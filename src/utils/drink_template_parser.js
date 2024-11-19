@@ -1,3 +1,3 @@
-export const string_to_object_drink = (drink_string) => {
-  return JSON.parse(drink_string);
+export const sanitize_drink_order = (drink) => {
+  return typeof drink === "string" ? JSON.parse(drink) : drink;
 };

@@ -3,9 +3,9 @@ import { useEffect, useState, useContext } from "react";
 import SearchBar from "../components/rotating_searchbar";
 import { useSupabase } from "../context/supabase_context";
 import { DrinkCheckout } from "../components/drink_checkout";
-import { QRCodeScreen } from "../pages/qr_code";
+// import { QRCodeScreen } from "../pages/qr_code";
 import { useAuth } from "../context/auth_context";
-import { string_to_object_drink } from "../utils/drink_template_parser";
+import { sanitize_drink_order } from "../utils/drink_template_parser";
 
 const Restaurant = ({ restaurant }) => {
   // Extract restaurantId from URL parameters
@@ -19,8 +19,12 @@ const Restaurant = ({ restaurant }) => {
     userData?.recent_drinks || []
   );
   const [prepurchased_transactions, set_prepurchased_transactions] = useState(
-    userData?.prepurchased_transactions[restaurant.id] || []
+    userData?.prepurchased_transactions || {}
   );
+  const [prepurchased_transactions_info, set_prepurchased_transactions_info] =
+    useState([]);
+  console.log(prepurchased_transactions);
+  console.log(prepurchased_transactions_info);
 
   const menu = restaurant.menu;
 
@@ -53,6 +57,9 @@ const Restaurant = ({ restaurant }) => {
           const newTransactions =
             payload.new.prepurchased_transactions?.[restaurant.id] || [];
 
+          console.log("old transactions", oldTransactions);
+          console.log("new transactions", newTransactions);
+
           if (
             JSON.stringify(oldTransactions) !== JSON.stringify(newTransactions)
           ) {
@@ -60,7 +67,9 @@ const Restaurant = ({ restaurant }) => {
               `Prepurchased transactions changed for restaurant`,
               newTransactions
             );
-            set_prepurchased_transactions(newTransactions);
+            set_prepurchased_transactions(
+              payload.new.prepurchased_transactions
+            );
           }
         }
       )
@@ -71,6 +80,26 @@ const Restaurant = ({ restaurant }) => {
       channel.unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    const fetchTransactions = async (transaction_ids) => {
+      try {
+        const { data, error } = await supabase
+          .from("transactions")
+          .select("*")
+          .in("transaction_id", transaction_ids);
+
+        if (error) throw error; // Handle Supabase error
+        set_prepurchased_transactions_info(data); // Update state with fetched transactions
+      } catch (err) {
+        console.error("Error fetching transactions:", err);
+      } finally {
+        console.log("end stuff here");
+      }
+    };
+
+    fetchTransactions(prepurchased_transactions[restaurant.id]);
+  }, [prepurchased_transactions]);
 
   const open_modal_drink_template = (drink_temlate) => {
     setSelectedItem(drink_temlate);
@@ -158,7 +187,7 @@ const Restaurant = ({ restaurant }) => {
   };
 
   const TEST = () => {
-    console.log(userData);
+    console.log(prepurchased_transactions_info);
   };
 
   return (
@@ -177,24 +206,29 @@ const Restaurant = ({ restaurant }) => {
       <h1>Your Favorite Drinks:</h1>
       <div>
         <ul>
-          {recent_drinks.map((drink, index) => (
-            <li
-              key={index}
-              onClick={() =>
-                open_modal_drink_template(string_to_object_drink(drink))
-              }
-              style={{ cursor: "pointer", color: "blue" }}
-            >
-              {string_to_object_drink(drink).name}
-            </li>
-          ))}
+          {recent_drinks
+            .slice()
+            .reverse()
+            .map((drink, index) => (
+              <li
+                key={index}
+                onClick={() =>
+                  open_modal_drink_template(sanitize_drink_order(drink))
+                }
+                style={{ cursor: "pointer", color: "blue" }}
+              >
+                {sanitize_drink_order(drink).name}
+              </li>
+            ))}
         </ul>
       </div>
       <h1>Drinks at {restaurant.name} you haven't redeemed yet: </h1>
       <div>
         <ul>
-          {prepurchased_transactions.map((transaction, index) => (
-            <li key={index}>{transaction}</li>
+          {prepurchased_transactions_info.map((transaction, index) => (
+            <li key={index}>
+              {sanitize_drink_order(transaction.item_id).name}
+            </li>
           ))}
         </ul>
       </div>
@@ -203,21 +237,23 @@ const Restaurant = ({ restaurant }) => {
         <div style={modalOverlayStyle}>
           <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
             {qrCode ? (
-              <QRCodeScreen
-                completed_drink_order={qrCode}
-                close_modal_complete_transaction={
-                  close_modal_complete_transaction
-                }
-                close_modal_incomplete_transaction={
-                  close_modal_incomplete_transaction
-                }
-              />
+              // <QRCodeScreen
+              //   completed_drink_order={qrCode}
+              //   close_modal_complete_transaction={
+              //     close_modal_complete_transaction
+              //   }
+              //   close_modal_incomplete_transaction={
+              //     close_modal_incomplete_transaction
+              //   }
+              // />
+              <div>QR Code in progress</div>
             ) : (
-              <DrinkCheckout
-                close_drinkcheckout={close_modal_from_drink_template}
-                item_object={selectedItem}
-                setQRCode={setQRCode}
-              />
+              // <DrinkCheckout
+              //   close_drinkcheckout={close_modal_from_drink_template}
+              //   item_object={selectedItem}
+              //   setQRCode={setQRCode}
+              // />
+              <div>Drink Checkout in Progress</div>
             )}
           </div>
         </div>
