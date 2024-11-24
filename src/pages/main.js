@@ -14,37 +14,18 @@ const Main = () => {
   const navigate = useNavigate();
   const supabase = useSupabase();
   const [loading, setLoading] = useState(true);
-  const [foundRestaurant, setFoundRestaurant] = useState();
-  const { userSession, logout, login, is_authenticated } = useAuth();
-
-  const find_closest_restaurants = async () => {
-    // console.log("hello");
-    try {
-      const { data, error } = await supabase.functions.invoke(
-        "closest_restaurant",
-        {
-          body: JSON.stringify({ foo: "bar" }),
-        }
-      );
-      if (error) throw error;
-      const restaurant_data = data[0];
-      //set global context to store restaurant data
-      setState(restaurant_data);
-      setFoundRestaurant(restaurant_data);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-
-  useEffect(() => {
-    find_closest_restaurants();
-    //console.log(foundRestaurant);
-  }, []);
+  const {
+    userSession,
+    logout,
+    login,
+    is_authenticated,
+    foundRestaurant,
+    setFoundRestaurant,
+  } = useAuth();
 
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
-      {loading ? (
+      {!foundRestaurant ? (
         <div>
           <h1>TapIn</h1>
         </div>

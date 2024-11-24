@@ -10,15 +10,13 @@ import { AuthProvider } from "./context/auth_context";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <React.StrictMode>
-    <SupabaseProvider>
-      <AuthProvider>
-        <MyProvider>
-          <App />
-        </MyProvider>
-      </AuthProvider>
-    </SupabaseProvider>
-  </React.StrictMode>
+  <SupabaseProvider>
+    <AuthProvider>
+      <MyProvider>
+        <App />
+      </MyProvider>
+    </AuthProvider>
+  </SupabaseProvider>
 );
 serviceWorkerRegistration.register();
 // If you want to start measuring performance in your app, pass a function

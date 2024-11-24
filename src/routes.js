@@ -8,7 +8,7 @@ import {
 import Main from "./pages/main";
 import QRCode from "./pages/qr_code";
 import Restaurant from "./pages/restaurant";
-import { DrinkCheckout } from "./components/drink_checkout";
+import { DrinkCheckout } from "./pages/drink_checkout";
 
 export const TIRouter = () => {
   return (
@@ -16,7 +16,7 @@ export const TIRouter = () => {
       <Routes>
         <Route path="/" element={<Main />} />
         <Route path="/qrcode/:transaction_id" element={<QRCode />} />
-        <Route path="/drink_select/:template" element={<DrinkCheckout />} />
+        <Route path="/drink_checkout" element={<DrinkCheckout />} />
       </Routes>
     </Router>
   );

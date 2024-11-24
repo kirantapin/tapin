@@ -1,25 +1,54 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { useSupabase } from "./supabase_context";
-// Create a context with default values (optional)
+import moment from "moment-timezone";
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   // Define the state you want to share
+  const supabase = useSupabase();
   const [userSession, setUserSession] = useState(() => {
     // Initialize user session from local storage (if available)
     const storedUser = localStorage.getItem("user");
     return storedUser ? JSON.parse(storedUser) : null;
   });
+
   const [userData, setUserData] = useState(null);
-  const supabase = useSupabase();
+  const [transactions, setTransactions] = useState([]);
+  const [foundRestaurant, setFoundRestaurant] = useState();
+  const [policies, setPolicies] = useState([]);
 
   useEffect(() => {
     if (userSession) {
       fetch_user_data(userSession);
+      fetch_transaction_data(userSession);
+      const fetch_data = async () => {
+        const restaurant_data = await find_closest_restaurants();
+        fetch_policies(restaurant_data.id);
+      };
+      fetch_data();
     } else {
       setUserData(null);
     }
   }, [userSession]);
+
+  const fetch_policies = async (restaurant_id) => {
+    const currentTime = new Date().toISOString();
+
+    console.log(currentTime);
+    const { data, error } = await supabase
+      .from("policies")
+      .select("*")
+      .eq("restaurant_id", restaurant_id)
+      .lte("begin_time", currentTime)
+      .gte("end_time", currentTime);
+    console.log("here");
+    console.log(data);
+    if (error) {
+      console.error("Error fetching data:", error);
+    } else {
+      setPolicies(data);
+    }
+  };
 
   const fetch_user_data = async (user) => {
     if (user) {
@@ -42,6 +71,44 @@ export const AuthProvider = ({ children }) => {
     } else {
       setUserData(null);
     }
+  };
+
+  const find_closest_restaurants = async () => {
+    // console.log("hello");
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        "closest_restaurant",
+        {
+          body: JSON.stringify({ foo: "bar" }),
+        }
+      );
+      if (error) throw error;
+      const restaurant_data = data[0];
+      //set global context to store restaurant data
+      setFoundRestaurant(restaurant_data);
+      return restaurant_data;
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  const fetch_transaction_data = async (userSession) => {
+    console.log("inside fetch transaction data");
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+    const formattedDate = ninetyDaysAgo.toISOString();
+    const { data, error } = await supabase
+      .from("transactions")
+      .select("*")
+      .eq("user_id", userSession.phone)
+      .gte("created_at", formattedDate)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    setTransactions(data);
   };
 
   const validateSession = async (userSession) => {
@@ -108,7 +175,19 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ userSession, login, logout, is_authenticated, userData }}
+      value={{
+        userSession,
+        login,
+        logout,
+        is_authenticated,
+        userData,
+        setUserData,
+        transactions,
+        setTransactions,
+        foundRestaurant,
+        policies,
+        setPolicies,
+      }}
     >
       {children}
     </AuthContext.Provider>
