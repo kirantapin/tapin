@@ -19,31 +19,14 @@ const Restaurant = ({ restaurant }) => {
 
   useEffect(() => {}, []);
 
-  const submit_drink_order = async (drink_order) => {
-    try {
-      const { data, error } = await supabase.functions.invoke(
-        "submit_drink_query",
-        {
-          body: JSON.stringify({ drink_order: drink_order, menu: menu }),
-        }
-      );
-      if (error) throw error;
-      const { response } = data;
-      console.log("drink order response", response);
-      go_to_drink_checkout(response);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-
   const TEST = () => {
     console.log(policies);
   };
 
-  const go_to_drink_checkout = (drink) => {
+  const open_drink_template_after_search = (order_response) => {
     navigate("/drink_checkout", {
       state: {
-        drink_template: sanitize_drink_order(drink),
+        cart_items: order_response,
         restaurant: restaurant,
       },
     });
@@ -60,7 +43,7 @@ const Restaurant = ({ restaurant }) => {
       </button>
       <h1>{restaurant.name}</h1>
       <div>
-        <SearchBar onSearch={submit_drink_order} />
+        <SearchBar action={open_drink_template_after_search} menu={menu} />
       </div>
       <h1>Your previous transactions</h1>
       <div>

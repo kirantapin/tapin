@@ -5,20 +5,20 @@ import { useSupabase } from "../context/supabase_context";
 import { useAuth } from "../context/auth_context";
 import { useLocation, useNavigate } from "react-router-dom";
 import { DrinkTemplate } from "../components/drink_template";
+import SearchBar from "../components/rotating_searchbar";
 
 export const DrinkCheckout = ({}) => {
   const location = useLocation();
   const supabase = useSupabase();
   const navigate = useNavigate();
+
   const { is_authenticated, userSession, transaction, setTransactions } =
     useAuth();
-  const [drink_template, set_drink_template] = useState(
-    location.state?.drink_template
-  );
+  const [cart_items, set_cart_items] = useState(location.state?.cart_items);
   const [restaurant, setRestaurant] = useState(location.state?.restaurant);
+  const menu = location.state?.restaurant.menu;
   const { state, setState } = useContext(MyContext);
-  console.log(restaurant);
-  console.log(drink_template);
+  console.log(cart_items);
 
   const purchase_drink = async (data) => {
     //things you need customer_id,restaurant_id,item,policy_id
@@ -56,15 +56,40 @@ export const DrinkCheckout = ({}) => {
     }
   };
 
+  const add_to_cart_items = (order_response) => {
+    set_cart_items((prevItems) => [...prevItems, ...order_response]);
+  };
+
+  const test = () => {
+    console.log(cart_items);
+  };
+
   return (
     <div>
-      <DrinkTemplate initialValues={drink_template} onSubmit={purchase_drink} />
+      {/* <DrinkTemplate initialValues={drink_template} onSubmit={purchase_drink} /> */}
+      <ul>
+        {cart_items.map((item, index) => (
+          <li key={index}>
+            {item.name}
+            <br />
+            {item.liquor}
+            <br />
+            Quantity {item.quantity}
+            <br />
+            Price {item.price}
+            <br />
+          </li>
+        ))}
+      </ul>
+      <SearchBar action={add_to_cart_items} menu={menu} />
+
       {!is_authenticated && (
         <div>
           Sign in with phone number to access deals and receive points with
           every order
         </div>
       )}
+      <button onClick={test}>Test</button>
       <button onClick={purchase_drink}>Purchase Drink</button>
     </div>
   );

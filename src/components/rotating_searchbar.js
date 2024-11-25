@@ -1,6 +1,7 @@
 import React, { useState } from "react";
+import { submit_drink_order } from "../utils/submit_drink_order";
 
-const SearchBar = ({ onSearch }) => {
+const SearchBar = ({ action, menu }) => {
   const [query, setQuery] = useState("");
 
   // Handle input change
@@ -9,10 +10,11 @@ const SearchBar = ({ onSearch }) => {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (query.trim()) {
-      onSearch(query); // Trigger the search function
+      const data = await submit_drink_order(query, menu); // Trigger the search function
+      action(data);
       setQuery(""); // Clear the input field
     }
   };
@@ -27,7 +29,7 @@ const SearchBar = ({ onSearch }) => {
         className="search-input"
       />
       <button type="submit" className="search-button">
-        Buy Drink
+        Get Drink
       </button>
     </form>
   );

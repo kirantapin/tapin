@@ -9,7 +9,7 @@
 //   restaurant_id: string;
 //   items: string[];
 // }
-import { qualifiesForDeal, applyDeal } from "./policy_engine_tester";
+import { qualifiesForDeal, applyDeal } from "./policy_engine_utils";
 
 class DealEngine {
   // Constructor function to initialize object properties
