@@ -4,9 +4,9 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
-import { MyProvider } from "./context/context";
-import { SupabaseProvider } from "./context/supabase_context";
-import { AuthProvider } from "./context/auth_context";
+import { MyProvider } from "./context/context.tsx";
+import { SupabaseProvider } from "./context/supabase_context.tsx";
+import { AuthProvider } from "./context/auth_context.tsx";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(

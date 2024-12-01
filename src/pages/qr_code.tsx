@@ -1,0 +1,119 @@
+import { useEffect, useState } from "react";
+import { useSupabase } from "../context/supabase_context.tsx";
+import { useAuth } from "../context/auth_context.tsx";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { Transaction } from "../types.ts";
+import QRCode from "react-qr-code";
+
+export const QRCodeScreen = () => {
+  const supabase = useSupabase();
+  const { transactions, setTransactions } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [transactionsToRedeem, setTransactionsToRedeem] = useState<
+    Transaction[]
+  >(location.state?.transactions || []);
+
+  const formatTransactions = (): string => {
+    const displayList = [];
+    for (const transaction of transactionsToRedeem) {
+      displayList.push({
+        id: transaction.transaction_id,
+        item: transaction.item,
+        category: transaction.category,
+        ...transaction.metadata,
+      });
+    }
+    return JSON.stringify(displayList);
+  };
+
+  useEffect(() => {
+    if (!transactionsToRedeem || transactionsToRedeem.length === 0) return;
+
+    // Set up a listener for all transaction IDs
+    const transactionIds = transactionsToRedeem.map((t) => t.transaction_id);
+    const channel = supabase
+      .channel("transaction_updates")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "transactions",
+          filter: `transaction_id=in.(${transactionIds.join(",")})`, // Use IN filter for multiple IDs
+        },
+        (payload) => {
+          const updatedTransactionId = payload.new.transaction_id;
+
+          setTransactions((prevTransactions) => {
+            // Update the transactions state
+            const updatedTransactions = prevTransactions.map((transaction) =>
+              transaction.transaction_id === updatedTransactionId
+                ? { ...transaction, is_fulfilled: payload.new.is_fulfilled }
+                : transaction
+            );
+
+            // Check if all transactions are fulfilled
+            const allFulfilled = transactionsToRedeem.every((t) =>
+              updatedTransactions.some(
+                (ut) =>
+                  ut.transaction_id === t.transaction_id &&
+                  ut.is_fulfilled === true
+              )
+            );
+
+            if (allFulfilled) {
+              console.log("All transactions fulfilled, exiting.");
+              navigate("/");
+            }
+
+            return updatedTransactions;
+          });
+        }
+      )
+      .subscribe();
+
+    // Cleanup function to unsubscribe when the component unmounts
+    return () => {
+      supabase.removeChannel(channel);
+      console.log("removing channel");
+    };
+  }, [transactionsToRedeem]);
+
+  return (
+    <div>
+      <div
+        style={{
+          height: "auto",
+          margin: "0 auto",
+          maxWidth: 256,
+          width: "100%",
+        }}
+      >
+        <QRCode
+          size={1024}
+          style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+          value={formatTransactions()}
+          viewBox={`0 0 256 256`}
+        />
+        <button
+          onClick={() => {
+            navigate("/");
+          }}
+        >
+          Redeem Later
+        </button>
+        <button
+          onClick={() => {
+            console.log(transactionsToRedeem);
+            console.log(formatTransactions());
+          }}
+        >
+          TEst
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default QRCodeScreen;

@@ -1,11 +1,11 @@
 import React from "react";
 import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { MyContext } from "../context/context";
-import { useSupabase } from "../context/supabase_context";
-import Restaurant from "./restaurant";
-import { useAuth } from "../context/auth_context";
-import { AuthVerify } from "../components/auth_entry";
+import { MyContext } from "../context/context.tsx";
+import { useSupabase } from "../context/supabase_context.tsx";
+import Restaurant from "./restaurant.tsx";
+import { useAuth } from "../context/auth_context.tsx";
+// import { AuthVerify } from "../components/auth_entry";
 
 const Main = () => {
   // Function to handle button clicks
@@ -19,19 +19,19 @@ const Main = () => {
     logout,
     login,
     is_authenticated,
-    foundRestaurant,
-    setFoundRestaurant,
+    restaurant,
+    setRestaurant,
   } = useAuth();
 
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
-      {!foundRestaurant ? (
+      {!restaurant ? (
         <div>
           <h1>TapIn</h1>
         </div>
       ) : (
         <div>
-          <Restaurant restaurant={foundRestaurant} />
+          <Restaurant restaurant={restaurant} />
           <button
             onClick={() => {
               const person = { name: "John Doe", phone: "1234567891" };
@@ -49,7 +49,6 @@ const Main = () => {
           >
             Print User Info
           </button>
-          <AuthVerify />
         </div>
       )}
     </div>
