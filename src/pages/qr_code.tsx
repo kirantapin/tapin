@@ -1,13 +1,20 @@
 import { useEffect, useState } from "react";
 import { useSupabase } from "../context/supabase_context.tsx";
+import { useRestaurantData } from "../context/restaurant_context.tsx";
 import { useAuth } from "../context/auth_context.tsx";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Transaction } from "../types.ts";
+import { BASE_PATH } from "../constants.ts";
 import QRCode from "react-qr-code";
 
 export const QRCodeScreen = () => {
   const supabase = useSupabase();
-  const { transactions, setTransactions } = useAuth();
+  const {
+    transactions,
+    setTransactions,
+    localTransactions,
+    setLocalTransactions,
+  } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [transactionsToRedeem, setTransactionsToRedeem] = useState<
@@ -44,6 +51,7 @@ export const QRCodeScreen = () => {
         },
         (payload) => {
           const updatedTransactionId = payload.new.transaction_id;
+          console.log("here");
 
           setTransactions((prevTransactions) => {
             // Update the transactions state
@@ -53,10 +61,19 @@ export const QRCodeScreen = () => {
                 : transaction
             );
 
+            // Filter out the transaction with the given ID
+            setLocalTransactions((prevLocalTransactions) => {
+              const filteredTransactions = prevLocalTransactions.filter(
+                (filteredTransaction) =>
+                  filteredTransaction.transaction_id !== updatedTransactionId
+              );
+              return filteredTransactions;
+            });
+
             // Check if all transactions are fulfilled
             const allFulfilled = transactionsToRedeem.every((t) =>
               updatedTransactions.some(
-                (ut) =>
+                (ut: Transaction) =>
                   ut.transaction_id === t.transaction_id &&
                   ut.is_fulfilled === true
               )
@@ -64,9 +81,9 @@ export const QRCodeScreen = () => {
 
             if (allFulfilled) {
               console.log("All transactions fulfilled, exiting.");
-              navigate("/");
+              navigate(BASE_PATH);
             }
-
+            console.log(updatedTransactions);
             return updatedTransactions;
           });
         }
@@ -98,15 +115,14 @@ export const QRCodeScreen = () => {
         />
         <button
           onClick={() => {
-            navigate("/");
+            navigate(BASE_PATH);
           }}
         >
           Redeem Later
         </button>
         <button
           onClick={() => {
-            console.log(transactionsToRedeem);
-            console.log(formatTransactions());
+            console.log(transactions);
           }}
         >
           TEst

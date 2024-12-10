@@ -1,10 +1,9 @@
 import { supabase } from "./supabase_client.ts";
 import { Menu, Cart, CartItem, Restaurant } from "../types";
-import { priceItem } from "./pricer.ts";
 
 export const assignIds = (items: CartItem[]): void => {
   items.forEach((item, index) => {
-    item.id = index + 1; // Directly modify the `id` of each item
+    item.id = index; // Directly modify the `id` of each item
   });
 };
 
@@ -33,8 +32,9 @@ export const submit_drink_order = async (
         id: index,
         item: item,
         quantity: quantity,
-        price: priceItem(item, restaurant),
-        points: priceItem(item, restaurant) * 100,
+        price: 0,
+        points: 0,
+        point_cost: 0,
       };
       temp_items.push(temp_cart_item);
     }

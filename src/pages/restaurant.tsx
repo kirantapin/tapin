@@ -1,13 +1,15 @@
 import React from "react";
 import { useEffect, useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { redirect, useNavigate } from "react-router-dom";
 import SearchBar from "../components/rotating_searchbar.tsx";
 import { useSupabase } from "../context/supabase_context";
 // import { QRCodeScreen } from "../pages/qr_code";
+import { useRestaurantData } from "../context/restaurant_context.tsx";
 import { useAuth } from "../context/auth_context.tsx";
 import { Cart, Restaurant, Policy, CartItem, Item } from "../types";
-import { priceItem } from "../utils/pricer.ts";
+import { DRINK_CHECKOUT_PATH, QR_CODE_PATH } from "../constants.ts";
 import { assignIds } from "../utils/submit_drink_order.ts";
+import { fakePhoneSignIn } from "../utils/test_signin.ts";
 
 interface RestaurantProps {
   restaurant: Restaurant;
@@ -15,16 +17,18 @@ interface RestaurantProps {
 
 const RestaurantPage: React.FC<RestaurantProps> = ({ restaurant }) => {
   // Extract restaurantId from URL parameters
-  const { is_authenticated, userSession, userData, transactions, policies } =
-    useAuth();
+  const { userSession, userData, transactions } = useAuth();
+  const { policies } = useRestaurantData();
   const navigate = useNavigate();
+  const supabase = useSupabase();
 
   const menu = restaurant.menu;
 
   useEffect(() => {}, []);
 
-  const TEST = () => {
-    console.log(policies);
+  const TEST = async () => {
+    console.log(userSession);
+    console.log(userData);
   };
 
   const open_drink_template_after_search = (order_response: Cart) => {
@@ -44,13 +48,14 @@ const RestaurantPage: React.FC<RestaurantProps> = ({ restaurant }) => {
           id: 0,
           item: firstConditionItem,
           quantity: condition.quantity,
-          price: priceItem(firstConditionItem, restaurant),
-          points: priceItem(firstConditionItem, restaurant) * 100,
+          price: 0,
+          points: 0,
+          point_cost: 0,
         });
       }
     }
     assignIds(cart_items);
-    navigate("/drink_checkout", {
+    navigate(DRINK_CHECKOUT_PATH, {
       state: {
         cart: cart_items,
         restaurant: restaurant,
@@ -79,7 +84,13 @@ const RestaurantPage: React.FC<RestaurantProps> = ({ restaurant }) => {
       <h1>Your previous transactions</h1>
       <ul>
         {transactions.map((transaction, index) => (
-          <div>
+          <div
+            onClick={() => {
+              navigate(QR_CODE_PATH, {
+                state: { transactions: [transaction] },
+              });
+            }}
+          >
             <p>{JSON.stringify(transaction)}</p>
           </div>
         ))}
@@ -95,6 +106,19 @@ const RestaurantPage: React.FC<RestaurantProps> = ({ restaurant }) => {
         </ul>
       </div>
       <button onClick={TEST}>test button</button>
+      {!userSession && (
+        <div
+          onClick={() => {
+            navigate("/sign_in", {
+              state: {
+                redirectTo: "/",
+              },
+            });
+          }}
+        >
+          Sign In
+        </div>
+      )}
     </div>
   );
 };

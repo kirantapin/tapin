@@ -1,9 +1,10 @@
 import { useSupabase } from "../context/supabase_context";
+import { useRestaurantData } from "../context/restaurant_context";
 import { useAuth } from "../context/auth_context";
 
 export const AuthVerify = () => {
   const supabase = useSupabase();
-  const { userSession, logout, login, is_authenticated } = useAuth();
+  const { userSession, logout, login } = useAuth();
 
   const sendOTP = async () => {
     // try {
@@ -57,10 +58,5 @@ export const AuthVerify = () => {
     console.log("verifying otp");
   };
 
-  return (
-    <div>
-      <button onClick={sendOTP}>Send OTP</button>
-      <button onClick={verifyOTP}>Verify OTP</button>
-    </div>
-  );
+  return [sendOTP, verifyOTP];
 };

@@ -4,18 +4,18 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
-import { MyProvider } from "./context/context.tsx";
-import { SupabaseProvider } from "./context/supabase_context.tsx";
 import { AuthProvider } from "./context/auth_context.tsx";
+import { SupabaseProvider } from "./context/supabase_context.tsx";
+import { RestaurantProvider } from "./context/restaurant_context.tsx";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <SupabaseProvider>
-    <AuthProvider>
-      <MyProvider>
+    <RestaurantProvider>
+      <AuthProvider>
         <App />
-      </MyProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </RestaurantProvider>
   </SupabaseProvider>
 );
 serviceWorkerRegistration.register();

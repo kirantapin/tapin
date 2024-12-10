@@ -1,32 +1,39 @@
 export type Cart = CartItem[];
 
+export interface VerifyOrderPayload {
+  cart: Cart;
+  dealEffectPayload: DealEffectPayload;
+  policy_id: string | null;
+  restaurant_id: string;
+  user_id: string | null;
+}
+
+export interface VerifyOrderReturnPayload {
+  payload: {
+    dealEffectPayload: DealEffectPayload;
+    cart: Cart;
+    cartResultsPayload: CartResultsPayload;
+  };
+  jwtToken: string;
+}
+
+export interface JWTPayloadType extends Record<string, unknown> {
+  cart: Cart;
+  dealEffectPayload: DealEffectPayload;
+  cartResultsPayload: CartResultsPayload;
+}
+
+export interface CartResultsPayload {
+  totalPrice: number;
+  totalPoints: number;
+  totalPointCost: number;
+}
+
 export interface DealEffectPayload {
-  freeAddedItems: { item: Item; quantity: number }[];
+  freeAddedItems: CartItem[];
   modifiedItems: ModifiedCartItem[];
   wholeCartModification: WholeCartModification | null;
 }
-
-export type Diff =
-  | {
-      type: "whole_cart";
-      percentDiscount?: number;
-      fixedDiscount?: number;
-      pointsMultiplier?: number;
-      blanketPrice?: number;
-      itemId?: number;
-    }
-  | {
-      type: "add_free_item";
-      item: Record<string, string>;
-      quantity: number;
-      itemId?: number;
-    }
-  | {
-      type: Exclude<string, "whole_cart" | "add_free_item">;
-      itemId: number;
-      effect: number;
-      quantity: number;
-    };
 
 export interface CartItem {
   id: number;
@@ -34,6 +41,7 @@ export interface CartItem {
   quantity: number;
   price: number;
   points: number;
+  point_cost: number | 0;
 }
 
 export interface WholeCartModification {
@@ -81,7 +89,7 @@ export interface CreateTransactionsPayload {
 export interface ReturnTransactionsPayload {
   deal_use: DealUse | null;
   transactions: Transaction[];
-  userData: User | null;
+  modifiedUserData: User | null;
 }
 
 export type Menu = {
@@ -113,12 +121,19 @@ export interface Transaction {
   tip_amount: number | null;
   price: number | null;
   points_awarded: number | null;
+  point_cost: number | 0;
 }
 
 export interface User {
   id: string;
   signed_up: string;
   points: Record<string, number>;
+}
+
+export interface UserSession {
+  phone: string;
+  accessToken: string;
+  refreshToken: string;
 }
 
 export interface Policy {
@@ -157,6 +172,10 @@ export type PolicyDefinitionCondition =
   | {
       type: "total_quantity";
       quantity: number;
+    }
+  | {
+      type: "minimum_user_points";
+      amount: number;
     };
 export type PolicyDefinitionAction =
   | {
@@ -182,7 +201,14 @@ export type PolicyDefinitionAction =
       amount: number;
       maxEffectedItems: number;
     }
+  | {
+      type: "apply_point_cost";
+      items: Item[];
+      amount: number;
+      maxEffectedItems: number;
+    }
   | { type: "apply_order_point_multiplier"; amount: number }
   | { type: "apply_fixed_order_discount"; amount: number }
   | { type: "apply_blanket_price"; amount: number }
-  | { type: "apply_order_percent_discount"; amount: number };
+  | { type: "apply_order_percent_discount"; amount: number }
+  | { type: "apply_blanket_point_cost"; amount: number };

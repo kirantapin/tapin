@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Cart, CartItem } from "../types";
-import { useAuth } from "../context/auth_context.tsx";
-import { priceItem } from "../utils/pricer.ts";
+import { useRestaurantData } from "../context/restaurant_context.tsx";
 
 interface CheckoutLineItemProps {
   item: CartItem;
@@ -15,7 +14,7 @@ export const CheckoutLineItem: React.FC<CheckoutLineItemProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [modifiedItem, setModifiedItem] = useState(item);
-  const { restaurant } = useAuth();
+  const { restaurant } = useRestaurantData();
 
   // Toggle expanded view
   const toggleExpand = () => {
@@ -52,11 +51,7 @@ export const CheckoutLineItem: React.FC<CheckoutLineItemProps> = ({
               : item.item.category
             : item.item.item}
         </strong>{" "}
-        - $
-        {restaurant
-          ? priceItem(modifiedItem.item, restaurant)
-          : "Restaurant not available"}{" "}
-        x {item.quantity}
+        - ${item.price} x {item.quantity}
         {item.item.item === "drink" && !item.item.name && (
           <span style={{ fontSize: "0.8em", marginLeft: "5px" }}>
             Drink has not been specified, you can still purchase it and it will

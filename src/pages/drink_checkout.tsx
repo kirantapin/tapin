@@ -1,42 +1,42 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useEffect, useState, useContext } from "react";
-import { useAuth } from "../context/auth_context.tsx";
+import { useRestaurantData } from "../context/restaurant_context.tsx";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSupabase } from "../context/supabase_context.tsx";
+import { useAuth } from "../context/auth_context.tsx";
 import SearchBar from "../components/rotating_searchbar.tsx";
-import { PolicyEngine } from "../utils/policy_engine.ts";
 import { CheckoutLineItem } from "../components/checkout_line_item.tsx";
-import { DealDisplay } from "../components/deal_display.tsx";
+// import { DealDisplay } from "../components/deal_display.tsx";
 import {
   Cart,
   CartItem,
   Policy,
-  Restaurant,
   DealEffectPayload,
   Transaction,
   User,
+  VerifyOrderPayload,
+  CartResultsPayload,
 } from "../types.ts";
-import { priceItem } from "../utils/pricer.ts";
+import { QR_CODE_PATH } from "../constants.ts";
+import { emptyDealEffect } from "../constants.ts";
+import { useDealDisplay } from "../components/deal_display.tsx";
+import { error } from "console";
 
 export const DrinkCheckout = ({}) => {
   const location = useLocation();
 
   const {
-    is_authenticated,
     userSession,
     transactions,
     setTransactions,
-    policies,
     setUserData,
+    userData,
+    setLocalTransactions,
+    loadingUser,
   } = useAuth();
+  const { policies, loadingRestaurantData } = useRestaurantData();
   const supabase = useSupabase();
   const navigate = useNavigate();
-
-  const emptyDealEffect: DealEffectPayload = {
-    freeAddedItems: [],
-    modifiedItems: [],
-    wholeCartModification: null,
-  };
 
   const [cart, setCart] = useState<Cart>(location.state?.cart);
   const [dealEffect, setDealEffect] =
@@ -45,44 +45,62 @@ export const DrinkCheckout = ({}) => {
   const [selectedPolicy, setSelectedPolicy] = useState<Policy | null>(
     location.state?.policy
   );
-  const [engine, setEngine] = useState(new PolicyEngine(cart, restaurant));
-  const [totalPrice, setTotalPrice] = useState(0);
-  const [totalPoints, setTotalPoints] = useState(0);
-  const [rendering, setRendering] = useState<JSX.Element>(<></>);
+
+  const hasFetched = useRef(false);
+  const [cartResults, setCartResults] = useState<CartResultsPayload>();
+  const [errorDisplay, setErrorDisplay] = useState<string | null>();
+  const token = useRef();
 
   useEffect(() => {
-    handleSelectedPolicy(selectedPolicy);
-  }, [selectedPolicy]);
-
-  useEffect(() => {
-    console.log("inside cart use effect");
-    for (const item of cart) {
-      item.price = priceItem(item.item, restaurant);
-    }
-    engine.update_cart(cart);
-    handleSelectedPolicy(selectedPolicy);
-  }, [cart]);
-
-  const handleSelectedPolicy = (selectedPolicy: Policy | null) => {
-    if (selectedPolicy) {
-      if (!engine.does_policy_apply(selectedPolicy)) {
-        setSelectedPolicy(null);
-        setDealEffect(emptyDealEffect);
-      } else {
-        const effect = engine.apply_policy(selectedPolicy);
-        setDealEffect(effect || emptyDealEffect);
+    if (!loadingUser && !loadingRestaurantData) {
+      if (!hasFetched.current) {
+        verify_order();
       }
-    } else {
-      setDealEffect(emptyDealEffect);
     }
+  }, [
+    cart,
+    dealEffect,
+    selectedPolicy,
+    loadingUser,
+    userData,
+    loadingRestaurantData,
+    restaurant,
+  ]);
+
+  const verify_order = async () => {
+    const payload: VerifyOrderPayload = {
+      cart: cart,
+      dealEffectPayload: dealEffect,
+      policy_id: selectedPolicy?.policy_id || null,
+      restaurant_id: restaurant.id,
+      user_id: userData?.id || null,
+    };
+    const { data, error } = await supabase.functions.invoke("verify_order", {
+      body: payload,
+    });
+    const returnData = data.data;
+    const errorMessage = data.error;
+    hasFetched.current = true;
+    if (error) {
+      console.error(error);
+    }
+    if (errorMessage) {
+      setErrorDisplay(errorMessage);
+    } else {
+      setErrorDisplay("");
+    }
+
+    setDealEffect(returnData.payload.dealEffectPayload);
+    setCart(returnData.payload.cart);
+    setCartResults(returnData.payload.cartResultsPayload);
+    token.current = returnData.jwtToken;
+    console.log(token.current);
   };
 
   const click_policy = (policy: Policy) => {
-    if (!engine.does_policy_apply(policy)) {
-      return;
-    } else {
-      setSelectedPolicy(policy);
-    }
+    hasFetched.current = false;
+    setDealEffect(emptyDealEffect);
+    setSelectedPolicy(policy);
   };
 
   const purchase_drink = async () => {
@@ -93,10 +111,8 @@ export const DrinkCheckout = ({}) => {
       cart: cart,
       userDealEffect: dealEffect,
       userPolicy: selectedPolicy,
-      results: {
-        totalPrice: totalPrice,
-        totalPoints: totalPoints,
-      },
+      userCartResults: cartResults,
+      token: token.current,
     };
 
     try {
@@ -105,34 +121,37 @@ export const DrinkCheckout = ({}) => {
       });
       if (error || !data)
         throw new Error("created transaction came back as null");
-      console.log(data);
       //transaction is good we need to store this locally somewhere
-      const { transactions, userData } = data as {
+      const { transactions, modifiedUserData } = data as {
         transactions: Transaction[];
-        userData: User;
+        modifiedUserData: User;
       };
-      setUserData(userData);
+
+      if (modifiedUserData) {
+        setUserData(modifiedUserData);
+      }
       if (!transactions || transactions?.length == 0) {
         throw new Error("No transactions received or created");
       } else {
-        setTransactions((prevTransactions) =>
-          [...prevTransactions, ...transactions].sort(
-            (a, b) =>
-              new Date(b.created_at).getTime() -
-              new Date(a.created_at).getTime()
-          )
-        );
-        navigate(`/qrcode`, {
+        if (!userSession) {
+          setLocalTransactions((prev) => [...prev, ...transactions]);
+        }
+        setTransactions((prevTransactions) => [
+          ...prevTransactions,
+          ...transactions,
+        ]);
+
+        navigate(QR_CODE_PATH, {
           state: { transactions: transactions },
         });
       }
-      //set global context to store restaurant data
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
 
   const add_to_cart = (order_response: Cart) => {
+    hasFetched.current = false;
     setCart((prevCart) => {
       const maxId = prevCart.reduce(
         (max, item) => Math.max(max, item.id || 0), // Find the highest ID in the current cart
@@ -151,22 +170,30 @@ export const DrinkCheckout = ({}) => {
   const test = () => {
     console.log(cart);
     console.log(dealEffect);
+    console.log(token.current);
   };
 
-  const updateCartItem = (
-    itemKey: number,
-    updatedFields: Partial<CartItem>
-  ) => {
-    setCart((prevCart) =>
-      prevCart.map((item) =>
-        item.id === itemKey ? { ...item, ...updatedFields } : item
-      )
-    );
+  const updateItem = (itemKey: number, updatedFields: Partial<CartItem>) => {
+    hasFetched.current = false;
+    if (itemKey < cart.length) {
+      setCart((prevCart) =>
+        prevCart.map((item) =>
+          item.id === itemKey ? { ...item, ...updatedFields } : item
+        )
+      );
+    } else {
+      setDealEffect((prev) => ({
+        ...prev,
+        freeAddedItems: prev.freeAddedItems.map((item) =>
+          item.id === itemKey ? { ...item, ...updatedFields } : item
+        ),
+      }));
+    }
   };
+  const { rendering } = useDealDisplay(cart, dealEffect, updateItem);
 
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
-      {/* <DrinkTemplate initialValues={drink_template} onSubmit={purchase_drink} /> */}
       <ul style={{ listStyle: "none", padding: 10, margin: 10 }}>
         Cart
         {cart &&
@@ -174,23 +201,13 @@ export const DrinkCheckout = ({}) => {
             <li key={index}>
               <CheckoutLineItem
                 item={item}
-                onUpdate={updateCartItem}
+                onUpdate={updateItem}
                 lockedFields={[]}
               />
             </li>
           ))}
         <br />
       </ul>
-      <DealDisplay
-        cart={cart}
-        dealEffect={dealEffect}
-        onUpdate={(price, points, jsx) => {
-          setTotalPrice(price);
-          setTotalPoints(points);
-          setRendering(jsx);
-        }}
-      />
-      {rendering}
       <ul style={{ listStyle: "none", padding: 10, margin: 10 }}>
         {policies.map((policy, index) => (
           <li
@@ -209,15 +226,26 @@ export const DrinkCheckout = ({}) => {
           </li>
         ))}
       </ul>
+      {errorDisplay}
+      {rendering}
+      <br />
+      Price:{cartResults?.totalPrice}
+      <br />
+      Points:{cartResults?.totalPoints}
+      <br />
+      Point Cost:{cartResults?.totalPointCost}
+      <br />
       <SearchBar action={add_to_cart} restaurant={restaurant} />
-      {!is_authenticated && (
+      {!userData && (
         <div>
           Sign in with phone number to access deals and receive points with
           every order
         </div>
       )}
       <button onClick={test}>Test</button>
-      <button onClick={purchase_drink}>Purchase Drink</button>
+      {token.current && (
+        <button onClick={purchase_drink}>Purchase Drink</button>
+      )}
     </div>
   );
 };
