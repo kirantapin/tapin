@@ -4,10 +4,10 @@ import { Restaurant } from "../types.ts";
 
 interface SearchBarProps {
   action: (data: any) => void; // Replace `any` with a more specific type if you know the structure of the data
-  restaurant: Restaurant; // Replace `any` with a specific type that represents the menu structure
+  restaurant_id: string; // Replace `any` with a specific type that represents the menu structure
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ action, restaurant }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ action, restaurant_id }) => {
   const [query, setQuery] = useState("");
 
   // Handle input change
@@ -19,7 +19,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ action, restaurant }) => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (query.trim()) {
-      const data = await submit_drink_order(query, restaurant); // Trigger the search function
+      const data = await submit_drink_order(query, restaurant_id); // Trigger the search function
       if (!data) {
         throw Error("submit drink order result is null");
       }

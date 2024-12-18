@@ -1,8 +1,13 @@
+import { useRestaurantData } from "./context/restaurant_context";
+import { useAuth } from "./context/auth_context";
+
+import React, { useEffect, useState } from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
+  useNavigate,
 } from "react-router-dom";
 
 import Main from "./pages/main";
@@ -12,7 +17,6 @@ import { DrinkCheckout } from "./pages/drink_checkout.tsx";
 import { SignIn } from "./pages/signin_page.tsx";
 import DevPolicyCreator from "./pages/dev_policy_creator.tsx";
 import RestaurantPage from "./pages/restaurant.tsx";
-import AppLoader from "./pages/app_load.tsx"
 import Discovery from "./pages/discovery.tsx";
 import {
   BASE_PATH,
@@ -20,14 +24,17 @@ import {
   DRINK_CHECKOUT_PATH,
   SIGNIN_PATH,
   RESTAURANT_PATH,
-  DISCOVER_PATH
+  DISCOVER_PATH,
 } from "./constants.ts";
 
-export const TIRouter = () => {
+const App: React.FC = () => {
+  const [loading, setLoading] = useState(true);
+
   return (
     <Router>
+      <AppLoader />
       <Routes>
-        <Route path={BASE_PATH} element={<Main />} />
+        <Route path={BASE_PATH} element={<Discovery />} />
         <Route path={RESTAURANT_PATH} element={<RestaurantPage />} />
         <Route path={DISCOVER_PATH} element={<Discovery />} />
         <Route path={QR_CODE_PATH} element={<QRCode />} />
@@ -39,4 +46,24 @@ export const TIRouter = () => {
   );
 };
 
-export default TIRouter;
+// Loader Component with Navigation Logic
+const AppLoader: React.FC = () => {
+  const { loadingUser } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  if (loadingUser) {
+    // Display a loader while fetching data
+    return (
+      <div
+        style={{ display: "flex", justifyContent: "center", marginTop: "50px" }}
+      >
+        <h1>Loading...</h1>
+      </div>
+    );
+  }
+
+  return null; // Render nothing once loading is done
+};
+
+export default App;

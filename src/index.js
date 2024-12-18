@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import App from "./App";
+import App from "./App.tsx";
 import reportWebVitals from "./reportWebVitals";
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 import { AuthProvider } from "./context/auth_context.tsx";
@@ -11,11 +11,11 @@ import { RestaurantProvider } from "./context/restaurant_context.tsx";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <SupabaseProvider>
-    <RestaurantProvider>
-      <AuthProvider>
+    <AuthProvider>
+      <RestaurantProvider>
         <App />
-      </AuthProvider>
-    </RestaurantProvider>
+      </RestaurantProvider>
+    </AuthProvider>
   </SupabaseProvider>
 );
 serviceWorkerRegistration.register();

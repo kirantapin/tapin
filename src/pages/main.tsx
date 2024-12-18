@@ -4,6 +4,7 @@ import { useAuth } from "../context/auth_context";
 import { useRestaurantData } from "../context/restaurant_context";
 // import { AuthVerify } from "../components/auth_entry";
 import { TEST_USER } from "../constants";
+import Discovery from "./discovery";
 
 const Main: React.FC = () => {
   const { userSession, logout, login } = useAuth();
@@ -11,7 +12,7 @@ const Main: React.FC = () => {
   const { restaurant, setRestaurant } = useRestaurantData();
 
   return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
+    <div>
       {restaurant === undefined ? (
         <div>
           <h1>TapIn</h1>
@@ -19,11 +20,10 @@ const Main: React.FC = () => {
         </div>
       ) : restaurant === null ? (
         <div>
-          <h1>Discovery</h1>
+          <Discovery />
         </div>
       ) : (
         <div>
-          <Restaurant restaurant={restaurant} />
           <button
             onClick={() => {
               login(TEST_USER);

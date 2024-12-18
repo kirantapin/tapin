@@ -1,12 +1,14 @@
 import React, { useRef } from "react";
 import { useEffect, useState, useContext } from "react";
 import { useRestaurantData } from "../context/restaurant_context.tsx";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useSupabase } from "../context/supabase_context.tsx";
 import { useAuth } from "../context/auth_context.tsx";
 import SearchBar from "../components/rotating_searchbar.tsx";
-import { CheckoutLineItem } from "../components/checkout_line_item.tsx";
-// import { DealDisplay } from "../components/deal_display.tsx";
+import { CheckoutLineItem } from "../components/checkout/checkout_line_item.tsx";
+import { isEqual } from "lodash";
+import { usePersistState } from "../hooks/usePersistState.tsx";
+
 import {
   Cart,
   CartItem,
@@ -17,62 +19,67 @@ import {
   VerifyOrderPayload,
   CartResultsPayload,
 } from "../types.ts";
-import { QR_CODE_PATH } from "../constants.ts";
+import { DISCOVER_PATH, QR_CODE_PATH } from "../constants.ts";
 import { emptyDealEffect } from "../constants.ts";
-import { useDealDisplay } from "../components/deal_display.tsx";
-import { error } from "console";
+import { useDealDisplay } from "../components/checkout/deal_display.tsx";
+import { fetch_policies } from "../utils/queries/policies.ts";
 
 export const DrinkCheckout = ({}) => {
-  const location = useLocation();
-
   const {
     userSession,
     transactions,
     setTransactions,
     setUserData,
     userData,
-    setLocalTransactions,
     loadingUser,
   } = useAuth();
-  const { policies, loadingRestaurantData } = useRestaurantData();
+  const [policies, setPolicies] = useState<Policy[]>([]);
+  const location = useLocation();
   const supabase = useSupabase();
   const navigate = useNavigate();
-
-  const [cart, setCart] = useState<Cart>(location.state?.cart);
+  const { id: restaurant_id } = useParams<{ id: string }>();
+  const [cart, setCart] = usePersistState<Cart>(
+    location.state?.cart || [],
+    restaurant_id + "_cart"
+  );
   const [dealEffect, setDealEffect] =
     useState<DealEffectPayload>(emptyDealEffect);
-  const restaurant = location.state?.restaurant;
   const [selectedPolicy, setSelectedPolicy] = useState<Policy | null>(
     location.state?.policy
   );
 
-  const hasFetched = useRef(false);
-  const [cartResults, setCartResults] = useState<CartResultsPayload>();
+  const [cartResults, setCartResults] = useState<CartResultsPayload | null>();
   const [errorDisplay, setErrorDisplay] = useState<string | null>();
   const token = useRef();
+  const hasFetched = useRef(false);
 
   useEffect(() => {
-    if (!loadingUser && !loadingRestaurantData) {
+    const fetch = async () => {
+      const policies = await fetch_policies(restaurant_id);
+      setPolicies(policies);
+    };
+    if (!restaurant_id) {
+      //navigate to error page
+      navigate(DISCOVER_PATH);
+    } else {
+      fetch();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!loadingUser) {
       if (!hasFetched.current) {
         verify_order();
       }
     }
-  }, [
-    cart,
-    dealEffect,
-    selectedPolicy,
-    loadingUser,
-    userData,
-    loadingRestaurantData,
-    restaurant,
-  ]);
+  }, [cart, dealEffect, selectedPolicy, loadingUser, userData]);
 
   const verify_order = async () => {
     const payload: VerifyOrderPayload = {
       cart: cart,
-      dealEffectPayload: dealEffect,
+      userDealEffect: dealEffect,
       policy_id: selectedPolicy?.policy_id || null,
-      restaurant_id: restaurant.id,
+      restaurant_id: restaurant_id as string,
       user_id: userData?.id || null,
     };
     const { data, error } = await supabase.functions.invoke("verify_order", {
@@ -89,25 +96,33 @@ export const DrinkCheckout = ({}) => {
     } else {
       setErrorDisplay("");
     }
-
+    setSelectedPolicy(returnData.payload.policy);
     setDealEffect(returnData.payload.dealEffectPayload);
     setCart(returnData.payload.cart);
     setCartResults(returnData.payload.cartResultsPayload);
     token.current = returnData.jwtToken;
-    console.log(token.current);
   };
 
   const click_policy = (policy: Policy) => {
     hasFetched.current = false;
-    setDealEffect(emptyDealEffect);
-    setSelectedPolicy(policy);
+    if (!isEqual(policy, selectedPolicy)) {
+      //selecting another policy
+      setSelectedPolicy(policy);
+      setDealEffect(emptyDealEffect);
+    } else {
+      //unselecting
+      setSelectedPolicy(null);
+      setDealEffect(emptyDealEffect);
+    }
+    setCartResults(undefined);
+    setErrorDisplay(null);
   };
 
   const purchase_drink = async () => {
     //things you need customer_id,restaurant_id,item,policy_id
     const payload = {
       user_id: userSession ? userSession.phone : null,
-      restaurant_id: restaurant.id,
+      restaurant_id: restaurant_id,
       cart: cart,
       userDealEffect: dealEffect,
       userPolicy: selectedPolicy,
@@ -133,16 +148,17 @@ export const DrinkCheckout = ({}) => {
       if (!transactions || transactions?.length == 0) {
         throw new Error("No transactions received or created");
       } else {
-        if (!userSession) {
-          setLocalTransactions((prev) => [...prev, ...transactions]);
-        }
         setTransactions((prevTransactions) => [
           ...prevTransactions,
           ...transactions,
         ]);
 
         navigate(QR_CODE_PATH, {
-          state: { transactions: transactions },
+          state: {
+            transactions: transactions.filter(
+              (transaction) => !isEqual(transaction.metadata, {})
+            ),
+          },
         });
       }
     } catch (error) {
@@ -174,6 +190,9 @@ export const DrinkCheckout = ({}) => {
   };
 
   const updateItem = (itemKey: number, updatedFields: Partial<CartItem>) => {
+    console.log(itemKey, cart.length);
+    console.log(dealEffect);
+    console.log(updatedFields);
     hasFetched.current = false;
     if (itemKey < cart.length) {
       setCart((prevCart) =>
@@ -194,11 +213,18 @@ export const DrinkCheckout = ({}) => {
 
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
+      <button
+        onClick={() => {
+          navigate(-1);
+        }}
+      >
+        Go back
+      </button>
       <ul style={{ listStyle: "none", padding: 10, margin: 10 }}>
         Cart
         {cart &&
-          cart.map((item: CartItem, index: number) => (
-            <li key={index}>
+          cart.map((item: CartItem) => (
+            <li key={item.id}>
               <CheckoutLineItem
                 item={item}
                 onUpdate={updateItem}
@@ -216,7 +242,7 @@ export const DrinkCheckout = ({}) => {
             style={{
               backgroundColor:
                 selectedPolicy?.policy_id === policy.policy_id
-                  ? "orange"
+                  ? "blue"
                   : "transparent",
               cursor: "pointer",
               padding: "10px",
@@ -235,7 +261,7 @@ export const DrinkCheckout = ({}) => {
       <br />
       Point Cost:{cartResults?.totalPointCost}
       <br />
-      <SearchBar action={add_to_cart} restaurant={restaurant} />
+      <SearchBar action={add_to_cart} restaurant_id={restaurant_id as string} />
       {!userData && (
         <div>
           Sign in with phone number to access deals and receive points with
@@ -243,7 +269,7 @@ export const DrinkCheckout = ({}) => {
         </div>
       )}
       <button onClick={test}>Test</button>
-      {token.current && (
+      {token.current && userData && (
         <button onClick={purchase_drink}>Purchase Drink</button>
       )}
     </div>

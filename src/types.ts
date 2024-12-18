@@ -2,7 +2,7 @@ export type Cart = CartItem[];
 
 export interface VerifyOrderPayload {
   cart: Cart;
-  dealEffectPayload: DealEffectPayload;
+  userDealEffect: DealEffectPayload;
   policy_id: string | null;
   restaurant_id: string;
   user_id: string | null;
@@ -21,6 +21,9 @@ export interface JWTPayloadType extends Record<string, unknown> {
   cart: Cart;
   dealEffectPayload: DealEffectPayload;
   cartResultsPayload: CartResultsPayload;
+  policy: Policy | null;
+  user_id: string | null;
+  restaurant_id: string;
 }
 
 export interface CartResultsPayload {
@@ -71,6 +74,10 @@ export interface Restaurant {
   //how to do location
   menu: Menu;
 }
+
+export interface DrinkForm {
+  restaurant: Restaurant;
+}
 export interface DealUse {
   deal_use_id: string;
   created_at: string;
@@ -94,30 +101,35 @@ export interface ReturnTransactionsPayload {
 
 export type Menu = {
   drink: DrinkMenu;
-  lineSkip: number;
-  cover: number;
-};
+} & Record<string, number>;
+
 export interface DrinkMenu {
   liquor: LiquorMenu;
-  beer_and_cider: Record<string, number>;
-  classic_cocktail: Record<string, number>;
-  specialty_option: Record<string, number>;
+  beer_and_cider: DrinkCategory;
+  classic_cocktail: DrinkCategory;
+  specialty_option: DrinkCategory;
 }
+
+type DrinkCategory = {
+  default: number;
+} & Record<string, number>;
 
 type LiquorMenu = {
   default: number;
-} & Record<string, Record<string, string | number>>;
+} & Record<string, LiquorTypeMenu>;
+
+type LiquorTypeMenu = { default: string } & Record<string, number>;
 
 export interface Transaction {
   transaction_id: string;
   created_at: string;
   is_fulfilled: boolean;
   restaurant_id: string;
-  user_id: string | null;
+  user_id: string;
   item: string;
   category: string | null;
   deal_use_id: string | null;
-  metadata: Record<string, unknown> | null;
+  metadata: Record<string, string> | null;
   tip_amount: number | null;
   price: number | null;
   points_awarded: number | null;
@@ -144,7 +156,7 @@ export interface Policy {
   count_as_deal: boolean;
   begin_time: string | null;
   end_time: string | null;
-  frequency: string | null;
+  usages: number | null;
   definition: PolicyDefinition;
 }
 
@@ -212,3 +224,18 @@ export type PolicyDefinitionAction =
   | { type: "apply_blanket_price"; amount: number }
   | { type: "apply_order_percent_discount"; amount: number }
   | { type: "apply_blanket_point_cost"; amount: number };
+
+export interface HouseMixerTemplate {
+  name: string;
+  modifiers: string[];
+  liquorType: string;
+  liquorBrand: string;
+  quantity: number;
+}
+
+export interface ShotShooterTemplate {
+  modifiers: string[];
+  liquorType: string;
+  liquorBrand: string;
+  quantity: number;
+}

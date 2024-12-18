@@ -9,7 +9,7 @@ export const assignIds = (items: CartItem[]): void => {
 
 export const submit_drink_order = async (
   drink_order: string,
-  restaurant: Restaurant
+  restaurant_id: string
 ): Promise<Cart | null> => {
   try {
     const { data, error } = await supabase.functions.invoke(
@@ -17,7 +17,7 @@ export const submit_drink_order = async (
       {
         body: JSON.stringify({
           drink_order: drink_order,
-          menu: restaurant.menu,
+          restaurant_id: restaurant_id,
         }),
       }
     );

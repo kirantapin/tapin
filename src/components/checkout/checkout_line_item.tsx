@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { Cart, CartItem } from "../types";
-import { useRestaurantData } from "../context/restaurant_context.tsx";
+import { CartItem } from "../../types";
 
 interface CheckoutLineItemProps {
   item: CartItem;
@@ -14,7 +13,6 @@ export const CheckoutLineItem: React.FC<CheckoutLineItemProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [modifiedItem, setModifiedItem] = useState(item);
-  const { restaurant } = useRestaurantData();
 
   // Toggle expanded view
   const toggleExpand = () => {
@@ -25,10 +23,21 @@ export const CheckoutLineItem: React.FC<CheckoutLineItemProps> = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (!lockedFields.includes(name)) {
-      setModifiedItem((prev) => ({
-        ...prev,
-        [name]: name === "quantity" || name === "price" ? Number(value) : value,
-      }));
+      if (name === "quantity" || name == "price") {
+        setModifiedItem((prev) => ({
+          ...prev,
+          [name]:
+            name === "quantity" || name === "price" ? Number(value) : value,
+        }));
+      } else {
+        setModifiedItem((prev) => ({
+          ...prev,
+          item: {
+            ...prev.item,
+            [name]: value,
+          },
+        }));
+      }
     }
   };
 
@@ -67,7 +76,7 @@ export const CheckoutLineItem: React.FC<CheckoutLineItemProps> = ({
             Category:{" "}
             <input
               type="text"
-              name="name"
+              name="category"
               value={modifiedItem.item.category || ""}
               onChange={handleChange}
             />

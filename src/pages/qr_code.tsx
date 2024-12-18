@@ -9,12 +9,7 @@ import QRCode from "react-qr-code";
 
 export const QRCodeScreen = () => {
   const supabase = useSupabase();
-  const {
-    transactions,
-    setTransactions,
-    localTransactions,
-    setLocalTransactions,
-  } = useAuth();
+  const { transactions, setTransactions } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [transactionsToRedeem, setTransactionsToRedeem] = useState<
@@ -60,15 +55,6 @@ export const QRCodeScreen = () => {
                 ? { ...transaction, is_fulfilled: payload.new.is_fulfilled }
                 : transaction
             );
-
-            // Filter out the transaction with the given ID
-            setLocalTransactions((prevLocalTransactions) => {
-              const filteredTransactions = prevLocalTransactions.filter(
-                (filteredTransaction) =>
-                  filteredTransaction.transaction_id !== updatedTransactionId
-              );
-              return filteredTransactions;
-            });
 
             // Check if all transactions are fulfilled
             const allFulfilled = transactionsToRedeem.every((t) =>
@@ -122,7 +108,7 @@ export const QRCodeScreen = () => {
         </button>
         <button
           onClick={() => {
-            console.log(transactions);
+            console.log(transactionsToRedeem);
           }}
         >
           TEst

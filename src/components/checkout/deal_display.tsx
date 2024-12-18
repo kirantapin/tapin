@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Cart, DealEffectPayload, Item, CartItem } from "../types";
+import { Cart, DealEffectPayload, Item, CartItem } from "../../types.ts";
 import { CheckoutLineItem } from "./checkout_line_item.tsx";
 
 export const useDealDisplay = (
@@ -30,26 +30,24 @@ export const useDealDisplay = (
 
     rendering = [
       ...rendering,
-      ...(dealEffect?.freeAddedItems.map(
-        (item: { item: Item; quantity: number }, index: number) => {
-          return (
-            <li key={index}>
-              <CheckoutLineItem
-                item={{
-                  id: index,
-                  item: item.item,
-                  quantity: item.quantity,
-                  price: 0,
-                  points: 0,
-                  point_cost: 0,
-                }}
-                onUpdate={onUpdate}
-                lockedFields={["quantity", ...Object.keys(item.item)]}
-              />
-            </li>
-          );
-        }
-      ) || []),
+      ...(dealEffect?.freeAddedItems.map((item: CartItem) => {
+        return (
+          <li key={item.id}>
+            <CheckoutLineItem
+              item={{
+                id: item.id,
+                item: item.item,
+                quantity: item.quantity,
+                price: 0,
+                points: 0,
+                point_cost: 0,
+              }}
+              onUpdate={onUpdate}
+              lockedFields={["quantity", ...Object.keys(item.item)]}
+            />
+          </li>
+        );
+      }) || []),
     ];
 
     // Process modified items

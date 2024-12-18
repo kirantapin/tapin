@@ -8,6 +8,8 @@ import React, {
 } from "react";
 import { Transaction, User, DealUse, UserSession } from "../types";
 import { useSupabase } from "./supabase_context";
+import { cleanExpiredLocalStorage } from "../utils/clean_local_storage";
+import { STORAGE_TTL } from "../constants";
 
 // Create a context with default values (optional)
 interface AuthContextProps {
@@ -18,10 +20,6 @@ interface AuthContextProps {
   setUserData: React.Dispatch<React.SetStateAction<User | null>>;
   transactions: Transaction[];
   setTransactions: React.Dispatch<React.SetStateAction<Transaction[] | []>>;
-  localTransactions: Transaction[];
-  setLocalTransactions: React.Dispatch<
-    React.SetStateAction<Transaction[] | []>
-  >;
   loadingUser: boolean;
 }
 
@@ -40,12 +38,12 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     const storedUser = localStorage.getItem("userSession");
     return storedUser ? JSON.parse(storedUser) : null;
   });
-  const [localTransactions, setLocalTransactions] = useState<Transaction[]>(
-    () => {
-      const storedTransactions = localStorage.getItem("localTransactions");
-      return storedTransactions ? JSON.parse(storedTransactions) : [];
-    }
-  );
+  // const [localTransactions, setLocalTransactions] = useState<Transaction[]>(
+  //   () => {
+  //     const storedTransactions = localStorage.getItem("localTransactions");
+  //     return storedTransactions ? JSON.parse(storedTransactions) : [];
+  //   }
+  // );
 
   const supabase = useSupabase();
 
@@ -55,6 +53,10 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const [loadingUser, setLoadingUser] = useState(true);
 
   useEffect(() => {
+    cleanExpiredLocalStorage(STORAGE_TTL);
+  }, []);
+
+  useEffect(() => {
     const fetchData = async () => {
       setLoadingUser(true);
       await fetch_user_data(userSession);
@@ -62,16 +64,15 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       await fetch_deal_uses(userSession);
       setLoadingUser(false);
     };
-
     fetchData();
   }, [userSession]);
 
-  useEffect(() => {
-    localStorage.setItem(
-      "localTransactions",
-      JSON.stringify(localTransactions)
-    );
-  }, [localTransactions]);
+  // useEffect(() => {
+  //   localStorage.setItem(
+  //     "localTransactions",
+  //     JSON.stringify(localTransactions)
+  //   );
+  // }, [localTransactions]);
 
   const fetch_user_data = async (userSession: UserSession | null) => {
     if (userSession) {
@@ -111,9 +112,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       if (error) {
         throw new Error(error.message);
       }
-      setTransactions([...localTransactions, ...data]);
-    } else {
-      setTransactions(localTransactions);
+      setTransactions(data);
     }
   };
 
@@ -158,8 +157,6 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         setUserData,
         transactions,
         setTransactions,
-        localTransactions,
-        setLocalTransactions,
         loadingUser,
       }}
     >

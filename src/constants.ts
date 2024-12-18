@@ -10,8 +10,11 @@ export const TEST_USER = {
 //paths
 export const BASE_PATH = "/";
 export const QR_CODE_PATH = "/qrcode/";
-export const DRINK_CHECKOUT_PATH = "/drink_checkout";
+export const DRINK_CHECKOUT_PATH = "/restaurant/:id/drink_checkout";
 export const SIGNIN_PATH = "/sign_in";
+export const RESTAURANT_PATH = "/restaurant/:id";
+export const APPLOAD_PATH = "";
+export const DISCOVER_PATH = "/discover";
 
 //objects
 export const emptyDealEffect: DealEffectPayload = {
@@ -19,3 +22,10 @@ export const emptyDealEffect: DealEffectPayload = {
   modifiedItems: [],
   wholeCartModification: null,
 };
+
+//error messages
+export const MISSING_USER_ID = "User ID is required but wasn't received.";
+
+//storage
+export const STORAGE_PREFIX = "state:";
+export const STORAGE_TTL = 6 * 60 * 1000;
