@@ -54,9 +54,42 @@ const ScrollToolbar = () => {
 
   return (
     <Toolbar visible={visible}>
-      <button>Button 1</button>
-      <button>Button 2</button>
-      <button>Button 3</button>
+      <button
+        style={{
+          padding: "10px 20px",
+          backgroundColor: "#007bff",
+          color: "#fff",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+        }}
+      >
+        Button 1
+      </button>
+      <button
+        style={{
+          padding: "10px 20px",
+          backgroundColor: "#007bff",
+          color: "#fff",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+        }}
+      >
+        Button 2
+      </button>
+      <button
+        style={{
+          padding: "10px 20px",
+          backgroundColor: "#007bff",
+          color: "#fff",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+        }}
+      >
+        Button 3
+      </button>
     </Toolbar>
   );
 };

@@ -77,6 +77,8 @@ export interface Restaurant {
 
 export interface DrinkForm {
   restaurant: Restaurant;
+  onUpdate: (values: Record<string, string>) => void;
+  transaction: Transaction;
 }
 export interface DealUse {
   deal_use_id: string;
@@ -123,13 +125,13 @@ type LiquorTypeMenu = { default: string } & Record<string, number>;
 export interface Transaction {
   transaction_id: string;
   created_at: string;
-  is_fulfilled: boolean;
+  fulfilled_by: string | null;
   restaurant_id: string;
   user_id: string;
   item: string;
   category: string | null;
   deal_use_id: string | null;
-  metadata: Record<string, string> | null;
+  metadata: Record<string, string>;
   tip_amount: number | null;
   price: number | null;
   points_awarded: number | null;

@@ -37,11 +37,50 @@ const SearchBar: React.FC<SearchBarProps> = ({ action, restaurant_id }) => {
         onChange={handleInputChange}
         className="search-input"
       />
-      <button type="submit" className="search-button">
-        Get Drink
+      <button
+        style={{
+          padding: "10px 20px",
+          backgroundColor: "#007bff",
+          color: "#fff",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+        }}
+        type="submit"
+        className="search-button"
+      >
+        Add to Cart
       </button>
     </form>
   );
 };
+
+const styles = `
+.search-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 12px 16px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 25px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.search-input::placeholder {
+  color: #aaa;
+}
+`;
+
+if (typeof document !== "undefined") {
+  const styleElement = document.createElement("style");
+  styleElement.textContent = styles;
+  document.head.appendChild(styleElement);
+}
 
 export default SearchBar;

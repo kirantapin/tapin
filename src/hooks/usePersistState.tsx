@@ -10,7 +10,7 @@ export function usePersistState<T>(
   initial_value: T,
   id: string,
   ttl: number = STORAGE_TTL
-): [T, (new_state: T | ((prevState: T) => T)) => void] {
+): [T, (new_state: T | ((prevState: T) => T)) => void, () => void] {
   const _initial_value = useMemo(() => {
     const local_storage_value_str = localStorage.getItem(STORAGE_PREFIX + id);
     const now = Date.now();
@@ -21,7 +21,16 @@ export function usePersistState<T>(
 
         // Check if the data is expired
         if (now - parsed.timestamp < ttl) {
-          return parsed.value; // Valid, non-expired data
+          //merging older stored value and new value
+          if (Array.isArray(parsed.value) && Array.isArray(initial_value)) {
+            const merged = [...parsed.value, ...initial_value] as T;
+            localStorage.setItem(
+              STORAGE_PREFIX + id,
+              JSON.stringify({ value: merged, timestamp: now })
+            );
+            return merged;
+          }
+          return parsed.value as T;
         } else {
           localStorage.removeItem(STORAGE_PREFIX + id); // Clean up expired data
         }
@@ -29,6 +38,12 @@ export function usePersistState<T>(
         console.error("Failed to parse localStorage value:", error);
       }
     }
+
+    const payload: PersistedState<T> = {
+      value: initial_value,
+      timestamp: now,
+    };
+    localStorage.setItem(STORAGE_PREFIX + id, JSON.stringify(payload));
 
     return initial_value;
   }, [id, initial_value, ttl]);
@@ -54,5 +69,9 @@ export function usePersistState<T>(
     });
   };
 
-  return [state, setPersistedState];
+  const clearPersistedState = () => {
+    localStorage.removeItem(STORAGE_PREFIX + id);
+  };
+
+  return [state, setPersistedState, clearPersistedState];
 }

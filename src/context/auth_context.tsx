@@ -34,16 +34,9 @@ interface AuthProviderProps {
 export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   // Define the state you want to share
   const [userSession, setUserSession] = useState(() => {
-    // Initialize user session from local storage (if available)
     const storedUser = localStorage.getItem("userSession");
     return storedUser ? JSON.parse(storedUser) : null;
   });
-  // const [localTransactions, setLocalTransactions] = useState<Transaction[]>(
-  //   () => {
-  //     const storedTransactions = localStorage.getItem("localTransactions");
-  //     return storedTransactions ? JSON.parse(storedTransactions) : [];
-  //   }
-  // );
 
   const supabase = useSupabase();
 
@@ -66,13 +59,6 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     };
     fetchData();
   }, [userSession]);
-
-  // useEffect(() => {
-  //   localStorage.setItem(
-  //     "localTransactions",
-  //     JSON.stringify(localTransactions)
-  //   );
-  // }, [localTransactions]);
 
   const fetch_user_data = async (userSession: UserSession | null) => {
     if (userSession) {

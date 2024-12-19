@@ -23,6 +23,7 @@ import { DISCOVER_PATH, QR_CODE_PATH } from "../constants.ts";
 import { emptyDealEffect } from "../constants.ts";
 import { useDealDisplay } from "../components/checkout/deal_display.tsx";
 import { fetch_policies } from "../utils/queries/policies.ts";
+import { findRenderedDOMComponentWithClass } from "react-dom/test-utils/index";
 
 export const DrinkCheckout = ({}) => {
   const {
@@ -38,7 +39,7 @@ export const DrinkCheckout = ({}) => {
   const supabase = useSupabase();
   const navigate = useNavigate();
   const { id: restaurant_id } = useParams<{ id: string }>();
-  const [cart, setCart] = usePersistState<Cart>(
+  const [cart, setCart, clearCart] = usePersistState<Cart>(
     location.state?.cart || [],
     restaurant_id + "_cart"
   );
@@ -134,6 +135,7 @@ export const DrinkCheckout = ({}) => {
       const { data, error } = await supabase.functions.invoke("submit_order", {
         body: payload,
       });
+      clearCart();
       if (error || !data)
         throw new Error("created transaction came back as null");
       //transaction is good we need to store this locally somewhere
@@ -153,7 +155,7 @@ export const DrinkCheckout = ({}) => {
           ...transactions,
         ]);
 
-        navigate(QR_CODE_PATH, {
+        navigate(`/restaurant/${restaurant_id}/qrcode`, {
           state: {
             transactions: transactions.filter(
               (transaction) => !isEqual(transaction.metadata, {})
@@ -214,8 +216,16 @@ export const DrinkCheckout = ({}) => {
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
       <button
+        style={{
+          padding: "10px 20px",
+          backgroundColor: "#007bff",
+          color: "#fff",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+        }}
         onClick={() => {
-          navigate(-1);
+          navigate(`/restaurant/${restaurant_id}`);
         }}
       >
         Go back
@@ -270,7 +280,19 @@ export const DrinkCheckout = ({}) => {
       )}
       <button onClick={test}>Test</button>
       {token.current && userData && (
-        <button onClick={purchase_drink}>Purchase Drink</button>
+        <button
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#007bff",
+            color: "#fff",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+          onClick={purchase_drink}
+        >
+          Purchase Drink
+        </button>
       )}
     </div>
   );

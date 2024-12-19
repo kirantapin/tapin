@@ -12,6 +12,7 @@ export const QRCodeScreen = () => {
   const { transactions, setTransactions } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { id: restaurant_id } = useParams();
   const [transactionsToRedeem, setTransactionsToRedeem] = useState<
     Transaction[]
   >(location.state?.transactions || []);
@@ -60,14 +61,13 @@ export const QRCodeScreen = () => {
             const allFulfilled = transactionsToRedeem.every((t) =>
               updatedTransactions.some(
                 (ut: Transaction) =>
-                  ut.transaction_id === t.transaction_id &&
-                  ut.is_fulfilled === true
+                  ut.transaction_id === t.transaction_id && ut.fulfilled_by
               )
             );
 
             if (allFulfilled) {
               console.log("All transactions fulfilled, exiting.");
-              navigate(BASE_PATH);
+              navigate("../");
             }
             console.log(updatedTransactions);
             return updatedTransactions;
@@ -100,18 +100,34 @@ export const QRCodeScreen = () => {
           viewBox={`0 0 256 256`}
         />
         <button
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#007bff",
+            color: "#fff",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
           onClick={() => {
-            navigate(BASE_PATH);
+            navigate(`/restaurant/${restaurant_id}`);
           }}
         >
           Redeem Later
         </button>
         <button
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#007bff",
+            color: "#fff",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
           onClick={() => {
             console.log(transactionsToRedeem);
           }}
         >
-          TEst
+          Test
         </button>
       </div>
     </div>

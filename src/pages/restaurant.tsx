@@ -11,6 +11,7 @@ import { DISCOVER_PATH } from "../constants.ts";
 import { DrinkCheckout } from "./drink_checkout.tsx";
 import { fetch_policies } from "../utils/queries/policies.ts";
 import { fetchRestaurantById } from "../utils/queries/restaurant.ts";
+import { PrevTransactionDisplay } from "../components/previous_transactions_display.tsx";
 
 const RestaurantPage: React.FC = () => {
   // Extract restaurantId from URL parameters
@@ -45,6 +46,7 @@ const RestaurantPage: React.FC = () => {
   const TEST = async () => {
     console.log(transactions);
     console.log(restaurant);
+    console.log(userData);
   };
 
   const open_drink_template_after_search = (order_response: Cart) => {
@@ -87,13 +89,18 @@ const RestaurantPage: React.FC = () => {
   return (
     <div>
       <button
-        onClick={() => {
-          console.log("changing restaurant");
+        style={{
+          padding: "10px 20px",
+          backgroundColor: "#007bff",
+          color: "#fff",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
         }}
+        onClick={goToDiscovery}
       >
-        Change Restaurant
+        Discovery
       </button>
-      <button onClick={goToDiscovery}>Discovery</button>
       <h1>{restaurant?.name}</h1>
       <h1>
         {restaurant?.id && userData?.points[restaurant.id]
@@ -110,23 +117,13 @@ const RestaurantPage: React.FC = () => {
         )}
       </div>
       <h1>Your previous transactions</h1>
-      <ul>
-        {transactions.map((transaction, index) =>
-          transaction.restaurant_id === restaurant?.id &&
-          transaction.is_fulfilled === false ? (
-            <div
-              key={index}
-              onClick={() => {
-                navigate(QR_CODE_PATH, {
-                  state: { transactions: [transaction] },
-                });
-              }}
-            >
-              <p>{transaction.metadata?.name || transaction.category}</p>
-            </div>
-          ) : null
-        )}
-      </ul>
+      {restaurant && (
+        <PrevTransactionDisplay
+          transactions={transactions}
+          restaurant={restaurant}
+        />
+      )}
+
       <div>
         <h1>Deals</h1>
         <ul>
@@ -137,7 +134,19 @@ const RestaurantPage: React.FC = () => {
           ))}
         </ul>
       </div>
-      <button onClick={TEST}>test button</button>
+      <button
+        style={{
+          padding: "10px 20px",
+          backgroundColor: "#007bff",
+          color: "#fff",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+        }}
+        onClick={TEST}
+      >
+        Test Button
+      </button>
       {!userSession && (
         <div
           onClick={() => {

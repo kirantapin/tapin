@@ -70,5 +70,5 @@ export const Banner = styled.div`
   position: fixed; /* Fixed at the top */
   top: 0; /* Align at the top */
   z-index: 1000; /* Ensure it stays above other elements */
-  background: linear-gradient(to bottom, white 80%, rgba(255, 0, 0, 0) 100%);
+  background: linear-gradient(to bottom, #007bff 80%, rgba(255, 0, 0, 0) 100%);
 `;

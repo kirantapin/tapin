@@ -9,7 +9,7 @@ export const TEST_USER = {
 
 //paths
 export const BASE_PATH = "/";
-export const QR_CODE_PATH = "/qrcode/";
+export const QR_CODE_PATH = "/restaurant/:id/qrcode";
 export const DRINK_CHECKOUT_PATH = "/restaurant/:id/drink_checkout";
 export const SIGNIN_PATH = "/sign_in";
 export const RESTAURANT_PATH = "/restaurant/:id";
