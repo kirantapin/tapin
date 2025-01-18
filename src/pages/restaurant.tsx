@@ -1,17 +1,28 @@
 import React from "react";
 import { useEffect, useState, useContext } from "react";
-import { redirect, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import SearchBar from "../components/rotating_searchbar.tsx";
 import { useSupabase } from "../context/supabase_context";
 import { useAuth } from "../context/auth_context.tsx";
-import { Cart, Restaurant, Policy, CartItem, Item } from "../types";
-import { DRINK_CHECKOUT_PATH, QR_CODE_PATH } from "../constants.ts";
+import {
+  Cart,
+  Restaurant,
+  Policy,
+  CartItem,
+  Item,
+  Subscription,
+} from "../types";
 import { assignIds } from "../utils/submit_drink_order.ts";
 import { DISCOVER_PATH } from "../constants.ts";
-import { DrinkCheckout } from "./drink_checkout.tsx";
 import { fetch_policies } from "../utils/queries/policies.ts";
 import { fetchRestaurantById } from "../utils/queries/restaurant.ts";
 import { PrevTransactionDisplay } from "../components/previous_transactions_display.tsx";
+import {
+  getSubscriptionsByIds,
+  getSubscriptionsByRestaurant,
+  getUserSubscription,
+  getSubscriptionById,
+} from "../utils/queries/subscriptions.ts";
 
 const RestaurantPage: React.FC = () => {
   // Extract restaurantId from URL parameters
@@ -20,8 +31,10 @@ const RestaurantPage: React.FC = () => {
   const supabase = useSupabase();
   const [restaurant, setRestaurant] = useState<Restaurant>();
   const [policies, setPolicies] = useState<Policy[]>([]);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [userSubscription, setUserSubscription] =
+    useState<Subscription | null>();
   const { id: restaurant_id } = useParams<{ id: string }>();
-  const [openCart, setOpenCart] = useState<boolean>(false);
 
   const menu = restaurant?.menu;
 
@@ -29,24 +42,44 @@ const RestaurantPage: React.FC = () => {
     //fetch the restaurant and policies
     const fetchData = async () => {
       const restaurantData = await fetchRestaurantById(restaurant_id);
-      console.log(restaurantData);
-      const policies = await fetch_policies(restaurant_id);
       if (!restaurantData) {
-        //navigate to restaurant not found page
-        //for now we will take user to discovery page
         navigate(DISCOVER_PATH);
-      } else {
-        setRestaurant(restaurantData);
-        setPolicies(policies);
       }
+      const policies = await fetch_policies(restaurant_id);
+      const uniqueSubscriptionIds = Array.from(
+        new Set(
+          policies
+            .map((policy) => policy.subscription_id)
+            .filter((id): id is string => id !== null) // Filter nulls and refine type
+        )
+      );
+      const subscriptions = await getSubscriptionsByIds(uniqueSubscriptionIds);
+      if (userData && restaurant_id) {
+        const userSubscriptionStatus = await getUserSubscription(
+          userData.id,
+          restaurant_id
+        );
+        const userSubscription = await getSubscriptionById(
+          userSubscriptionStatus?.subscription_id || null
+        );
+
+        setUserSubscription(userSubscription);
+      }
+
+      setRestaurant(restaurantData as Restaurant);
+      setPolicies(policies);
+      setSubscriptions(subscriptions);
     };
     fetchData();
   }, []);
 
   const TEST = async () => {
-    console.log(transactions);
-    console.log(restaurant);
-    console.log(userData);
+    const { data, error } = await supabase.functions.invoke(
+      "handle_subscriptions",
+      {
+        body: { random: "hello" },
+      }
+    );
   };
 
   const open_drink_template_after_search = (order_response: Cart) => {
@@ -116,7 +149,6 @@ const RestaurantPage: React.FC = () => {
           />
         )}
       </div>
-      <h1>Your previous transactions</h1>
       {restaurant && (
         <PrevTransactionDisplay
           transactions={transactions}
@@ -127,11 +159,13 @@ const RestaurantPage: React.FC = () => {
       <div>
         <h1>Deals</h1>
         <ul>
-          {policies.map((policy, index) => (
-            <div key={index} onClick={() => goToDrinkCheckout([], policy)}>
-              <li key={index}>{policy.name}</li>
-            </div>
-          ))}
+          {policies
+            .filter((policy) => policy.subscription_id === null)
+            .map((policy, index) => (
+              <div key={index} onClick={() => goToDrinkCheckout([], policy)}>
+                <li key={index}>{policy.name}</li>
+              </div>
+            ))}
         </ul>
       </div>
       <button

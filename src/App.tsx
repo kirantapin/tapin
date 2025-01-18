@@ -1,4 +1,3 @@
-import { useRestaurantData } from "./context/restaurant_context";
 import { useAuth } from "./context/auth_context";
 
 import React, { useEffect, useState } from "react";
@@ -14,10 +13,10 @@ import Main from "./pages/main";
 import QRCode from "./pages/qr_code.tsx";
 import Restaurant from "./pages/restaurant.tsx";
 import { DrinkCheckout } from "./pages/drink_checkout.tsx";
-import { SignIn } from "./pages/signin_page.tsx";
-import DevPolicyCreator from "./pages/dev_policy_creator.tsx";
+// import { SignIn } from "./pages/signin_page.tsx";
 import RestaurantPage from "./pages/restaurant.tsx";
 import Discovery from "./pages/discovery.tsx";
+import FigmaPage from "./pages/demo_restaurant.tsx";
 import {
   BASE_PATH,
   QR_CODE_PATH,
@@ -26,6 +25,11 @@ import {
   RESTAURANT_PATH,
   DISCOVER_PATH,
 } from "./constants.ts";
+import Demo2 from "./pages/demo_restaurant2.tsx";
+import SignIn from "./pages/signin/signin.tsx";
+import CheckoutPage from "./pages/demo_checkout.tsx";
+import { Check } from "lucide-react";
+import DemoQR from "./pages/demo_qr.tsx";
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -39,8 +43,24 @@ const App: React.FC = () => {
         <Route path={DISCOVER_PATH} element={<Discovery />} />
         <Route path={QR_CODE_PATH} element={<QRCode />} />
         <Route path={DRINK_CHECKOUT_PATH} element={<DrinkCheckout />} />
-        <Route path={SIGNIN_PATH} element={<SignIn />} />
-        <Route path={"/create_policy"} element={<DevPolicyCreator />} />
+        {/* <Route path={SIGNIN_PATH} element={<SignIn />} /> */}
+        <Route path={"/demo/:id"} element={<FigmaPage />} />
+        <Route path={"/demo2/:id"} element={<Demo2 />} />
+        <Route path={"/demo_signin"} element={<SignIn />} />
+        <Route path={"/demo_checkout"} element={<CheckoutPage />} />
+        <Route
+          path={"demo_qr"}
+          element={
+            <DemoQR
+              onBack={() => {
+                console.log("hello");
+              }}
+              onSkip={() => {
+                console.log("hello");
+              }}
+            />
+          }
+        />
       </Routes>
     </Router>
   );

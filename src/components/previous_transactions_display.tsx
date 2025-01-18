@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Transaction, Restaurant } from "../types";
 import { QR_CODE_PATH } from "../constants";
 import { isEqual, rest } from "lodash";
@@ -55,9 +55,12 @@ export const PrevTransactionDisplay: React.FC<PrevTransactionProps> = ({
     Transaction[]
   >([]);
   const navigate = useNavigate();
+  const { id: restaurant_id } = useParams();
 
   const goToQRCodePage = () => {
-    navigate(QR_CODE_PATH, { state: { transactions: selectedTransactions } });
+    navigate(`/restaurant/${restaurant_id}/qrcode`, {
+      state: { transactions: selectedTransactions },
+    });
   };
 
   const handleUpdatedTransaction = (
@@ -105,14 +108,7 @@ export const PrevTransactionDisplay: React.FC<PrevTransactionProps> = ({
 
   return (
     <div style={{ padding: "20px" }}>
-      <button
-        onClick={() => {
-          console.log(transactions);
-        }}
-      >
-        see transactions
-      </button>
-      <h1>Transaction List</h1>
+      <h1>Your Previous Transactions</h1>
       <ul style={{ listStyle: "none", padding: 0 }}>
         {transactions
           .filter((transaction) => transaction.restaurant_id === restaurant.id)

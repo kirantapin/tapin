@@ -6,15 +6,12 @@ import reportWebVitals from "./reportWebVitals";
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 import { AuthProvider } from "./context/auth_context.tsx";
 import { SupabaseProvider } from "./context/supabase_context.tsx";
-import { RestaurantProvider } from "./context/restaurant_context.tsx";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <SupabaseProvider>
     <AuthProvider>
-      <RestaurantProvider>
-        <App />
-      </RestaurantProvider>
+      <App />
     </AuthProvider>
   </SupabaseProvider>
 );

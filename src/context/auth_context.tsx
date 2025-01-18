@@ -6,15 +6,14 @@ import React, {
   FC,
   ReactNode,
 } from "react";
-import { Transaction, User, DealUse, UserSession } from "../types";
+import { Transaction, User, DealUse } from "../types";
 import { useSupabase } from "./supabase_context";
-import { cleanExpiredLocalStorage } from "../utils/clean_local_storage";
-import { STORAGE_TTL } from "../constants";
+import { Session } from "@supabase/supabase-js";
 
 // Create a context with default values (optional)
 interface AuthContextProps {
-  userSession: UserSession | null;
-  login: (userSession: UserSession) => void;
+  userSession: any; // Supabase session type
+  login: () => void;
   logout: () => void;
   userData: User | null;
   setUserData: React.Dispatch<React.SetStateAction<User | null>>;
@@ -32,112 +31,118 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
-  // Define the state you want to share
-  const [userSession, setUserSession] = useState(() => {
-    const storedUser = localStorage.getItem("userSession");
-    return storedUser ? JSON.parse(storedUser) : null;
-  });
-
+  const [userSession, setUserSession] = useState<any>(null);
   const supabase = useSupabase();
-
   const [userData, setUserData] = useState<User | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [dealUses, setDealUses] = useState<DealUse[]>([]);
   const [loadingUser, setLoadingUser] = useState(true);
 
+  const setData = async (session: Session | null) => {
+    if (!session) {
+      return;
+    }
+    const phone = session.user.phone;
+    if (!phone) {
+      return;
+    }
+    setUserSession(session);
+    fetchDealUses(phone);
+    fetchUserData(phone);
+    fetchTransactionData(phone);
+  };
+
   useEffect(() => {
-    cleanExpiredLocalStorage(STORAGE_TTL);
+    setLoadingUser(true);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setData(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setLoadingUser(true);
+      setData(session);
+      setLoadingUser(false);
+    });
+    setLoadingUser(false);
+    return () => subscription.unsubscribe();
   }, []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoadingUser(true);
-      await fetch_user_data(userSession);
-      await fetch_transaction_data(userSession);
-      await fetch_deal_uses(userSession);
-      setLoadingUser(false);
-    };
-    fetchData();
-  }, [userSession]);
+  // Fetch user data
+  const fetchUserData = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", userId)
+        .single();
 
-  const fetch_user_data = async (userSession: UserSession | null) => {
-    if (userSession) {
-      try {
-        const phone = userSession.phone;
-        const { data, error } = await supabase
-          .from("users")
-          .select("*")
-          .eq("id", phone)
-          .single();
-        if (error) {
-          console.error("Error fetching user:", error);
-          setUserSession(null);
-          return;
-        }
-        setUserData(data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    } else {
-      setUserData(null);
+      if (error) throw error;
+
+      setUserData(data);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
     }
   };
 
-  const fetch_transaction_data = async (userSession: UserSession | null) => {
-    if (userSession) {
+  // Fetch transaction data
+  const fetchTransactionData = async (userId: string) => {
+    try {
       const ninetyDaysAgo = new Date();
       ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
       const formattedDate = ninetyDaysAgo.toISOString();
+
       const { data, error } = await supabase
         .from("transactions")
         .select("*")
-        .eq("user_id", userSession.phone)
+        .eq("user_id", userId)
         .gte("created_at", formattedDate)
         .order("created_at", { ascending: false });
 
-      if (error) {
-        throw new Error(error.message);
-      }
+      if (error) throw error;
       setTransactions(data);
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
     }
   };
 
-  const fetch_deal_uses = async (userSession: UserSession | null) => {
-    if (userSession) {
+  // Fetch deal uses
+  const fetchDealUses = async (userId: string) => {
+    try {
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
       const formattedDate = weekAgo.toISOString();
+
       const { data, error } = await supabase
         .from("deal_use")
         .select("*")
-        .eq("user_id", userSession.phone)
+        .eq("user_id", userId)
         .gte("created_at", formattedDate)
         .order("created_at", { ascending: false });
 
-      if (error) {
-        throw new Error(error.message);
-      }
+      if (error) throw error;
 
       setDealUses(data);
+    } catch (error) {
+      console.error("Error fetching deal uses:", error);
     }
   };
 
-  const login = (userSession: UserSession) => {
-    localStorage.setItem("userSession", JSON.stringify(userSession));
-    setUserSession(userSession);
-  };
-
-  // Function to log out the user
-  const logout = () => {
-    localStorage.removeItem("userSession");
+  // Logout function
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUserSession(null);
+    setUserData(null);
+    setTransactions([]);
+    setDealUses([]);
   };
 
   return (
     <AuthContext.Provider
       value={{
         userSession,
-        login,
+        login: () => {}, // Login is handled automatically by Supabase
         logout,
         userData,
         setUserData,

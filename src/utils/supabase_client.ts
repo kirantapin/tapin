@@ -3,10 +3,22 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 const supabase_key = process.env.REACT_APP_SUPABASE_ANON_KEY;
 const project_url = process.env.REACT_APP_PROJECT_URL;
 
+let supabase_key_local = process.env.REACT_APP_SUPABASE_ANON_KEY_LOCAL;
+let project_url_local = process.env.REACT_APP_PROJECT_URL_LOCAL;
+
 if (!supabase_key || !project_url) {
   throw new Error(
     "Missing Supabase environment variables: REACT_APP_SUPABASE_ANON_KEY or REACT_APP_PROJECT_URL"
   );
 }
 
+if (!supabase_key_local || !project_url_local) {
+  supabase_key_local = "";
+  project_url_local = "";
+}
+
 export const supabase: SupabaseClient = createClient(project_url, supabase_key);
+// export const supabase_functions: SupabaseClient = createClient(
+//   project_url_local,
+//   supabase_key_local
+// );

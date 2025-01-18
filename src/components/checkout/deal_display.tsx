@@ -24,9 +24,9 @@ export const useDealDisplay = (
       return total + item.points * item.quantity;
     }, 0);
 
-    rendering.push(<div>Subtotal {preDealTotalPrice}</div>);
-    rendering.push(<div>Points {preDealPoints}</div>);
-    rendering.push(<div>Point Cost {preDealPointCost}</div>);
+    // rendering.push(<div>Subtotal {preDealTotalPrice}</div>);
+    // rendering.push(<div>Points {preDealPoints}</div>);
+    // rendering.push(<div>Point Cost {preDealPointCost}</div>);
 
     rendering = [
       ...rendering,

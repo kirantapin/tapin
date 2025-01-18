@@ -86,7 +86,6 @@ export interface DealUse {
   user_id: string;
   restaurant_id: string;
   policy_id: string;
-  transactions: string[];
   count_as_deal: boolean;
 }
 
@@ -158,8 +157,39 @@ export interface Policy {
   count_as_deal: boolean;
   begin_time: string | null;
   end_time: string | null;
-  usages: number | null;
+  total_usages: number | null;
+  subscription_id: string | null;
   definition: PolicyDefinition;
+}
+export interface UserSubscription {
+  user_id: string;
+  restaurant_id: string;
+  subscription_id: string;
+  last_paid: string;
+  created_at: string;
+}
+
+export interface Subscription {
+  subscription_id: string;
+  restaurant_id: string;
+  display_name: string;
+  display_description: string;
+  display_perk_list: string[];
+  price: number;
+  tier_tag: number;
+  nightly_deal_usages: number;
+}
+
+export interface Package {
+  package_id: string;
+  restaurant_id: string;
+  display_name: string;
+  display_description: string;
+  display_perk_list: string[];
+  price: number;
+  nightly_deal_usages: number;
+  begin_time: string;
+  end_time: string;
 }
 
 export interface PolicyDefinition {
@@ -190,6 +220,12 @@ export type PolicyDefinitionCondition =
   | {
       type: "minimum_user_points";
       amount: number;
+    }
+  | {
+      type: "time_range";
+      begin_time: string;
+      end_time: string;
+      allowed_days: string[];
     };
 export type PolicyDefinitionAction =
   | {

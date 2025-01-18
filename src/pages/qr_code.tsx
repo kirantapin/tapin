@@ -21,10 +21,10 @@ export const QRCodeScreen = () => {
     const displayList = [];
     for (const transaction of transactionsToRedeem) {
       displayList.push({
-        id: transaction.transaction_id,
+        transaction_id: transaction.transaction_id,
         item: transaction.item,
         category: transaction.category,
-        ...transaction.metadata,
+        metadata: transaction.metadata,
       });
     }
     return JSON.stringify(displayList);
