@@ -59,20 +59,15 @@ export interface ModifiedCartItem {
   quantity: number;
 }
 
-export interface Item {
-  item: string;
-  category?: string | null;
-  liquorType?: string | null;
-  liquorBrand?: string | null;
-  name?: string | null;
-  modifiers?: string[] | null;
-}
+export type Item = string[];
 
 export interface Restaurant {
   id: string;
   name: string;
   //how to do location
   menu: Menu;
+  stripe_account_id: string;
+  active: boolean;
 }
 
 export interface DrinkForm {
@@ -127,14 +122,14 @@ export interface Transaction {
   fulfilled_by: string | null;
   restaurant_id: string;
   user_id: string;
-  item: string;
-  category: string | null;
+  item: string[];
   deal_use_id: string | null;
   metadata: Record<string, string>;
   tip_amount: number | null;
   price: number | null;
   points_awarded: number | null;
   point_cost: number | 0;
+  payment_intent_id: string;
 }
 
 export interface User {
@@ -160,6 +155,7 @@ export interface Policy {
   total_usages: number | null;
   subscription_id: string | null;
   definition: PolicyDefinition;
+  image_url: string | null;
 }
 export interface UserSubscription {
   user_id: string;

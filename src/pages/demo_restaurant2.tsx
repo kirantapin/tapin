@@ -12,7 +12,11 @@ import {
   Subscription,
 } from "../types";
 import { assignIds } from "../utils/submit_drink_order.ts";
-import { DISCOVER_PATH } from "../constants.ts";
+import {
+  DISCOVER_PATH,
+  DRINK_CHECKOUT_PATH,
+  RESTAURANT_PATH,
+} from "../constants.ts";
 import { fetch_policies } from "../utils/queries/policies.ts";
 import { fetchRestaurantById } from "../utils/queries/restaurant.ts";
 import { PrevTransactionDisplay } from "../components/previous_transactions_display.tsx";
@@ -22,21 +26,65 @@ import {
   getUserSubscription,
   getSubscriptionById,
 } from "../utils/queries/subscriptions.ts";
-import { log } from "console";
-
+import SearchBar from "../components/rotating_searchbar.tsx";
+import { PolicyCard } from "../components/cards/policy_card.tsx";
+import { SubscriptionCard } from "../components/cards/subscription_card.tsx";
+import {
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
+} from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import MenuOrdering from "../components/menu.tsx";
+import { Sidebar } from "../components/sidebar.tsx";
+import { project_url } from "../utils/supabase_client.ts";
 export default function Demo2() {
   const { userSession, userData, transactions, logout } = useAuth();
   const navigate = useNavigate();
   const [restaurant, setRestaurant] = useState<Restaurant>();
   const [policies, setPolicies] = useState<Policy[]>([]);
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-  const [userSubscription, setUserSubscription] =
-    useState<Subscription | null>();
+  const [subscription, setSubscription] = useState({
+    name: "Party Pass Plus",
+    price: 19.99,
+    interval: "month" as const,
+    policies: [
+      {
+        title: "BOGO Drinks",
+        description: "Buy one drink, get one free every Friday night",
+        isLimitedTime: true,
+        expirationDate: "June 1, 2025",
+        isDeal: true,
+      },
+      {
+        title: "50% Off Appetizers",
+        description: "Half price appetizers every day from 4-6 PM",
+        isLimitedTime: false,
+        isDeal: true,
+      },
+      {
+        title: "VIP Line Skip",
+        description: "Skip the line at participating venues",
+        isLimitedTime: false,
+        isDeal: false,
+      },
+    ],
+  });
+
+  const displayTabs = {
+    offers: "Offers",
+    rewards: "Rewards",
+    order: "Order",
+    purchases: "Purchases",
+  };
+
   const { id: restaurant_id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState("offers");
 
   const offersRef = useRef(null);
   const prevTransactionsRef = useRef(null);
+  const menuRef = useRef(null);
 
   const handleTabClick = (tabName: string) => {
     setActiveTab(tabName); // Update active tab
@@ -44,8 +92,11 @@ export default function Demo2() {
       case "offers":
         offersRef.current?.scrollIntoView({ behavior: "smooth" });
         break;
-      case "previous_transactions":
+      case "purchases":
         prevTransactionsRef.current?.scrollIntoView({ behavior: "smooth" });
+        break;
+      case "order":
+        menuRef.current?.scrollIntoView({ behavior: "smooth" });
         break;
       default:
         break;
@@ -53,6 +104,10 @@ export default function Demo2() {
   };
 
   const menu = restaurant?.menu;
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 
   useEffect(() => {
     //fetch the restaurant and policies
@@ -60,7 +115,7 @@ export default function Demo2() {
     const fetchData = async () => {
       const restaurantData = await fetchRestaurantById(restaurant_id);
       if (!restaurantData) {
-        navigate(DISCOVER_PATH);
+        navigate("/not_found_page");
       }
       const policies = await fetch_policies(restaurant_id);
       const uniqueSubscriptionIds = Array.from(
@@ -70,22 +125,9 @@ export default function Demo2() {
             .filter((id): id is string => id !== null) // Filter nulls and refine type
         )
       );
-      const subscriptions = await getSubscriptionsByIds(uniqueSubscriptionIds);
-      if (userData && restaurant_id) {
-        const userSubscriptionStatus = await getUserSubscription(
-          userData.id,
-          restaurant_id
-        );
-        const userSubscription = await getSubscriptionById(
-          userSubscriptionStatus?.subscription_id || null
-        );
-
-        setUserSubscription(userSubscription);
-      }
 
       setRestaurant(restaurantData as Restaurant);
       setPolicies(policies);
-      setSubscriptions(subscriptions);
     };
     fetchData();
   }, []);
@@ -111,12 +153,20 @@ export default function Demo2() {
     );
 
     // Observe sections
-    const sections = [offersRef.current, prevTransactionsRef.current];
+    const sections = [
+      offersRef.current,
+      prevTransactionsRef.current,
+      menuRef.current,
+    ];
     sections.forEach((section) => observer.observe(section));
 
     // Cleanup observer on unmount
     return () => observer.disconnect();
   }, []);
+
+  const open_drink_template_after_search = (order_response: Cart) => {
+    goToDrinkCheckout(order_response, null);
+  };
 
   const goToDrinkCheckout = (cart: Cart | [], initialPolicy: Policy | null) => {
     //build cart with policy conditions
@@ -138,7 +188,7 @@ export default function Demo2() {
       }
     }
     assignIds(cart_items);
-    navigate(`/restaurant/${restaurant_id}/drink_checkout`, {
+    navigate(DRINK_CHECKOUT_PATH.replace(":id", restaurant_id as string), {
       state: {
         cart: cart_items,
         restaurant: restaurant,
@@ -152,27 +202,21 @@ export default function Demo2() {
       {/* Header Image */}
       <div className="relative h-40">
         <img
-          src="/boy2-1.jpeg"
+          src={`${project_url}/storage/v1/object/public/restaurant_images/${restaurant_id}_hero.jpeg`}
           alt="Restaurant exterior"
           className="object-cover w-full h-full"
         />
         <div className="absolute inset-0 bg-black/40" />
         <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
-          <button className="text-white">
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </button>
+          <IconButton
+            edge="start"
+            color="inherit"
+            aria-label="menu"
+            onClick={toggleSidebar}
+            sx={{ color: "white" }}
+          >
+            <MenuIcon />
+          </IconButton>
           <div className="flex gap-4">
             <Heart className="w-6 h-6 text-white" />
             <svg
@@ -191,20 +235,10 @@ export default function Demo2() {
           </div>
         </div>
       </div>
-      {/* <button
-        onClick={() => {
-          console.log(userSession);
-          console.log(transactions);
-        }}
-      >
-        test
-      </button> */}
-
-      {/* Restaurant Info */}
       <div className="relative px-4 pb-4">
-        <div className="absolute -top-8 left-4 rounded-full overflow-hidden border-4 border-white">
+        <div className="absolute -top-8 left-4 rounded-full overflow-hidden border-4 border-black">
           <img
-            src="/boylan_profile.png"
+            src={`${project_url}/storage/v1/object/public/restaurant_images/${restaurant_id}_profile.png`}
             alt="Restaurant logo"
             className="w-[72px] h-[72px] bg-white"
           />
@@ -228,52 +262,69 @@ export default function Demo2() {
         )}
 
         {/* Points Banner */}
-        <div className="flex items-center justify-between bg-gray-100 rounded-lg p-4 mt-4">
+        <div
+          className="flex items-center justify-between bg-red-500 rounded-lg p-4 mt-4"
+          onClick={() => {
+            navigate("/cover_deals");
+          }}
+        >
           <div className="text-sm">
-            <div>No Active Passes</div>
-            <div className="font-medium">Browse passes to unlock perks!</div>
+            <div>
+              <h1 className="text-lg font-bold">This Bar Requires Cover</h1>
+            </div>
+            <div className="font-medium text-gray-800">
+              View all Cover Passes
+            </div>
           </div>
-          <ChevronRight className="w-5 h-5 text-gray-400" />
+          <ChevronRight className="w-5 h-5 text-gray-900" />
         </div>
 
         {/* Navigation Tabs */}
-        <div className="mt-4">
+        <div className="sticky top-0 z-10 mt-4">
           <div className="flex border-b">
-            {["offers", "order", "rewards", "previous_transactions"].map(
-              (tab) => (
-                <button
-                  key={tab}
-                  className={`flex-1 py-2 px-4 text-center ${
-                    activeTab === tab
-                      ? "border-b-2 border-red-500 text-red-500"
-                      : "text-gray-500"
-                  }`}
-                  onClick={() => handleTabClick(tab)}
-                >
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                </button>
-              )
-            )}
+            {Object.keys(displayTabs).map((tab) => (
+              <button
+                key={tab}
+                className={`flex-1 py-2 px-4 text-center ${
+                  activeTab === tab
+                    ? "border-b-2 border-red-500 text-red-500"
+                    : "text-gray-500"
+                }`}
+                onClick={() => handleTabClick(tab)}
+              >
+                {displayTabs[tab as keyof typeof displayTabs]}
+              </button>
+            ))}
           </div>
         </div>
 
         {/* Membership Cards */}
         <div className="space-y-4 mt-4" ref={offersRef} data-tab="offers">
-          {policies
-            .filter((policy) => policy.subscription_id === null)
-            .map((policy, index) => (
-              <div className="bg-[#2A2F45] text-white rounded-lg p-4">
-                <h3 className="font-semibold text-lg">{policy.name}</h3>
-                <p className="text-sm text-gray-300 mt-1">{policy.header}</p>
-                <button
-                  className="mt-4 px-4 py-2 bg-white text-[#2A2F45] rounded-md font-medium"
-                  onClick={() => goToDrinkCheckout([], policy)}
-                >
-                  Add to Cart
-                </button>
-              </div>
-            ))}
+          <>
+            {policies
+              .filter((policy) => policy.subscription_id === null)
+              .map((policy, index) => (
+                <PolicyCard
+                  title={policy.name}
+                  description={policy.header}
+                  isLimitedTime={true}
+                  expirationDate={undefined}
+                  isDeal={false}
+                  primaryColor="#2A2F45"
+                  secondaryColor="#F5B14C"
+                />
+              ))}
+            <SubscriptionCard
+              {...subscription}
+              primaryColor={"#2A2F45"}
+              secondaryColor={"#2A2F45"}
+            />
+          </>
         </div>
+        <div ref={menuRef} data-tab="menu">
+          <MenuOrdering />
+        </div>
+
         <div ref={prevTransactionsRef} data-tab="previous_transactions">
           {restaurant && (
             <PrevTransactionDisplay
@@ -282,8 +333,23 @@ export default function Demo2() {
             />
           )}
         </div>
-        <button onClick={logout}>logout</button>
+        <div>
+          {restaurant && (
+            <SearchBar
+              action={open_drink_template_after_search}
+              restaurant_id={restaurant_id as string}
+            />
+          )}
+        </div>
       </div>
+      <Sidebar isOpen={isSidebarOpen} onClose={toggleSidebar} />
+      <button
+        onClick={() => {
+          console.log(userSession);
+        }}
+      >
+        test
+      </button>
     </div>
   );
 }

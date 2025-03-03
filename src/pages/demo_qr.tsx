@@ -1,5 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ArrowLeft, QrCode, X } from "lucide-react";
+import { useSupabase } from "../context/supabase_context.tsx";
+import { useAuth } from "../context/auth_context.tsx";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { Transaction } from "../types.ts";
+import { BASE_PATH, RESTAURANT_PATH } from "../constants.ts";
+import QRCode from "react-qr-code";
 
 export default function DemoQR({
   onBack,
@@ -9,6 +15,79 @@ export default function DemoQR({
   onSkip: () => void;
 }) {
   const [codeEntered, setCodeEntered] = useState("");
+  const supabase = useSupabase();
+  const { transactions, setTransactions } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { id: restaurant_id } = useParams();
+  const [transactionsToRedeem, setTransactionsToRedeem] = useState<
+    Transaction[]
+  >(location.state?.transactions || []);
+
+  const formatTransactions = (): string => {
+    const displayList = [];
+    for (const transaction of transactionsToRedeem) {
+      displayList.push({
+        transaction_id: transaction.transaction_id,
+        item: transaction.item,
+        category: transaction.category,
+        metadata: transaction.metadata,
+      });
+    }
+    return JSON.stringify(displayList);
+  };
+
+  useEffect(() => {
+    if (!transactionsToRedeem || transactionsToRedeem.length === 0) return;
+
+    // Set up a listener for all transaction IDs
+    const transactionIds = transactionsToRedeem.map((t) => t.transaction_id);
+    const channel = supabase
+      .channel("transaction_updates")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "transactions",
+          filter: `transaction_id=in.(${transactionIds.join(",")})`, // Use IN filter for multiple IDs
+        },
+        (payload) => {
+          const updatedTransactionId = payload.new.transaction_id;
+          console.log("here");
+
+          setTransactions((prevTransactions) => {
+            // Update the transactions state
+            const updatedTransactions = prevTransactions.map((transaction) =>
+              transaction.transaction_id === updatedTransactionId
+                ? { ...transaction, is_fulfilled: payload.new.is_fulfilled }
+                : transaction
+            );
+
+            // Check if all transactions are fulfilled
+            const allFulfilled = transactionsToRedeem.every((t) =>
+              updatedTransactions.some(
+                (ut: Transaction) =>
+                  ut.transaction_id === t.transaction_id && ut.fulfilled_by
+              )
+            );
+
+            if (allFulfilled) {
+              navigate("../");
+            }
+            console.log(updatedTransactions);
+            return updatedTransactions;
+          });
+        }
+      )
+      .subscribe();
+
+    // Cleanup function to unsubscribe when the component unmounts
+    return () => {
+      supabase.removeChannel(channel);
+      console.log("removing channel");
+    };
+  }, [transactionsToRedeem]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,16 +96,20 @@ export default function DemoQR({
   };
 
   return (
-    <div className="min-h-screen bg-black text-white p-6">
+    <div className="min-h-screen bg-white text-black p-6">
       <div className="flex justify-between items-center mb-8">
         <button
-          onClick={onBack}
-          className="text-white hover:text-gray-300 transition-colors"
+          onClick={() => {
+            navigate(RESTAURANT_PATH.replace(":id", restaurant_id as string));
+          }}
+          className=" hover:text-gray-300 transition-colors"
         >
           <ArrowLeft className="w-6 h-6" />
         </button>
         <button
-          onClick={onSkip}
+          onClick={() => {
+            navigate(RESTAURANT_PATH.replace(":id", restaurant_id as string));
+          }}
           className="text-[#F5B14C] hover:text-[#E4A43B] transition-colors"
         >
           Redeem Later
@@ -34,12 +117,17 @@ export default function DemoQR({
       </div>
 
       <h1 className="text-3xl font-bold mb-4">Scan QR Code</h1>
-      <p className="text-xl text-gray-300 mb-8">
+      <p className="text-xl text-gray-500 mb-8">
         Scan the QR code at the restaurant to check in and unlock offers.
       </p>
 
       <div className="aspect-square w-full max-w-xs mx-auto bg-white flex items-center justify-center mb-8 rounded-xl">
-        <QrCode className="w-32 h-32 text-black" />
+        <QRCode
+          size={1024}
+          style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+          value={formatTransactions()}
+          viewBox={`0 0 256 256`}
+        />
       </div>
 
       <form onSubmit={handleSubmit} className="mb-8">
@@ -52,7 +140,7 @@ export default function DemoQR({
             type="text"
             value={codeEntered}
             onChange={(e) => setCodeEntered(e.target.value)}
-            className="w-full bg-[#2A2F45] rounded-xl p-4 pr-12 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#F5B14C]"
+            className="w-full bg-[#FFFFFF] rounded-xl p-4 pr-12 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#F5B14C]"
             placeholder="Enter QR code"
           />
           {codeEntered && (
@@ -73,7 +161,7 @@ export default function DemoQR({
         </button>
       </form>
 
-      <p className="text-center text-gray-400">
+      <p className="text-center text-gray-500">
         Having trouble? Ask a staff member for assistance.
       </p>
     </div>

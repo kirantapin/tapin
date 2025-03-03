@@ -73,15 +73,6 @@ const RestaurantPage: React.FC = () => {
     fetchData();
   }, []);
 
-  const TEST = async () => {
-    const { data, error } = await supabase.functions.invoke(
-      "handle_subscriptions",
-      {
-        body: { random: "hello" },
-      }
-    );
-  };
-
   const open_drink_template_after_search = (order_response: Cart) => {
     goToDrinkCheckout(order_response, null);
   };
@@ -168,23 +159,10 @@ const RestaurantPage: React.FC = () => {
             ))}
         </ul>
       </div>
-      <button
-        style={{
-          padding: "10px 20px",
-          backgroundColor: "#007bff",
-          color: "#fff",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer",
-        }}
-        onClick={TEST}
-      >
-        Test Button
-      </button>
       {!userSession && (
         <div
           onClick={() => {
-            navigate("/sign_in", {
+            navigate("/signin", {
               state: {
                 redirectTo: "/",
               },

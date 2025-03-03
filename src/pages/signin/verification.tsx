@@ -83,17 +83,17 @@ export function Verification({
   };
 
   return (
-    <div className="min-h-screen bg-black text-white p-6">
+    <div className="min-h-screen bg-white text-black p-6">
       <button onClick={onBack} className="mb-12">
         <ArrowLeft className="w-6 h-6" />
       </button>
 
       <h1 className="text-4xl font-bold mb-4">Verify it's you</h1>
-      <p className="text-xl text-gray-300 mb-2">
+      <p className="text-xl text-gray-600 mb-2">
         Please enter 6 digit verification code that have been sent to your
         mobile phone
       </p>
-      <p className="text-xl text-gray-300 mb-8">{phoneNumber}</p>
+      <p className="text-xl text-gray-600 mb-8">{phoneNumber}</p>
 
       <div className="flex gap-4 mb-8 justify-center">
         {code.map((digit, index) => (
@@ -116,7 +116,7 @@ export function Verification({
         ))}
       </div>
 
-      <div className="text-gray-400 mb-4 text-center">
+      <div className="text-gray-600 mb-4 text-center">
         You can resend the code in {timeLeft} seconds
       </div>
       <div className="text-center">
@@ -129,12 +129,12 @@ export function Verification({
         </button>
       </div>
 
-      <button
-        className="w-full bg-[#8B7355] text-white py-4 rounded-full text-lg font-medium"
+      {/* <button
+        className="w-full bg-[#8B7355] text-black py-4 rounded-full text-lg font-medium"
         onClick={() => onVerify(code.join(""))}
       >
         Submit
-      </button>
+      </button> */}
     </div>
   );
 }

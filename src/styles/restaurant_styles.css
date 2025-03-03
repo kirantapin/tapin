@@ -1,0 +1,222 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: rgb(249 250 251);
+}
+
+.header {
+  background-color: white;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+}
+
+.backButton {
+  color: rgb(75 85 99);
+}
+
+.headerTitle {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+}
+
+.cartIcon {
+  color: rgb(75 85 99);
+}
+
+.main {
+  flex: 1 1 0%;
+  padding: 1rem;
+}
+
+.section {
+  margin-bottom: 1.5rem;
+}
+
+.sectionTitle {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.itemCard {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.itemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.itemName {
+  font-weight: 500;
+}
+
+.itemPrice {
+  color: rgb(75 85 99);
+}
+
+.itemQuantity {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: rgb(107 114 128);
+}
+
+.quantityControls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.quantityButton {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid rgb(229 231 235);
+}
+
+.quantityText {
+  font-weight: 500;
+}
+
+.policyCard {
+  background-color: #2a2f45;
+  color: white;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.policyTitle {
+  font-weight: 600;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+.policyDescription {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: rgb(209 213 219);
+  margin-top: 0.25rem;
+}
+
+.footer {
+  background-color: white;
+  box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.1);
+  padding: 1rem;
+}
+
+.footerContent {
+  max-width: 32rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.totalLabel {
+  color: rgb(75 85 99);
+}
+
+.totalAmount {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+}
+
+.checkoutButton {
+  width: 100%;
+  background-color: #2a2f45;
+  color: white;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+}
+
+.disabledButton {
+  width: 100%;
+  background-color: rgb(209 213 219);
+  color: rgb(107 114 128);
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background-color: rgb(0 0 0 / 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modalContent {
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  max-width: 24rem;
+  width: 100%;
+}
+
+.modalTitle {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.modalText {
+  color: rgb(75 85 99);
+  margin-bottom: 1.5rem;
+}
+
+.modalButton {
+  width: 100%;
+  background-color: #2a2f45;
+  color: white;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+}
+
+.errorText {
+  color: rgb(239 68 68);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  margin-top: 0.5rem;
+}
+
+.successText {
+  color: rgb(34 197 94);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  margin-top: 0.5rem;
+}

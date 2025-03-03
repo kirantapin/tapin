@@ -12,11 +12,18 @@ export const fetchRestaurantById = async (
     .select("*")
     .eq("id", restaurantId)
     .single();
-  console.log(data);
+
   if (error) {
     console.error("Error fetching restaurant:", error.message);
     return null;
   }
+
+  const tempMenu = data.menu;
+  const liquorMenu = tempMenu["drink"]["liquor"];
+  tempMenu["drink"]["house_mixer"] = liquorMenu;
+  tempMenu["drink"]["shots_or_shooters"] = liquorMenu;
+  delete tempMenu["drink"]["liquor"];
+  data.menu = tempMenu;
 
   return data;
 };

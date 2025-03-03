@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import { PhoneInput } from "./phone_input";
 import { Verification } from "./verification";
 import { supabase } from "../../utils/supabase_client";
-
+import { useNavigate } from "react-router-dom";
 export default function SignIn() {
   const [step, setStep] = useState<"phone" | "verify">("phone");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
-
+  const navigate = useNavigate();
   // Handle phone number submission
   const handlePhoneSubmit = async (phone: string) => {
     setErrorMessage(""); // Clear previous errors
@@ -42,7 +42,7 @@ export default function SignIn() {
       setErrorMessage("Invalid OTP. Please try again.");
     } else if (session) {
       console.log("User authenticated:", session.user);
-      // No need to manually handle the session here; `onAuthStateChange` in AuthProvider will handle it.
+      navigate(-1);
     }
   };
 

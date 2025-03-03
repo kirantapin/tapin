@@ -6,13 +6,15 @@ import {
   useElements,
   PaymentRequestButtonElement,
   ExpressCheckoutElement,
+  PaymentElement,
 } from "@stripe/react-stripe-js";
-import { supabase } from "../utils/supabase_client";
+import { supabase, supabase_local } from "../utils/supabase_client";
 import { useAuth } from "../context/auth_context";
 import { useNavigate } from "react-router-dom";
 import { isEqual } from "lodash";
 
 import { Transaction, User } from "../types.ts";
+import { QR_CODE_PATH } from "../constants.ts";
 
 const stripePublishableKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || "";
 const stripePromise = loadStripe(stripePublishableKey);
@@ -25,9 +27,13 @@ const PayButton = ({ payload }) => {
 
   const purchase_drink = async (payload) => {
     try {
-      const { data, error } = await supabase.functions.invoke("submit_order", {
-        body: payload,
-      });
+      const { data, error } = await supabase_local.functions.invoke(
+        "submit_order",
+        {
+          body: payload,
+        }
+      );
+      console.log(data, error);
       if (error || !data) return null;
       const { transactions, modifiedUserData } = data;
       return { transactions, modifiedUserData };
@@ -52,7 +58,7 @@ const PayButton = ({ payload }) => {
         ...transactions,
       ]);
 
-      navigate(`/restaurant/${payload.restaurant_id}/qrcode`, {
+      navigate(QR_CODE_PATH.replace(":id", payload.restaurant_id), {
         state: {
           transactions: transactions.filter(
             (transaction) => !isEqual(transaction.metadata, {})
@@ -76,42 +82,43 @@ const PayButton = ({ payload }) => {
         return;
       }
 
-      // Call backend to create PaymentIntent for connected account
-      //   const response = await supabase.functions.invoke("create_intent", {
-      //     body: {
-      //       amount: payload.userCartResults?.totalPrice * 100, // Convert to cents
-      //       currency: "usd",
-      //       connectedAccountId: payload.connectedAccountId, // Pass connected account ID
-      //     },
-      //   });
+      const response = await supabase_local.functions.invoke("create_intent", {
+        body: {
+          amount: payload.userCartResults?.totalPrice * 100, // Convert to cents
+          currency: "usd",
+          connectedAccountId: payload.connectedAccountId, // Pass connected account ID
+        },
+      });
 
-      //   if (response.error) {
-      //     //handle response error
-      //   }
+      if (response.error) {
+        //handle response error
+      }
 
-      //   const { client_secret: clientSecret } = response.data;
+      const { client_secret: clientSecret } = response.data;
+      const { paymentIntent, error: confirmPaymentError } =
+        await stripe.confirmPayment({
+          elements,
+          clientSecret,
+          confirmParams: {
+            return_url: "https://example.com",
+          },
+          redirect: "if_required",
+        });
 
-      // Confirm the PaymentIntent with Stripe
-      //   const { error } = await stripe.confirmPayment({
-      //     elements,
-      //     clientSecret,
-      //     confirmParams: {
-      //       return_url: "https://example.com",
-      //     },
-      //     redirect: "if_required",
-      //   });
-      const paymentData = {
-        amount: payload.userCartResults?.totalPrice * 100, // Amount in cents
-        currency: "usd",
-        connectedAccountId: payload.connectedAccountId, // Connected account ID
-        additionalOrderData: {},
-      };
-
-      payload["paymentData"] = paymentData;
-      const error = null;
-      if (error) {
-        console.error("Payment Confirmation Error:", error);
+      if (confirmPaymentError) {
+        console.error("Payment Confirmation Error:", confirmPaymentError);
+      } else if (!paymentIntent) {
+        console.error("No Payment Intent Generated");
       } else {
+        const paymentData = {
+          amount: payload.userCartResults?.totalPrice * 100, // Amount in cents
+          currency: "usd",
+          connectedAccountId: payload.connectedAccountId, // Connected account ID
+          paymentIntentId: paymentIntent.id,
+          additionalOrderData: {},
+        };
+
+        payload["paymentData"] = paymentData;
         const tapInResponse = await purchase_drink(payload);
         console.log(tapInResponse);
         if (tapInResponse) {
@@ -175,7 +182,6 @@ function ApplePayButton({ payload }) {
       }}
     >
       <PayButton payload={payload} />
-      <p>button available</p>
     </Elements>
   ) : (
     <p>Loading</p>

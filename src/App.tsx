@@ -10,13 +10,9 @@ import {
 } from "react-router-dom";
 
 import Main from "./pages/main";
-import QRCode from "./pages/qr_code.tsx";
 import Restaurant from "./pages/restaurant.tsx";
 import { DrinkCheckout } from "./pages/drink_checkout.tsx";
-// import { SignIn } from "./pages/signin_page.tsx";
-import RestaurantPage from "./pages/restaurant.tsx";
 import Discovery from "./pages/discovery.tsx";
-import FigmaPage from "./pages/demo_restaurant.tsx";
 import {
   BASE_PATH,
   QR_CODE_PATH,
@@ -24,12 +20,17 @@ import {
   SIGNIN_PATH,
   RESTAURANT_PATH,
   DISCOVER_PATH,
+  LOYALTY_REWARD_PATH,
 } from "./constants.ts";
 import Demo2 from "./pages/demo_restaurant2.tsx";
 import SignIn from "./pages/signin/signin.tsx";
 import CheckoutPage from "./pages/demo_checkout.tsx";
 import { Check } from "lucide-react";
 import DemoQR from "./pages/demo_qr.tsx";
+import NotFoundPage from "./pages/not_found_page.tsx";
+import CoverDeals from "./pages/cover_deals.tsx";
+import RestaurantPage from "./pages/new_restaurant.tsx";
+import RewardsPage from "./pages/rewards.tsx";
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -39,17 +40,13 @@ const App: React.FC = () => {
       <AppLoader />
       <Routes>
         <Route path={BASE_PATH} element={<Discovery />} />
-        <Route path={RESTAURANT_PATH} element={<RestaurantPage />} />
         <Route path={DISCOVER_PATH} element={<Discovery />} />
-        <Route path={QR_CODE_PATH} element={<QRCode />} />
-        <Route path={DRINK_CHECKOUT_PATH} element={<DrinkCheckout />} />
-        {/* <Route path={SIGNIN_PATH} element={<SignIn />} /> */}
-        <Route path={"/demo/:id"} element={<FigmaPage />} />
-        <Route path={"/demo2/:id"} element={<Demo2 />} />
-        <Route path={"/demo_signin"} element={<SignIn />} />
-        <Route path={"/demo_checkout"} element={<CheckoutPage />} />
+        <Route path={SIGNIN_PATH} element={<SignIn />} />
+        <Route path={RESTAURANT_PATH} element={<RestaurantPage />} />
+        <Route path={DRINK_CHECKOUT_PATH} element={<CheckoutPage />} />
+        <Route path={LOYALTY_REWARD_PATH} element={<RewardsPage />} />
         <Route
-          path={"demo_qr"}
+          path={QR_CODE_PATH}
           element={
             <DemoQR
               onBack={() => {
@@ -61,6 +58,8 @@ const App: React.FC = () => {
             />
           }
         />
+        <Route path="/cover_deals" element={<CoverDeals />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>
   );

@@ -54,6 +54,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     setLoadingUser(true);
+    console.log("here");
     supabase.auth.getSession().then(({ data: { session } }) => {
       setData(session);
     });

@@ -1,6 +1,5 @@
 import React, { useRef } from "react";
 import { useEffect, useState, useContext } from "react";
-import { useRestaurantData } from "../context/restaurant_context.tsx";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useSupabase } from "../context/supabase_context.tsx";
 import { useAuth } from "../context/auth_context.tsx";
@@ -9,6 +8,7 @@ import { CheckoutLineItem } from "../components/checkout/checkout_line_item.tsx"
 import { isEqual } from "lodash";
 import { usePersistState } from "../hooks/usePersistState.tsx";
 import ApplePayButton from "../components/apple_pay_button.tsx";
+import { supabase_local } from "@/utils/supabase_client.ts";
 
 import {
   Cart,
@@ -78,7 +78,7 @@ export const DrinkCheckout = ({}) => {
         verify_order();
       }
     }
-  }, [cart, dealEffect, selectedPolicy, loadingUser, userData]);
+  }, [cart, dealEffect, selectedPolicy, loadingUser, userData, userSession]);
 
   const removeItem = (id: number) => {
     const updatedCart = cart.filter((item: CartItem) => item.id !== id);
@@ -93,9 +93,12 @@ export const DrinkCheckout = ({}) => {
       restaurant_id: restaurant_id as string,
       user_id: userData?.id || null,
     };
-    const { data, error } = await supabase.functions.invoke("verify_order", {
-      body: payload,
-    });
+    const { data, error } = await supabase_local.functions.invoke(
+      "verify_order",
+      {
+        body: payload,
+      }
+    );
     const returnData = data.data;
     const errorMessage = data.error;
     hasFetched.current = true;
@@ -128,55 +131,6 @@ export const DrinkCheckout = ({}) => {
     setCartResults(undefined);
     setErrorDisplay(null);
   };
-
-  // const purchase_drink = async () => {
-  //   //things you need customer_id,restaurant_id,item,policy_id
-  //   const payload = {
-  //     user_id: userSession ? userSession.phone : null,
-  //     restaurant_id: restaurant_id,
-  //     cart: cart,
-  //     userDealEffect: dealEffect,
-  //     userPolicy: selectedPolicy,
-  //     userCartResults: cartResults,
-  //     token: token.current,
-  //   };
-
-  //   try {
-  //     const { data, error } = await supabase.functions.invoke("submit_order", {
-  //       body: payload,
-  //     });
-  //     clearCart();
-  //     if (error || !data)
-  //       throw new Error("created transaction came back as null");
-  //     //transaction is good we need to store this locally somewhere
-  //     const { transactions, modifiedUserData } = data as {
-  //       transactions: Transaction[];
-  //       modifiedUserData: User;
-  //     };
-
-  //     if (modifiedUserData) {
-  //       setUserData(modifiedUserData);
-  //     }
-  //     if (!transactions || transactions?.length == 0) {
-  //       throw new Error("No transactions received or created");
-  //     } else {
-  //       setTransactions((prevTransactions) => [
-  //         ...prevTransactions,
-  //         ...transactions,
-  //       ]);
-
-  //       navigate(`/restaurant/${restaurant_id}/qrcode`, {
-  //         state: {
-  //           transactions: transactions.filter(
-  //             (transaction) => !isEqual(transaction.metadata, {})
-  //           ),
-  //         },
-  //       });
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching data:", error);
-  //   }
-  // };
 
   const add_to_cart = (order_response: Cart) => {
     hasFetched.current = false;
@@ -293,31 +247,32 @@ export const DrinkCheckout = ({}) => {
       <button onClick={test}>Test</button>
       {token.current && userData && cartResults && (
         <div>
-          {/* <button
-            style={{
-              padding: "10px 20px",
-              backgroundColor: "#007bff",
-              color: "#fff",
-              border: "none",
-              borderRadius: "5px",
-              cursor: "pointer",
-            }}
-            onClick={purchase_drink}
-          >
-            Purchase Drink
-          </button> */}
-          <ApplePayButton
-            payload={{
-              user_id: userSession ? userSession.phone : null,
-              restaurant_id: restaurant_id,
-              cart: cart,
-              userDealEffect: dealEffect,
-              userPolicy: selectedPolicy,
-              userCartResults: cartResults,
-              token: token.current,
-              metadata: { restaurantName: restaurant?.name },
-            }}
-          />
+          {userSession ? (
+            <ApplePayButton
+              payload={{
+                user_id: userSession ? userSession.phone : null,
+                restaurant_id: restaurant_id,
+                cart: cart,
+                userDealEffect: dealEffect,
+                userPolicy: selectedPolicy,
+                userCartResults: cartResults,
+                token: token.current,
+                metadata: { restaurantName: restaurant?.name },
+              }}
+            />
+          ) : (
+            <div className="mt-6 flex justify-between items-center text-black">
+              <button
+                className="text-[#F5B14C]"
+                onClick={() => {
+                  navigate("/signin");
+                }}
+              >
+                Sign In
+              </button>
+              <span className="text-gray-600">Purchase by Signing In</span>
+            </div>
+          )}
         </div>
       )}
     </div>

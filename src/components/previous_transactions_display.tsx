@@ -58,7 +58,7 @@ export const PrevTransactionDisplay: React.FC<PrevTransactionProps> = ({
   const { id: restaurant_id } = useParams();
 
   const goToQRCodePage = () => {
-    navigate(`/restaurant/${restaurant_id}/qrcode`, {
+    navigate(QR_CODE_PATH.replace(":id", restaurant_id as string), {
       state: { transactions: selectedTransactions },
     });
   };

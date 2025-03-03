@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from "react";
 import Restaurant from "./restaurant";
 import { useAuth } from "../context/auth_context";
-import { useRestaurantData } from "../context/restaurant_context";
 // import { AuthVerify } from "../components/auth_entry";
 import { TEST_USER } from "../constants";
 import Discovery from "./discovery";
-
+sdjflskdj;
 const Main: React.FC = () => {
   const { userSession, logout, login } = useAuth();
-
-  const { restaurant, setRestaurant } = useRestaurantData();
 
   return (
     <div>

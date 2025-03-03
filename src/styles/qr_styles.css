@@ -1,0 +1,28 @@
+.action-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem; /* Tailwind's mb-8 */
+}
+
+.action-button {
+  color: white; /* Tailwind's text-white */
+  transition: color 0.3s; /* Tailwind's transition-colors */
+}
+
+.action-button:hover {
+  color: #d1d5db; /* Tailwind's hover:text-gray-300 */
+}
+
+.skip-button {
+  color: #f5b14c; /* Tailwind's text-[#F5B14C] */
+}
+
+.skip-button:hover {
+  color: #e4a43b; /* Tailwind's hover:text-[#E4A43B] */
+}
+
+.icon-size {
+  width: 1.5rem; /* Tailwind's w-6 */
+  height: 1.5rem; /* Tailwind's h-6 */
+}
