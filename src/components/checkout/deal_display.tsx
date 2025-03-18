@@ -127,11 +127,6 @@ export const useDealDisplay = (
             </div>
           );
           break;
-        case "apply_blanket_point_cost":
-          rendering.push(
-            <div key="apply_blanket_point_cost">-{modification.amount}pts</div>
-          );
-          break;
       }
     }
 

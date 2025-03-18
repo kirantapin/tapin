@@ -18,8 +18,8 @@ export const checkoutStyles = {
 
   quantityControls: "flex items-center gap-3 mt-2",
   quantityButton:
-    "w-8 h-8 flex items-center justify-center rounded-full border",
-  quantityText: "font-medium",
+    "w-8 h-8 rounded-full bg-[#2A2F45] flex items-center justify-center text-white",
+  quantityText: "mx-3",
 
   policyCard: "bg-[#2A2F45] text-white rounded-lg p-4 mb-4",
   policyTitle: "font-semibold text-lg",
@@ -57,7 +57,4 @@ export const checkoutStyles = {
 
   paymentContainer: "space-y-4",
   paymentIcon: "w-5 h-5 mr-2",
-  quantityButton:
-    "w-8 h-8 rounded-full bg-[#2A2F45] flex items-center justify-center text-white",
-  quantityText: "mx-3",
 };

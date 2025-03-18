@@ -23,3 +23,26 @@ export const fetch_policies = async (
     return data;
   }
 };
+
+export const fetchPolicyById = async (
+  policy_id: string | undefined
+): Promise<Policy | null> => {
+  if (!policy_id) {
+    return null;
+  }
+
+  const currentTime = new Date().toISOString();
+
+  const { data, error } = await supabase
+    .from("policies")
+    .select("*")
+    .eq("policy_id", policy_id)
+    .single(); // Ensures only one policy is returned
+
+  if (error) {
+    console.error("Error fetching policy:", error);
+    return null;
+  }
+
+  return data;
+};

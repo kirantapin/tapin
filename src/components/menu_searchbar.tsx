@@ -3,34 +3,28 @@ import { Search } from "lucide-react";
 import { useSupabase } from "../context/supabase_context.tsx";
 import { Restaurant } from "../types";
 import { useNavigate } from "react-router-dom";
-import { RESTAURANT_PATH } from "../constants.ts";
+import { RESTAURANT_PATH, MENU_DISPLAY_MAP } from "../constants.ts";
 import { project_url } from "../utils/supabase_client.ts";
 // Mock data for restaurants
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "../components/ui/alert-dialog";
-
-export default function RestaurantDiscovery() {
+export default function MenuSearchbar({ menu, handleResults }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<Restaurant[]>([]);
-  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [restaurants, setRestaurants] = useState<string[]>([]);
   const supabase = useSupabase();
   const navigate = useNavigate();
 
+
+  const scrapeMenu=()=>(
+    for (const [path, items] of Object.entries(MENU_DISPLAY_MAP)) {
+        //add all strings from path
+        //add all items
+    }
+  )
+
   useEffect(() => {
     const fetchRestaurants = async () => {
-      const { data, error } = await supabase.from("restaurants").select("*");
-      if (error) console.error("Error fetching restaurants:", error.message);
-      else setRestaurants(data);
+      const resultMapping = {};
     };
     fetchRestaurants();
   }, []);
@@ -48,18 +42,6 @@ export default function RestaurantDiscovery() {
 
   return (
     <div className="min-h-screen flex flex-col items-center gap-8 px-4 py-8 bg-gray-50">
-      <img
-        src="/tapin_logo_black.png"
-        alt="Tap In Logo"
-        width={120}
-        height={40}
-        className=""
-      />
-
-      <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl text-gray-900">
-        Discover Bars & Restaurants
-      </h1>
-
       <div className="w-full max-w-md">
         <div className="relative">
           <input
@@ -104,22 +86,6 @@ export default function RestaurantDiscovery() {
           </p>
         )}
       </div>
-      <AlertDialog>
-        <AlertDialogTrigger>Open</AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your
-              account and remove your data from our servers.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction>Continue</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

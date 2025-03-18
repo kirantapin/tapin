@@ -5,8 +5,9 @@ import { useAuth } from "../context/auth_context.tsx";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Transaction } from "../types.ts";
 import { BASE_PATH, RESTAURANT_PATH } from "../constants.ts";
-import QRCode from "react-qr-code";
-
+import { itemToStringDescription } from "@/utils/parse.ts";
+import { supabase_local } from "@/utils/supabase_client.ts";
+import { QRCode } from "react-qrcode-logo";
 export default function DemoQR({
   onBack,
   onSkip,
@@ -15,14 +16,16 @@ export default function DemoQR({
   onSkip: () => void;
 }) {
   const [codeEntered, setCodeEntered] = useState("");
+  const [redeemError, setRedeemError] = useState("");
   const supabase = useSupabase();
-  const { transactions, setTransactions } = useAuth();
+  const { userData, transactions, setTransactions } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { id: restaurant_id } = useParams();
   const [transactionsToRedeem, setTransactionsToRedeem] = useState<
     Transaction[]
   >(location.state?.transactions || []);
+  const [verifyingState, setVerifyingState] = useState("");
 
   const formatTransactions = (): string => {
     const displayList = [];
@@ -30,8 +33,6 @@ export default function DemoQR({
       displayList.push({
         transaction_id: transaction.transaction_id,
         item: transaction.item,
-        category: transaction.category,
-        metadata: transaction.metadata,
       });
     }
     return JSON.stringify(displayList);
@@ -73,7 +74,8 @@ export default function DemoQR({
             );
 
             if (allFulfilled) {
-              navigate("../");
+              console.log("inside here");
+              setVerifyingState("complete");
             }
             console.log(updatedTransactions);
             return updatedTransactions;
@@ -89,17 +91,85 @@ export default function DemoQR({
     };
   }, [transactionsToRedeem]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const formatCode = () => {
+    const digitsOnly = codeEntered.replace(/\D/g, "");
+
+    // Ensure it's at least 10 digits long (US phone numbers without country code)
+    if (digitsOnly.length === 10) {
+      return `1${digitsOnly}`; // Add US country code
+    } else if (digitsOnly.length === 11 && digitsOnly.startsWith("1")) {
+      return `${digitsOnly}`; // Ensure +1 format
+    }
+    return null;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Here you would typically validate the code and proceed accordingly
-    console.log("Code submitted:", codeEntered);
+    const employeeId = formatCode();
+
+    if (!employeeId) {
+      setRedeemError("Number provided is not valid");
+      return;
+    }
+    setVerifyingState("loading");
+    const response = await supabase_local.functions.invoke(
+      "redeem_transactions_client",
+      {
+        body: {
+          transactionIds: transactionsToRedeem.map(
+            (transaction) => transaction.transaction_id
+          ),
+          employeeId: employeeId,
+          userId: userData?.id,
+        },
+      }
+    );
+    console.log(response);
+    const { success, updatedTransactions, error } = response.data;
+    if (response.error || response.data.error || !response.data.success) {
+      setRedeemError("Failed to Redeem Transactions");
+      setVerifyingState("");
+      return;
+    }
+
+    if (updatedTransactions.length !== transactionsToRedeem.length) {
+      setRedeemError(
+        "Error occurred while Redeeming Transactions. Reach out to TapIn."
+      );
+      setVerifyingState("");
+      return;
+    }
+
+    setVerifyingState("complete");
+    setTransactions((prevTransactions) =>
+      prevTransactions.map((transaction) =>
+        transactionsToRedeem.some(
+          (redeemTransaction) =>
+            redeemTransaction.transaction_id === transaction.transaction_id
+        )
+          ? { ...transaction, fulfilled_by: employeeId } // Mark as fulfilled
+          : transaction
+      )
+    );
+    //create component that shows a loader if loading, but a check mark if complete and a button to go back to home page.
+    //you might need to reretrieve transactions
   };
+
+  const itemFrequencyMap: Record<string, number> = {};
+
+  transactionsToRedeem.forEach((transaction) => {
+    const itemDescription = itemToStringDescription(transaction.item);
+    itemFrequencyMap[itemDescription] =
+      (itemFrequencyMap[itemDescription] || 0) + 1;
+  });
 
   return (
     <div className="min-h-screen bg-white text-black p-6">
       <div className="flex justify-between items-center mb-8">
         <button
           onClick={() => {
+            console.log("arrow left");
             navigate(RESTAURANT_PATH.replace(":id", restaurant_id as string));
           }}
           className=" hover:text-gray-300 transition-colors"
@@ -108,6 +178,7 @@ export default function DemoQR({
         </button>
         <button
           onClick={() => {
+            console.log("redeem later button");
             navigate(RESTAURANT_PATH.replace(":id", restaurant_id as string));
           }}
           className="text-[#F5B14C] hover:text-[#E4A43B] transition-colors"
@@ -126,22 +197,32 @@ export default function DemoQR({
           size={1024}
           style={{ height: "auto", maxWidth: "100%", width: "100%" }}
           value={formatTransactions()}
-          viewBox={`0 0 256 256`}
         />
       </div>
+      <div>
+        {Object.entries(itemFrequencyMap).map(([item, frequency]) => (
+          <div key={item} className="p-2 border-b">
+            <span className="font-bold">{frequency}x</span> {item}
+          </div>
+        ))}
+      </div>
+
+      {redeemError && <div>{redeemError}</div>}
 
       <form onSubmit={handleSubmit} className="mb-8">
         <label htmlFor="qr-code" className="block text-lg mb-2">
-          Or enter code manually
+          Or have the Bartender redeem manually
         </label>
         <div className="relative">
           <input
             id="qr-code"
-            type="text"
+            type="text" // Keeps the input type as text
+            inputMode="numeric" // Suggests numeric keyboard on mobile
+            pattern="[0-9]*" // Helps enforce numeric input
             value={codeEntered}
             onChange={(e) => setCodeEntered(e.target.value)}
-            className="w-full bg-[#FFFFFF] rounded-xl p-4 pr-12 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#F5B14C]"
-            placeholder="Enter QR code"
+            className="w-full bg-[#FFFFFF] rounded-xl p-4 pr-12 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#F5B14C]"
+            placeholder="Enter Employee Phone Number"
           />
           {codeEntered && (
             <button
@@ -155,15 +236,33 @@ export default function DemoQR({
         </div>
         <button
           type="submit"
-          className="w-full bg-[#F5B14C] text-black py-4 rounded-full text-lg font-medium mt-4 hover:bg-[#E4A43B] transition-colors"
+          className="w-full bg-[#F5B14C] text-black py-4 rounded-full text-lg mt-4 hover:bg-[#E4A43B] transition-colors"
         >
           Submit Code
         </button>
       </form>
+      {verifyingState && <div>{verifyingState}</div>}
+      {verifyingState === "complete" && (
+        <div
+          onClick={() => {
+            console.log("go back home button");
+            navigate(RESTAURANT_PATH.replace(":id", restaurant_id));
+          }}
+        >
+          Go Back Home
+        </div>
+      )}
 
       <p className="text-center text-gray-500">
         Having trouble? Ask a staff member for assistance.
       </p>
+      <button
+        onClick={() => {
+          console.log(transactionsToRedeem);
+        }}
+      >
+        test
+      </button>
     </div>
   );
 }

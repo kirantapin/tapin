@@ -21,6 +21,10 @@ import {
   RESTAURANT_PATH,
   DISCOVER_PATH,
   LOYALTY_REWARD_PATH,
+  PREVIOUS_TRANSACTIONS_PATH,
+  POLICIES_PAGE_PATH,
+  OFFERS_PAGE_PATH,
+  SINGLE_POLICY_PAGE_PATH,
 } from "./constants.ts";
 import Demo2 from "./pages/demo_restaurant2.tsx";
 import SignIn from "./pages/signin/signin.tsx";
@@ -31,6 +35,9 @@ import NotFoundPage from "./pages/not_found_page.tsx";
 import CoverDeals from "./pages/cover_deals.tsx";
 import RestaurantPage from "./pages/new_restaurant.tsx";
 import RewardsPage from "./pages/rewards.tsx";
+import TransactionList from "./pages/previous_transactions.tsx";
+import PoliciesPage from "./pages/policies.tsx";
+import SinglePolicyPage from "./pages/single_policy_page.tsx";
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -45,6 +52,12 @@ const App: React.FC = () => {
         <Route path={RESTAURANT_PATH} element={<RestaurantPage />} />
         <Route path={DRINK_CHECKOUT_PATH} element={<CheckoutPage />} />
         <Route path={LOYALTY_REWARD_PATH} element={<RewardsPage />} />
+        <Route path={OFFERS_PAGE_PATH} element={<PoliciesPage />} />
+        <Route path={SINGLE_POLICY_PAGE_PATH} element={<SinglePolicyPage />} />
+        <Route
+          path={PREVIOUS_TRANSACTIONS_PATH}
+          element={<TransactionList />}
+        />
         <Route
           path={QR_CODE_PATH}
           element={

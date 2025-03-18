@@ -3,19 +3,48 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Beer } from "lucide-react";
 import { Policy } from "@/types";
+import { project_url } from "@/utils/supabase_client";
+import { SINGLE_POLICY_PAGE_PATH } from "@/constants";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
-export default function PolicyCard({ policy }) {
+export default function PolicyCard({
+  policy,
+  primaryColor,
+}: {
+  policy: Policy;
+  primaryColor: string;
+}) {
+  const navigate = useNavigate();
+  const location = useLocation();
   return (
-    <div className="w-[280px] flex-shrink-0">
+    <div
+      className="w-[280px] flex-shrink-0"
+      onClick={() => {
+        navigate(
+          SINGLE_POLICY_PAGE_PATH.replace(":id", policy.restaurant_id).replace(
+            ":policy_id",
+            policy.policy_id
+          ),
+          {
+            state: {
+              previousPage: location.pathname,
+            },
+          }
+        );
+      }}
+    >
       <Card className="overflow-hidden border relative bg-white px-2 py-1 rounded-[20px] aspect-[5/5]">
         {/* Image Container */}
         <div className="relative rounded-[20px] overflow-hidden p-1.5 mb-2.5">
           <img
-            src="https://t.ftcdn.net/jpg/02/88/14/50/240_F_288145005_jTo5HhhYYCtOo8m0clfCVLS7SUw8Y5T8.jpg?height=112&width=216"
+            src={
+              policy.image_url ||
+              `${project_url}/storage/v1/object/public/restaurant_images/${policy.restaurant_id}_profile.png`
+            }
             alt="TapIn Logo"
             className="w-full aspect-[216/112] object-cover rounded-2xl"
             onError={(e) => {
-              e.currentTarget.src = "/whitlows_profile.png"; // Fallback image from public directory
+              e.currentTarget.src = ""; //this should be changed to a generic tapin logo in public directory
             }}
           />
           {/* Savings Badge */}
@@ -38,7 +67,8 @@ export default function PolicyCard({ policy }) {
             <h2 className="text-lg font-bold text-black pr-2">{policy.name}</h2>
             <Button
               size="icon"
-              className="rounded-full bg-[#E15B5B] hover:bg-[#c94949] w-7 h-7 flex items-center justify-center flex-shrink-0"
+              className="rounded-full   w-7 h-7 flex items-center justify-center flex-shrink-0"
+              style={{ backgroundColor: primaryColor }}
             >
               <Plus className="w-4 h-4" />
             </Button>

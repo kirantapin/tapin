@@ -18,6 +18,10 @@ export const RESTAURANT_PATH = "/restaurant/:id";
 export const APPLOAD_PATH = "";
 export const DISCOVER_PATH = "/discover";
 export const LOYALTY_REWARD_PATH = "/restaurant/:id/rewards";
+export const PREVIOUS_TRANSACTIONS_PATH =
+  "/restaurant/:id/previous_transactions";
+export const OFFERS_PAGE_PATH = "/restaurant/:id/offers";
+export const SINGLE_POLICY_PAGE_PATH = "/restaurant/:id/offers/:policy_id";
 
 //objects
 export const emptyDealEffect: DealEffectPayload = {
@@ -31,7 +35,37 @@ export const MISSING_USER_ID = "User ID is required but wasn't received.";
 
 //storage
 export const STORAGE_PREFIX = "state:";
-export const STORAGE_TTL = 10 * 6 * 60 * 1000;
+export const STORAGE_TTL = 6 * 60 * 1000;
 
 //tax
 export const TEST_TAX_RATE = 0.08;
+
+export const DRINK_MENU_TAG = "drink";
+export const FOOD_MENU_TAG = "food";
+export const PASS_MENU_TAG = "passes";
+
+export const COCKTAILS_LABEL = "Cocktails";
+export const HOUSE_MIXER_LABEL = "House Mixers";
+export const SHOTS_SHOOTERS_LABEL = "Shots or Shooters";
+export const SPECIALTY_DRINKS_LABEL = "Specialty Drinks";
+export const BEER_AND_CIDER_LABEL = "Beer and Ciders";
+
+export const MENU_DISPLAY_MAP = {
+  [HOUSE_MIXER_LABEL]: [DRINK_MENU_TAG, "house_mixer"],
+  [BEER_AND_CIDER_LABEL]: [DRINK_MENU_TAG, "beer_and_cider"],
+  [SHOTS_SHOOTERS_LABEL]: [DRINK_MENU_TAG, "shots_or_shooters"],
+  [COCKTAILS_LABEL]: [DRINK_MENU_TAG, "classic_cocktail"],
+  [SPECIALTY_DRINKS_LABEL]: [DRINK_MENU_TAG, "specialty_option"],
+  Food: [FOOD_MENU_TAG],
+  Passes: [PASS_MENU_TAG],
+};
+
+export const LOYALTY_REWARD_TAG = "loyalty_reward";
+export const NORMAL_DEAL_TAG = "";
+export const PASS_TAG = "pass";
+
+// black greyscale 700
+// gray background grayscale 300
+// gray on gray background grayscale 500
+
+export const KNOWN_MODIFIERS = { double: 2, triple: 3 };

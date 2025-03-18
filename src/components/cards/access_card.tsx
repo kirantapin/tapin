@@ -1,3 +1,5 @@
+import { titleCase } from "title-case";
+
 interface CardProps {
   baseColor: string;
   venueName: string;
@@ -46,7 +48,7 @@ export default function Card({
   const colors = generateGradientColors(baseColor);
 
   return (
-    <div className="w-full aspect-[9/5] rounded-3xl p-3 sm:p-4 relative overflow-hidden shadow-xl text-white my-4">
+    <div className="w-full aspect-[9/5] rounded-3xl p-3 sm:p-4 relative overflow-hidden  text-white my-4">
       <div
         style={{
           background: `linear-gradient(to bottom right, ${colors.from}, ${colors.via}, ${colors.to})`,
@@ -71,7 +73,9 @@ export default function Card({
         <div className="space-y-1 sm:space-y-2">
           <div className="space-y-0.5">
             <p className="text-xs sm:text-sm text-white/80">{venueName}</p>
-            <h2 className="text-xl sm:text-2xl font-semibold">{title}</h2>
+            <h2 className="text-xl sm:text-2xl font-semibold">
+              {titleCase(title)}
+            </h2>
           </div>
 
           <div className="inline-block bg-white/30 rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm">

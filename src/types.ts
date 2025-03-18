@@ -27,6 +27,8 @@ export interface JWTPayloadType extends Record<string, unknown> {
 }
 
 export interface CartResultsPayload {
+  subtotal: number;
+  tax: number;
   totalPrice: number;
   totalPoints: number;
   totalPointCost: number;
@@ -59,7 +61,10 @@ export interface ModifiedCartItem {
   quantity: number;
 }
 
-export type Item = string[];
+export interface Item {
+  path: string[];
+  modifiers: string[];
+}
 
 export interface Restaurant {
   id: string;
@@ -68,6 +73,7 @@ export interface Restaurant {
   menu: Menu;
   stripe_account_id: string;
   active: boolean;
+  metadata: Record<string, string | boolean>;
 }
 
 export interface DrinkForm {
@@ -124,7 +130,7 @@ export interface Transaction {
   user_id: string;
   item: string[];
   deal_use_id: string | null;
-  metadata: Record<string, string>;
+  metadata: Record<string, string | string[]>;
   tip_amount: number | null;
   price: number | null;
   points_awarded: number | null;
@@ -153,6 +159,7 @@ export interface Policy {
   begin_time: string | null;
   end_time: string | null;
   total_usages: number | null;
+  days_since_last_use: number | null;
   subscription_id: string | null;
   definition: PolicyDefinition;
   image_url: string | null;
@@ -172,10 +179,8 @@ export interface Subscription {
   display_description: string;
   display_perk_list: string[];
   price: number;
-  tier_tag: number;
-  nightly_deal_usages: number;
+  added_nightly_deal_usages: number;
 }
-
 export interface Package {
   package_id: string;
   restaurant_id: string;
@@ -189,7 +194,7 @@ export interface Package {
 }
 
 export interface PolicyDefinition {
-  id: string;
+  tag: string;
   conditions: PolicyDefinitionCondition[];
   action: PolicyDefinitionAction;
 }
@@ -256,8 +261,7 @@ export type PolicyDefinitionAction =
   | { type: "apply_order_point_multiplier"; amount: number }
   | { type: "apply_fixed_order_discount"; amount: number }
   | { type: "apply_blanket_price"; amount: number }
-  | { type: "apply_order_percent_discount"; amount: number }
-  | { type: "apply_blanket_point_cost"; amount: number };
+  | { type: "apply_order_percent_discount"; amount: number };
 
 export interface HouseMixerTemplate {
   name: string;

@@ -1,22 +1,28 @@
 import { Restaurant, CartItem, DrinkMenu, Menu, Item } from "../types";
+import { KNOWN_MODIFIERS, MENU_DISPLAY_MAP } from "@/constants";
 
 export function priceItem(item: Item, restaurant: Restaurant): number {
-  let menu = restaurant.menu;
+  const { path, modifiers } = item;
+  let multiple = modifiers.reduce(
+    (acc, modifier) => acc * (KNOWN_MODIFIERS[modifier] || 1),
+    1
+  );
+  let menu: any = structuredClone(restaurant.menu);
   const liquorMenu = menu["drink"]["shots_or_shooters"];
-  for (let i = 0; i < item.length; i++) {
-    if (item[i] in menu) {
-      menu = menu[item[i]];
-    } else {
-      throw new Error("Item cannot be priced");
-    }
+  const temp = path.reduce(
+    (acc, key) => (acc && acc[key] ? acc[key] : undefined),
+    menu
+  );
+  if (!temp) {
+    throw new Error("Item cannot be priced");
   }
-  if (typeof menu === "number") {
-    return menu;
+  if (typeof temp === "number") {
+    return temp * multiple;
   }
 
-  if (typeof menu === "string") {
-    const liquorType = item[item.length - 2];
-    return liquorMenu[liquorType][menu];
+  if (typeof temp === "string") {
+    const liquorType = path[path.length - 2];
+    return liquorMenu[liquorType][temp] * multiple;
   }
   throw new Error("Item cannot be priced");
 }

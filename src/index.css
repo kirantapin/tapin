@@ -26,14 +26,37 @@ code {
 
 @font-face {
   font-family: "Gilroy";
+  src: url("assets/fonts/gilroy-bold-webfont/Gilroy-Regular.woff")
+    format("woff");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Gilroy";
+  src: url("assets/fonts/gilroy-bold-webfont/Gilroy-Medium.woff") format("woff");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Gilroy";
+  src: url("assets/fonts/gilroy-bold-webfont/Gilroy-SemiBold.woff")
+    format("woff");
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Gilroy";
   src: url("assets/fonts/gilroy-bold-webfont/Gilroy-Bold.woff") format("woff");
-  font-weight: bold;
+  font-weight: 700;
   font-style: normal;
 }
 
 body {
   font-family: "Gilroy", Arial, sans-serif;
-  font-weight: bold;
+  font-weight: normal;
 }
 
 h1,
@@ -47,19 +70,6 @@ span {
   font-family: "Gilroy", Arial, sans-serif;
   font-weight: bold;
 }
-
-/* 4. Apply Gilroy Font to Buttons */
-/* button {
-  font-family: "Gilroy", Arial, sans-serif;
-  font-weight: bold;
-  font-size: 14px; 
-  color: #fff; 
-  background-color: #007bff; 
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-} */
 
 @tailwind base;
 @tailwind components;

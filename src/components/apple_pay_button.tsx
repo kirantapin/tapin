@@ -1,17 +1,14 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   Elements,
   useStripe,
   useElements,
-  PaymentRequestButtonElement,
   ExpressCheckoutElement,
-  PaymentElement,
 } from "@stripe/react-stripe-js";
 import { supabase, supabase_local } from "../utils/supabase_client";
 import { useAuth } from "../context/auth_context";
 import { useNavigate } from "react-router-dom";
-import { isEqual } from "lodash";
 
 import { Transaction, User } from "../types.ts";
 import { QR_CODE_PATH } from "../constants.ts";
@@ -33,7 +30,6 @@ const PayButton = ({ payload }) => {
           body: payload,
         }
       );
-      console.log(data, error);
       if (error || !data) return null;
       const { transactions, modifiedUserData } = data;
       return { transactions, modifiedUserData };
@@ -60,9 +56,7 @@ const PayButton = ({ payload }) => {
 
       navigate(QR_CODE_PATH.replace(":id", payload.restaurant_id), {
         state: {
-          transactions: transactions.filter(
-            (transaction) => !isEqual(transaction.metadata, {})
-          ),
+          transactions: transactions,
         },
       });
     }
@@ -81,10 +75,9 @@ const PayButton = ({ payload }) => {
         console.error("Submit Error:", submitError.message);
         return;
       }
-
       const response = await supabase_local.functions.invoke("create_intent", {
         body: {
-          amount: payload.userCartResults?.totalPrice * 100, // Convert to cents
+          amount: payload.totalWithTip,
           currency: "usd",
           connectedAccountId: payload.connectedAccountId, // Pass connected account ID
         },
@@ -92,6 +85,7 @@ const PayButton = ({ payload }) => {
 
       if (response.error) {
         //handle response error
+        return;
       }
 
       const { client_secret: clientSecret } = response.data;
@@ -111,8 +105,6 @@ const PayButton = ({ payload }) => {
         console.error("No Payment Intent Generated");
       } else {
         const paymentData = {
-          amount: payload.userCartResults?.totalPrice * 100, // Amount in cents
-          currency: "usd",
           connectedAccountId: payload.connectedAccountId, // Connected account ID
           paymentIntentId: paymentIntent.id,
           additionalOrderData: {},
@@ -120,7 +112,6 @@ const PayButton = ({ payload }) => {
 
         payload["paymentData"] = paymentData;
         const tapInResponse = await purchase_drink(payload);
-        console.log(tapInResponse);
         if (tapInResponse) {
           const { transactions, modifiedUserData } = tapInResponse;
           handleTapInResponse(transactions, modifiedUserData);
@@ -137,13 +128,13 @@ const PayButton = ({ payload }) => {
         <ExpressCheckoutElement
           options={{
             mode: "payment",
-            amount: payload.userCartResults?.totalPrice * 100,
+            amount: payload.totalWithTip,
             currency: "usd",
             // Customizable with appearance API.
-            appearance: {
-              /*...*/
-            },
+            appearance: {},
             paymentMethods: {
+              link: "never",
+              amazonPay: "never",
               googlePay: "always",
               applePay: "always",
             },
@@ -167,13 +158,12 @@ const PayButton = ({ payload }) => {
 
 function ApplePayButton({ payload }) {
   const [options, setOptions] = useState();
-
   return payload.token ? (
     <Elements
       stripe={stripePromise}
       options={{
         mode: "payment",
-        amount: payload.userCartResults?.totalPrice * 100,
+        amount: payload.totalWithTip,
         currency: "usd",
         // Customizable with appearance API.
         appearance: {
