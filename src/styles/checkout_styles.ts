@@ -51,7 +51,7 @@ export const checkoutStyles = {
   itemContainer: "flex justify-between items-center",
   itemInfo: "text-sm text-gray-600",
 
-  summaryContainer: "space-y-2 mb-8",
+  summaryContainer: "space-y-2 mb-8 font-medium",
   summaryRow: "flex justify-between",
   summaryTotal: "flex justify-between text-xl font-bold",
 

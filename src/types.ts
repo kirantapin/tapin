@@ -1,3 +1,5 @@
+import { StringDecoder } from "string_decoder";
+
 export type Cart = CartItem[];
 
 export interface VerifyOrderPayload {
@@ -103,7 +105,7 @@ export interface ReturnTransactionsPayload {
 
 export type Menu = {
   drink: DrinkMenu;
-} & Record<string, number>;
+} & Record<string, Record<string, number>>;
 
 export interface DrinkMenu {
   liquor: LiquorMenu;
@@ -112,15 +114,28 @@ export interface DrinkMenu {
   specialty_option: DrinkCategory;
 }
 
-type DrinkCategory = {
-  default: number;
-} & Record<string, number>;
+type DrinkCategory = Record<string, number>;
 
-type LiquorMenu = {
-  default: number;
-} & Record<string, LiquorTypeMenu>;
+type LiquorMenu = Record<string, LiquorTypeMenu>;
 
-type LiquorTypeMenu = { default: string } & Record<string, number>;
+type LiquorTypeMenu = { house: number } & Record<string, number>;
+
+export interface SingleMenuItem {
+  price: number;
+  description?: string | null;
+  imageUrl?: string | null;
+}
+
+export interface Pass {
+  item_id: string;
+  restaurant_id: string;
+  item_name: string;
+  item_description: string;
+  price: number;
+  for_date: string;
+  end_time: string;
+  amount_remaining: number | null;
+}
 
 export interface Transaction {
   transaction_id: string;
@@ -193,6 +208,8 @@ export interface Package {
   end_time: string;
 }
 
+export type ItemSpecification = string[];
+
 export interface PolicyDefinition {
   tag: string;
   conditions: PolicyDefinitionCondition[];
@@ -206,12 +223,12 @@ export type PolicyDefinitionCondition =
     }
   | {
       type: "minimum_quantity";
-      items: Item[];
+      items: ItemSpecification[];
       quantity: number;
     }
   | {
       type: "exact_quantity";
-      items: Item[];
+      items: ItemSpecification[];
       quantity: number;
     }
   | {
@@ -231,30 +248,30 @@ export type PolicyDefinitionCondition =
 export type PolicyDefinitionAction =
   | {
       type: "add_free_item";
-      item: Item;
+      item: ItemSpecification;
       quantity: number;
     }
   | {
       type: "apply_percent_discount";
-      items: Item[];
+      items: ItemSpecification[];
       amount: number;
       maxEffectedItems: number;
     }
   | {
       type: "apply_fixed_discount";
-      items: Item[];
+      items: ItemSpecification[];
       amount: number;
       maxEffectedItems: number;
     }
   | {
       type: "apply_point_multiplier";
-      items: Item[];
+      items: ItemSpecification[];
       amount: number;
       maxEffectedItems: number;
     }
   | {
       type: "apply_point_cost";
-      items: Item[];
+      items: ItemSpecification[];
       amount: number;
       maxEffectedItems: number;
     }

@@ -11,9 +11,11 @@ import { PolicyDescriptionDisplay } from "@/components/display_utils/policy_desc
 import { CartManager } from "@/utils/cartManager";
 import { useAuth } from "@/context/auth_context";
 import { RESTAURANT_PATH } from "@/constants";
+import { toast, ToastContainer } from "react-toastify";
 
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import { resourceLimits } from "worker_threads";
 
 export default function SinglePolicyPage() {
   const { userSession } = useAuth();
@@ -148,9 +150,20 @@ export default function SinglePolicyPage() {
           <button
             className="fixed bottom-4 left-4 right-4 text-white py-3 rounded-md flex items-center justify-center gap-2"
             style={{ backgroundColor: restaurant?.metadata.primaryColor }}
-            onClick={() => {
+            onClick={async () => {
               if (cartManager.current) {
-                cartManager.current.setPolicy(policy);
+                const result = await cartManager.current.setPolicy(policy);
+                if (result) {
+                  toast(result, {
+                    className: "bg-red-500 text-white",
+                    progressClassName: "bg-red-700",
+                  });
+                } else {
+                  toast("Deal added to cart.", {
+                    className: "bg-green-500 text-white",
+                    progressClassName: "bg-green-700",
+                  });
+                }
               } else {
                 console.log("Try Again");
               }
@@ -161,6 +174,7 @@ export default function SinglePolicyPage() {
           </button>
         )}
       </div>
+      <ToastContainer />
     </div>
   ) : (
     <div className="max-w-md mx-auto bg-white min-h-screen flex flex-col">

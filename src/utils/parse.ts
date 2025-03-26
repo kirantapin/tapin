@@ -1,18 +1,22 @@
+import { PASS_MENU_TAG } from "@/constants";
 import { Item } from "@/types";
 import { titleCase } from "title-case";
 
 export const itemToStringDescription = (item: Item) => {
   const path = item.path;
+  if (path[0] === PASS_MENU_TAG) {
+    return titleCase(path[1]);
+  }
   if (path[path.length - 3] === "house_mixer") {
     //TODO
-    if (path[path.length - 1] === "default") {
+    if (path[path.length - 1] === "house") {
       return titleCase(`${path[path.length - 2]} House Mixer`);
     } else {
       return titleCase(`House Mixer with ${path[path.length - 1]}`);
     }
   }
   if (path[path.length - 3] === "shots_or_shooters") {
-    if (path[path.length - 1] === "default") {
+    if (path[path.length - 1] === "house") {
       return titleCase(`${path[path.length - 2]} Shot`);
     } else {
       return titleCase(`Shot of ${path[path.length - 1]}`);

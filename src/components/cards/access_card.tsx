@@ -77,10 +77,6 @@ export default function Card({
               {titleCase(title)}
             </h2>
           </div>
-
-          <div className="inline-block bg-white/30 rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm">
-            {savings}
-          </div>
         </div>
 
         <div className="flex justify-between items-end mt-auto pt-2">

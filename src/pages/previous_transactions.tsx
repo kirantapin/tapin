@@ -7,6 +7,7 @@ import { fetchRestaurantById } from "@/utils/queries/restaurant";
 import { QR_CODE_PATH, PASS_MENU_TAG, RESTAURANT_PATH } from "@/constants";
 import { ArrowLeft } from "lucide-react";
 import { checkoutStyles } from "@/styles/checkout_styles";
+import { rest } from "lodash";
 
 // Transaction List Component
 const TransactionList: React.FC = () => {
@@ -112,10 +113,17 @@ const TransactionList: React.FC = () => {
           <button
             key={filter}
             className={`px-4 py-1.5 rounded-full text-sm whitespace-nowrap ${
-              activeFilter === filter
-                ? "bg-red-100 text-red-500 border border-red-500"
-                : "border text-gray-500"
+              activeFilter === filter ? " border " : "border text-gray-500"
             }`}
+            style={
+              activeFilter === filter
+                ? {
+                    color: restaurant?.metadata.primaryColor,
+                    borderColor: restaurant?.metadata.primaryColor,
+                    backgroundColor: `${restaurant?.metadata.primaryColor}33`,
+                  }
+                : {}
+            }
             onClick={() => {
               setShowPasses(filter === "Passes");
               setActiveFilter(filter);
@@ -170,10 +178,13 @@ const TransactionList: React.FC = () => {
           {/* Redeem Button */}
           <button
             className={`w-full mt-4 py-2 rounded-lg text-white font-semibold ${
-              selectedTransactions.length > 0
-                ? "bg-red-600 hover:bg-red-700"
-                : "bg-gray-400 cursor-not-allowed"
+              selectedTransactions.length > 0 ? "" : "bg-gray-400 "
             }`}
+            style={
+              selectedTransactions.length > 0
+                ? { background: restaurant?.metadata.primaryColor }
+                : {}
+            }
             onClick={handleRedeem}
             disabled={selectedTransactions.length === 0}
           >

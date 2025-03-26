@@ -7,7 +7,12 @@ import { useAuth } from "../context/auth_context.tsx";
 import { isEqual } from "lodash";
 import { usePersistState } from "../hooks/usePersistState.tsx";
 import ApplePayButton from "../components/apple_pay_button.tsx";
-import { RESTAURANT_PATH, SIGNIN_PATH } from "../constants.ts";
+import {
+  NORMAL_DEAL_TAG,
+  PASS_TAG,
+  RESTAURANT_PATH,
+  SIGNIN_PATH,
+} from "../constants.ts";
 import {
   Cart,
   CartItem,
@@ -26,28 +31,19 @@ import PolicyCard from "@/components/cards/shad_policy_card.tsx";
 import { supabase_local } from "@/utils/supabase_client.ts";
 import { itemToStringDescription } from "@/utils/parse.ts";
 import { CartManager } from "@/utils/cartManager.ts";
+import { ToastContainer, toast } from "react-toastify";
 
 const reducer = (state, action) => {
   return { ...state, ...action };
 };
 
 export default function CheckoutPage() {
-  const { userSession, userData, loadingUser } = useAuth();
+  const { userSession, setShowSignInModal } = useAuth();
   const [policies, setPolicies] = useState<Policy[]>([]);
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
-  const location = useLocation();
-  const supabase = useSupabase();
   const navigate = useNavigate();
   const { id: restaurant_id } = useParams<{ id: string }>();
-  // const [cart, setCart, clearCart] = usePersistState<Cart>(
-  //   [],
-  //   restaurant_id + "_cart"
-  // );
   const cartManager = useRef<CartManager | null>(null);
-
-  const token = useRef();
-  const hasFetched = useRef(false);
-
   const [tipPercent, setTipPercent] = useState<number>(0.2);
 
   const initialState = {
@@ -56,6 +52,7 @@ export default function CheckoutPage() {
     selectedPolicy: null,
     cartResults: null,
     errorDisplay: null,
+    token: null,
   };
 
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -82,19 +79,49 @@ export default function CheckoutPage() {
   }, [userSession]);
 
   const click_policy = async (policy: Policy) => {
+    let result = null;
     if (!isEqual(policy, state.selectedPolicy)) {
-      await cartManager.current?.setPolicy(policy);
+      result = await cartManager.current?.setPolicy(policy);
     } else {
-      await cartManager.current?.setPolicy(null);
+      result = await cartManager.current?.setPolicy(null);
+    }
+    if (result) {
+      toast(result, {
+        className: "bg-red-500 text-white",
+        progressClassName: "bg-red-700",
+      });
+    } else {
+      toast("Deal added to cart.", {
+        className: "bg-green-500 text-white",
+        progressClassName: "bg-green-700",
+      });
     }
     dispatch(cartManager.current?.getCartState());
+  };
+
+  const sanityCheck = async (): Promise<string | null> => {
+    return await cartManager.current?.refresh();
   };
 
   const updateItem = async (
     itemKey: number,
     updatedFields: Partial<CartItem>
   ) => {
-    await cartManager.current?.updateItem(itemKey, updatedFields);
+    const result = await cartManager.current?.updateItem(
+      itemKey,
+      updatedFields
+    );
+    if (result) {
+      toast(result, {
+        className: "bg-red-500 text-white",
+        progressClassName: "bg-red-700",
+      });
+    } else {
+      toast("Deal added to cart.", {
+        className: "bg-green-500 text-white",
+        progressClassName: "bg-green-700",
+      });
+    }
     dispatch(cartManager.current?.getCartState());
   };
 
@@ -173,9 +200,15 @@ export default function CheckoutPage() {
         <div className="overflow-x-auto pb-2 no-scrollbar">
           <h2 className="text-2xl font-bold mb-4">Save More</h2>
           <div className="flex gap-2 whitespace-nowrap">
-            {[...policies].map((policy) => (
-              <PolicyCard policy={policy} key={policy.policy_id} />
-            ))}
+            {policies
+              .filter(
+                (policy) =>
+                  policy.definition.tag === NORMAL_DEAL_TAG ||
+                  policy.definition.tag === PASS_TAG
+              )
+              .map((policy) => (
+                <PolicyCard policy={policy} key={policy.policy_id} />
+              ))}
           </div>
         </div>
         {state.cart.length > 0 && state.cartResults && (
@@ -216,10 +249,17 @@ export default function CheckoutPage() {
           </div>
         )}
         {state.errorDisplay}
+        {/* <button
+          onClick={() => {
+            console.log(state);
+          }}
+        >
+          test
+        </button> */}
         {state.cart.length > 0 && (
           <div className={checkoutStyles.paymentContainer}>
             {userSession ? (
-              token.current &&
+              state.token &&
               state.cartResults &&
               state.cartResults.totalPrice > 0 && (
                 <ApplePayButton
@@ -230,11 +270,13 @@ export default function CheckoutPage() {
                     userDealEffect: state.dealEffect,
                     userPolicy: state.selectedPolicy,
                     userCartResults: state.cartResults,
-                    token: token.current,
+                    token: state.token,
                     totalWithTip: Math.round(
                       state.cartResults.totalPrice * (1 + tipPercent) * 100
                     ),
+                    connectedAccountId: restaurant?.stripe_account_id,
                   }}
+                  sanityCheck={sanityCheck}
                 />
               )
             ) : (
@@ -242,7 +284,7 @@ export default function CheckoutPage() {
                 <button
                   className="text-black"
                   onClick={() => {
-                    navigate(SIGNIN_PATH);
+                    setShowSignInModal(true);
                   }}
                 >
                   Sign In
@@ -253,6 +295,7 @@ export default function CheckoutPage() {
           </div>
         )}
       </div>
+      <ToastContainer />
     </div>
   );
 }

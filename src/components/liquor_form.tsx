@@ -37,7 +37,7 @@ const LiquorForm = ({ type, menu, addToCart, primaryColor }) => {
 
     const liquorPath = structuredClone(MENU_DISPLAY_MAP[type]);
     liquorPath.push(selectedLiquor);
-    liquorPath.push("default");
+    liquorPath.push("house");
     addToCart({ path: liquorPath, modifiers: modifiers });
 
     setSelectedLiquor("");

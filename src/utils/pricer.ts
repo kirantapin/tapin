@@ -16,13 +16,6 @@ export function priceItem(item: Item, restaurant: Restaurant): number {
   if (!temp) {
     throw new Error("Item cannot be priced");
   }
-  if (typeof temp === "number") {
-    return temp * multiple;
-  }
 
-  if (typeof temp === "string") {
-    const liquorType = path[path.length - 2];
-    return liquorMenu[liquorType][temp] * multiple;
-  }
-  throw new Error("Item cannot be priced");
+  return temp * multiple;
 }

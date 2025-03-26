@@ -69,3 +69,5 @@ export const PASS_TAG = "pass";
 // gray on gray background grayscale 500
 
 export const KNOWN_MODIFIERS = { double: 2, triple: 3 };
+
+export const PASS_INDICATOR = "@";

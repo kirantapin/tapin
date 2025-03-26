@@ -1,5 +1,6 @@
 import { supabase } from "../supabase_client";
-import { Restaurant } from "../../types";
+import { Restaurant, Pass } from "../../types";
+import { PASS_MENU_TAG, DRINK_MENU_TAG } from "@/constants";
 
 export const fetchRestaurantById = async (
   restaurantId: string | undefined
@@ -18,12 +19,52 @@ export const fetchRestaurantById = async (
     return null;
   }
 
+  const passes = await fetchPasses(restaurantId);
+
   const tempMenu = data.menu;
-  const liquorMenu = tempMenu["drink"]["liquor"];
-  tempMenu["drink"]["house_mixer"] = liquorMenu;
-  tempMenu["drink"]["shots_or_shooters"] = liquorMenu;
-  delete tempMenu["drink"]["liquor"];
+  const liquorMenu = tempMenu[DRINK_MENU_TAG]["liquor"];
+  tempMenu[DRINK_MENU_TAG]["house_mixer"] = liquorMenu;
+  tempMenu[DRINK_MENU_TAG]["shots_or_shooters"] = liquorMenu;
+  delete tempMenu[DRINK_MENU_TAG]["liquor"];
   data.menu = tempMenu;
+  data.menu[PASS_MENU_TAG] = passes;
+
+  console.log(data);
 
   return data;
+};
+
+export const fetchPasses = async (
+  restaurantId: string | null
+): Promise<any> => {
+  const { data, error } = await supabase
+    .from("passes")
+    .select("*")
+    .eq("restaurant_id", restaurantId)
+    .gte("for_date", new Date().toISOString());
+  console.log("output", data);
+  if (error) {
+    console.error("Error fetch temporary items.", error.message);
+    return {};
+  }
+
+  const passMenu = {};
+
+  for (const pass of data) {
+    if (pass.item_name in passMenu) {
+      passMenu[pass.item_name][pass.for_date] = {
+        price: pass.price,
+        description: pass.item_description,
+      };
+    } else {
+      passMenu[pass.item_name] = {
+        [pass.for_date]: {
+          price: pass.price,
+          description: pass.item_description,
+        },
+      };
+    }
+  }
+
+  return passMenu;
 };

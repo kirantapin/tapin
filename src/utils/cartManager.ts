@@ -130,7 +130,7 @@ export class CartManager {
       if (error) {
         console.error("Supabase Error:", error);
         this.errorDisplay =
-          error.message || "An error occurred while verifying the order.";
+          error.message || "An error occurred while verifying the cart.";
         return;
       }
 
@@ -145,7 +145,7 @@ export class CartManager {
     } catch (err) {
       console.error("Unexpected Error:", err);
       this.errorDisplay =
-        "An unexpected error occurred while verifying the order.";
+        "An unexpected error occurred while verifying the cart.";
     }
     this.saveCartToLocalStorage();
   }
@@ -176,18 +176,30 @@ export class CartManager {
   public async updateItem(
     itemKey: number,
     updatedFields: Partial<CartItem>
-  ): Promise<void> {
+  ): Promise<string | null> {
     this.handleUpdateItem(itemKey, updatedFields);
     await this.verifyOrder();
+    if (this.errorDisplay) {
+      return this.errorDisplay;
+    }
+    return null;
   }
 
-  public async setPolicy(policy: Policy | null): Promise<void> {
+  public async setPolicy(policy: Policy | null): Promise<string | null> {
     this.selectedPolicy = policy;
     await this.verifyOrder();
+    if (this.errorDisplay) {
+      return this.errorDisplay;
+    }
+    return null;
   }
 
-  public async addToCart(item: Item, restaurant: Restaurant): Promise<void> {
+  public async addToCart(
+    item: Item,
+    restaurant: Restaurant
+  ): Promise<string | null> {
     // Check if the item already exists in the cart
+    console.log(item);
     const existingItemIndex = this.cart.findIndex((cartItem) =>
       isEqual(cartItem.item, item)
     );
@@ -218,6 +230,10 @@ export class CartManager {
       this.cart = [...this.cart, newCartItem];
     }
     await this.verifyOrder();
+    if (this.errorDisplay) {
+      return this.errorDisplay;
+    }
+    return null;
   }
 
   public getCartState() {
@@ -229,5 +245,13 @@ export class CartManager {
       errorDisplay: this.errorDisplay,
       token: this.token,
     };
+  }
+
+  public async refresh(): Promise<string | null> {
+    await this.verifyOrder();
+    if (this.errorDisplay) {
+      return this.errorDisplay;
+    }
+    return null;
   }
 }

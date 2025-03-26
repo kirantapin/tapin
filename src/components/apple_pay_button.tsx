@@ -16,7 +16,7 @@ import { QR_CODE_PATH } from "../constants.ts";
 const stripePublishableKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || "";
 const stripePromise = loadStripe(stripePublishableKey);
 
-const PayButton = ({ payload }) => {
+const PayButton = ({ payload, sanityCheck }) => {
   const stripe = useStripe();
   const elements = useElements();
   const { setTransactions, setUserData } = useAuth();
@@ -70,11 +70,17 @@ const PayButton = ({ payload }) => {
 
     try {
       // Submit payment details
+      const potentialError = await sanityCheck();
+      if (potentialError) {
+        //handle response error
+        return;
+      }
       const { error: submitError } = await elements.submit();
       if (submitError) {
         console.error("Submit Error:", submitError.message);
         return;
       }
+
       const response = await supabase_local.functions.invoke("create_intent", {
         body: {
           amount: payload.totalWithTip,
@@ -156,8 +162,7 @@ const PayButton = ({ payload }) => {
   );
 };
 
-function ApplePayButton({ payload }) {
-  const [options, setOptions] = useState();
+function ApplePayButton({ payload, sanityCheck }) {
   return payload.token ? (
     <Elements
       stripe={stripePromise}
@@ -171,7 +176,7 @@ function ApplePayButton({ payload }) {
         },
       }}
     >
-      <PayButton payload={payload} />
+      <PayButton payload={payload} sanityCheck={sanityCheck} />
     </Elements>
   ) : (
     <p>Loading</p>

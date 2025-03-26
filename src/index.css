@@ -2,15 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 html,
 body {
   overflow-x: hidden; /* Disable horizontal scrolling */
@@ -59,16 +50,14 @@ body {
   font-weight: normal;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p,
-span {
+p {
   font-family: "Gilroy", Arial, sans-serif;
-  font-weight: bold;
+  font-weight: normal;
+}
+
+button {
+  font-family: "Gilroy", Arial, sans-serif !important;
+  font-weight: bold !important;
 }
 
 @tailwind base;
@@ -149,4 +138,16 @@ span {
     -ms-overflow-x: hidden;
     scrollbar-width: none;
   }
+}
+
+.custom-line-clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Show 2 full lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Adds "..." only after two lines */
+  max-height: 3rem; /* Adjust based on font-size to fit exactly 2 lines */
+  line-height: 1.5rem; /* Ensures consistent line spacing */
+  white-space: normal; /* Allows wrapping */
+  word-wrap: break-word; /* Prevents words from overflowing */
 }

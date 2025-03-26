@@ -3,8 +3,10 @@ import { ChevronDown, QrCode } from "lucide-react";
 
 export function PhoneInput({
   onSubmit,
+  onClose,
 }: {
   onSubmit: (phone: string) => void;
+  onClose: () => void;
 }) {
   const [phoneNumber, setPhoneNumber] = useState("");
 
@@ -23,10 +25,9 @@ export function PhoneInput({
             className="h-8 object-contain"
           />
         </div>
-        <QrCode className="w-6 h-6 text-[#F5B14C]" />
       </div>
 
-      <div className="mt-24">
+      <div className="mt-10">
         <h1 className="text-4xl font-bold mb-4">Login or sign up</h1>
         <p className="text-xl text-gray-600 mb-12">
           New to Tap In? Log in to find your next favorite bar and let the good
@@ -70,7 +71,9 @@ export function PhoneInput({
         </div>
 
         <div className="absolute bottom-12 left-0 right-0 text-center">
-          <button className="text-gray-600 underline">Browse as Guest</button>
+          <button onClick={onClose} className="text-gray-600 underline">
+            Browse as Guest
+          </button>
         </div>
       </div>
     </div>

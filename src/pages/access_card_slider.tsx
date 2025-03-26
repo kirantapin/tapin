@@ -35,21 +35,25 @@ const AccessCardSlider = ({ restaurant }: { restaurant: Restaurant }) => {
         className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar"
         onScroll={handleScroll}
       >
-        {Object.entries(accessCards).map(([name, price], index) => (
-          <div key={index} className="snap-center shrink-0 w-full px-4">
-            <AccessCard
-              baseColor={restaurant.metadata.primaryColor}
-              venueName={restaurant?.name}
-              title={name}
-              savings="Save $1.50 per drink"
-              regularPrice={price}
-              discountPrice={5}
-              date="01/25"
-            />
-          </div>
-        ))}
+        {Object.entries(accessCards).map(([name, dateObjects], index) =>
+          Object.entries(dateObjects).map(([date, itemInfo], index) => {
+            itemInfo["for_date"] = date;
+            return (
+              <div key={index} className="snap-center shrink-0 w-full px-4">
+                <AccessCard
+                  baseColor={restaurant.metadata.primaryColor}
+                  venueName={restaurant?.name}
+                  title={name}
+                  savings="Save $1.50 per drink"
+                  regularPrice={itemInfo.price}
+                  discountPrice={5}
+                  date={date}
+                />
+              </div>
+            );
+          })
+        )}
       </div>
-
       {/* Scroll Indicator Dots */}
       <div className="flex justify-center">
         {Object.entries(accessCards).map((_, index) => (

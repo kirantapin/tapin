@@ -20,6 +20,8 @@ interface AuthContextProps {
   transactions: Transaction[];
   setTransactions: React.Dispatch<React.SetStateAction<Transaction[] | []>>;
   loadingUser: boolean;
+  showSignInModal: boolean;
+  setShowSignInModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const AuthContext = createContext<AuthContextProps | undefined>(
@@ -37,6 +39,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [dealUses, setDealUses] = useState<DealUse[]>([]);
   const [loadingUser, setLoadingUser] = useState(true);
+  const [showSignInModal, setShowSignInModal] = useState(false);
 
   const setData = async (session: Session | null) => {
     if (!session) {
@@ -150,6 +153,8 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         transactions,
         setTransactions,
         loadingUser,
+        showSignInModal,
+        setShowSignInModal,
       }}
     >
       {children}

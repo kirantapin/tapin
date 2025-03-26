@@ -84,10 +84,6 @@ export function Verification({
 
   return (
     <div className="min-h-screen bg-white text-black p-6">
-      <button onClick={onBack} className="mb-12">
-        <ArrowLeft className="w-6 h-6" />
-      </button>
-
       <h1 className="text-4xl font-bold mb-4">Verify it's you</h1>
       <p className="text-xl text-gray-600 mb-2">
         Please enter 6 digit verification code that have been sent to your
@@ -95,7 +91,7 @@ export function Verification({
       </p>
       <p className="text-xl text-gray-600 mb-8">{phoneNumber}</p>
 
-      <div className="flex gap-4 mb-8 justify-center">
+      <div className="flex gap-3 mb-8 justify-center">
         {code.map((digit, index) => (
           <div key={index} className="relative">
             <input

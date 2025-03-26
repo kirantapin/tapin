@@ -131,9 +131,6 @@ export default function PoliciesPage() {
               <CardHeader className="p-0">
                 <div className="relative mt-3 mx-3">
                   <Skeleton width="100%" height={192} className="rounded-2xl" />
-                  <div className="absolute bottom-2 left-2 bg-black/70 text-yellow-400 px-2 py-1 rounded-md text-xs flex items-center">
-                    <Skeleton width={60} height={16} />
-                  </div>
                 </div>
               </CardHeader>
 

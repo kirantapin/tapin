@@ -6,6 +6,8 @@ import { Policy } from "@/types";
 import { project_url } from "@/utils/supabase_client";
 import { SINGLE_POLICY_PAGE_PATH } from "@/constants";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { titleCase } from "title-case";
+import { sentenceCase } from "@/utils/parse";
 
 export default function PolicyCard({
   policy,
@@ -64,7 +66,9 @@ export default function PolicyCard({
         <CardContent className="px-2 flex flex-col justify-between h-[calc(100%-theme(space.1)-var(--image-height)-0.5rem)]">
           {/* Title and Button Row */}
           <div className="flex justify-between items-start">
-            <h2 className="text-lg font-bold text-black pr-2">{policy.name}</h2>
+            <h2 className="text-lg font-bold text-black pr-2">
+              {titleCase(policy.name)}
+            </h2>
             <Button
               size="icon"
               className="rounded-full   w-7 h-7 flex items-center justify-center flex-shrink-0"
@@ -78,7 +82,7 @@ export default function PolicyCard({
           <div className="flex items-start gap-2 text-gray-600 mt-3 flex-wrap">
             <Beer className="h-5 w-5 flex-shrink-0" />
             <span className="text-base break-words whitespace-normal min-w-0 flex-1">
-              {policy.header}
+              {sentenceCase(policy.header)}
             </span>
           </div>
         </CardContent>

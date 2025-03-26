@@ -11,7 +11,7 @@ import {
   LOYALTY_REWARD_PATH,
 } from "@/constants";
 import { fetchRestaurantById } from "@/utils/queries/restaurant";
-import { Gift } from "lucide-react";
+import { ChevronUp, ChevronDown } from "lucide-react";
 import { rest } from "lodash";
 import { itemToStringDescription } from "@/utils/parse";
 
@@ -26,8 +26,9 @@ const Rewards: React.FC<RewardsProps> = ({ userData, restaurant }) => {
   const [loyaltyPolicies, setLoyaltyPolicies] = useState<Policy[]>([]);
   const navigate = useNavigate();
   const [intervals, setIntervals] = useState();
-  const [widthPercentage, setWidthPercentage] = useState();
+  const [widthPercentage, setWidthPercentage] = useState(null);
   const [pointsToGo, setPointsToGo] = useState();
+  const [isOpen, setIsOpen] = useState(true);
 
   const computeRange = (policies: Policy[]) => {
     const maxValue = policies[policies.length - 1].definition.action.amount;
@@ -63,7 +64,7 @@ const Rewards: React.FC<RewardsProps> = ({ userData, restaurant }) => {
     <>
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold">Rewards</h2>
-        <button
+        {/* <button
           onClick={() => {
             navigate(OFFERS_PAGE_PATH.replace(":id", restaurant.id), {
               state: {
@@ -75,6 +76,20 @@ const Rewards: React.FC<RewardsProps> = ({ userData, restaurant }) => {
           style={{ color: restaurant.metadata.primaryColor }}
         >
           View Rewards
+        </button> */}
+        <button
+          onClick={() => {
+            setIsOpen(!isOpen); // Toggles the arrow direction
+          }}
+          className="text-sm font-semibold flex items-center gap-1"
+          style={{ color: restaurant.metadata.primaryColor }}
+        >
+          View Rewards
+          {isOpen ? (
+            <ChevronUp className="w-6 h-6" />
+          ) : (
+            <ChevronDown className="w-6 h-6" />
+          )}
         </button>
       </div>
 
@@ -86,22 +101,26 @@ const Rewards: React.FC<RewardsProps> = ({ userData, restaurant }) => {
           >
             {userPoints} Points
           </h3>
-          {pointsToGo ? (
+          {userPoints === 0 ? (
             <p className="text-sm text-black-600 mb-11">
-              {pointsToGo} points until your next reward
+              Start earning points and claim rewards!
+            </p>
+          ) : pointsToGo ? (
+            <p className="text-sm text-black-600 mb-11">
+              {pointsToGo} points until your next reward!
             </p>
           ) : (
             <p className="text-sm text-black-600 mb-11">Claim your reward!</p>
           )}
 
           {/* Progress Bar */}
-          {widthPercentage && intervals && (
+          {widthPercentage !== null && intervals && (
             <>
               <div className="mt-4 h-2 bg-gray-200 rounded-full w-full">
                 <div
                   className="h-full  rounded-full transition-all duration-300"
                   style={{
-                    width: `${widthPercentage}%`,
+                    width: `${widthPercentage === 0 ? 2 : widthPercentage}%`,
                     backgroundColor: restaurant.metadata.primaryColor,
                   }}
                 ></div>
@@ -117,34 +136,49 @@ const Rewards: React.FC<RewardsProps> = ({ userData, restaurant }) => {
         </div>
       )}
 
-      <div className="bg-gray-50 rounded-lg p-4 mb-6 mt-4">
-        <h3 className="text-gray-800 text-lg font-semibold mb-4">
-          Rewards you can get
-        </h3>
-        <div className="space-y-4">
-          {loyaltyPolicies.map((policy) => (
-            <div key={policy.policy_id} className="flex items-center">
-              <div className="w-12 h-12 flex items-center justify-center">
-                <img
-                  src={
-                    "https://s-sdistributing.com/wp-content/uploads/Bud-Light-2.png" ||
-                    "/placeholder.svg"
-                  }
-                  alt={policy.header}
-                  className="max-h-full max-w-full object-contain"
-                />
+      <div
+        className={`transition-all duration-300 ease-in-out overflow-hidden ${
+          isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        <div className="bg-gray-50 rounded-lg p-4 mt-4 border-2 border-gray-200">
+          <h3 className="text-black text-lg font-semibold mb-4">
+            Rewards you can get
+          </h3>
+
+          <div className="space-y-4">
+            {loyaltyPolicies.map((policy) => (
+              <div
+                key={policy.policy_id}
+                className="grid grid-cols-[4rem_6rem_auto] items-center gap-4"
+              >
+                {/* Image - Fixed Width */}
+                <div className="w-12 h-12 flex items-center justify-center">
+                  <img
+                    src={
+                      "https://s-sdistributing.com/wp-content/uploads/Bud-Light-2.png" ||
+                      "/placeholder.svg"
+                    }
+                    alt={policy.header}
+                    className="max-h-full max-w-full object-contain"
+                  />
+                </div>
+
+                {/* Amount - Fixed Width */}
+                <div className="text-xl text-black font-bold font-[Gilroy] text-left">
+                  {policy.definition.action.amount}
+                </div>
+
+                {/* Description - Takes Remaining Space */}
+                <div className="text-gray-700 font-[Gilroy]">
+                  {itemToStringDescription({
+                    path: policy.definition.action.items[0],
+                    modifiers: [],
+                  })}
+                </div>
               </div>
-              <div className="ml-2 text-xl text-black font-bold font-[Gilroy]">
-                {policy.definition.action.amount}
-              </div>
-              <div className="ml-10 text-gray-700  font-[Gilroy]">
-                {itemToStringDescription({
-                  path: policy.definition.action.items[0],
-                  modifiers: [],
-                })}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 
@@ -152,19 +186,15 @@ const Rewards: React.FC<RewardsProps> = ({ userData, restaurant }) => {
       <button
         onClick={() =>
           navigate(OFFERS_PAGE_PATH.replace(":id", restaurant.id), {
-            state: {
-              tag: LOYALTY_REWARD_TAG,
-            },
+            state: { tag: LOYALTY_REWARD_TAG },
           })
         }
-        className="w-full mt-6 border-2 py-3 rounded-lg font-bold flex items-center justify-center gap-2"
+        className="mt-4 rounded-lg flex items-center justify-left gap-2 text-white w-fit max-w-sm px-5 py-2.5 text-sm"
         style={{
-          borderColor: restaurant.metadata.primaryColor,
-          color: restaurant.metadata.primaryColor,
+          backgroundColor: restaurant.metadata.primaryColor, // Matches red button color
         }}
       >
-        <Gift className="w-5 h-5" />
-        Rewards
+        Redeem Rewards
       </button>
     </>
   );
