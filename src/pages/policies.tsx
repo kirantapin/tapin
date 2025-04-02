@@ -21,6 +21,7 @@ import { project_url } from "@/utils/supabase_client";
 
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import { getPolicyFlair } from "@/utils/parse";
 
 export default function PoliciesPage() {
   const location = useLocation();
@@ -75,14 +76,14 @@ export default function PoliciesPage() {
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-xl font-semibold">Awesome Deals 🍻</h1>
+        <h1 className="text-2xl font-semibold">Awesome Deals</h1>
         <button className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100">
           <ShoppingBag className="w-5 h-5" />
         </button>
       </div>
 
       {/* Search Bar */}
-      <div className="px-4 mb-4">
+      <div className="px-4 mt-4 mb-4">
         <div className="flex items-center bg-white rounded-full px-4 py-3 border-2 border-gray-300 focus-within:border-gray-500 transition-colors duration-300">
           <Search className="w-5 h-5 text-gray-400 mr-2" />
           <input
@@ -186,9 +187,9 @@ export default function PoliciesPage() {
                       e.currentTarget.src = ""; // Should be replaced with a generic TapIn logo in the public directory
                     }}
                   />
-                  <div className="absolute bottom-2 left-2 bg-black/70 text-yellow-400 px-2 py-1 rounded-md text-xs flex items-center">
+                  <div className="absolute bottom-2 left-2 bg-black/80 text-yellow-400 px-2 py-1 rounded-full text-xs flex items-center font-semibold">
                     <Moon className="w-3 h-3 mr-1" />
-                    Nightly Deal Use
+                    {getPolicyFlair(policy)}
                   </div>
                 </div>
               </CardHeader>

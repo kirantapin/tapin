@@ -41,8 +41,8 @@ export const fetchPasses = async (
     .from("passes")
     .select("*")
     .eq("restaurant_id", restaurantId)
-    .gte("for_date", new Date().toISOString());
-  console.log("output", data);
+    .gte("end_time", new Date().toISOString());
+  console.log(data);
   if (error) {
     console.error("Error fetch temporary items.", error.message);
     return {};

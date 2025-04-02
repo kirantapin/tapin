@@ -165,7 +165,9 @@ const TransactionList: React.FC = () => {
                         modifiers: transaction.metadata.modifiers || [],
                       })}
                     </p>
-                    <p className="text-gray-500">${transaction.price}</p>
+                    <p className="text-gray-500">
+                      ${transaction.price?.toFixed(2)}
+                    </p>
                     <p className="text-gray-500">
                       {convertUtcToLocal(transaction.created_at)}
                     </p>
@@ -213,7 +215,9 @@ const TransactionList: React.FC = () => {
                       modifiers: transaction.metadata.modifiers || [],
                     })}
                   </p>
-                  <p className="text-gray-500">${transaction.price}</p>
+                  <p className="text-gray-500">
+                    ${transaction.price?.toFixed(2)}
+                  </p>
                   <p className="text-gray-500">{transaction.created_at}</p>
                 </div>
               </div>

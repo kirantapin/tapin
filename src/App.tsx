@@ -22,6 +22,7 @@ import {
   POLICIES_PAGE_PATH,
   OFFERS_PAGE_PATH,
   SINGLE_POLICY_PAGE_PATH,
+  INFO_PAGE_PATH,
 } from "./constants.ts";
 import SignIn from "./pages/signin/signin.tsx";
 import CheckoutPage from "./pages/demo_checkout.tsx";
@@ -37,6 +38,7 @@ import SinglePolicyPage from "./pages/single_policy_page.tsx";
 import { supabase } from "./utils/supabase_client.ts";
 import { PhoneInput } from "./pages/signin/phone_input.tsx";
 import { Verification } from "./pages/signin/verification.tsx";
+import RestaurantInfo from "./pages/restaurant_info.tsx";
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -57,6 +59,7 @@ const App: React.FC = () => {
         <Route path={LOYALTY_REWARD_PATH} element={<RewardsPage />} />
         <Route path={OFFERS_PAGE_PATH} element={<PoliciesPage />} />
         <Route path={SINGLE_POLICY_PAGE_PATH} element={<SinglePolicyPage />} />
+        <Route path={INFO_PAGE_PATH} element={<RestaurantInfo />} />
         <Route
           path={PREVIOUS_TRANSACTIONS_PATH}
           element={<TransactionList />}
@@ -102,45 +105,6 @@ const AppLoader: React.FC = () => {
 
 export default App;
 
-// const SignInModal = ({ onClose }: { onClose: () => void }) => {
-//   const [visible, setVisible] = useState(false);
-
-//   // Trigger slide-in on mount
-//   useEffect(() => {
-//     requestAnimationFrame(() => {
-//       setVisible(true);
-//     });
-//   }, []);
-
-//   // Handle closing with animation
-//   const handleClose = () => {
-//     setVisible(false);
-//     setTimeout(onClose, 300); // Wait for slide-out animation to finish
-//   };
-
-//   return (
-//     <div className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center">
-//       {/* Slide-up container */}
-//       <div
-//         className={`bg-white w-full max-w-md rounded-t-2xl shadow-xl transition-transform duration-300 transform ${
-//           visible ? "translate-y-0" : "translate-y-full"
-//         }`}
-//       >
-//         <div className="p-6 relative h-[60vh] overflow-y-auto">
-//           <button
-//             onClick={handleClose}
-//             className="absolute top-2 right-3 text-gray-500 hover:text-black"
-//           >
-//             ✕
-//           </button>
-//           <h2 className="text-xl font-bold mb-4">Sign In</h2>
-//           {/* Your actual sign-in form or content */}
-//           <p>This is your sign-in modal content.</p>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
 const SignInModal = ({ onClose }: { onClose: () => void }) => {
   const [visible, setVisible] = useState(false);
   const [step, setStep] = useState<"phone" | "verify">("phone");
@@ -205,7 +169,7 @@ const SignInModal = ({ onClose }: { onClose: () => void }) => {
         <div className="p-6 relative h-[85vh] overflow-y-auto">
           <button
             onClick={handleClose}
-            className="absolute font-3xl top-2 right-3 text-gray-500 hover:text-black"
+            className="absolute font-4xl top-2 right-3 text-gray-500 hover:text-black"
           >
             ✕
           </button>
@@ -215,7 +179,7 @@ const SignInModal = ({ onClose }: { onClose: () => void }) => {
           {errorMessage && <p className="text-red-500 mb-2">{errorMessage}</p>}
 
           {step === "phone" ? (
-            <PhoneInput onClose={onClose} onSubmit={handlePhoneSubmit} />
+            <PhoneInput onClose={handleClose} onSubmit={handlePhoneSubmit} />
           ) : (
             <Verification
               phoneNumber={phoneNumber}

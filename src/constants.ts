@@ -22,6 +22,7 @@ export const PREVIOUS_TRANSACTIONS_PATH =
   "/restaurant/:id/previous_transactions";
 export const OFFERS_PAGE_PATH = "/restaurant/:id/offers";
 export const SINGLE_POLICY_PAGE_PATH = "/restaurant/:id/offers/:policy_id";
+export const INFO_PAGE_PATH = "/restaurant/:id/info";
 
 //objects
 export const emptyDealEffect: DealEffectPayload = {
@@ -36,9 +37,6 @@ export const MISSING_USER_ID = "User ID is required but wasn't received.";
 //storage
 export const STORAGE_PREFIX = "state:";
 export const STORAGE_TTL = 6 * 60 * 1000;
-
-//tax
-export const TEST_TAX_RATE = 0.08;
 
 export const DRINK_MENU_TAG = "drink";
 export const FOOD_MENU_TAG = "food";

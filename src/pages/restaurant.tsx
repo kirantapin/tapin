@@ -35,6 +35,7 @@ import {
   OFFERS_PAGE_PATH,
   NORMAL_DEAL_TAG,
   PASS_TAG,
+  INFO_PAGE_PATH,
 } from "../constants.ts";
 
 import { fetch_policies } from "../utils/queries/policies.ts";
@@ -42,8 +43,6 @@ import { fetchRestaurantById } from "../utils/queries/restaurant.ts";
 import PolicyCard from "@/components/cards/shad_policy_card.tsx";
 
 import { project_url } from "../utils/supabase_client.ts";
-import { isEqual, rest, update } from "lodash";
-import { usePersistState } from "@/hooks/usePersistState.tsx";
 import { DrinkList } from "@/components/menu_items.tsx";
 import GoToCartButton from "@/components/go_to_cart_button.tsx";
 import AccessCardSlider from "./access_card_slider.tsx";
@@ -52,6 +51,7 @@ import { CartManager } from "@/utils/cartManager.ts";
 import { ToastContainer, toast } from "react-toastify";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import { Sidebar } from "@/components/sidebar.tsx";
 
 export default function RestaurantPage() {
   const { userSession, userData, transactions, logout, setShowSignInModal } =
@@ -66,6 +66,7 @@ export default function RestaurantPage() {
   const cartManager = useRef<CartManager | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [orderSearch, setOrderSearch] = useState<string>("");
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
 
   const scrollToOrderDrinks = () => {
     orderDrinksRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -121,7 +122,12 @@ export default function RestaurantPage() {
     <div className="min-h-screen bg-gray-25">
       {/* Header Icons */}
       <div className="absolute w-full top-0 z-50 flex justify-between items-center px-4 py-3">
-        <div className="bg-black/60 p-2 rounded-full">
+        <div
+          className="bg-black/60 p-2 rounded-full"
+          onClick={() => {
+            setSidebarOpen(true);
+          }}
+        >
           <Menu className="w-5 h-5 text-white" />
         </div>
 
@@ -137,13 +143,13 @@ export default function RestaurantPage() {
       </div>
       {/* Hero Image */}
       <div
-        className="relative h-48 rounded-b-xl bg-cover bg-center"
+        className="relative h-52 rounded-b-2xl bg-cover bg-center"
         style={{
           backgroundImage: `url('${project_url}/storage/v1/object/public/restaurant_images/${restaurant_id}_hero.jpeg')`,
         }}
       >
         {/* Profile Image */}
-        <div className="absolute -bottom-7" style={{ left: "18px" }}>
+        <div className="absolute -bottom-5" style={{ left: "18px" }}>
           {" "}
           {/* Moved further down */}
           <div className="w-24 h-24 rounded-full border-2 border-white  overflow-hidden shadow-lg">
@@ -175,7 +181,12 @@ export default function RestaurantPage() {
               Order
             </span>
           </button>
-          <button className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-200 bg-white shadow-sm">
+          <button
+            className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-200 bg-white shadow-sm"
+            onClick={() => {
+              navigate(INFO_PAGE_PATH.replace(":id", restaurant_id));
+            }}
+          >
             <Info className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
             <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">
               More Info
@@ -219,7 +230,7 @@ export default function RestaurantPage() {
                 </div>
 
                 {/* Right: Image Block with full height and right rounding */}
-                <div className="h-full w-32 rounded-r-3xl overflow-hidden">
+                {/* <div className="h-full w-32 rounded-r-3xl overflow-hidden">
                   <img
                     src={
                       "https://www.life-publications.com/wp-content/uploads/2023/07/Party-in-the-Square-August-2023.jpg" ||
@@ -228,7 +239,7 @@ export default function RestaurantPage() {
                     alt="name"
                     className="h-full w-full object-cover"
                   />
-                </div>
+                </div> */}
               </div>
             ))}
           </div>
@@ -236,9 +247,7 @@ export default function RestaurantPage() {
 
         {/* My Spot Section */}
         <div className="mt-6">
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            My Spot <span>🪑</span>
-          </h2>
+          <h1 className="text-xl font-bold flex items-center gap-2">My Spot</h1>
 
           <div className="flex gap-4 mt-4 overflow-x-auto pb-2">
             {/* Card 1: My Passes */}
@@ -260,8 +269,8 @@ export default function RestaurantPage() {
 
               {/* Text in bottom-left */}
               <div className="absolute bottom-3 left-4">
-                <p className="text-xs text-gray-500 font-medium">My Passes</p>
-                <p className="text-sm font-semibold text-gray-900">
+                <p className="font-14 text-gray-500 font-medium">My Passes</p>
+                <p className="font-16 font-semibold text-gray-900">
                   {
                     transactions.filter(
                       (t) =>
@@ -290,8 +299,8 @@ export default function RestaurantPage() {
               </div>
 
               <div className="absolute bottom-3 left-4">
-                <p className="text-xs text-gray-500 font-medium">My Orders</p>
-                <p className="text-sm font-semibold text-gray-900">
+                <p className="font-14 text-gray-500 font-medium">My Orders</p>
+                <p className="font-16 font-semibold text-gray-900">
                   {
                     transactions.filter(
                       (t) =>
@@ -312,12 +321,20 @@ export default function RestaurantPage() {
           )}
 
           <div className="mt-8">
-            {restaurant && <AccessCardSlider restaurant={restaurant} />}
+            {restaurant && cart && (
+              <AccessCardSlider
+                restaurant={restaurant}
+                cart={cart}
+                addToCart={addToCart}
+                removeFromCart={removeFromCart}
+                displayCartPasses={false}
+              />
+            )}
           </div>
           {/* Awesome Deals Section */}
           <div className="mt-8">
             <div className="flex justify-between items-center mb-2">
-              <h2 className="text-xl font-bold">Awesome Deals 🍻</h2>
+              <h1 className="text-xl font-bold">Awesome Deals</h1>
               <button
                 className="text-sm font-semibold "
                 style={{ color: restaurant?.metadata["primaryColor"] }}
@@ -330,7 +347,7 @@ export default function RestaurantPage() {
             </div>
 
             <div className="overflow-x-auto pb-2 no-scrollbar">
-              <div className="flex gap-2 whitespace-nowrap">
+              <div className="flex gap-4 whitespace-nowrap">
                 {policies
                   .filter(
                     (policy) =>
@@ -369,8 +386,10 @@ export default function RestaurantPage() {
             {Object.keys(MENU_DISPLAY_MAP).map((filter) => (
               <button
                 key={filter}
-                className={`px-4 py-1.5 rounded-full text-sm whitespace-nowrap ${
-                  activeFilter === filter ? `border` : "border text-gray-500"
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full whitespace-nowrap border transition-all duration-150 ${
+                  activeFilter === filter
+                    ? "text-sm font-medium"
+                    : "text-sm text-gray-500"
                 }`}
                 style={
                   activeFilter === filter
@@ -379,14 +398,13 @@ export default function RestaurantPage() {
                         borderColor: restaurant?.metadata.primaryColor,
                       }
                     : {
-                        backgroundColor: `#f6f8fa`,
+                        backgroundColor: "#f6f8fa",
+                        borderColor: "#e5e7eb", // neutral border for inactive
                       }
                 }
                 onClick={() => {
                   setActiveFilter(filter);
-                  const timeout = setTimeout(() => {
-                    scrollToOrderDrinks();
-                  }, 100);
+                  setTimeout(() => scrollToOrderDrinks(), 100);
                 }}
               >
                 {filter}
@@ -406,24 +424,21 @@ export default function RestaurantPage() {
             />
           )}
         </div>
-        <button
-          onClick={() => {
-            console.log(restaurant.menu);
-          }}
-        >
-          test
-        </button>
 
         {!userSession ? (
           <button
-            onClick={() => {
-              setShowSignInModal(true);
-            }}
+            onClick={() => setShowSignInModal(true)}
+            className="mt-5 mb-5 px-4 py-2 bg-blue-600 text-white rounded-full font-medium shadow-sm hover:bg-blue-700 transition"
           >
             Sign in
           </button>
         ) : (
-          <button onClick={logout}>log out</button>
+          <button
+            onClick={logout}
+            className="mt-5 mb-5 px-4 py-2 bg-gray-200 text-gray-800 rounded-full font-medium shadow-sm hover:bg-gray-300 transition"
+          >
+            Log out
+          </button>
         )}
         {restaurant && (
           <GoToCartButton
@@ -433,15 +448,13 @@ export default function RestaurantPage() {
             }
           />
         )}
-        <button
-          onClick={() => {
-            // toast("Wow so easy !");
-            setShowSignInModal(true);
-          }}
-        >
-          show sign in modal
-        </button>
         <ToastContainer />
+        <Sidebar
+          isOpen={sidebarOpen}
+          onClose={() => {
+            setSidebarOpen(false);
+          }}
+        />
       </div>
     </div>
   ) : (
@@ -473,13 +486,6 @@ const RestaurantHeaderSkeleton = () => {
         <Skeleton width="100%" height="100%" />
       </div>
 
-      {/* Profile Image */}
-      <div className="absolute -bottom-12 left-5">
-        <div className="w-24 h-24 rounded-full border-4 border-white overflow-hidden">
-          <Skeleton circle width="100%" height="100%" />
-        </div>
-      </div>
-
       {/* Restaurant Info + Action Buttons */}
       <div className="mt-20 px-4 space-y-4">
         {/* Restaurant Name */}
@@ -492,7 +498,7 @@ const RestaurantHeaderSkeleton = () => {
           {[1, 2, 3].map((_, i) => (
             <div
               key={i}
-              className="flex-1 h-10 rounded-full overflow-hidden border border-gray-200 shadow-sm"
+              className="flex-1 h-11 rounded-full overflow-hidden border border-gray-200 shadow-sm"
             >
               <Skeleton width="100%" height="100%" />
             </div>

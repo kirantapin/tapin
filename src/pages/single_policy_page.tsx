@@ -6,7 +6,7 @@ import { ArrowLeft, ShoppingBag, Moon, ShoppingCart } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { titleCase } from "title-case";
-import { convertUtcToLocal, sentenceCase } from "@/utils/parse";
+import { convertUtcToLocal, getPolicyFlair, sentenceCase } from "@/utils/parse";
 import { PolicyDescriptionDisplay } from "@/components/display_utils/policy_description_display";
 import { CartManager } from "@/utils/cartManager";
 import { useAuth } from "@/context/auth_context";
@@ -95,9 +95,11 @@ export default function SinglePolicyPage() {
             }}
           />
 
-          <div className="absolute bottom-2 left-2 flex items-center gap-2 bg-black/70 text-white px-3 py-1 rounded-md">
+          <div className="absolute bottom-2 left-2 flex items-center gap-2 bg-black/70 text-white px-3 py-1 rounded-full">
             <Moon size={16} className="text-yellow-400" />
-            <span className="font-medium text-sm">Nightly Deal Use</span>
+            <span className="font-medium text-sm">
+              {getPolicyFlair(policy)}
+            </span>
           </div>
         </div>
 

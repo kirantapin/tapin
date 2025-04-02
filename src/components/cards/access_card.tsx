@@ -1,13 +1,18 @@
+import { Cart } from "@/types";
+import { isEqual } from "lodash";
+import { Minus, Plus, Trash2 } from "lucide-react";
 import { titleCase } from "title-case";
 
 interface CardProps {
-  baseColor: string;
+  cart: Cart;
+  primaryColor: string;
   venueName: string;
   title: string;
-  savings: string;
   regularPrice: number;
-  discountPrice: number;
   date: string;
+  itemPath: string[];
+  addToCart;
+  removeFromCart;
 }
 
 function generateGradientColors(baseColor: string) {
@@ -37,18 +42,22 @@ function generateGradientColors(baseColor: string) {
 }
 
 export default function Card({
-  baseColor = "#34A853",
-  venueName = "Whitlow's DC",
-  title = "Happy Hour",
-  savings = "Save $1.50 per drink",
-  regularPrice = 10,
-  discountPrice = 5,
-  date = "01/25",
+  cart,
+  primaryColor,
+  venueName,
+  title,
+  regularPrice,
+  date,
+  itemPath,
+  addToCart,
+  removeFromCart,
 }: CardProps) {
-  const colors = generateGradientColors(baseColor);
+  const colors = generateGradientColors(primaryColor);
+  const cartItem = cart.find((item) => isEqual(item.item.path, itemPath));
+  const quantity = cartItem?.quantity || 0;
 
   return (
-    <div className="w-full aspect-[9/5] rounded-3xl p-3 sm:p-4 relative overflow-hidden  text-white my-4">
+    <div className="w-full aspect-[9/5] rounded-3xl p-3 sm:p-4 relative overflow-hidden text-white my-4">
       <div
         style={{
           background: `linear-gradient(to bottom right, ${colors.from}, ${colors.via}, ${colors.to})`,
@@ -65,33 +74,70 @@ export default function Card({
       />
 
       {/* Date in top right corner */}
-      <div className="absolute top-3 sm:top-4 right-4 sm:right-6 text-sm text-white/80">
+      <div className="absolute top-3 sm:top-4 right-4 sm:right-6 text-sm text-white/150 font-[Gilroy]">
         {date}
       </div>
 
-      <div className="relative z-10 h-full flex flex-col">
+      {/* Main content */}
+      <div className="relative z-10 h-full flex flex-col pb-20">
+        {" "}
+        {/* pb-20 ensures space for bottom content */}
         <div className="space-y-1 sm:space-y-2">
           <div className="space-y-0.5">
             <p className="text-xs sm:text-sm text-white/80">{venueName}</p>
-            <h2 className="text-xl sm:text-2xl font-semibold">
+            <h2 className="text-2xl sm:text-2xl font-semibold">
               {titleCase(title)}
             </h2>
           </div>
         </div>
+      </div>
 
-        <div className="flex justify-between items-end mt-auto pt-2">
-          <div className="space-y-0.5">
-            <p className="text-[10px] sm:text-xs text-white/80">
-              Reg. Price: ${regularPrice}
-            </p>
-            <p className="text-xs sm:text-sm font-semibold">
-              Happy Hour: ${discountPrice}
-            </p>
-          </div>
-          <button className="bg-white hover:bg-gray-100 text-black text-xs sm:text-sm font-semibold py-1 sm:py-1.5 px-3 sm:px-4 rounded-full transition-colors duration-200">
-            Join Now
-          </button>
+      {/* Bottom pinned price + buttons */}
+      <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end z-20">
+        <div>
+          <p className="text-base sm:text-sm text-white">
+            Price:{" "}
+            <span className="font-normal">${regularPrice.toFixed(2)}</span>
+          </p>
         </div>
+
+        {quantity > 0 ? (
+          <div className="flex items-center bg-white rounded-full px-1 py-1">
+            <button
+              onClick={() =>
+                removeFromCart(cartItem?.id, { quantity: quantity - 1 })
+              }
+              className="w-6 h-6 flex items-center justify-center rounded-full"
+              style={{ backgroundColor: primaryColor }}
+            >
+              {quantity > 1 ? (
+                <Minus className="w-4 h-4 text-white" />
+              ) : (
+                <Trash2 className="w-4 h-4 text-white" />
+              )}
+            </button>
+            <span className="mx-3 text-sm font-semibold text-gray-800">
+              {quantity}
+            </span>
+            <button
+              onClick={() => addToCart({ path: itemPath, modifiers: [] })}
+              className="w-6 h-6 flex items-center justify-center rounded-full"
+              style={{ backgroundColor: primaryColor }}
+            >
+              <Plus className="w-4 h-4 text-white" />
+            </button>
+          </div>
+        ) : (
+          <button
+            className="h-6 w-6 rounded-full flex items-center justify-center text-black"
+            style={{ backgroundColor: "white" }}
+            onClick={() => {
+              addToCart({ path: itemPath, modifiers: [] });
+            }}
+          >
+            <Plus className="h-4 w-4" />
+          </button>
+        )}
       </div>
     </div>
   );

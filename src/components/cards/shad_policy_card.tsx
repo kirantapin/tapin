@@ -7,7 +7,7 @@ import { project_url } from "@/utils/supabase_client";
 import { SINGLE_POLICY_PAGE_PATH } from "@/constants";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { titleCase } from "title-case";
-import { sentenceCase } from "@/utils/parse";
+import { getPolicyFlair, sentenceCase } from "@/utils/parse";
 
 export default function PolicyCard({
   policy,
@@ -50,7 +50,7 @@ export default function PolicyCard({
             }}
           />
           {/* Savings Badge */}
-          <div className="absolute bottom-3 left-3 flex items-center gap-2 bg-black/65 rounded-lg px-2 py-1">
+          <div className="absolute bottom-3 left-3 flex items-center gap-2 bg-black/80 rounded-full px-2 py-1">
             {/* Yellow Percentage Icon */}
             <div className="w-5 h-5 rounded-full bg-[#FFD700] flex items-center justify-center">
               <span className="text-black text-xs">%</span>
@@ -58,7 +58,7 @@ export default function PolicyCard({
 
             {/* Discount Text */}
             <span className="text-[#FFD700] font-semibold text-sm">
-              Save $2 Per Shot
+              {getPolicyFlair(policy)}
             </span>
           </div>
         </div>

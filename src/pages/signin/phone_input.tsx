@@ -65,11 +65,6 @@ export function PhoneInput({
           </button>
         </form>
 
-        <div className="mt-6 flex justify-between items-center">
-          <span className="text-gray-600">Don't Have an account?</span>
-          <button className="text-[#F5B14C]">Register</button>
-        </div>
-
         <div className="absolute bottom-12 left-0 right-0 text-center">
           <button onClick={onClose} className="text-gray-600 underline">
             Browse as Guest

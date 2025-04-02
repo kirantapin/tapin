@@ -55,9 +55,22 @@ p {
   font-weight: normal;
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+li,
+div,
+span {
+  font-family: "Gilroy", Arial, sans-serif;
+  font-weight: normal;
+}
+
 button {
-  font-family: "Gilroy", Arial, sans-serif !important;
-  font-weight: bold !important;
+  font-family: "Gilroy", Arial, sans-serif;
+  font-weight: bold;
 }
 
 @tailwind base;

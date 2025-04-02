@@ -199,7 +199,7 @@ export class CartManager {
     restaurant: Restaurant
   ): Promise<string | null> {
     // Check if the item already exists in the cart
-    console.log(item);
+    console.log("inside add to cart", item);
     const existingItemIndex = this.cart.findIndex((cartItem) =>
       isEqual(cartItem.item, item)
     );

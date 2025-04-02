@@ -1,5 +1,5 @@
 import { PASS_MENU_TAG } from "@/constants";
-import { Item } from "@/types";
+import { Item, Policy } from "@/types";
 import { titleCase } from "title-case";
 
 export const itemToStringDescription = (item: Item) => {
@@ -162,4 +162,30 @@ export function sentenceCase(text: string) {
   return text
     .toLowerCase()
     .replace(/(^\s*\w|[.!?]\s*\w)/g, (match) => match.toUpperCase());
+}
+
+export function getPolicyFlair(policy: Policy): string {
+  const action = policy.definition.action;
+  switch (action.type) {
+    case "add_free_item":
+      return `${action.quantity} Free Item${action.quantity > 1 ? "s" : ""}`;
+    case "apply_percent_discount":
+      return `${action.amount}% Off`;
+    case "apply_fixed_discount":
+      return `$${action.amount} Off`;
+    case "apply_point_multiplier":
+      return `${action.amount}x Points`;
+    case "apply_point_cost":
+      return `Redeem for ${action.amount} Points`;
+    case "apply_order_point_multiplier":
+      return `${action.amount}x Points on Whole Order`;
+    case "apply_fixed_order_discount":
+      return `$${action.amount} Off Whole Order`;
+    case "apply_blanket_price":
+      return `Whole Order is $${action.amount}`;
+    case "apply_order_percent_discount":
+      return `${action.amount}% Off Whole Order`;
+    default:
+      return "";
+  }
 }

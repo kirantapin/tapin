@@ -1,12 +1,23 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import AccessCard from "@/components/cards/access_card.tsx";
-import { Restaurant } from "@/types";
+import { Cart, CartItem, Restaurant } from "@/types";
 import { PASS_MENU_TAG } from "@/constants";
 
-const AccessCardSlider = ({ restaurant }: { restaurant: Restaurant }) => {
+const AccessCardSlider = ({
+  cart,
+  restaurant,
+  addToCart,
+  removeFromCart,
+  displayCartPasses = false,
+}: {
+  cart: Cart;
+  restaurant: Restaurant;
+  addToCart;
+  removeFromCart;
+  displayCartPasses: boolean;
+}) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollContainerRef = useRef(null);
-  const accessCards = restaurant.menu[PASS_MENU_TAG];
 
   // Function to update active card based on scroll position
   const handleScroll = () => {
@@ -27,36 +38,81 @@ const AccessCardSlider = ({ restaurant }: { restaurant: Restaurant }) => {
     });
   };
 
+  const flatAccessCards = useMemo(() => {
+    const flattened = [];
+
+    if (displayCartPasses) {
+      for (const cartItem of cart) {
+        const item = cartItem.item;
+        if (item.path[0] === PASS_MENU_TAG) {
+          flattened.push({
+            name: item.path[1],
+            date: item.path[2],
+            itemInfo: {
+              ...restaurant.menu[PASS_MENU_TAG][item.path[1]][item.path[2]],
+              for_date: item.path[1],
+            },
+          });
+        }
+      }
+      return flattened;
+    }
+
+    for (const [name, dateObjects] of Object.entries(
+      restaurant.menu[PASS_MENU_TAG]
+    )) {
+      for (const [date, itemInfo] of Object.entries(dateObjects)) {
+        flattened.push({
+          name,
+          date,
+          itemInfo: { ...itemInfo, for_date: date },
+        });
+      }
+    }
+
+    return flattened;
+  }, [restaurant, cart]);
+
   return (
     <div className="mt-8">
       {/* Scrollable Access Cards Container */}
-      <div
-        ref={scrollContainerRef}
-        className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar"
-        onScroll={handleScroll}
-      >
-        {Object.entries(accessCards).map(([name, dateObjects], index) =>
-          Object.entries(dateObjects).map(([date, itemInfo], index) => {
-            itemInfo["for_date"] = date;
+      {!displayCartPasses && (
+        <h1 className="text-xl font-bold">Live Passes at {restaurant.name}</h1>
+      )}
+      {flatAccessCards.length > 0 ? (
+        <div
+          ref={scrollContainerRef}
+          className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar"
+          onScroll={handleScroll}
+        >
+          {flatAccessCards.map(({ name, date, itemInfo }, index) => {
             return (
               <div key={index} className="snap-center shrink-0 w-full px-4">
                 <AccessCard
-                  baseColor={restaurant.metadata.primaryColor}
+                  cart={cart}
+                  primaryColor={restaurant.metadata.primaryColor}
                   venueName={restaurant?.name}
                   title={name}
-                  savings="Save $1.50 per drink"
                   regularPrice={itemInfo.price}
-                  discountPrice={5}
                   date={date}
+                  itemPath={[PASS_MENU_TAG, name, date]}
+                  addToCart={addToCart}
+                  removeFromCart={removeFromCart}
                 />
               </div>
             );
-          })
-        )}
-      </div>
+          })}
+        </div>
+      ) : (
+        !displayCartPasses && (
+          <div className="flex justify-center mt-4">
+            <h2>No Live Passes at this time</h2>
+          </div>
+        )
+      )}
       {/* Scroll Indicator Dots */}
       <div className="flex justify-center">
-        {Object.entries(accessCards).map((_, index) => (
+        {flatAccessCards.map(({ name, date, itemInfo }, index) => (
           <button
             key={index}
             onClick={() => scrollToCard(index)}

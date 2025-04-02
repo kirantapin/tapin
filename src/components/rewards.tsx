@@ -41,6 +41,7 @@ const Rewards: React.FC<RewardsProps> = ({ userData, restaurant }) => {
     );
     setPointsToGo(nextLargest?.definition.action.amount - userPoints);
     setIntervals(roundedNumbers);
+    console.log("hello", progress > 100 ? 100 : progress);
     setWidthPercentage(progress > 100 ? 100 : progress);
   };
 
@@ -63,7 +64,7 @@ const Rewards: React.FC<RewardsProps> = ({ userData, restaurant }) => {
   return (
     <>
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">Rewards</h2>
+        <h1 className="text-xl font-bold">Rewards</h1>
         {/* <button
           onClick={() => {
             navigate(OFFERS_PAGE_PATH.replace(":id", restaurant.id), {
@@ -116,7 +117,7 @@ const Rewards: React.FC<RewardsProps> = ({ userData, restaurant }) => {
           {/* Progress Bar */}
           {widthPercentage !== null && intervals && (
             <>
-              <div className="mt-4 h-2 bg-gray-200 rounded-full w-full">
+              <div className="mt-4 h-3 bg-gray-200 rounded-full w-full">
                 <div
                   className="h-full  rounded-full transition-all duration-300"
                   style={{
