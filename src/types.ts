@@ -1,13 +1,11 @@
-import { StringDecoder } from "string_decoder";
-
 export type Cart = CartItem[];
 
 export interface VerifyOrderPayload {
   cart: Cart;
   userDealEffect: DealEffectPayload;
-  policy_id: string | null;
   restaurant_id: string;
   user_id: string | null;
+  request: { type: string; content: Item | string | number };
 }
 
 export interface VerifyOrderReturnPayload {
@@ -37,7 +35,7 @@ export interface CartResultsPayload {
 }
 
 export interface DealEffectPayload {
-  freeAddedItems: CartItem[];
+  addedItems: { policy_id: string; cartItem: CartItem }[];
   modifiedItems: ModifiedCartItem[];
   wholeCartModification: WholeCartModification | null;
 }
@@ -227,15 +225,6 @@ export type PolicyDefinitionCondition =
       quantity: number;
     }
   | {
-      type: "exact_quantity";
-      items: ItemSpecification[];
-      quantity: number;
-    }
-  | {
-      type: "total_quantity";
-      quantity: number;
-    }
-  | {
       type: "minimum_user_points";
       amount: number;
     }
@@ -277,8 +266,18 @@ export type PolicyDefinitionAction =
     }
   | { type: "apply_order_point_multiplier"; amount: number }
   | { type: "apply_fixed_order_discount"; amount: number }
-  | { type: "apply_blanket_price"; amount: number }
-  | { type: "apply_order_percent_discount"; amount: number };
+  | {
+      type: "apply_blanket_price";
+      amount: number;
+      items: { item: ItemSpecification; quantity: number }[];
+    }
+  | { type: "apply_order_percent_discount"; amount: number }
+  | {
+      type: "apply_add_on";
+      items: ItemSpecification[];
+      amount: number;
+      frequency: number;
+    };
 
 export interface HouseMixerTemplate {
   name: string;

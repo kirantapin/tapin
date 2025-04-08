@@ -1,5 +1,5 @@
 import { PASS_MENU_TAG } from "@/constants";
-import { Item, Policy } from "@/types";
+import { Item, ItemSpecification, Policy } from "@/types";
 import { titleCase } from "title-case";
 
 export const itemToStringDescription = (item: Item) => {
@@ -58,16 +58,7 @@ export const policyToStringDescription = (policy: Policy) => {
         return `At least ${listItemsToStringDescription(
           condition.quantity,
           condition.items
-        )} `;
-      case "exact_quantity":
-        return `Exactly ${listItemsToStringDescription(
-          condition.quantity,
-          condition.items
         )} in cart`;
-      case "total_quantity":
-        return `Your cart has exactly ${
-          condition.quantity > 1 ? `${condition.quantity} items` : "1 item"
-        }`;
       case "minimum_user_points":
         return `User has at least ${condition.amount} points`;
       case "time_range":
@@ -119,7 +110,7 @@ export const policyToStringDescription = (policy: Policy) => {
       case "apply_fixed_order_discount":
         return `Get a fixed discount of $${action.amount} on your order`;
       case "apply_blanket_price":
-        return `Your entire order is $${action.amount}`;
+        return `$${action.amount} total for select items`;
       case "apply_order_percent_discount":
         return `Get a ${action.amount}% discount on your entire order`;
       default:
@@ -182,10 +173,49 @@ export function getPolicyFlair(policy: Policy): string {
     case "apply_fixed_order_discount":
       return `$${action.amount} Off Whole Order`;
     case "apply_blanket_price":
-      return `Whole Order is $${action.amount}`;
+      return `$${action.amount} Total`;
     case "apply_order_percent_discount":
       return `${action.amount}% Off Whole Order`;
     default:
       return "";
   }
+}
+
+export function getItemName(item: ItemSpecification): string {
+  if (isPassItem(item)) {
+    return titleCase(item[1]);
+  }
+  return titleCase(item[item.length - 1]);
+}
+
+export function isPassItem(item: ItemSpecification): boolean {
+  return item[0] === PASS_MENU_TAG;
+}
+
+export function keywordExtraction(item: ItemSpecification): string[] {
+  const keywords: string[] = [];
+
+  // Add each path segment as a keyword
+  item.forEach((segment) => {
+    // Split segment into individual words and clean them
+    const words = segment
+      .toLowerCase()
+      .split(/[\s-]+/) // Split on spaces and hyphens
+      .filter((word) => word.length > 2) // Filter out very short words
+      .map((word) => word.trim());
+
+    keywords.push(...words);
+  });
+
+  // If it's a pass item, add "pass" as a keyword
+  if (isPassItem(item)) {
+    keywords.push("pass");
+  }
+
+  // Remove duplicates
+  const uniqueKeywords = [...new Set(keywords)];
+
+  // Filter out common words that aren't useful for search
+  const stopWords = ["the", "and", "with", "for", "from"];
+  return uniqueKeywords.filter((word) => !stopWords.includes(word));
 }

@@ -154,7 +154,7 @@ export default function SinglePolicyPage() {
             style={{ backgroundColor: restaurant?.metadata.primaryColor }}
             onClick={async () => {
               if (cartManager.current) {
-                const result = await cartManager.current.setPolicy(policy);
+                const result = await cartManager.current.addPolicy(policy);
                 if (result) {
                   toast(result, {
                     className: "bg-red-500 text-white",

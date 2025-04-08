@@ -10,7 +10,6 @@ import { act, useEffect, useState } from "react";
 import {
   LOYALTY_REWARD_TAG,
   NORMAL_DEAL_TAG,
-  PASS_TAG,
   RESTAURANT_PATH,
   SINGLE_POLICY_PAGE_PATH,
 } from "@/constants";
@@ -51,8 +50,7 @@ export default function PoliciesPage() {
   }, []);
 
   const tagMap = {
-    Deals: "",
-    "Pass Bundles": PASS_TAG,
+    Deals: NORMAL_DEAL_TAG,
     Rewards: LOYALTY_REWARD_TAG,
   };
 

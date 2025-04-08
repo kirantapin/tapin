@@ -27,7 +27,17 @@ const PayButton = ({ payload, sanityCheck }) => {
       const { data, error } = await supabase_local.functions.invoke(
         "submit_order",
         {
-          body: payload,
+          body: {
+            user_id: payload.user_id,
+            restaurant_id: payload.restaurant_id,
+            totalWithTip: payload.totalWithTip,
+            connectedAccountId: payload.connectedAccountId,
+            cart: payload.state.cart,
+            userDealEffect: payload.state.dealEffect,
+            userPolicy: payload.state.selectedPolicy,
+            userCartResults: payload.state.cartResults,
+            token: payload.state.token,
+          },
         }
       );
       if (error || !data) return null;
@@ -163,7 +173,7 @@ const PayButton = ({ payload, sanityCheck }) => {
 };
 
 function ApplePayButton({ payload, sanityCheck }) {
-  return payload.token ? (
+  return payload.state.token ? (
     <Elements
       stripe={stripePromise}
       options={{

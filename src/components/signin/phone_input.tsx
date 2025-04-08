@@ -30,8 +30,8 @@ export function PhoneInput({
       <div className="mt-10">
         <h1 className="text-4xl font-bold mb-4">Login or sign up</h1>
         <p className="text-xl text-gray-600 mb-12">
-          New to Tap In? Log in to find your next favorite bar and let the good
-          times pour!
+          New to Tap In? Log in to access exclusive deals and earn rewards, let
+          the good times pour!
         </p>
 
         <form onSubmit={handleSubmit}>

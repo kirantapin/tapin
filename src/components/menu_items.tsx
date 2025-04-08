@@ -3,22 +3,22 @@ import { Plus, Trash2, Minus } from "lucide-react";
 import {
   HOUSE_MIXER_LABEL,
   MENU_DISPLAY_MAP,
-  PASS_INDICATOR,
   PASS_MENU_TAG,
   SHOTS_SHOOTERS_LABEL,
 } from "@/constants";
 import LiquorForm from "./liquor_form";
 import { titleCase } from "title-case";
-import { Cart, Restaurant, SingleMenuItem } from "@/types";
+import { Cart, Item, Restaurant, SingleMenuItem } from "@/types";
 import { project_url } from "@/utils/supabase_client";
 import { isEqual } from "lodash";
+import { getMenuItemFromPath } from "@/utils/pricer";
+import { isPassItem } from "@/utils/parse";
 
-function DrinkItem({
+export function DrinkItem({
   key,
   cart,
-  restaurant_id,
+  restaurant,
   name,
-  menuItem,
   addToCart,
   removeFromCart,
   drinkPath,
@@ -26,16 +26,23 @@ function DrinkItem({
 }: {
   key: string;
   cart: Cart;
-  restaurant_id: string;
+  restaurant: Restaurant;
   name: string;
-  menuItem: SingleMenuItem;
-  addToCart;
-  removeFromCart;
+  addToCart: (item: Item) => Promise<void>;
+  removeFromCart: (item: Item) => Promise<void>;
   drinkPath: string[];
   primaryColor: string;
 }) {
-  const isPass = drinkPath[0] === PASS_MENU_TAG;
-  const cartItem = cart.find((item) => isEqual(item.item.path, drinkPath));
+  const isPass = isPassItem(drinkPath);
+  const menuItem = getMenuItemFromPath(drinkPath, restaurant);
+  const modifiedDrinkPath =
+    isPass && menuItem?.for_date
+      ? [...drinkPath, menuItem.for_date]
+      : drinkPath;
+  console.log(menuItem);
+  const cartItem = cart.find((item) =>
+    isEqual(item.item.path, modifiedDrinkPath)
+  );
   const quantity = cartItem?.quantity || 0;
 
   return (
@@ -44,8 +51,8 @@ function DrinkItem({
       <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 p-3">
         <img
           src={
-            menuItem.imageUrl ||
-            `${project_url}/storage/v1/object/public/restaurant_images/${restaurant_id}_profile.png`
+            menuItem?.imageUrl ||
+            `${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`
           }
           alt={name}
           className="h-full w-full object-cover"
@@ -59,24 +66,22 @@ function DrinkItem({
             <h3 className="font-bold text-base">{titleCase(name)}</h3>
             {isPass && (
               <span className="text-xs text-gray-500 ml-2">
-                {menuItem.for_date}
+                {menuItem?.for_date}
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-500 line-clamp-2">
-            {menuItem.description}
+          <p className="text-sm text-gray-500 custom-line-clamp">
+            {menuItem?.description}
           </p>
         </div>
 
         <div className="flex items-center justify-between mt-2">
-          <p className="font-bold text-base">${menuItem.price.toFixed(2)}</p>
+          <p className="font-bold text-base">${menuItem?.price?.toFixed(2)}</p>
 
           {quantity > 0 ? (
             <div className="flex items-center bg-white rounded-full px-3 py-1 ">
               <button
-                onClick={() =>
-                  removeFromCart(cartItem?.id, { quantity: quantity - 1 })
-                }
+                onClick={async () => await removeFromCart(cartItem?.id)}
                 className="w-6 h-6 flex items-center justify-center rounded-full"
                 style={{ backgroundColor: primaryColor }}
               >
@@ -90,9 +95,9 @@ function DrinkItem({
                 {quantity}
               </span>
               <button
-                onClick={() =>
-                  addToCart({
-                    path: drinkPath,
+                onClick={async () =>
+                  await addToCart({
+                    path: modifiedDrinkPath,
                     modifiers: [],
                   })
                 }
@@ -106,8 +111,11 @@ function DrinkItem({
             <button
               className="h-7 w-7 rounded-full flex items-center justify-center text-white"
               style={{ backgroundColor: primaryColor }}
-              onClick={() => {
-                addToCart({ path: drinkPath, modifiers: [] });
+              onClick={async () => {
+                await addToCart({
+                  path: modifiedDrinkPath,
+                  modifiers: [],
+                });
               }}
             >
               <Plus className="h-4 w-4" />
@@ -170,9 +178,8 @@ export const DrinkList = ({
                 <DrinkItem
                   key={name}
                   cart={cart}
-                  restaurant_id={restaurant.id}
+                  restaurant={restaurant}
                   name={name}
-                  menuItem={itemInfo}
                   addToCart={addToCart}
                   removeFromCart={removeFromCart}
                   drinkPath={[...MENU_DISPLAY_MAP[label], name, date]}
@@ -188,9 +195,8 @@ export const DrinkList = ({
             <DrinkItem
               key={name}
               cart={cart}
-              restaurant_id={restaurant.id}
+              restaurant={restaurant}
               name={name}
-              menuItem={menuItem}
               addToCart={addToCart}
               removeFromCart={removeFromCart}
               drinkPath={[...MENU_DISPLAY_MAP[label], name]}

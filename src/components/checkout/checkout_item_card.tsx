@@ -1,4 +1,4 @@
-import { CartItem, DealEffectPayload, Restaurant } from "@/types";
+import { CartItem, DealEffectPayload, Item, Restaurant } from "@/types";
 import { itemToStringDescription } from "@/utils/parse";
 import { modifiedItemFlair } from "@/utils/pricer";
 import { project_url } from "@/utils/supabase_client";
@@ -8,12 +8,14 @@ export function CheckoutItemCard({
   item,
   restaurant,
   dealEffect,
-  updateItem,
+  addToCart,
+  removeFromCart,
 }: {
   item: CartItem;
   restaurant: Restaurant;
   dealEffect: DealEffectPayload;
-  updateItem;
+  addToCart: (item: Item) => void;
+  removeFromCart: (itemId: number) => void;
 }) {
   const itemPath = item.item.path;
   const itemInfo = itemPath.reduce(
@@ -70,11 +72,7 @@ export function CheckoutItemCard({
       {/* Right: Quantity stepper */}
       <div className="flex items-center gap-3 bg-gray-100 rounded-full px-1 py-1">
         <button
-          onClick={() =>
-            updateItem(item.id, {
-              quantity: item.quantity - 1,
-            })
-          }
+          onClick={() => removeFromCart(item.id)}
           className="bg-white rounded-full p-1"
         >
           {item.quantity === 1 ? (
@@ -92,11 +90,7 @@ export function CheckoutItemCard({
         </span>
 
         <button
-          onClick={() =>
-            updateItem(item.id, {
-              quantity: item.quantity + 1,
-            })
-          }
+          onClick={() => addToCart(item.item)}
           className="bg-white rounded-full p-1"
         >
           <Plus className="w-5 h-5 text-black" />

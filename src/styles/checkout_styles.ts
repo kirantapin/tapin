@@ -46,7 +46,7 @@ export const checkoutStyles = {
   successText: "text-green-500 text-sm mt-2",
 
   pageContainer: "min-h-screen bg-white text-black p-6", // p-6 adds padding of 6 units (24px) to all sides
-  pageTitle: "text-3xl font-bold margin-bottom-8", // mb-8 stands for margin-bottom with 8 units of spacing (32px)
+  pageTitle: "text-2xl font-semibold margin-bottom-8", // mb-8 stands for margin-bottom with 8 units of spacing (32px)
   itemsContainer: "divide-y divide-gray-300", // mb-8 stands for margin-bottom with 8 units of spacing (32px)
   itemContainer: "flex justify-between items-center",
   itemInfo: "text-sm text-gray-600",

@@ -26,7 +26,7 @@ export const INFO_PAGE_PATH = "/restaurant/:id/info";
 
 //objects
 export const emptyDealEffect: DealEffectPayload = {
-  freeAddedItems: [],
+  addedItems: [],
   modifiedItems: [],
   wholeCartModification: null,
 };
@@ -59,8 +59,8 @@ export const MENU_DISPLAY_MAP = {
 };
 
 export const LOYALTY_REWARD_TAG = "loyalty_reward";
-export const NORMAL_DEAL_TAG = "";
-export const PASS_TAG = "pass";
+export const NORMAL_DEAL_TAG = "deal";
+export const ADD_ON_TAG = "add_on";
 
 // black greyscale 700
 // gray background grayscale 300
@@ -69,3 +69,9 @@ export const PASS_TAG = "pass";
 export const KNOWN_MODIFIERS = { double: 2, triple: 3 };
 
 export const PASS_INDICATOR = "@";
+
+export const ADD_ITEM = "add_item";
+export const REMOVE_ITEM = "remove_item";
+export const ADD_POLICY = "add_policy";
+export const REMOVE_POLICY = "remove_policy";
+export const SANITY_CHECK = "sanity_check";

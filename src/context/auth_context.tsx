@@ -37,7 +37,6 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const supabase = useSupabase();
   const [userData, setUserData] = useState<User | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [dealUses, setDealUses] = useState<DealUse[]>([]);
   const [loadingUser, setLoadingUser] = useState(true);
   const [showSignInModal, setShowSignInModal] = useState(false);
 
@@ -50,14 +49,12 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       return;
     }
     setUserSession(session);
-    fetchDealUses(phone);
     fetchUserData(phone);
     fetchTransactionData(phone);
   };
 
   useEffect(() => {
     setLoadingUser(true);
-    console.log("here");
     supabase.auth.getSession().then(({ data: { session } }) => {
       setData(session);
     });
@@ -111,35 +108,12 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Fetch deal uses
-  const fetchDealUses = async (userId: string) => {
-    try {
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      const formattedDate = weekAgo.toISOString();
-
-      const { data, error } = await supabase
-        .from("deal_use")
-        .select("*")
-        .eq("user_id", userId)
-        .gte("created_at", formattedDate)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-
-      setDealUses(data);
-    } catch (error) {
-      console.error("Error fetching deal uses:", error);
-    }
-  };
-
   // Logout function
   const logout = async () => {
     await supabase.auth.signOut();
     setUserSession(null);
     setUserData(null);
     setTransactions([]);
-    setDealUses([]);
   };
 
   return (

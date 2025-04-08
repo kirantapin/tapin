@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import AccessCard from "@/components/cards/access_card.tsx";
-import { Cart, CartItem, Restaurant } from "@/types";
+import { Cart, CartItem, DealEffectPayload, Restaurant } from "@/types";
 import { PASS_MENU_TAG } from "@/constants";
+import { modifiedItemFlair } from "@/utils/pricer";
 
 const AccessCardSlider = ({
   cart,
@@ -9,12 +10,14 @@ const AccessCardSlider = ({
   addToCart,
   removeFromCart,
   displayCartPasses = false,
+  dealEffect,
 }: {
   cart: Cart;
   restaurant: Restaurant;
   addToCart;
   removeFromCart;
   displayCartPasses: boolean;
+  dealEffect: DealEffectPayload | null;
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollContainerRef = useRef(null);
@@ -37,6 +40,13 @@ const AccessCardSlider = ({
       behavior: "smooth",
     });
   };
+  // if (dealEffect) {
+  //   const { oldPrice, currentPrice, discountDescription } = modifiedItemFlair(
+  //     item,
+  //     restaurant,
+  //     dealEffect
+  //   );
+  // }
 
   const flatAccessCards = useMemo(() => {
     const flattened = [];

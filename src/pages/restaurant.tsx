@@ -34,8 +34,8 @@ import {
   SIGNIN_PATH,
   OFFERS_PAGE_PATH,
   NORMAL_DEAL_TAG,
-  PASS_TAG,
   INFO_PAGE_PATH,
+  LOYALTY_REWARD_TAG,
 } from "../constants.ts";
 
 import { fetch_policies } from "../utils/queries/policies.ts";
@@ -52,6 +52,10 @@ import { ToastContainer, toast } from "react-toastify";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { Sidebar } from "@/components/sidebar.tsx";
+import { Sheet } from "react-modal-sheet";
+import DealCard from "@/components/cards/small_policy.tsx";
+import PolicyModal from "@/components/bottom_sheets/policy_modal.tsx";
+import { useCartManager } from "@/hooks/useCartManager.tsx";
 
 export default function RestaurantPage() {
   const { userSession, userData, transactions, logout, setShowSignInModal } =
@@ -59,14 +63,22 @@ export default function RestaurantPage() {
   const navigate = useNavigate();
   const [restaurant, setRestaurant] = useState<Restaurant>();
   const [policies, setPolicies] = useState<Policy[]>([]);
-  const [cart, setCart] = useState<Cart | null>();
   const { id: restaurant_id } = useParams<{ id: string }>();
   const [activeFilter, setActiveFilter] = useState(HOUSE_MIXER_LABEL);
   const orderDrinksRef = useRef<HTMLDivElement>(null);
-  const cartManager = useRef<CartManager | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [orderSearch, setOrderSearch] = useState<string>("");
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [policy, setPolicy] = useState<Policy | null>(null);
+  const {
+    state,
+    addToCart,
+    removeFromCart,
+    addPolicy,
+    removePolicy,
+    refreshCart,
+  } = useCartManager(restaurant as Restaurant, userSession);
 
   const scrollToOrderDrinks = () => {
     orderDrinksRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -77,18 +89,6 @@ export default function RestaurantPage() {
       navigate("/not_found_page");
     }
   }, []);
-
-  useEffect(() => {
-    const setManager = async () => {
-      if (!cartManager.current || !cartManager.current.userSession) {
-        console.log("there", userSession);
-        cartManager.current = new CartManager(restaurant_id, userSession);
-        await cartManager.current.init();
-        setCart(cartManager.current.cart);
-      }
-    };
-    setManager();
-  }, [userSession]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -104,19 +104,6 @@ export default function RestaurantPage() {
     };
     fetchData();
   }, []);
-
-  const addToCart = async (item: Item) => {
-    await cartManager.current?.addToCart(item, restaurant);
-    setCart(cartManager.current?.cart);
-  };
-
-  const removeFromCart = async (
-    itemKey: number,
-    updatedFields: Partial<CartItem>
-  ) => {
-    await cartManager.current?.updateItem(itemKey, updatedFields);
-    setCart(cartManager.current?.cart);
-  };
 
   return !loading ? (
     <div className="min-h-screen bg-gray-25">
@@ -177,7 +164,7 @@ export default function RestaurantPage() {
           >
             <Beer className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
             {/* <Info className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" /> */}
-            <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">
+            <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
               Order
             </span>
           </button>
@@ -188,13 +175,20 @@ export default function RestaurantPage() {
             }}
           >
             <Info className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
-            <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">
+            <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
               More Info
             </span>
           </button>
-          <button className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-200 bg-white shadow-sm">
+          <button
+            className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-200 bg-white shadow-sm"
+            onClick={() =>
+              navigate(OFFERS_PAGE_PATH.replace(":id", restaurant.id), {
+                state: { tag: LOYALTY_REWARD_TAG },
+              })
+            }
+          >
             <Gift className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
-            <span className="text-xs sm:text-sm text-gray-600 whitespace-nowrap">
+            <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
               Rewards
             </span>
           </button>
@@ -223,14 +217,14 @@ export default function RestaurantPage() {
                   </div>
                   <button
                     className="bg-white px-4 py-1 rounded mt-2 text-sm self-start"
-                    style={{ color: restaurant?.metadata["primaryColor"] }}
+                    style={{ color: restaurant?.metadata.primaryColor }}
                   >
                     Order Now
                   </button>
                 </div>
 
                 {/* Right: Image Block with full height and right rounding */}
-                {/* <div className="h-full w-32 rounded-r-3xl overflow-hidden">
+                <div className="h-full w-32 rounded-r-3xl overflow-hidden">
                   <img
                     src={
                       "https://www.life-publications.com/wp-content/uploads/2023/07/Party-in-the-Square-August-2023.jpg" ||
@@ -239,7 +233,7 @@ export default function RestaurantPage() {
                     alt="name"
                     className="h-full w-full object-cover"
                   />
-                </div> */}
+                </div>
               </div>
             ))}
           </div>
@@ -307,7 +301,7 @@ export default function RestaurantPage() {
                         t.fulfilled_by === null && t.item[0] !== PASS_MENU_TAG
                     ).length
                   }{" "}
-                  In Cart
+                  Items
                 </p>
               </div>
             </div>
@@ -321,10 +315,10 @@ export default function RestaurantPage() {
           )}
 
           <div className="mt-8">
-            {restaurant && cart && (
+            {restaurant && state.cart && (
               <AccessCardSlider
                 restaurant={restaurant}
-                cart={cart}
+                cart={state.cart}
                 addToCart={addToCart}
                 removeFromCart={removeFromCart}
                 displayCartPasses={false}
@@ -333,7 +327,7 @@ export default function RestaurantPage() {
           </div>
           {/* Awesome Deals Section */}
           <div className="mt-8">
-            <div className="flex justify-between items-center mb-2">
+            <div className="flex justify-between items-center mb-4">
               <h1 className="text-xl font-bold">Awesome Deals</h1>
               <button
                 className="text-sm font-semibold "
@@ -349,15 +343,14 @@ export default function RestaurantPage() {
             <div className="overflow-x-auto pb-2 no-scrollbar">
               <div className="flex gap-4 whitespace-nowrap">
                 {policies
-                  .filter(
-                    (policy) =>
-                      policy.definition.tag === NORMAL_DEAL_TAG ||
-                      policy.definition.tag === PASS_TAG
-                  )
+                  .filter((policy) => policy.definition.tag === NORMAL_DEAL_TAG)
                   .map((policy) => (
-                    <PolicyCard
+                    <DealCard
                       policy={policy}
+                      restaurant={restaurant}
                       primaryColor={restaurant?.metadata.primaryColor}
+                      setPolicy={setPolicy}
+                      setIsOpen={setIsOpen}
                     />
                   ))}
               </div>
@@ -415,12 +408,12 @@ export default function RestaurantPage() {
           {/* Drinks List */}
           {restaurant && (
             <DrinkList
-              cart={cart}
+              cart={state.cart}
               label={activeFilter}
               restaurant={restaurant}
               addToCart={addToCart}
               removeFromCart={removeFromCart}
-              primaryColor={restaurant.metadata.primaryColor}
+              primaryColor={restaurant.metadata.primaryColor as string}
             />
           )}
         </div>
@@ -444,7 +437,7 @@ export default function RestaurantPage() {
           <GoToCartButton
             restaurant={restaurant}
             cartCount={
-              cart?.reduce((total, item) => total + item.quantity, 0) || 0
+              state.cart.reduce((total, item) => total + item.quantity, 0) || 0
             }
           />
         )}
@@ -455,6 +448,18 @@ export default function RestaurantPage() {
             setSidebarOpen(false);
           }}
         />
+        {policy && (
+          <PolicyModal
+            isOpen={isOpen}
+            onClose={() => setIsOpen(false)}
+            policy={policy as Policy}
+            restaurant={restaurant as Restaurant}
+            onAddToCart={addPolicy}
+            cart={state.cart}
+            addToCart={addToCart}
+            removeFromCart={removeFromCart}
+          />
+        )}
       </div>
     </div>
   ) : (

@@ -1,21 +1,34 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Cart, Restaurant } from "@/types";
+import { Cart, CartResultsPayload, Restaurant } from "@/types";
 
 type TipSelectorProps = {
   setTip: (tip: number) => void;
-  cart: Cart;
+  cartResults: CartResultsPayload;
   restaurant: Restaurant;
+  tipAmounts: number[];
 };
-
-const tipOptions = ["$4", "$5", "$6", "Other"];
 
 export default function TipSelector({
   setTip,
-  cart,
+  cartResults,
   restaurant,
+  tipAmounts = [0.1, 0.15, 0.2],
 }: TipSelectorProps) {
-  const [selected, setSelected] = useState("$5");
+  const [selected, setSelected] = useState(
+    `${(tipAmounts[1] * cartResults.totalPrice).toFixed(2)}`
+  );
+
+  const tipOptions = [
+    `${(tipAmounts[0] * cartResults.totalPrice).toFixed(2)}`,
+    `${(tipAmounts[1] * cartResults.totalPrice).toFixed(2)}`,
+    `${(tipAmounts[2] * cartResults.totalPrice).toFixed(2)}`,
+    "Other",
+  ];
+
+  const _ = useMemo(() => {
+    setTip(tipAmounts[tipOptions.indexOf(selected)]);
+  }, [selected, tipOptions, tipAmounts]);
 
   return (
     <div className="relative flex w-full bg-gray-100 rounded-full p-1">
@@ -34,7 +47,9 @@ export default function TipSelector({
       {tipOptions.map((tip) => (
         <button
           key={tip}
-          onClick={() => setSelected(tip)}
+          onClick={() => {
+            setSelected(tip);
+          }}
           className={`relative z-10 flex-1 py-2 text-sm font-medium transition-colors 
             ${selected === tip ? "text-white" : "text-gray-600"}`}
         >

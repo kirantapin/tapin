@@ -1,4 +1,11 @@
-import { emptyDealEffect, MENU_DISPLAY_MAP } from "@/constants";
+import {
+  ADD_ITEM,
+  ADD_POLICY,
+  emptyDealEffect,
+  MENU_DISPLAY_MAP,
+  REMOVE_ITEM,
+  REMOVE_POLICY,
+} from "@/constants";
 import {
   Cart,
   CartItem,
@@ -14,7 +21,7 @@ import { isEqual } from "lodash";
 import { priceItem } from "./pricer";
 
 const localStorageCartTag = "_cart";
-const CART_EXPIRATION_MINUTES = 10;
+const CART_EXPIRATION_MINUTES = 15;
 
 export class CartManager {
   cart: Cart;
@@ -95,7 +102,11 @@ export class CartManager {
     localStorage.setItem(this.localStorageKey, JSON.stringify(data));
   }
 
-  private async verifyOrder(): Promise<void> {
+  private async verifyOrder(
+    type: string,
+    content: Item | string | number
+  ): Promise<void> {
+    console.log("verifyOrder", type, content);
     if (!this.userSession?.user?.phone) {
       this.cart = this.cart;
       this.dealEffect = emptyDealEffect;
@@ -109,9 +120,9 @@ export class CartManager {
     const payload: VerifyOrderPayload = {
       cart: this.cart,
       userDealEffect: this.dealEffect,
-      policy_id: this.selectedPolicy?.policy_id || null,
       restaurant_id: this.restaurant_id,
       user_id: this.userSession?.user.phone,
+      request: { type: type, content: content },
     };
 
     try {
@@ -167,7 +178,7 @@ export class CartManager {
     } else {
       this.dealEffect = {
         ...this.dealEffect,
-        freeAddedItems: this.dealEffect.freeAddedItems.map((item) =>
+        addedItems: this.dealEffect.addedItems.map((item) =>
           item.id === itemKey ? { ...item, ...updatedFields } : item
         ),
       };
@@ -194,42 +205,69 @@ export class CartManager {
     return null;
   }
 
+  public async addPolicy(policy: Policy): Promise<string | null> {
+    await this.verifyOrder(ADD_POLICY, policy.policy_id);
+    if (this.errorDisplay) {
+      return this.errorDisplay;
+    }
+    return null;
+  }
+
+  public async removePolicy(policy: Policy): Promise<string | null> {
+    await this.verifyOrder(REMOVE_POLICY, policy.policy_id);
+    console.log("inside remove policy", this.getCartState());
+    if (this.errorDisplay) {
+      return this.errorDisplay;
+    }
+    return null;
+  }
+
   public async addToCart(
     item: Item,
     restaurant: Restaurant
   ): Promise<string | null> {
     // Check if the item already exists in the cart
+    // console.log("inside add to cart", item);
+    // const existingItemIndex = this.cart.findIndex((cartItem) =>
+    //   isEqual(cartItem.item, item)
+    // );
+
+    // if (existingItemIndex >= 0) {
+    //   // If the item exists, increment the quantity
+    //   this.cart = this.cart.map((cartItem, index) =>
+    //     index === existingItemIndex
+    //       ? { ...cartItem, quantity: cartItem.quantity + 1 }
+    //       : cartItem
+    //   );
+    // } else {
+    //   // If the item doesn't exist, add it with the next available ID
+    //   const maxId = this.cart.reduce(
+    //     (max, cartItem) => Math.max(max, cartItem.id || 0),
+    //     0
+    //   );
+
+    //   const newCartItem = {
+    //     id: maxId + 1,
+    //     item: item,
+    //     quantity: 1,
+    //     price: priceItem(item, restaurant),
+    //     points: 100,
+    //     point_cost: 0,
+    //   };
+
+    //   this.cart = [...this.cart, newCartItem];
+    // }
     console.log("inside add to cart", item);
-    const existingItemIndex = this.cart.findIndex((cartItem) =>
-      isEqual(cartItem.item, item)
-    );
-
-    if (existingItemIndex >= 0) {
-      // If the item exists, increment the quantity
-      this.cart = this.cart.map((cartItem, index) =>
-        index === existingItemIndex
-          ? { ...cartItem, quantity: cartItem.quantity + 1 }
-          : cartItem
-      );
-    } else {
-      // If the item doesn't exist, add it with the next available ID
-      const maxId = this.cart.reduce(
-        (max, cartItem) => Math.max(max, cartItem.id || 0),
-        0
-      );
-
-      const newCartItem = {
-        id: maxId + 1,
-        item: item,
-        quantity: 1,
-        price: priceItem(item, restaurant),
-        points: 100,
-        point_cost: 0,
-      };
-
-      this.cart = [...this.cart, newCartItem];
+    await this.verifyOrder(ADD_ITEM, item);
+    if (this.errorDisplay) {
+      return this.errorDisplay;
     }
-    await this.verifyOrder();
+    return null;
+  }
+
+  public async removeFromCart(itemId: number): Promise<string | null> {
+    console.log("inside remove from cart", itemId);
+    await this.verifyOrder(REMOVE_ITEM, itemId);
     if (this.errorDisplay) {
       return this.errorDisplay;
     }
@@ -245,6 +283,16 @@ export class CartManager {
       errorDisplay: this.errorDisplay,
       token: this.token,
     };
+  }
+
+  public getActivePolicies(): string[] {
+    const policyIds = this.dealEffect.modifiedItems
+      .map((item) => item.policy_id)
+      .concat(this.dealEffect.addedItems.map((item) => item.policy_id));
+    if (this.dealEffect.wholeCartModification?.policy_id) {
+      policyIds.push(this.dealEffect.wholeCartModification.policy_id);
+    }
+    return policyIds;
   }
 
   public async refresh(): Promise<string | null> {

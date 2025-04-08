@@ -1,18 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { Policy, Restaurant } from "@/types";
+import { useNavigate } from "react-router-dom";
+import { Policy, Restaurant, User } from "@/types";
 import { fetch_policies } from "@/utils/queries/policies";
-import {
-  PASS_TAG,
-  NORMAL_DEAL_TAG,
-  LOYALTY_REWARD_TAG,
-  RESTAURANT_PATH,
-  OFFERS_PAGE_PATH,
-  LOYALTY_REWARD_PATH,
-} from "@/constants";
-import { fetchRestaurantById } from "@/utils/queries/restaurant";
+import { LOYALTY_REWARD_TAG, OFFERS_PAGE_PATH } from "@/constants";
 import { ChevronUp, ChevronDown } from "lucide-react";
-import { rest } from "lodash";
 import { itemToStringDescription } from "@/utils/parse";
 
 interface RewardsProps {
@@ -22,12 +13,11 @@ interface RewardsProps {
 
 const Rewards: React.FC<RewardsProps> = ({ userData, restaurant }) => {
   const userPoints = userData.points[restaurant.id];
-  const location = useLocation();
   const [loyaltyPolicies, setLoyaltyPolicies] = useState<Policy[]>([]);
   const navigate = useNavigate();
-  const [intervals, setIntervals] = useState();
-  const [widthPercentage, setWidthPercentage] = useState(null);
-  const [pointsToGo, setPointsToGo] = useState();
+  const [intervals, setIntervals] = useState<number[]>([]);
+  const [widthPercentage, setWidthPercentage] = useState<number | null>(null);
+  const [pointsToGo, setPointsToGo] = useState<number | null>(null);
   const [isOpen, setIsOpen] = useState(true);
 
   const computeRange = (policies: Policy[]) => {
