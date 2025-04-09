@@ -2,6 +2,7 @@ import { OFFERS_PAGE_PATH, SINGLE_POLICY_PAGE_PATH } from "@/constants";
 import { Policy, Restaurant } from "@/types";
 import { Tag, ChevronRight } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { titleCase } from "title-case";
 
 type DealPreOrderBarProps = {
   policy: Policy | null;
@@ -40,8 +41,8 @@ export default function DealPreOrderBar({
           }
         }}
       >
-        <span className="text-gray-800 text-sm font-medium">
-          {policy ? policy.name : "Checkout Exclusive Deals"}
+        <span className="text-gray-800 text-md font-medium">
+          {policy ? titleCase(policy.name) : "Checkout Exclusive Deals"}
         </span>
         <ChevronRight size={16} className="text-gray-800" />
       </div>

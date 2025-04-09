@@ -1,8 +1,9 @@
 import { CartItem, DealEffectPayload, Item, Restaurant } from "@/types";
 import { itemToStringDescription } from "@/utils/parse";
-import { modifiedItemFlair } from "@/utils/pricer";
+import { getMenuItemFromPath, modifiedItemFlair } from "@/utils/pricer";
 import { project_url } from "@/utils/supabase_client";
 import { Minus, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
 
 export function CheckoutItemCard({
   item,
@@ -18,16 +19,14 @@ export function CheckoutItemCard({
   removeFromCart: (itemId: number) => void;
 }) {
   const itemPath = item.item.path;
-  const itemInfo = itemPath.reduce(
-    (acc, key) => (acc && acc[key] !== undefined ? acc[key] : null),
-    restaurant.menu
-  );
+  const itemInfo = getMenuItemFromPath(itemPath, restaurant);
 
   const { oldPrice, currentPrice, discountDescription } = modifiedItemFlair(
     item,
     restaurant,
     dealEffect
   );
+  const [loading, setLoading] = useState(false);
 
   return (
     <div className="flex items-center justify-between py-4">
@@ -59,7 +58,7 @@ export function CheckoutItemCard({
             )}
             {discountDescription && (
               <span
-                className="bg-[#cda852] text-sm bg-yellow-500 text-white px-2 py-0.5 rounded font-semibold"
+                className="bg-[#cda852] text-xs text-white px-2 py-0.5 rounded font-semibold"
                 style={{ backgroundColor: restaurant.metadata.primaryColor }}
               >
                 {discountDescription}
@@ -72,7 +71,11 @@ export function CheckoutItemCard({
       {/* Right: Quantity stepper */}
       <div className="flex items-center gap-3 bg-gray-100 rounded-full px-1 py-1">
         <button
-          onClick={() => removeFromCart(item.id)}
+          onClick={async () => {
+            setLoading(true);
+            await removeFromCart(item.id);
+            setLoading(false);
+          }}
           className="bg-white rounded-full p-1"
         >
           {item.quantity === 1 ? (
@@ -86,11 +89,19 @@ export function CheckoutItemCard({
         </button>
 
         <span className="text-sm font-medium text-gray-900">
-          {item.quantity}
+          {loading ? (
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-800 border-t-transparent" />
+          ) : (
+            item.quantity
+          )}
         </span>
 
         <button
-          onClick={() => addToCart(item.item)}
+          onClick={async () => {
+            setLoading(true);
+            await addToCart(item.item);
+            setLoading(false);
+          }}
           className="bg-white rounded-full p-1"
         >
           <Plus className="w-5 h-5 text-black" />

@@ -3,16 +3,21 @@ import { useNavigate } from "react-router-dom";
 import { Policy, Restaurant, User } from "@/types";
 import { fetch_policies } from "@/utils/queries/policies";
 import { LOYALTY_REWARD_TAG, OFFERS_PAGE_PATH } from "@/constants";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronUp, ChevronDown, ChevronRight } from "lucide-react";
 import { itemToStringDescription } from "@/utils/parse";
 
 interface RewardsProps {
   userData: User;
   restaurant: Restaurant;
+  onIntentionToRedeem: (policy: Policy) => void;
 }
 
-const Rewards: React.FC<RewardsProps> = ({ userData, restaurant }) => {
-  const userPoints = userData.points[restaurant.id];
+const Rewards: React.FC<RewardsProps> = ({
+  userData,
+  restaurant,
+  onIntentionToRedeem,
+}) => {
+  const userPoints = userData.points[restaurant.id] || 0;
   const [loyaltyPolicies, setLoyaltyPolicies] = useState<Policy[]>([]);
   const navigate = useNavigate();
   const [intervals, setIntervals] = useState<number[]>([]);
@@ -55,19 +60,6 @@ const Rewards: React.FC<RewardsProps> = ({ userData, restaurant }) => {
     <>
       <div className="flex justify-between items-center">
         <h1 className="text-xl font-bold">Rewards</h1>
-        {/* <button
-          onClick={() => {
-            navigate(OFFERS_PAGE_PATH.replace(":id", restaurant.id), {
-              state: {
-                tag: LOYALTY_REWARD_TAG,
-              },
-            });
-          }}
-          className=" text-sm hover:underline font-semibold"
-          style={{ color: restaurant.metadata.primaryColor }}
-        >
-          View Rewards
-        </button> */}
         <button
           onClick={() => {
             setIsOpen(!isOpen); // Toggles the arrow direction
@@ -141,7 +133,7 @@ const Rewards: React.FC<RewardsProps> = ({ userData, restaurant }) => {
             {loyaltyPolicies.map((policy) => (
               <div
                 key={policy.policy_id}
-                className="grid grid-cols-[4rem_6rem_auto] items-center gap-4"
+                className="grid grid-cols-[4rem_6rem_1fr_auto] items-center gap-4"
               >
                 {/* Image - Fixed Width */}
                 <div className="w-12 h-12 flex items-center justify-center">
@@ -167,6 +159,17 @@ const Rewards: React.FC<RewardsProps> = ({ userData, restaurant }) => {
                     modifiers: [],
                   })}
                 </div>
+
+                {/* Chevron - Auto Width */}
+                {userPoints >= policy.definition.conditions[0].amount && (
+                  <div
+                    className="text-gray-700 inline-flex items-center bg-white rounded-full px-2 py-1 w-fit border border-gray-400"
+                    style={{ color: restaurant.metadata.primaryColor }}
+                    onClick={() => onIntentionToRedeem(policy)}
+                  >
+                    <span className="text-[10px]">Redeem</span>
+                  </div>
+                )}
               </div>
             ))}
           </div>

@@ -1,7 +1,7 @@
 import { ADD_ON_TAG, NORMAL_DEAL_TAG } from "@/constants";
 import { fetch_policies } from "./queries/policies";
 import { supabase } from "./supabase_client";
-import { Cart, Policy } from "@/types";
+import { Cart, DealEffectPayload, Policy } from "@/types";
 import { getMissingItemsForPolicy } from "./item_recommender";
 import { isPassItem } from "./parse";
 
@@ -28,6 +28,35 @@ export class PolicyManager {
     return this.policies.filter(
       (policy) => policy.definition.tag === NORMAL_DEAL_TAG
     );
+  }
+
+  getRecommendedDeals(cart: Cart, dealeffect: DealEffectPayload): Policy[] {
+    const activePolicies = this.getActivePolicies(dealeffect);
+    const activeDeal = activePolicies.some(
+      (policy) => policy.definition.tag === NORMAL_DEAL_TAG
+    );
+    if (activeDeal) {
+      return [];
+    }
+    const deals = this.getDeals();
+    const sortedDeals = deals
+      .map((deal) => ({
+        deal,
+        missingItems: getMissingItemsForPolicy(deal, cart),
+      }))
+      .sort((a, b) => {
+        const sumA = a.missingItems.reduce(
+          (sum, item) => sum + item.quantityNeeded,
+          0
+        );
+        const sumB = b.missingItems.reduce(
+          (sum, item) => sum + item.quantityNeeded,
+          0
+        );
+        return sumA - sumB;
+      })
+      .map(({ deal }) => deal);
+    return sortedDeals;
   }
 
   getAddOns(cart: Cart): {
@@ -71,5 +100,50 @@ export class PolicyManager {
 
   getAllPolicies(): Policy[] {
     return this.policies;
+  }
+
+  public getActivePolicies(dealeffect: DealEffectPayload): Policy[] {
+    const activePolicyIds = new Set<string>();
+
+    // Get policy IDs from added items
+    dealeffect.addedItems.forEach(({ policy_id }) => {
+      activePolicyIds.add(policy_id);
+    });
+
+    // Get policy IDs from modified items
+    dealeffect.modifiedItems.forEach(({ policy_id }) => {
+      activePolicyIds.add(policy_id);
+    });
+
+    // Get policy ID from whole cart modification if it exists
+    if (dealeffect.wholeCartModification) {
+      activePolicyIds.add(dealeffect.wholeCartModification.policy_id);
+    }
+
+    // Return policies that match the active IDs
+    return this.policies.filter((policy) =>
+      activePolicyIds.has(policy.policy_id)
+    );
+  }
+  public static getActivePolicyIds(dealeffect: DealEffectPayload): Set<string> {
+    const activePolicyIds = new Set<string>();
+
+    // Get policy IDs from added items
+    dealeffect.addedItems.forEach(({ policy_id }) => {
+      activePolicyIds.add(policy_id);
+    });
+
+    // Get policy IDs from modified items
+    dealeffect.modifiedItems.forEach(({ policy_id }) => {
+      activePolicyIds.add(policy_id);
+    });
+
+    // Get policy ID from whole cart modification if it exists
+    if (dealeffect.wholeCartModification) {
+      activePolicyIds.add(dealeffect.wholeCartModification.policy_id);
+    }
+
+    // Return policies that match the active IDs
+    return activePolicyIds;
   }
 }

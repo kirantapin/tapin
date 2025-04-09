@@ -5,7 +5,9 @@ export interface VerifyOrderPayload {
   userDealEffect: DealEffectPayload;
   restaurant_id: string;
   user_id: string | null;
+  cartResults: CartResultsPayload | null;
   request: { type: string; content: Item | string | number };
+  jwtToken: string | null;
 }
 
 export interface VerifyOrderReturnPayload {
@@ -40,6 +42,21 @@ export interface DealEffectPayload {
   wholeCartModification: WholeCartModification | null;
 }
 
+export interface WholeCartModification {
+  policy_id: string;
+  modificationType: string;
+  amount: number;
+}
+
+export interface ModifiedCartItem {
+  id: number;
+  policy_id: string;
+  modificationType: string;
+  amount: number;
+  quantity: number;
+  maxEffectedItems: number | null;
+}
+
 export interface CartItem {
   id: number;
   item: Item;
@@ -47,18 +64,6 @@ export interface CartItem {
   price: number;
   points: number;
   point_cost: number | 0;
-}
-
-export interface WholeCartModification {
-  modificationType: string;
-  amount: number;
-}
-
-export interface ModifiedCartItem {
-  id: number;
-  modificationType: string;
-  amount: number;
-  quantity: number;
 }
 
 export interface Item {

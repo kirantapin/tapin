@@ -12,6 +12,7 @@ import {
 } from "../types";
 import { UserSession } from "../types";
 import { emptyDealEffect } from "@/constants";
+import { isPassItem } from "@/utils/parse";
 
 interface CartState {
   cart: Cart;
@@ -52,7 +53,7 @@ export function useCartManager(
         cartManagerRef.current.userSession !== userSession
       ) {
         cartManagerRef.current = new CartManager(restaurant.id, userSession);
-        await cartManagerRef.current.init();
+        // await cartManagerRef.current.init();
         dispatch(cartManagerRef.current.getCartState());
       }
     };
@@ -67,9 +68,9 @@ export function useCartManager(
     dispatch(cartManagerRef.current.getCartState());
 
     if (result) {
-      toast.error(result);
+      triggerToast(result, "error");
     } else {
-      toast.success("Item added to cart");
+      triggerToast("Item added to cart", "success");
     }
   };
 
@@ -79,7 +80,7 @@ export function useCartManager(
     dispatch(cartManagerRef.current.getCartState());
 
     if (result) {
-      toast.error(result);
+      triggerToast(result, "error");
     }
   };
 
@@ -89,9 +90,9 @@ export function useCartManager(
     dispatch(cartManagerRef.current.getCartState());
 
     if (result) {
-      toast.error(result);
+      triggerToast(result, "error");
     } else {
-      toast.success("Deal added successfully");
+      triggerToast("Deal added successfully", "success");
     }
   };
 
@@ -101,9 +102,9 @@ export function useCartManager(
     dispatch(cartManagerRef.current.getCartState());
 
     if (result) {
-      toast.error(result);
+      triggerToast(result, "error");
     } else {
-      toast.success("Deal removed successfully");
+      triggerToast("Deal removed successfully", "success");
     }
   };
 
@@ -119,6 +120,13 @@ export function useCartManager(
     return cartManagerRef.current.getActivePolicies();
   };
 
+  const triggerToast = (message: string, type: "success" | "error") => {
+    toast[type](message, {
+      className: "font-[Gilroy]",
+      autoClose: 2000,
+    });
+  };
+
   return {
     state,
     dispatch,
@@ -129,5 +137,6 @@ export function useCartManager(
     refreshCart,
     getActivePolicies,
     cartManager: cartManagerRef.current,
+    isPreEntry: state.cart.some((item) => isPassItem(item.item.path)),
   };
 }

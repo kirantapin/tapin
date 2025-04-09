@@ -56,18 +56,28 @@ export function modifiedItemFlair(
     (added) => added.cartItem.id === cartItem.id
   );
 
+  const temp: {
+    oldPrice: number;
+    currentPrice: number;
+    discountDescription: string | null;
+  } = {
+    currentPrice: cartItem.price,
+    oldPrice: priceItem(cartItem.item, restaurant),
+    discountDescription: null,
+  };
+
   if (addedItem) {
-    return {
-      oldPrice: priceItem(addedItem.cartItem.item, restaurant),
-      currentPrice: addedItem.cartItem.price,
-      discountDescription:
-        addedItem.cartItem.price == 0
-          ? "Free Item"
-          : `$${
-              priceItem(addedItem.cartItem.item, restaurant) -
-              addedItem.cartItem.price
-            } off`,
-    };
+    if (addedItem.cartItem.point_cost > 0) {
+      temp["discountDescription"] = `-${addedItem.cartItem.point_cost} points`;
+    } else if (addedItem.cartItem.price == 0) {
+      temp["discountDescription"] = "Free Item";
+    } else {
+      temp["discountDescription"] = `$${
+        priceItem(addedItem.cartItem.item, restaurant) -
+        addedItem.cartItem.price
+      } off`;
+    }
+    return temp;
   }
 
   if (!modifiedItem) {
@@ -78,15 +88,6 @@ export function modifiedItemFlair(
     };
   }
 
-  const temp: {
-    oldPrice: number;
-    currentPrice: number;
-    discountDescription: string | null;
-  } = {
-    currentPrice: cartItem.price,
-    oldPrice: priceItem(cartItem.item, restaurant),
-    discountDescription: null,
-  };
   switch (modifiedItem.modificationType) {
     case "apply_fixed_discount":
       // Add logic for fixed discount
@@ -116,7 +117,7 @@ export function getMenuItemFromPath(
   restaurant: Restaurant
 ): SingleMenuItem | null {
   const isPass = isPassItem(path);
-
+  console.log(path, isPass);
   if (isPass) {
     // For pass items, get the menu item but use most recent date
     const passMenu = restaurant.menu[PASS_MENU_TAG];

@@ -3,6 +3,7 @@ import { Item, ItemSpecification, Policy } from "@/types";
 import { titleCase } from "title-case";
 
 export const itemToStringDescription = (item: Item) => {
+  console.log("item", item);
   const path = item.path;
   if (path[0] === PASS_MENU_TAG) {
     return titleCase(path[1]);
@@ -173,7 +174,7 @@ export function getPolicyFlair(policy: Policy): string {
     case "apply_fixed_order_discount":
       return `$${action.amount} Off Whole Order`;
     case "apply_blanket_price":
-      return `$${action.amount} Total`;
+      return `$${action.amount} Total on Select Items`;
     case "apply_order_percent_discount":
       return `${action.amount}% Off Whole Order`;
     default:
@@ -200,17 +201,12 @@ export function keywordExtraction(item: ItemSpecification): string[] {
     // Split segment into individual words and clean them
     const words = segment
       .toLowerCase()
-      .split(/[\s-]+/) // Split on spaces and hyphens
+      .split(/[\s\-_]+/) // Split on spaces, hyphens and underscores
       .filter((word) => word.length > 2) // Filter out very short words
       .map((word) => word.trim());
 
     keywords.push(...words);
   });
-
-  // If it's a pass item, add "pass" as a keyword
-  if (isPassItem(item)) {
-    keywords.push("pass");
-  }
 
   // Remove duplicates
   const uniqueKeywords = [...new Set(keywords)];

@@ -3,8 +3,9 @@ import { BadgeCheck, Check, Plus, Ticket } from "lucide-react";
 import { Policy } from "@/types";
 import { Restaurant } from "@/types";
 import { truncate } from "fs/promises";
-import { sentenceCase } from "@/utils/parse";
+import { getPolicyFlair, sentenceCase } from "@/utils/parse";
 import { titleCase } from "title-case";
+import { getMissingItemsForPolicy } from "@/utils/item_recommender";
 
 interface DealCardProps {
   policy: Policy;
@@ -14,11 +15,26 @@ interface DealCardProps {
 }
 
 const DealCard: React.FC<DealCardProps> = ({
+  cart,
   policy,
   restaurant,
   setPolicy,
   setIsOpen,
 }) => {
+  const missingItems = getMissingItemsForPolicy(policy, cart);
+  const flair = getPolicyFlair(policy);
+  const totalMissingQuantity = missingItems.reduce(
+    (sum, item) => sum + item.quantityNeeded,
+    0
+  );
+  const missingItemsText =
+    totalMissingQuantity > 0
+      ? `Add ${totalMissingQuantity} ${
+          totalMissingQuantity === 1 ? "item" : "items"
+        } to get ${flair}`
+      : "";
+
+  console.log(missingItems);
   return (
     <div
       className="flex-shrink-0 w-80"
@@ -45,6 +61,16 @@ const DealCard: React.FC<DealCardProps> = ({
               {titleCase(policy.name)}
             </h3>
           </div>
+
+          <p
+            className={`text-sm ${
+              totalMissingQuantity > 0 ? "text-red-500" : "text-green-500"
+            }`}
+          >
+            {totalMissingQuantity > 0
+              ? missingItemsText
+              : `Apply to cart for ${flair}`}
+          </p>
 
           {/* Button Row */}
           <div className="flex justify-between items-center mt-1">

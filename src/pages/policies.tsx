@@ -21,8 +21,13 @@ import { project_url } from "@/utils/supabase_client";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { getPolicyFlair } from "@/utils/parse";
+import DealCard from "@/components/cards/small_policy";
+import { useCartManager } from "@/hooks/useCartManager";
+import { useAuth } from "@/context/auth_context";
+import PolicyModal from "@/components/bottom_sheets/policy_modal";
 
 export default function PoliciesPage() {
+  const { userSession } = useAuth();
   const location = useLocation();
   const [activeTag, setActiveTag] = useState(
     location.state?.tag || NORMAL_DEAL_TAG
@@ -33,6 +38,12 @@ export default function PoliciesPage() {
   const [showSkeleton, setShowSkeleton] = useState<boolean>(true);
   const { id: restaurant_id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [activePolicy, setActivePolicy] = useState<Policy | null>(null);
+  const { state, addPolicy, addToCart, removeFromCart } = useCartManager(
+    restaurant as Restaurant,
+    userSession
+  );
 
   useEffect(() => {
     //fetch policies by restaurant ID
@@ -80,20 +91,8 @@ export default function PoliciesPage() {
         </button>
       </div>
 
-      {/* Search Bar */}
-      <div className="px-4 mt-4 mb-4">
-        <div className="flex items-center bg-white rounded-full px-4 py-3 border-2 border-gray-300 focus-within:border-gray-500 transition-colors duration-300">
-          <Search className="w-5 h-5 text-gray-400 mr-2" />
-          <input
-            type="text"
-            placeholder="Search"
-            className="bg-transparent outline-none w-full text-gray-700"
-          />
-        </div>
-      </div>
-
       {/* Tabs */}
-      <div className="flex px-4 gap-4 mb-4">
+      <div className="flex px-4 gap-4 mt-6 mb-8">
         {Object.keys(tagMap).map((tagLabel) => (
           <button
             key={tagMap[tagLabel]}
@@ -155,74 +154,81 @@ export default function PoliciesPage() {
           ))
         ) : activePolicies.length > 0 ? (
           activePolicies.map((policy) => (
-            <Card
-              key={policy.policy_id} // Added key to prevent React warnings
-              className="overflow-hidden border-gray-200 rounded-2xl"
-              onClick={() => {
-                navigate(
-                  SINGLE_POLICY_PAGE_PATH.replace(":id", restaurant_id).replace(
-                    ":policy_id",
-                    policy.policy_id
-                  ),
-                  {
-                    state: {
-                      previousPage: location.pathname,
-                    },
-                  }
-                );
-              }}
-            >
-              <CardHeader className="p-0">
-                <div className="relative mt-3 mx-3">
-                  <img
-                    src={
-                      policy.image_url ||
-                      `${project_url}/storage/v1/object/public/restaurant_images/${policy.restaurant_id}_profile.png`
-                    }
-                    alt="TapIn Logo"
-                    className="w-full h-48 object-cover rounded-2xl"
-                    onError={(e) => {
-                      e.currentTarget.src = ""; // Should be replaced with a generic TapIn logo in the public directory
-                    }}
-                  />
-                  <div className="absolute bottom-2 left-2 bg-black/80 text-yellow-400 px-2 py-1 rounded-full text-xs flex items-center font-semibold">
-                    <Moon className="w-3 h-3 mr-1" />
-                    {getPolicyFlair(policy)}
-                  </div>
-                </div>
-              </CardHeader>
+            // <Card
+            //   key={policy.policy_id} // Added key to prevent React warnings
+            //   className="overflow-hidden border-gray-200 rounded-2xl"
+            //   onClick={() => {
+            //     navigate(
+            //       SINGLE_POLICY_PAGE_PATH.replace(":id", restaurant_id).replace(
+            //         ":policy_id",
+            //         policy.policy_id
+            //       ),
+            //       {
+            //         state: {
+            //           previousPage: location.pathname,
+            //         },
+            //       }
+            //     );
+            //   }}
+            // >
+            //   <CardHeader className="p-0">
+            //     <div className="relative mt-3 mx-3">
+            //       <img
+            //         src={
+            //           policy.image_url ||
+            //           `${project_url}/storage/v1/object/public/restaurant_images/${policy.restaurant_id}_profile.png`
+            //         }
+            //         alt="TapIn Logo"
+            //         className="w-full h-48 object-cover rounded-2xl"
+            //         onError={(e) => {
+            //           e.currentTarget.src = ""; // Should be replaced with a generic TapIn logo in the public directory
+            //         }}
+            //       />
+            //       <div className="absolute bottom-2 left-2 bg-black/80 text-yellow-400 px-2 py-1 rounded-full text-xs flex items-center font-semibold">
+            //         <Moon className="w-3 h-3 mr-1" />
+            //         {getPolicyFlair(policy)}
+            //       </div>
+            //     </div>
+            //   </CardHeader>
 
-              <CardContent className="pt-3 pb-1">
-                <div className="flex justify-between items-start">
-                  <h3 className="text-lg font-bold">{policy.name}</h3>
-                  <button
-                    className="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center ml-2 flex-shrink-0"
-                    style={{
-                      backgroundColor: restaurant?.metadata.primaryColor,
-                    }}
-                  >
-                    <Plus className="w-5 h-5" />
-                  </button>
-                </div>
-                <p className="text-gray-600 text-sm">{policy.header}</p>
-              </CardContent>
+            //   <CardContent className="pt-3 pb-1">
+            //     <div className="flex justify-between items-start">
+            //       <h3 className="text-lg font-bold">{policy.name}</h3>
+            //       <button
+            //         className="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center ml-2 flex-shrink-0"
+            //         style={{
+            //           backgroundColor: restaurant?.metadata.primaryColor,
+            //         }}
+            //       >
+            //         <Plus className="w-5 h-5" />
+            //       </button>
+            //     </div>
+            //     <p className="text-gray-600 text-sm">{policy.header}</p>
+            //   </CardContent>
 
-              <CardFooter className="py-2">
-                <div>
-                  <div className="text-gray-500 text-sm">
-                    {policy.begin_time && policy.end_time
-                      ? "8 PM – 12 AM • Unlimited"
-                      : "Anytime"}
-                  </div>
-                  <div className="mt-1">
-                    <span className="bg-gray-400 text-white text-xs px-3 py-1 rounded-full">
-                      Open to All
-                    </span>
-                  </div>
-                </div>
-                <button onClick={() => console.log(policy)}></button>
-              </CardFooter>
-            </Card>
+            //   <CardFooter className="py-2">
+            //     <div>
+            //       <div className="text-gray-500 text-sm">
+            //         {policy.begin_time && policy.end_time
+            //           ? "8 PM – 12 AM • Unlimited"
+            //           : "Anytime"}
+            //       </div>
+            //       <div className="mt-1">
+            //         <span className="bg-gray-400 text-white text-xs px-3 py-1 rounded-full">
+            //           Open to All
+            //         </span>
+            //       </div>
+            //     </div>
+            //     <button onClick={() => console.log(policy)}></button>
+            //   </CardFooter>
+            // </Card>
+            <DealCard
+              cart={state.cart}
+              policy={policy}
+              restaurant={restaurant as Restaurant}
+              setPolicy={setActivePolicy}
+              setIsOpen={setIsOpen}
+            />
           ))
         ) : (
           <p className="text-gray-500 text-center">
@@ -230,6 +236,18 @@ export default function PoliciesPage() {
           </p>
         )}
       </div>
+      {activePolicy && (
+        <PolicyModal
+          policy={activePolicy}
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          restaurant={restaurant as Restaurant}
+          onAddToCart={addPolicy}
+          state={state}
+          addToCart={addToCart}
+          removeFromCart={removeFromCart}
+        />
+      )}
     </div>
   );
 }

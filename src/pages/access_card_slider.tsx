@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import AccessCard from "@/components/cards/access_card.tsx";
 import { Cart, CartItem, DealEffectPayload, Restaurant } from "@/types";
 import { PASS_MENU_TAG } from "@/constants";
+import { isPassItem } from "@/utils/parse";
 import { modifiedItemFlair } from "@/utils/pricer";
 
 const AccessCardSlider = ({
@@ -40,13 +41,6 @@ const AccessCardSlider = ({
       behavior: "smooth",
     });
   };
-  // if (dealEffect) {
-  //   const { oldPrice, currentPrice, discountDescription } = modifiedItemFlair(
-  //     item,
-  //     restaurant,
-  //     dealEffect
-  //   );
-  // }
 
   const flatAccessCards = useMemo(() => {
     const flattened = [];
@@ -54,15 +48,8 @@ const AccessCardSlider = ({
     if (displayCartPasses) {
       for (const cartItem of cart) {
         const item = cartItem.item;
-        if (item.path[0] === PASS_MENU_TAG) {
-          flattened.push({
-            name: item.path[1],
-            date: item.path[2],
-            itemInfo: {
-              ...restaurant.menu[PASS_MENU_TAG][item.path[1]][item.path[2]],
-              for_date: item.path[1],
-            },
-          });
+        if (isPassItem(item.path)) {
+          flattened.push(cartItem);
         }
       }
       return flattened;
@@ -80,6 +67,8 @@ const AccessCardSlider = ({
       }
     }
 
+    console.log(flattened, displayCartPasses);
+
     return flattened;
   }, [restaurant, cart]);
 
@@ -95,22 +84,43 @@ const AccessCardSlider = ({
           className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar"
           onScroll={handleScroll}
         >
-          {flatAccessCards.map(({ name, date, itemInfo }, index) => {
-            return (
-              <div key={index} className="snap-center shrink-0 w-full px-4">
-                <AccessCard
-                  cart={cart}
-                  primaryColor={restaurant.metadata.primaryColor}
-                  venueName={restaurant?.name}
-                  title={name}
-                  regularPrice={itemInfo.price}
-                  date={date}
-                  itemPath={[PASS_MENU_TAG, name, date]}
-                  addToCart={addToCart}
-                  removeFromCart={removeFromCart}
-                />
-              </div>
-            );
+          {flatAccessCards.map((x, index) => {
+            if (displayCartPasses) {
+              let modifiedFlair = null;
+              if (dealEffect) {
+                if (x) {
+                  modifiedFlair = modifiedItemFlair(x, restaurant, dealEffect);
+                }
+              }
+              console.log(x);
+              return (
+                <div key={index} className="snap-center shrink-0 w-full px-4">
+                  <AccessCard
+                    cart={cart}
+                    cartItem={x}
+                    restaurant={restaurant}
+                    itemPath={null}
+                    addToCart={addToCart}
+                    removeFromCart={removeFromCart}
+                    modifiedFlair={modifiedFlair}
+                  />
+                </div>
+              );
+            } else {
+              return (
+                <div key={index} className="snap-center shrink-0 w-full px-4">
+                  <AccessCard
+                    cart={cart}
+                    cartItemId={null}
+                    restaurant={restaurant}
+                    itemPath={[PASS_MENU_TAG, x.name, x.date]}
+                    addToCart={addToCart}
+                    removeFromCart={removeFromCart}
+                    modifiedFlair={null}
+                  />
+                </div>
+              );
+            }
           })}
         </div>
       ) : (

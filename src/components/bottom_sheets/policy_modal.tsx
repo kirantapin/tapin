@@ -9,12 +9,16 @@ import {
   convertUtcToLocal,
   getItemName,
   getPolicyFlair,
+  isPassItem,
   sentenceCase,
 } from "@/utils/parse";
 import { PolicyDescriptionDisplay } from "@/components/display_utils/policy_description_display";
 import { getMissingItemsForPolicy } from "@/utils/item_recommender";
 import { getMenuItemFromPath } from "@/utils/pricer";
 import { motion } from "framer-motion";
+import { PolicyManager } from "@/utils/policy_manager";
+import { DRINK_CHECKOUT_PATH } from "@/constants";
+import { useNavigate } from "react-router-dom";
 
 interface PolicyModalProps {
   isOpen: boolean;
@@ -22,7 +26,7 @@ interface PolicyModalProps {
   policy: Policy;
   restaurant: Restaurant;
   onAddToCart: (policy: Policy) => void;
-  cart: Cart;
+  state;
   addToCart: (item: any) => void;
   removeFromCart: (itemId: number, updates: any) => void;
 }
@@ -33,16 +37,16 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
   policy,
   restaurant,
   onAddToCart,
-  cart,
+  state,
   addToCart,
   removeFromCart,
 }) => {
-  console.log(cart);
-  const missingItemsResults = getMissingItemsForPolicy(policy, cart);
-  console.log(missingItemsResults);
+  const missingItemsResults = getMissingItemsForPolicy(policy, state.cart);
   const hasMissingItems = missingItemsResults.length > 0;
-  console.log(hasMissingItems);
-
+  const policyIsActive = PolicyManager.getActivePolicyIds(state.dealEffect).has(
+    policy.policy_id
+  );
+  const navigate = useNavigate();
   return (
     <Sheet
       isOpen={isOpen}
@@ -76,7 +80,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
               </div>
             </div>
 
-            <p className="text-gray-600 mt-3">
+            <p className=" mt-3 text-xl font-bold text-black">
               {sentenceCase(policy.header || "")}
             </p>
 
@@ -139,7 +143,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                       return (
                         <DrinkItem
                           key={`${index}-${itemIndex}`}
-                          cart={cart}
+                          cart={state.cart}
                           restaurant={restaurant}
                           name={getItemName(itemPath)}
                           addToCart={addToCart}
@@ -161,7 +165,9 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
               <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-4">
                 <div className="flex items-center gap-2 text-green-700">
                   <span className="font-medium">
-                    All conditions met! You're ready to add this deal.
+                    {policyIsActive
+                      ? "This deal is already active in your cart."
+                      : "All conditions met! You're ready to add this deal."}
                   </span>
                 </div>
               </div>
@@ -191,6 +197,17 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                         // Add one of the acceptable items
                         const itemPath =
                           result.missingItems[i % result.missingItems.length];
+                        if (isPassItem(itemPath)) {
+                          const menuItem = getMenuItemFromPath(
+                            itemPath,
+                            restaurant
+                          );
+                          if (menuItem) {
+                            itemPath.push(menuItem.for_date);
+                          } else {
+                            continue;
+                          }
+                        }
                         addItemPromises.push(
                           addToCart({
                             path: itemPath,
@@ -216,11 +233,17 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                     ? "#9CA3AF"
                     : (restaurant?.metadata.primaryColor as string),
                 }}
-                onClick={() => !hasMissingItems && onAddToCart(policy)}
+                onClick={() => {
+                  if (policyIsActive) {
+                    navigate(DRINK_CHECKOUT_PATH.replace(":id", restaurant.id));
+                  } else if (!hasMissingItems) {
+                    onAddToCart(policy);
+                  }
+                }}
                 disabled={hasMissingItems}
               >
                 <ShoppingCart size={18} />
-                Add to Cart
+                {policyIsActive ? "Go to Checkout" : "Add to Cart"}
               </button>
             </div>
           </div>

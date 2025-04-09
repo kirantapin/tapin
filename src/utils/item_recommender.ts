@@ -1,6 +1,5 @@
 import { Cart, Policy, ItemSpecification } from "@/types";
 import { isEqual } from "lodash";
-
 /**
  * Analyzes a user's cart against a policy to determine what items are missing to qualify
  *
@@ -12,6 +11,7 @@ export function getMissingItemsForPolicy(policy: Policy, cart: Cart) {
   // Initialize result object
   const results: {
     missingItems: ItemSpecification[];
+    currentQuantity: number;
     quantityNeeded: number;
   }[] = [];
 
@@ -47,6 +47,7 @@ export function getMissingItemsForPolicy(policy: Policy, cart: Cart) {
       // Add missing items result
       results.push({
         missingItems: condition.items,
+        currentQuantity,
         quantityNeeded: condition.quantity - currentQuantity,
       });
     }

@@ -8,7 +8,7 @@ export function PolicyDescriptionDisplay({ policy }: { policy: Policy }) {
 
   return (
     <div>
-      <p>{actionDescription}</p>
+      <p className="text-lg font-bold text-black">{actionDescription}</p>
       {conditionDescriptions.length > 0 && <p>Requirements:</p>}
       <ul style={{ listStyleType: "disc", paddingLeft: "20px" }}>
         {conditionDescriptions.map(

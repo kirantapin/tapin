@@ -81,9 +81,9 @@ export class CartManager {
     // this.verifyOrder();
   }
 
-  async init() {
-    if (!this.token) await this.verifyOrder();
-  }
+  // async init() {
+  //   if (!this.token) await this.verifyOrder();
+  // }
 
   /**
    * Saves the current cart state to localStorage with a timestamp.
@@ -121,8 +121,10 @@ export class CartManager {
       cart: this.cart,
       userDealEffect: this.dealEffect,
       restaurant_id: this.restaurant_id,
+      cartResults: this.cartResults,
       user_id: this.userSession?.user.phone,
       request: { type: type, content: content },
+      jwtToken: this.token,
     };
 
     try {
@@ -137,7 +139,7 @@ export class CartManager {
 
       const returnData = data?.data;
       const errorMessage = data?.error || "";
-
+      console.log("returnData", returnData);
       if (error) {
         console.error("Supabase Error:", error);
         this.errorDisplay =
@@ -226,38 +228,6 @@ export class CartManager {
     item: Item,
     restaurant: Restaurant
   ): Promise<string | null> {
-    // Check if the item already exists in the cart
-    // console.log("inside add to cart", item);
-    // const existingItemIndex = this.cart.findIndex((cartItem) =>
-    //   isEqual(cartItem.item, item)
-    // );
-
-    // if (existingItemIndex >= 0) {
-    //   // If the item exists, increment the quantity
-    //   this.cart = this.cart.map((cartItem, index) =>
-    //     index === existingItemIndex
-    //       ? { ...cartItem, quantity: cartItem.quantity + 1 }
-    //       : cartItem
-    //   );
-    // } else {
-    //   // If the item doesn't exist, add it with the next available ID
-    //   const maxId = this.cart.reduce(
-    //     (max, cartItem) => Math.max(max, cartItem.id || 0),
-    //     0
-    //   );
-
-    //   const newCartItem = {
-    //     id: maxId + 1,
-    //     item: item,
-    //     quantity: 1,
-    //     price: priceItem(item, restaurant),
-    //     points: 100,
-    //     point_cost: 0,
-    //   };
-
-    //   this.cart = [...this.cart, newCartItem];
-    // }
-    console.log("inside add to cart", item);
     await this.verifyOrder(ADD_ITEM, item);
     if (this.errorDisplay) {
       return this.errorDisplay;
@@ -266,7 +236,6 @@ export class CartManager {
   }
 
   public async removeFromCart(itemId: number): Promise<string | null> {
-    console.log("inside remove from cart", itemId);
     await this.verifyOrder(REMOVE_ITEM, itemId);
     if (this.errorDisplay) {
       return this.errorDisplay;

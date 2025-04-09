@@ -39,12 +39,11 @@ export function DrinkItem({
     isPass && menuItem?.for_date
       ? [...drinkPath, menuItem.for_date]
       : drinkPath;
-  console.log(menuItem);
   const cartItem = cart.find((item) =>
     isEqual(item.item.path, modifiedDrinkPath)
   );
   const quantity = cartItem?.quantity || 0;
-
+  const [loading, setLoading] = useState(false);
   return (
     <div className="flex items-stretch m-3 border p-3 rounded-3xl bg-white">
       {/* Image */}
@@ -81,7 +80,11 @@ export function DrinkItem({
           {quantity > 0 ? (
             <div className="flex items-center bg-white rounded-full px-3 py-1 ">
               <button
-                onClick={async () => await removeFromCart(cartItem?.id)}
+                onClick={async () => {
+                  setLoading(true);
+                  await removeFromCart(cartItem?.id);
+                  setLoading(false);
+                }}
                 className="w-6 h-6 flex items-center justify-center rounded-full"
                 style={{ backgroundColor: primaryColor }}
               >
@@ -91,16 +94,22 @@ export function DrinkItem({
                   <Trash2 className="w-4 h-4 text-white" />
                 )}
               </button>
-              <span className="mx-3 text-sm font-semibold text-gray-800">
-                {quantity}
-              </span>
+              {loading ? (
+                <div className="mx-3 animate-spin rounded-full h-4 w-4 border-2 border-gray-800 border-t-transparent" />
+              ) : (
+                <span className="mx-3 text-sm font-semibold text-gray-800">
+                  {quantity}
+                </span>
+              )}
               <button
-                onClick={async () =>
+                onClick={async () => {
+                  setLoading(true);
                   await addToCart({
                     path: modifiedDrinkPath,
                     modifiers: [],
-                  })
-                }
+                  });
+                  setLoading(false);
+                }}
                 className="w-6 h-6 flex items-center justify-center bg-gray-100 rounded-full"
                 style={{ backgroundColor: primaryColor }}
               >
@@ -112,13 +121,19 @@ export function DrinkItem({
               className="h-7 w-7 rounded-full flex items-center justify-center text-white"
               style={{ backgroundColor: primaryColor }}
               onClick={async () => {
+                setLoading(true);
                 await addToCart({
                   path: modifiedDrinkPath,
                   modifiers: [],
                 });
+                setLoading(false);
               }}
             >
-              <Plus className="h-4 w-4" />
+              {loading ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+              ) : (
+                <Plus className="h-4 w-4" />
+              )}
             </button>
           )}
         </div>

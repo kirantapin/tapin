@@ -10,6 +10,7 @@ import {
   Plus,
   BadgeCheck,
   Beer,
+  X,
 } from "lucide-react";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -43,7 +44,7 @@ import { fetchRestaurantById } from "../utils/queries/restaurant.ts";
 import PolicyCard from "@/components/cards/shad_policy_card.tsx";
 
 import { project_url } from "../utils/supabase_client.ts";
-import { DrinkList } from "@/components/menu_items.tsx";
+import { DrinkItem, DrinkList } from "@/components/menu_items.tsx";
 import GoToCartButton from "@/components/go_to_cart_button.tsx";
 import AccessCardSlider from "./access_card_slider.tsx";
 import Rewards from "@/components/rewards.tsx";
@@ -56,6 +57,8 @@ import { Sheet } from "react-modal-sheet";
 import DealCard from "@/components/cards/small_policy.tsx";
 import PolicyModal from "@/components/bottom_sheets/policy_modal.tsx";
 import { useCartManager } from "@/hooks/useCartManager.tsx";
+import { useSearch } from "@/hooks/useSearch.tsx";
+import { getItemName } from "@/utils/parse.ts";
 
 export default function RestaurantPage() {
   const { userSession, userData, transactions, logout, setShowSignInModal } =
@@ -67,7 +70,6 @@ export default function RestaurantPage() {
   const [activeFilter, setActiveFilter] = useState(HOUSE_MIXER_LABEL);
   const orderDrinksRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [orderSearch, setOrderSearch] = useState<string>("");
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [policy, setPolicy] = useState<Policy | null>(null);
@@ -79,6 +81,13 @@ export default function RestaurantPage() {
     removePolicy,
     refreshCart,
   } = useCartManager(restaurant as Restaurant, userSession);
+
+  const { searchResults, searchQuery, setSearchQuery, clearSearch } = useSearch(
+    {
+      restaurant: restaurant as Restaurant,
+      initialQuery: "",
+    }
+  );
 
   const scrollToOrderDrinks = () => {
     orderDrinksRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -311,7 +320,14 @@ export default function RestaurantPage() {
         {/* Rewards Section */}
         <div className="mt-6">
           {userData && restaurant && (
-            <Rewards userData={userData} restaurant={restaurant} />
+            <Rewards
+              userData={userData}
+              restaurant={restaurant}
+              onIntentionToRedeem={(policy) => {
+                setPolicy(policy);
+                setIsOpen(true);
+              }}
+            />
           )}
 
           <div className="mt-8">
@@ -346,6 +362,7 @@ export default function RestaurantPage() {
                   .filter((policy) => policy.definition.tag === NORMAL_DEAL_TAG)
                   .map((policy) => (
                     <DealCard
+                      cart={state.cart}
                       policy={policy}
                       restaurant={restaurant}
                       primaryColor={restaurant?.metadata.primaryColor}
@@ -370,51 +387,80 @@ export default function RestaurantPage() {
               type="text"
               placeholder="Search"
               className="w-full pl-12 pr-4 py-3 border rounded-full text-base"
-              onChange={(e) => setOrderSearch(e.target.value)}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              value={searchQuery}
             />
+            {searchQuery && (
+              <button
+                onClick={clearSearch}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2"
+              >
+                <X className="h-5 w-5 text-black" />
+              </button>
+            )}
           </div>
 
           {/* Filters */}
-          <div className="flex gap-3 mb-4 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar">
-            {Object.keys(MENU_DISPLAY_MAP).map((filter) => (
-              <button
-                key={filter}
-                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full whitespace-nowrap border transition-all duration-150 ${
-                  activeFilter === filter
-                    ? "text-sm font-medium"
-                    : "text-sm text-gray-500"
-                }`}
-                style={
-                  activeFilter === filter
-                    ? {
-                        color: restaurant?.metadata.primaryColor,
-                        borderColor: restaurant?.metadata.primaryColor,
-                      }
-                    : {
-                        backgroundColor: "#f6f8fa",
-                        borderColor: "#e5e7eb", // neutral border for inactive
-                      }
-                }
-                onClick={() => {
-                  setActiveFilter(filter);
-                  setTimeout(() => scrollToOrderDrinks(), 100);
-                }}
-              >
-                {filter}
-              </button>
-            ))}
-          </div>
-
-          {/* Drinks List */}
-          {restaurant && (
-            <DrinkList
-              cart={state.cart}
-              label={activeFilter}
-              restaurant={restaurant}
-              addToCart={addToCart}
-              removeFromCart={removeFromCart}
-              primaryColor={restaurant.metadata.primaryColor as string}
-            />
+          {searchResults.length > 0 ? (
+            <div className="mb-4">
+              <pre className="whitespace-pre-wrap break-words">
+                {searchResults.map((searchResult, index) => (
+                  <DrinkItem
+                    key={index}
+                    cart={state.cart}
+                    restaurant={restaurant as Restaurant}
+                    name={getItemName(searchResult)}
+                    addToCart={addToCart}
+                    removeFromCart={removeFromCart}
+                    drinkPath={searchResult}
+                    primaryColor={restaurant?.metadata.primaryColor as string}
+                  />
+                ))}
+              </pre>
+            </div>
+          ) : (
+            <>
+              <div className="flex gap-3 mb-4 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar">
+                {Object.keys(MENU_DISPLAY_MAP).map((filter) => (
+                  <button
+                    key={filter}
+                    className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full whitespace-nowrap border transition-all duration-150 ${
+                      activeFilter === filter
+                        ? "text-sm font-medium"
+                        : "text-sm text-gray-500"
+                    }`}
+                    style={
+                      activeFilter === filter
+                        ? {
+                            color: restaurant?.metadata.primaryColor,
+                            borderColor: restaurant?.metadata.primaryColor,
+                          }
+                        : {
+                            backgroundColor: "#f6f8fa",
+                            borderColor: "#e5e7eb", // neutral border for inactive
+                          }
+                    }
+                    onClick={() => {
+                      setActiveFilter(filter);
+                      setTimeout(() => scrollToOrderDrinks(), 100);
+                    }}
+                  >
+                    {filter}
+                  </button>
+                ))}
+              </div>
+              {/* Drinks List */}
+              {restaurant && (
+                <DrinkList
+                  cart={state.cart}
+                  label={activeFilter}
+                  restaurant={restaurant}
+                  addToCart={addToCart}
+                  removeFromCart={removeFromCart}
+                  primaryColor={restaurant.metadata.primaryColor as string}
+                />
+              )}
+            </>
           )}
         </div>
 
@@ -455,7 +501,7 @@ export default function RestaurantPage() {
             policy={policy as Policy}
             restaurant={restaurant as Restaurant}
             onAddToCart={addPolicy}
-            cart={state.cart}
+            state={state}
             addToCart={addToCart}
             removeFromCart={removeFromCart}
           />

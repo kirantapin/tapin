@@ -28,7 +28,6 @@ import CheckoutPage from "./pages/demo_checkout.tsx";
 import DemoQR from "./pages/demo_qr.tsx";
 import NotFoundPage from "./pages/not_found_page.tsx";
 import RestaurantPage from "./pages/restaurant.tsx";
-import RewardsPage from "./pages/rewards.tsx";
 import TransactionList from "./pages/previous_transactions.tsx";
 import PoliciesPage from "./pages/policies.tsx";
 import RestaurantInfo from "./pages/restaurant_info.tsx";
@@ -51,7 +50,6 @@ const App: React.FC = () => {
         <Route path={SIGNIN_PATH} element={<SignIn />} />
         <Route path={RESTAURANT_PATH} element={<RestaurantPage />} />
         <Route path={DRINK_CHECKOUT_PATH} element={<CheckoutPage />} />
-        <Route path={LOYALTY_REWARD_PATH} element={<RewardsPage />} />
         <Route path={OFFERS_PAGE_PATH} element={<PoliciesPage />} />
         <Route path={INFO_PAGE_PATH} element={<RestaurantInfo />} />
         <Route

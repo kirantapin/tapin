@@ -31,7 +31,6 @@ const PayButton = ({ payload, sanityCheck }) => {
             user_id: payload.user_id,
             restaurant_id: payload.restaurant_id,
             totalWithTip: payload.totalWithTip,
-            connectedAccountId: payload.connectedAccountId,
             cart: payload.state.cart,
             userDealEffect: payload.state.dealEffect,
             userPolicy: payload.state.selectedPolicy,
