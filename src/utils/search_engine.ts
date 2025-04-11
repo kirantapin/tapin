@@ -1,6 +1,7 @@
 import Fuse from "fuse.js";
-import { ItemSpecification } from "../types";
-import { keywordExtraction, getItemName } from "./parse";
+import { ItemSpecification, Restaurant } from "../types";
+import { keywordExtraction } from "./parse";
+import { ItemUtils } from "./item_utils";
 
 interface SearchableItem {
   id: string;
@@ -13,11 +14,11 @@ export class SearchEngine {
   private fuse: Fuse<SearchableItem>;
   private items: SearchableItem[];
 
-  constructor(items: ItemSpecification[]) {
+  constructor(items: ItemSpecification[], restaurant: Restaurant) {
     this.items = items.map((item) => ({
-      id: item.join("_"),
-      name: getItemName(item),
-      keywords: keywordExtraction(item),
+      id: item,
+      name: ItemUtils.getItemName(item, restaurant),
+      keywords: keywordExtraction(item, restaurant),
       originalItem: item,
     }));
 
@@ -44,11 +45,11 @@ export class SearchEngine {
     return results.map((result) => result.item.originalItem);
   }
 
-  addItem(item: ItemSpecification) {
+  addItem(item: ItemSpecification, restaurant: Restaurant) {
     const searchableItem = {
       id: item.join("_"),
-      name: getItemName(item),
-      keywords: keywordExtraction(item),
+      name: ItemUtils.getItemName(item, restaurant),
+      keywords: keywordExtraction(item, restaurant),
       originalItem: item,
     };
     this.items.push(searchableItem);

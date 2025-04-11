@@ -1,21 +1,21 @@
 import { ADD_ON_TAG, NORMAL_DEAL_TAG } from "@/constants";
 import { fetch_policies } from "./queries/policies";
 import { supabase } from "./supabase_client";
-import { Cart, DealEffectPayload, Policy } from "@/types";
+import { Cart, DealEffectPayload, Policy, Restaurant } from "@/types";
 import { getMissingItemsForPolicy } from "./item_recommender";
-import { isPassItem } from "./parse";
+import { ItemUtils } from "./item_utils";
 
 export class PolicyManager {
-  private restaurantId: string;
+  private restaurant: Restaurant;
   private policies: Policy[];
 
-  constructor(restaurantId: string) {
-    this.restaurantId = restaurantId;
+  constructor(restaurant: Restaurant) {
+    this.restaurant = restaurant;
     this.policies = [];
   }
 
   async init() {
-    await this.fetchPolicies(this.restaurantId);
+    await this.fetchPolicies(this.restaurant.id);
   }
 
   async fetchPolicies(restaurantId: string): Promise<Policy[]> {
@@ -30,8 +30,8 @@ export class PolicyManager {
     );
   }
 
-  getRecommendedDeals(cart: Cart, dealeffect: DealEffectPayload): Policy[] {
-    const activePolicies = this.getActivePolicies(dealeffect);
+  getRecommendedDeals(cart: Cart, dealEffect: DealEffectPayload): Policy[] {
+    const activePolicies = this.getActivePolicies(dealEffect, this.restaurant);
     const activeDeal = activePolicies.some(
       (policy) => policy.definition.tag === NORMAL_DEAL_TAG
     );
@@ -42,7 +42,12 @@ export class PolicyManager {
     const sortedDeals = deals
       .map((deal) => ({
         deal,
-        missingItems: getMissingItemsForPolicy(deal, cart),
+        missingItems: getMissingItemsForPolicy(
+          deal,
+          cart,
+          this.restaurant,
+          dealEffect
+        ),
       }))
       .sort((a, b) => {
         const sumA = a.missingItems.reduce(
@@ -59,13 +64,20 @@ export class PolicyManager {
     return sortedDeals;
   }
 
-  getAddOns(cart: Cart): {
+  getAddOns(
+    cart: Cart,
+    dealEffect: DealEffectPayload
+  ): {
     allAddOns: Policy[];
     passAddOns: Policy[];
     normalAddOns: Policy[];
   } {
+    console.log(this.policies);
     const validPolicies: Policy[] = [];
     const seenItems = new Set<string>();
+
+    const passAddOns: Policy[] = [];
+    const normalAddOns: Policy[] = [];
 
     for (let i = 0; i < this.policies.length; i++) {
       const policy = this.policies[i];
@@ -74,20 +86,18 @@ export class PolicyManager {
       const actionItem = JSON.stringify(policy.definition.action.items[0]);
       if (seenItems.has(actionItem)) continue;
 
-      if (getMissingItemsForPolicy(policy, cart).length === 0) {
+      if (
+        getMissingItemsForPolicy(policy, cart, this.restaurant, dealEffect)
+          .length === 0
+      ) {
         seenItems.add(actionItem);
         validPolicies.push(policy);
-      }
-    }
-    const passAddOns: Policy[] = [];
-    const normalAddOns: Policy[] = [];
-
-    for (const policy of validPolicies) {
-      const item = policy.definition.action.items[0];
-      if (isPassItem(item)) {
-        passAddOns.push(policy);
-      } else {
-        normalAddOns.push(policy);
+        const item = policy.definition.action.items[0];
+        if (ItemUtils.isPassItem(item, this.restaurant)) {
+          passAddOns.push(policy);
+        } else {
+          normalAddOns.push(policy);
+        }
       }
     }
 
@@ -102,7 +112,10 @@ export class PolicyManager {
     return this.policies;
   }
 
-  public getActivePolicies(dealeffect: DealEffectPayload): Policy[] {
+  public getActivePolicies(
+    dealeffect: DealEffectPayload,
+    restaurant: Restaurant
+  ): Policy[] {
     const activePolicyIds = new Set<string>();
 
     // Get policy IDs from added items

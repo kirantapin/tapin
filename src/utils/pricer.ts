@@ -11,33 +11,6 @@ import {
   SingleMenuItem,
 } from "../types";
 import { KNOWN_MODIFIERS, MENU_DISPLAY_MAP, PASS_MENU_TAG } from "@/constants";
-import { isPassItem } from "./parse";
-
-export function priceCartNormally(cart: Cart, restaurant: Restaurant): number {
-  let total = 0;
-  for (const cartItem of cart) {
-    total += priceItem(cartItem.item, restaurant) * cartItem.quantity;
-  }
-  return total;
-}
-
-export function priceItem(item: Item, restaurant: Restaurant): number {
-  const { path, modifiers } = item;
-  let multiple = modifiers.reduce(
-    (acc, modifier) => acc * (KNOWN_MODIFIERS[modifier] || 1),
-    1
-  );
-  let menu: any = structuredClone(restaurant.menu);
-  const temp = path.reduce(
-    (acc, key) => (acc && acc[key] ? acc[key] : undefined),
-    menu
-  );
-  if (!temp || !temp.price) {
-    throw new Error("Item cannot be priced");
-  }
-
-  return temp.price * multiple;
-}
 
 export function modifiedItemFlair(
   cartItem: CartItem,
@@ -102,7 +75,9 @@ export function modifiedItemFlair(
       temp["discountDescription"] = `-${modifiedItem.amount} points`;
       break;
     case "apply_percent_discount":
-      temp["discountDescription"] = `%${modifiedItem.amount} off`;
+      temp["discountDescription"] = `%${(modifiedItem.amount * 100).toFixed(
+        0
+      )} off`;
       break;
     case "apply_blanket_price":
       temp["discountDescription"] = `$${temp.oldPrice - temp.currentPrice} off`;
@@ -112,37 +87,25 @@ export function modifiedItemFlair(
   return temp;
 }
 
-export function getMenuItemFromPath(
-  path: string[],
-  restaurant: Restaurant
-): SingleMenuItem | null {
-  const isPass = isPassItem(path);
-  console.log(path, isPass);
-  if (isPass) {
-    // For pass items, get the menu item but use most recent date
-    const passMenu = restaurant.menu[PASS_MENU_TAG];
-    if (!passMenu) return null;
+export function priceCartNormally(cart: Cart, restaurant: Restaurant): number {
+  let total = 0;
+  for (const cartItem of cart) {
+    total += priceItem(cartItem.item, restaurant) * cartItem.quantity;
+  }
+  return total;
+}
 
-    const itemKey = path[1];
-    if (!passMenu[itemKey]) return null;
+export function priceItem(item: Item, restaurant: Restaurant): number {
+  const { id, modifiers } = item;
+  let multiple = modifiers.reduce(
+    (acc, modifier) => acc * (KNOWN_MODIFIERS[modifier] || 1),
+    1
+  );
 
-    // Get all dates and find most recent
-    const dates = Object.keys(passMenu[itemKey]);
-    if (dates.length === 0) return null;
-
-    const mostRecentDate = dates.sort().reverse()[0];
-
-    return {
-      ...passMenu[itemKey][mostRecentDate],
-      for_date: mostRecentDate,
-    };
+  const temp = restaurant.menu[id].info;
+  if (!temp || !temp.price) {
+    throw new Error("Item cannot be priced");
   }
 
-  // For normal items, traverse the path
-  const menuItem = path.reduce((acc: any, key) => {
-    if (!acc || acc[key] === undefined) return null;
-    return acc[key];
-  }, restaurant.menu);
-
-  return menuItem;
+  return temp.price * multiple;
 }

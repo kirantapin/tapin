@@ -160,10 +160,13 @@ const TransactionList: React.FC = () => {
                   />
                   <div>
                     <p className="font-semibold text-gray-700">
-                      {itemToStringDescription({
-                        path: transaction.item,
-                        modifiers: transaction.metadata.modifiers || [],
-                      })}
+                      {itemToStringDescription(
+                        {
+                          id: transaction.item,
+                          modifiers: transaction.metadata.modifiers || [],
+                        },
+                        restaurant
+                      )}
                     </p>
                     <p className="text-gray-500">
                       ${transaction.price?.toFixed(2)}
@@ -210,10 +213,13 @@ const TransactionList: React.FC = () => {
                 {/* Checkbox for selection */}
                 <div>
                   <p className="font-semibold text-gray-700">
-                    {itemToStringDescription({
-                      path: transaction.item,
-                      modifiers: transaction.metadata.modifiers || [],
-                    })}
+                    {itemToStringDescription(
+                      {
+                        id: transaction.item,
+                        modifiers: transaction.metadata.modifiers || [],
+                      },
+                      restaurant
+                    )}
                   </p>
                   <p className="text-gray-500">
                     ${transaction.price?.toFixed(2)}

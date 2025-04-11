@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import AccessCard from "@/components/cards/access_card.tsx";
 import { Cart, CartItem, DealEffectPayload, Restaurant } from "@/types";
-import { PASS_MENU_TAG } from "@/constants";
-import { isPassItem } from "@/utils/parse";
+import { MENU_DISPLAY_MAP, PASS_LABEL, PASS_MENU_TAG } from "@/constants";
+import { getAllItemsInCategory, isPassItem } from "@/utils/parse";
 import { modifiedItemFlair } from "@/utils/pricer";
+import { ItemUtils } from "@/utils/item_utils";
 
 const AccessCardSlider = ({
   cart,
@@ -48,24 +49,19 @@ const AccessCardSlider = ({
     if (displayCartPasses) {
       for (const cartItem of cart) {
         const item = cartItem.item;
-        if (isPassItem(item.path)) {
+        if (ItemUtils.isPassItem(item.id, restaurant)) {
           flattened.push(cartItem);
         }
       }
       return flattened;
     }
 
-    for (const [name, dateObjects] of Object.entries(
-      restaurant.menu[PASS_MENU_TAG]
-    )) {
-      for (const [date, itemInfo] of Object.entries(dateObjects)) {
-        flattened.push({
-          name,
-          date,
-          itemInfo: { ...itemInfo, for_date: date },
-        });
-      }
-    }
+    const items = ItemUtils.getAllItemsInCategory(
+      MENU_DISPLAY_MAP[PASS_LABEL],
+      restaurant
+    );
+
+    flattened.push(...items);
 
     console.log(flattened, displayCartPasses);
 
@@ -99,7 +95,7 @@ const AccessCardSlider = ({
                     cart={cart}
                     cartItem={x}
                     restaurant={restaurant}
-                    itemPath={null}
+                    itemId={null}
                     addToCart={addToCart}
                     removeFromCart={removeFromCart}
                     modifiedFlair={modifiedFlair}
@@ -113,7 +109,7 @@ const AccessCardSlider = ({
                     cart={cart}
                     cartItemId={null}
                     restaurant={restaurant}
-                    itemPath={[PASS_MENU_TAG, x.name, x.date]}
+                    itemId={x}
                     addToCart={addToCart}
                     removeFromCart={removeFromCart}
                     modifiedFlair={null}
@@ -132,12 +128,12 @@ const AccessCardSlider = ({
       )}
       {/* Scroll Indicator Dots */}
       <div className="flex justify-center">
-        {flatAccessCards.map(({ name, date, itemInfo }, index) => (
+        {flatAccessCards.map((_, index) => (
           <button
             key={index}
             onClick={() => scrollToCard(index)}
-            className={`h-2 w-2 mx-1 rounded-full transition-colors duration-300 ${
-              activeIndex === index ? "" : "bg-gray-300"
+            className={`h-2 mx-1 rounded-full transition-all duration-300 ${
+              activeIndex === index ? "w-4" : "bg-gray-300 w-2"
             }`}
             style={{
               backgroundColor:

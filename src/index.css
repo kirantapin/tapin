@@ -164,3 +164,13 @@ button {
   white-space: normal; /* Allows wrapping */
   word-wrap: break-word; /* Prevents words from overflowing */
 }
+.custom-line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1; /* Show 2 full lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 3rem; /* Adjust based on font-size to fit exactly 2 lines */
+  line-height: 1.5rem; /* Ensures consistent line spacing */
+  white-space: normal; /* Allows wrapping */
+}

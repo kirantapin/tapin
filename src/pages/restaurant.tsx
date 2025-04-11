@@ -11,6 +11,9 @@ import {
   BadgeCheck,
   Beer,
   X,
+  Ticket,
+  Martini,
+  GlassWater,
 } from "lucide-react";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -46,19 +49,24 @@ import PolicyCard from "@/components/cards/shad_policy_card.tsx";
 import { project_url } from "../utils/supabase_client.ts";
 import { DrinkItem, DrinkList } from "@/components/menu_items.tsx";
 import GoToCartButton from "@/components/go_to_cart_button.tsx";
-import AccessCardSlider from "./access_card_slider.tsx";
+import AccessCardSlider from "../components/sliders/access_card_slider.tsx";
 import Rewards from "@/components/rewards.tsx";
-import { CartManager } from "@/utils/cartManager.ts";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { Sidebar } from "@/components/sidebar.tsx";
-import { Sheet } from "react-modal-sheet";
 import DealCard from "@/components/cards/small_policy.tsx";
 import PolicyModal from "@/components/bottom_sheets/policy_modal.tsx";
 import { useCartManager } from "@/hooks/useCartManager.tsx";
 import { useSearch } from "@/hooks/useSearch.tsx";
-import { getItemName } from "@/utils/parse.ts";
+import { adjustColor } from "@/utils/color";
+import {
+  GradientIcon,
+  Hero,
+  useThemeColorOnScroll,
+} from "@/utils/gradient.tsx";
+import { useBannerColor } from "@/hooks/useBannerColor.tsx";
+import HighlightSlider from "@/components/sliders/highlight_slider.tsx";
 
 export default function RestaurantPage() {
   const { userSession, userData, transactions, logout, setShowSignInModal } =
@@ -90,7 +98,18 @@ export default function RestaurantPage() {
   );
 
   const scrollToOrderDrinks = () => {
-    orderDrinksRef.current?.scrollIntoView({ behavior: "smooth" });
+    orderDrinksRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  };
+
+  const [activePromo, setActivePromo] = useState(0);
+
+  const handleScroll = (e) => {
+    const scrollPosition = e.currentTarget.scrollLeft;
+    const itemWidth = e.currentTarget.offsetWidth;
+    const newActivePromo = Math.round(scrollPosition / itemWidth);
+    setActivePromo(newActivePromo);
   };
 
   useEffect(() => {
@@ -113,6 +132,10 @@ export default function RestaurantPage() {
     };
     fetchData();
   }, []);
+
+  const titleRef = useRef<HTMLHeadingElement>(null);
+
+  useBannerColor(titleRef);
 
   return !loading ? (
     <div className="min-h-screen bg-gray-25">
@@ -138,16 +161,16 @@ export default function RestaurantPage() {
         </div>
       </div>
       {/* Hero Image */}
-      <div
+      {/* <div
         className="relative h-52 rounded-b-2xl bg-cover bg-center"
         style={{
           backgroundImage: `url('${project_url}/storage/v1/object/public/restaurant_images/${restaurant_id}_hero.jpeg')`,
         }}
       >
-        {/* Profile Image */}
+        
         <div className="absolute -bottom-5" style={{ left: "18px" }}>
           {" "}
-          {/* Moved further down */}
+          
           <div className="w-24 h-24 rounded-full border-2 border-white  overflow-hidden shadow-lg">
             <img
               src={`${project_url}/storage/v1/object/public/restaurant_images/${restaurant_id}_profile.png`}
@@ -156,47 +179,64 @@ export default function RestaurantPage() {
             />
           </div>
         </div>
-      </div>
-
+      </div> */}
+      <Hero
+        hero_image={`${project_url}/storage/v1/object/public/restaurant_images/${restaurant_id}_hero.jpeg`}
+        profile_image={`${project_url}/storage/v1/object/public/restaurant_images/${restaurant_id}_profile.png`}
+      />
       {/* Restaurant Info */}
       <div className="mt-10 px-4">
         <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold">{restaurant?.name}</h1>
+          <h1 ref={titleRef} className="text-2xl font-bold">
+            {restaurant?.name}
+          </h1>
           <BadgeCheck className="w-5 h-5 text-blue-500" />
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-2 sm:gap-3 mt-6 px-2">
+        <div className="flex gap-2 sm:gap-3 mt-5 px-2">
           <button
             onClick={scrollToOrderDrinks}
-            className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-200 bg-white shadow-sm"
+            className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-300 bg-white shadow-md"
           >
-            <Beer className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+            <GradientIcon
+              icon={Beer}
+              primaryColor={restaurant?.metadata.primaryColor as string}
+              size={17}
+            />
             {/* <Info className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" /> */}
             <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
               Order
             </span>
           </button>
           <button
-            className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-200 bg-white shadow-sm"
+            className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-300 bg-white shadow-md"
             onClick={() => {
               navigate(INFO_PAGE_PATH.replace(":id", restaurant_id));
             }}
           >
-            <Info className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+            <GradientIcon
+              icon={Info}
+              primaryColor={restaurant?.metadata.primaryColor as string}
+              size={17}
+            />
             <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
               More Info
             </span>
           </button>
           <button
-            className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-200 bg-white shadow-sm"
+            className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-300 bg-white shadow-md"
             onClick={() =>
               navigate(OFFERS_PAGE_PATH.replace(":id", restaurant.id), {
                 state: { tag: LOYALTY_REWARD_TAG },
               })
             }
           >
-            <Gift className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+            <GradientIcon
+              icon={Gift}
+              primaryColor={restaurant?.metadata.primaryColor as string}
+              size={17}
+            />
             <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
               Rewards
             </span>
@@ -204,49 +244,20 @@ export default function RestaurantPage() {
         </div>
 
         {/* Promo Banner */}
-        <div className="mt-4 overflow-x-auto whitespace-nowrap no-scrollbar scrollbar-hide">
-          <div className="flex gap-4 snap-x snap-mandatory">
-            {[1, 2, 3].map((index) => (
-              <div
-                key={index}
-                className="snap-start flex-shrink-0 w-full max-w-md rounded-3xl overflow-hidden p-0 flex text-white"
-                style={{
-                  backgroundColor: restaurant?.metadata.primaryColor,
-                }}
-              >
-                {/* Left: Text Content */}
-                <div className="flex flex-col justify-between flex-1 p-4">
-                  <div>
-                    <h3 className="text-lg font-bold">Save 20% on Shooters</h3>
-                    <p className="text-sm max-w-[90%] sm:max-w-[90%] md:max-w-[100%] overflow-hidden text-ellipsis break-words custom-line-clamp">
-                      $10 Fireball shots for Chiefs fans & $10 Green Tea shots
-                      for Eagles Fans $10 Fireball shots for Chiefs fans & $10
-                      Green Tea shots for Eagles Fans
-                    </p>
-                  </div>
-                  <button
-                    className="bg-white px-4 py-1 rounded mt-2 text-sm self-start"
-                    style={{ color: restaurant?.metadata.primaryColor }}
-                  >
-                    Order Now
-                  </button>
-                </div>
-
-                {/* Right: Image Block with full height and right rounding */}
-                <div className="h-full w-32 rounded-r-3xl overflow-hidden">
-                  <img
-                    src={
-                      "https://www.life-publications.com/wp-content/uploads/2023/07/Party-in-the-Square-August-2023.jpg" ||
-                      "/placeholder.svg"
-                    }
-                    alt="name"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <HighlightSlider
+          restaurant={restaurant as Restaurant}
+          addToCart={(itemId: string) => {
+            addToCart({ id: itemId, modifiers: [] });
+          }}
+          setPolicyModal={(policy_id: string) => {
+            const policy = policies.find((p) => p.policy_id === policy_id);
+            if (policy) {
+              setPolicy(policy);
+              setIsOpen(true);
+            }
+          }}
+          policies={policies}
+        />
 
         {/* My Spot Section */}
         <div className="mt-6">
@@ -265,6 +276,14 @@ export default function RestaurantPage() {
                 );
               }}
             >
+              {/* Ticket icon in top-left */}
+              <div className="absolute top-3 left-3">
+                <GradientIcon
+                  icon={Ticket}
+                  primaryColor={restaurant?.metadata.primaryColor as string}
+                />
+              </div>
+
               {/* Arrow in top-right */}
               <div className="absolute top-3 right-3 bg-gray-100 rounded-full p-1">
                 <ChevronRight className="w-4 h-4 text-gray-400" />
@@ -297,6 +316,12 @@ export default function RestaurantPage() {
                 );
               }}
             >
+              <div className="absolute top-3 left-3">
+                <GradientIcon
+                  icon={GlassWater}
+                  primaryColor={restaurant?.metadata.primaryColor as string}
+                />
+              </div>
               <div className="absolute top-3 right-3 bg-gray-100 rounded-full p-1">
                 <ChevronRight className="w-4 h-4 text-gray-400" />
               </div>
@@ -349,7 +374,9 @@ export default function RestaurantPage() {
                 className="text-sm font-semibold "
                 style={{ color: restaurant?.metadata["primaryColor"] }}
                 onClick={() => {
-                  navigate(OFFERS_PAGE_PATH.replace(":id", restaurant_id));
+                  navigate(
+                    OFFERS_PAGE_PATH.replace(":id", restaurant_id as string)
+                  );
                 }}
               >
                 View All
@@ -368,6 +395,7 @@ export default function RestaurantPage() {
                       primaryColor={restaurant?.metadata.primaryColor}
                       setPolicy={setPolicy}
                       setIsOpen={setIsOpen}
+                      dealEffect={state.dealEffect}
                     />
                   ))}
               </div>
@@ -409,10 +437,9 @@ export default function RestaurantPage() {
                     key={index}
                     cart={state.cart}
                     restaurant={restaurant as Restaurant}
-                    name={getItemName(searchResult)}
                     addToCart={addToCart}
                     removeFromCart={removeFromCart}
-                    drinkPath={searchResult}
+                    itemId={searchResult}
                     primaryColor={restaurant?.metadata.primaryColor as string}
                   />
                 ))}

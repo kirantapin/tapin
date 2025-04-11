@@ -13,6 +13,7 @@ import {
 import { UserSession } from "../types";
 import { emptyDealEffect } from "@/constants";
 import { isPassItem } from "@/utils/parse";
+import { ItemUtils } from "@/utils/item_utils";
 
 interface CartState {
   cart: Cart;
@@ -137,6 +138,8 @@ export function useCartManager(
     refreshCart,
     getActivePolicies,
     cartManager: cartManagerRef.current,
-    isPreEntry: state.cart.some((item) => isPassItem(item.item.path)),
+    isPreEntry: state.cart.some((item) =>
+      ItemUtils.isPassItem(item.item.id, restaurant as Restaurant)
+    ),
   };
 }

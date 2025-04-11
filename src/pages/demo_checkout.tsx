@@ -2,9 +2,7 @@ import { useState, useRef, useEffect, useReducer } from "react";
 import { ArrowLeft, Check, ChevronLeft, Tag, X } from "lucide-react";
 import { checkoutStyles } from "../styles/checkout_styles";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { useSupabase } from "../context/supabase_context.tsx";
 import { useAuth } from "../context/auth_context.tsx";
-import { isEqual, rest, update } from "lodash";
 import ApplePayButton from "../components/apple_pay_button.tsx";
 import {
   NORMAL_DEAL_TAG,
@@ -19,12 +17,8 @@ import { fetchRestaurantById } from "../utils/queries/restaurant.ts";
 import PolicyCard from "@/components/cards/shad_policy_card.tsx";
 import { ToastContainer, toast } from "react-toastify";
 import { CheckoutItemCard } from "@/components/checkout/checkout_item_card.tsx";
-import AccessCardSlider from "./access_card_slider.tsx";
-import {
-  getMenuItemFromPath,
-  priceCartNormally,
-  priceItem,
-} from "@/utils/pricer.ts";
+import AccessCardSlider from "../components/sliders/access_card_slider.tsx";
+import { priceCartNormally } from "@/utils/pricer.ts";
 import DealPreOrderBar from "@/components/checkout/deal_checkout_bar.tsx";
 import TipSelector from "@/components/checkout/tip_selector.tsx";
 import { motion } from "framer-motion";
@@ -35,8 +29,9 @@ import AddOnCard from "@/components/cards/add_on_card.tsx";
 import { useTimer } from "@/hooks/useTimer.tsx";
 import DealCard from "@/components/cards/small_policy.tsx";
 import PolicyModal from "@/components/bottom_sheets/policy_modal.tsx";
-import { itemToStringDescription } from "@/utils/parse.ts";
+import { isPassItem } from "@/utils/parse.ts";
 import { PassAddOnCard } from "@/components/cards/pass_add_on_card.tsx";
+import { ItemUtils } from "@/utils/item_utils.ts";
 export default function CheckoutPage() {
   const { userSession, setShowSignInModal } = useAuth();
   const [policies, setPolicies] = useState<Policy[]>([]);
@@ -72,23 +67,15 @@ export default function CheckoutPage() {
   } = useCartManager(restaurant as Restaurant, userSession);
 
   useEffect(() => {
-    const initPolicyManager = async () => {
-      const policyManager = new PolicyManager(restaurant_id as string);
-      await policyManager.init();
-      setPolicyManager(policyManager);
-    };
-    initPolicyManager();
-  }, []);
-
-  useEffect(() => {
     const fetch = async () => {
       const restaurant = await fetchRestaurantById(restaurant_id);
       if (!restaurant) {
         navigate(DISCOVER_PATH);
         return;
       }
-      const policies = await fetch_policies(restaurant_id);
-      setPolicies(policies);
+      const policyManager = new PolicyManager(restaurant as Restaurant);
+      await policyManager.init();
+      setPolicyManager(policyManager);
       setRestaurant(restaurant);
     };
     fetch();
@@ -126,7 +113,10 @@ export default function CheckoutPage() {
       {restaurant && state.cart.length > 0 ? (
         <div className={checkoutStyles.itemsContainer}>
           {state.cart
-            .filter((item: CartItem) => item.item.path[0] !== PASS_MENU_TAG)
+            .filter(
+              (item: CartItem) =>
+                !ItemUtils.isPassItem(item.item.id, restaurant)
+            )
             .map((item: CartItem) => (
               <CheckoutItemCard
                 key={item.id} // assuming item has a unique id
@@ -167,7 +157,8 @@ export default function CheckoutPage() {
       </div>
       {restaurant && policyManager && state.cart.length > 0 && (
         <div className="mt-4">
-          {policyManager.getAddOns(state.cart).allAddOns.length > 0 && (
+          {policyManager.getAddOns(state.cart, state.dealEffect).allAddOns
+            .length > 0 && (
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-bold mb-4">
                 {isPreEntry ? "Exclusive Pre-entry Deals" : "Exclusive Deals"}
@@ -188,7 +179,7 @@ export default function CheckoutPage() {
             <div className="flex gap-2" style={{ minWidth: "max-content" }}>
               {addOnTime > 0 &&
                 policyManager
-                  .getAddOns(state.cart)
+                  .getAddOns(state.cart, state.dealEffect)
                   .normalAddOns.map((policy) => (
                     <AddOnCard
                       state={state}
@@ -204,14 +195,16 @@ export default function CheckoutPage() {
             </div>
           </div>
           <div className="mt-2">
-            {policyManager.getAddOns(state.cart).passAddOns.map((policy) => (
-              <PassAddOnCard
-                state={state}
-                addPolicy={addPolicy}
-                restaurant={restaurant as Restaurant}
-                policy={policy as Policy}
-              />
-            ))}
+            {policyManager
+              .getAddOns(state.cart, state.dealEffect)
+              .passAddOns.map((policy) => (
+                <PassAddOnCard
+                  state={state}
+                  addPolicy={addPolicy}
+                  restaurant={restaurant as Restaurant}
+                  policy={policy as Policy}
+                />
+              ))}
           </div>
         </div>
       )}
@@ -234,6 +227,7 @@ export default function CheckoutPage() {
                       primaryColor={restaurant?.metadata.primaryColor}
                       setPolicy={setPolicy}
                       setIsOpen={setIsOpen}
+                      dealEffect={state.dealEffect}
                     />
                   ))}
               </div>
@@ -252,27 +246,23 @@ export default function CheckoutPage() {
       />
       {state.cart.length > 0 && state.cartResults && (
         <div className={checkoutStyles.summaryContainer}>
-          <div className={checkoutStyles.summaryRow}>
-            <span>Subtotal</span>
-            <span>${state.cartResults.subtotal.toFixed(2)}</span>
-          </div>
-          {policyManager &&
-            policyManager.getActivePolicies(state.dealEffect).length > 0 &&
-            restaurant && (
-              <div
-                className={checkoutStyles.summaryRow}
-                style={{ color: "#40C4AA" }}
-              >
-                <span>Discounts</span>
-                <span>
-                  -$
-                  {(
-                    priceCartNormally(state.cart, restaurant) -
-                    state.cartResults.subtotal
-                  ).toFixed(2)}
-                </span>
-              </div>
-            )}
+          {priceCartNormally(state.cart, restaurant as Restaurant) -
+            state?.cartResults?.subtotal >
+            0 && (
+            <div
+              className={checkoutStyles.summaryRow}
+              style={{ color: "#40C4AA" }}
+            >
+              <span>Discounts</span>
+              <span>
+                -$
+                {(
+                  priceCartNormally(state.cart, restaurant as Restaurant) -
+                  state.cartResults.subtotal
+                ).toFixed(2)}
+              </span>
+            </div>
+          )}
           {state.cartResults.totalPointCost > 0 && (
             <div className={checkoutStyles.summaryRow}>
               <span>Point Cost</span>
@@ -288,6 +278,10 @@ export default function CheckoutPage() {
               <span>+{state.cartResults.totalPoints} points</span>
             </div>
           )}
+          <div className={checkoutStyles.summaryRow}>
+            <span>Subtotal</span>
+            <span>${state.cartResults.subtotal.toFixed(2)}</span>
+          </div>
           <div className={checkoutStyles.summaryRow}>
             <span>Tax</span>
             <span>${state.cartResults.tax.toFixed(2)}</span>
@@ -379,6 +373,15 @@ export default function CheckoutPage() {
           )}
         </div>
       )}
+      <button
+        onClick={() => {
+          console.log(
+            policyManager?.getAddOns(state.cart, state.dealEffect).allAddOns
+          );
+        }}
+      >
+        test
+      </button>
 
       {policy && (
         <PolicyModal

@@ -1,45 +1,33 @@
 import { PASS_MENU_TAG } from "@/constants";
-import { Item, ItemSpecification, Policy } from "@/types";
+import { Item, ItemSpecification, Policy, Restaurant } from "@/types";
 import { titleCase } from "title-case";
+import { ItemUtils } from "./item_utils";
 
-export const itemToStringDescription = (item: Item) => {
-  console.log("item", item);
-  const path = item.path;
-  if (path[0] === PASS_MENU_TAG) {
-    return titleCase(path[1]);
-  }
-  if (path[path.length - 3] === "house_mixer") {
-    //TODO
-    if (path[path.length - 1] === "house") {
-      return titleCase(`${path[path.length - 2]} House Mixer`);
-    } else {
-      return titleCase(`House Mixer with ${path[path.length - 1]}`);
-    }
-  }
-  if (path[path.length - 3] === "shots_or_shooters") {
-    if (path[path.length - 1] === "house") {
-      return titleCase(`${path[path.length - 2]} Shot`);
-    } else {
-      return titleCase(`Shot of ${path[path.length - 1]}`);
-    }
-  }
-  return titleCase(path[path.length - 1]);
+export const itemToStringDescription = (item: Item, restaurant: Restaurant) => {
+  return titleCase(restaurant.menu[item.id].info.name);
 };
 
 const listItemsToStringDescription = (
   quantity: number,
-  items: string[][],
-  injectWord: string | null = null
+  items: string[],
+  injectWord: string | null = null,
+  restaurant: Restaurant
 ) => {
   if (items.length > 1) {
     const itemNames = items
-      .map((item) => itemToStringDescription({ path: item, modifiers: [] }))
+      .map((item) =>
+        itemToStringDescription({ id: item, modifiers: [] }, restaurant)
+      )
       .join(" or ");
     return `${quantity} ${
       injectWord ? injectWord + " " : ""
     }orders of either ${itemNames}`;
   } else if (items.length === 1) {
-    const itemName = itemToStringDescription({ path: items[0], modifiers: [] });
+    console.log(items[0]);
+    const itemName = itemToStringDescription(
+      { id: items[0], modifiers: [] },
+      restaurant
+    );
     return `${quantity} ${injectWord ? injectWord + " " : ""}${itemName}${
       quantity > 1 ? "s" : ""
     }`;
@@ -48,7 +36,10 @@ const listItemsToStringDescription = (
   }
 };
 
-export const policyToStringDescription = (policy: Policy) => {
+export const policyToStringDescription = (
+  policy: Policy,
+  restaurant: Restaurant
+) => {
   const conditions = policy.definition.conditions;
   const action = policy.definition.action;
   const conditionDescriptions = conditions.map((condition) => {
@@ -58,7 +49,9 @@ export const policyToStringDescription = (policy: Policy) => {
       case "minimum_quantity":
         return `At least ${listItemsToStringDescription(
           condition.quantity,
-          condition.items
+          condition.items,
+          null,
+          restaurant
         )} in cart`;
       case "minimum_user_points":
         return `User has at least ${condition.amount} points`;
@@ -72,48 +65,62 @@ export const policyToStringDescription = (policy: Policy) => {
   });
 
   const actionDescription = (() => {
+    console.log(action.type);
     switch (action.type) {
       case "add_free_item":
         return `Receive ${listItemsToStringDescription(
           action.quantity,
           [action.item],
-          "free"
+          "free",
+          restaurant
         )}`;
       //Get 30 % off on up to 3 orders of either item or item or item
       case "apply_percent_discount":
-        return `Get ${
-          action.amount
-        }% off on up to ${listItemsToStringDescription(
+        return `Get ${(action.amount * 100).toFixed(
+          0
+        )}% off on up to ${listItemsToStringDescription(
           action.maxEffectedItems,
-          action.items
+          action.items,
+          null,
+          restaurant
         )}`;
       case "apply_fixed_discount":
-        return `Get $${
-          action.amount
-        } off on up to ${listItemsToStringDescription(
+        return `Get $${action.amount.toFixed(
+          2
+        )} off on up to ${listItemsToStringDescription(
           action.maxEffectedItems,
-          action.items
+          action.items,
+          null,
+          restaurant
         )}`;
       case "apply_point_multiplier":
-        return `Earn ${
-          action.amount
-        }x points on up to ${listItemsToStringDescription(
+        return `Earn ${action.amount.toFixed(
+          2
+        )}x points on up to ${listItemsToStringDescription(
           action.maxEffectedItems,
-          action.items
+          action.items,
+          null,
+          restaurant
         )}`;
       case "apply_point_cost":
         return `Up to ${listItemsToStringDescription(
           action.maxEffectedItems,
-          action.items
+          action.items,
+          null,
+          restaurant
         )} can be redeemed for ${action.amount} points each`;
       case "apply_order_point_multiplier":
         return `Earn ${action.amount}x points on your entire order`;
       case "apply_fixed_order_discount":
-        return `Get a fixed discount of $${action.amount} on your order`;
+        return `Get a fixed discount of $${action.amount.toFixed(
+          2
+        )} on your order`;
       case "apply_blanket_price":
-        return `$${action.amount} total for select items`;
+        return `$${action.amount.toFixed(2)} total for select items`;
       case "apply_order_percent_discount":
-        return `Get a ${action.amount}% discount on your entire order`;
+        return `Get a ${(action.amount * 100).toFixed(
+          0
+        )}% discount on your entire order`;
       default:
         return null;
     }
@@ -162,9 +169,9 @@ export function getPolicyFlair(policy: Policy): string {
     case "add_free_item":
       return `${action.quantity} Free Item${action.quantity > 1 ? "s" : ""}`;
     case "apply_percent_discount":
-      return `${action.amount}% Off`;
+      return `${(action.amount * 100).toFixed(0)}% Off`;
     case "apply_fixed_discount":
-      return `$${action.amount} Off`;
+      return `$${action.amount.toFixed(2)} Off`;
     case "apply_point_multiplier":
       return `${action.amount}x Points`;
     case "apply_point_cost":
@@ -176,37 +183,30 @@ export function getPolicyFlair(policy: Policy): string {
     case "apply_blanket_price":
       return `$${action.amount} Total on Select Items`;
     case "apply_order_percent_discount":
-      return `${action.amount}% Off Whole Order`;
+      return `${(action.amount * 100).toFixed(0)}% Off Whole Order`;
     default:
       return "";
   }
 }
 
-export function getItemName(item: ItemSpecification): string {
-  if (isPassItem(item)) {
-    return titleCase(item[1]);
-  }
-  return titleCase(item[item.length - 1]);
-}
-
-export function isPassItem(item: ItemSpecification): boolean {
-  return item[0] === PASS_MENU_TAG;
-}
-
-export function keywordExtraction(item: ItemSpecification): string[] {
+export function keywordExtraction(
+  item: ItemSpecification,
+  restaurant: Restaurant
+): string[] {
   const keywords: string[] = [];
 
-  // Add each path segment as a keyword
-  item.forEach((segment) => {
-    // Split segment into individual words and clean them
-    const words = segment
-      .toLowerCase()
-      .split(/[\s\-_]+/) // Split on spaces, hyphens and underscores
-      .filter((word) => word.length > 2) // Filter out very short words
-      .map((word) => word.trim());
-
-    keywords.push(...words);
-  });
+  // Get the full path by traversing the menu object
+  const path = restaurant.menu[item];
+  for (const segment of path) {
+    const name = restaurant.menu[segment].info.name;
+    keywords.push(
+      name
+        .toLowerCase()
+        .split(/[\s\-_]+/) // Split on spaces, hyphens and underscores
+        .filter((word) => word.length > 2) // Filter out very short words
+        .map((word) => word.trim())
+    );
+  }
 
   // Remove duplicates
   const uniqueKeywords = [...new Set(keywords)];

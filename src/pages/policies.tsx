@@ -118,7 +118,7 @@ export default function PoliciesPage() {
       </div>
 
       {/* Deals */}
-      <div className="px-12 space-y-4">
+      <div className="px-12 space-y-8 flex flex-col items-center w-full">
         {/* Show Skeletons if `showSkeleton` is true */}
         {showSkeleton ? (
           [...Array(3)].map((_, index) => (
@@ -228,6 +228,7 @@ export default function PoliciesPage() {
               restaurant={restaurant as Restaurant}
               setPolicy={setActivePolicy}
               setIsOpen={setIsOpen}
+              dealEffect={state.dealEffect}
             />
           ))
         ) : (

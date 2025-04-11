@@ -41,21 +41,25 @@ export const STORAGE_TTL = 6 * 60 * 1000;
 export const DRINK_MENU_TAG = "drink";
 export const FOOD_MENU_TAG = "food";
 export const PASS_MENU_TAG = "passes";
+export const SPECIALTY_DRINKS_TAG = "7";
+export const COCKTAILS_TAG = "6";
+export const BEER_AND_CIDER_TAG = "5";
 
 export const COCKTAILS_LABEL = "Cocktails";
 export const HOUSE_MIXER_LABEL = "House Mixers";
 export const SHOTS_SHOOTERS_LABEL = "Shots or Shooters";
 export const SPECIALTY_DRINKS_LABEL = "Specialty Drinks";
 export const BEER_AND_CIDER_LABEL = "Beer and Ciders";
+export const PASS_LABEL = "Passes";
 
 export const MENU_DISPLAY_MAP = {
   [HOUSE_MIXER_LABEL]: [DRINK_MENU_TAG, "house_mixer"],
-  [BEER_AND_CIDER_LABEL]: [DRINK_MENU_TAG, "beer_and_cider"],
+  [BEER_AND_CIDER_LABEL]: BEER_AND_CIDER_TAG,
   [SHOTS_SHOOTERS_LABEL]: [DRINK_MENU_TAG, "shots_or_shooters"],
-  [COCKTAILS_LABEL]: [DRINK_MENU_TAG, "classic_cocktail"],
-  [SPECIALTY_DRINKS_LABEL]: [DRINK_MENU_TAG, "specialty_option"],
-  Food: [FOOD_MENU_TAG],
-  Passes: [PASS_MENU_TAG],
+  [COCKTAILS_LABEL]: COCKTAILS_TAG,
+  [SPECIALTY_DRINKS_LABEL]: SPECIALTY_DRINKS_TAG,
+  [PASS_LABEL]: PASS_MENU_TAG,
+  Food: FOOD_MENU_TAG,
 };
 
 export const LOYALTY_REWARD_TAG = "loyalty_reward";

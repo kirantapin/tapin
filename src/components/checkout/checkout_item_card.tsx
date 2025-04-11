@@ -1,10 +1,11 @@
 import { CartItem, DealEffectPayload, Item, Restaurant } from "@/types";
 import { itemToStringDescription } from "@/utils/parse";
-import { getMenuItemFromPath, modifiedItemFlair } from "@/utils/pricer";
+import { getMenuItemFromItemId, modifiedItemFlair } from "@/utils/pricer";
 import { project_url } from "@/utils/supabase_client";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
-
+import { ItemUtils } from "@/utils/item_utils";
+import { adjustColor } from "@/utils/color";
 export function CheckoutItemCard({
   item,
   restaurant,
@@ -18,8 +19,7 @@ export function CheckoutItemCard({
   addToCart: (item: Item) => void;
   removeFromCart: (itemId: number) => void;
 }) {
-  const itemPath = item.item.path;
-  const itemInfo = getMenuItemFromPath(itemPath, restaurant);
+  const itemInfo = ItemUtils.getMenuItemFromItemId(item.item.id, restaurant);
 
   const { oldPrice, currentPrice, discountDescription } = modifiedItemFlair(
     item,
@@ -35,17 +35,17 @@ export function CheckoutItemCard({
         {/* Image */}
         <img
           src={
-            itemInfo.imageUrl ||
+            itemInfo.image_url ||
             `${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`
           }
-          alt={itemToStringDescription(item.item)}
+          alt={itemToStringDescription(item.item, restaurant)}
           className="w-20 h-20 rounded-md object-cover bg-gray-100"
         />
 
         {/* Info */}
         <div>
           <p className="text-xl font-semibold text-gray-900">
-            {itemToStringDescription(item.item)}
+            {itemToStringDescription(item.item, restaurant)}
           </p>
           <div className="flex items-center gap-2 mt-1">
             <span className="text-md text-gray-600 font-medium">
@@ -59,7 +59,14 @@ export function CheckoutItemCard({
             {discountDescription && (
               <span
                 className="bg-[#cda852] text-xs text-white px-2 py-0.5 rounded font-semibold"
-                style={{ backgroundColor: restaurant.metadata.primaryColor }}
+                style={{
+                  background: restaurant?.metadata.primaryColor
+                    ? `linear-gradient(45deg, 
+    ${adjustColor(restaurant.metadata.primaryColor as string, -30)},
+    ${adjustColor(restaurant.metadata.primaryColor as string, 20)}
+  )`
+                    : undefined,
+                }}
               >
                 {discountDescription}
               </span>

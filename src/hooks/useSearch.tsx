@@ -14,22 +14,12 @@ interface UseSearchReturn {
   clearSearch: () => void;
 }
 
-function getAllItemPaths(
-  menu: any,
-  currentPath: string[] = []
-): ItemSpecification[] {
+function getAllItemIds(menu: any): ItemSpecification[] {
   const paths: ItemSpecification[] = [];
 
-  // Base case: if this node has a price, it's a leaf (menu item)
-  if (menu?.price !== undefined) {
-    paths.push([...currentPath]);
-    return paths;
-  }
-
-  // If it's an object, recursively search its properties
-  if (menu && typeof menu === "object" && !Array.isArray(menu)) {
-    for (const key of Object.keys(menu)) {
-      paths.push(...getAllItemPaths(menu[key], [...currentPath, key]));
+  for (const key of Object.keys(menu)) {
+    if (menu[key]?.price !== undefined) {
+      paths.push(key);
     }
   }
 
@@ -43,13 +33,16 @@ export function useSearch({
   const [searchQuery, setSearchQuery] = useState<string>(initialQuery);
 
   // Get all item paths using DFS
-  const itemPaths = useMemo(() => {
+  const itemIds = useMemo(() => {
     if (!restaurant?.menu) return [];
-    return getAllItemPaths(restaurant.menu);
+    return getAllItemIds(restaurant.menu);
   }, [restaurant?.menu]);
 
   // Create a memoized instance of SearchEngine with all item paths
-  const searchEngine = useMemo(() => new SearchEngine(itemPaths), [itemPaths]);
+  const searchEngine = useMemo(
+    () => new SearchEngine(itemIds, restaurant),
+    [itemIds]
+  );
 
   // Memoize search results
   const searchResults = useMemo(() => {

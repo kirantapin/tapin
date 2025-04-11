@@ -67,7 +67,7 @@ export interface CartItem {
 }
 
 export interface Item {
-  path: string[];
+  id: string;
   modifiers: string[];
 }
 
@@ -130,14 +130,26 @@ export interface SingleMenuItem {
 }
 
 export interface Pass {
-  item_id: string;
+  pass_id: string;
   restaurant_id: string;
-  item_name: string;
+  itemId: string;
   item_description: string;
   price: number;
   for_date: string;
   end_time: string;
   amount_remaining: number | null;
+}
+
+export interface Highlight {
+  highlight_id: string;
+  restaurant_id: string;
+  content_type: "item" | "policy";
+  content_pointer: string;
+  title_override: string;
+  description_override: string;
+  image_url_override: string;
+  active: boolean;
+  end_time: string | null;
 }
 
 export interface Transaction {
@@ -146,7 +158,7 @@ export interface Transaction {
   fulfilled_by: string | null;
   restaurant_id: string;
   user_id: string;
-  item: string[];
+  item: string;
   deal_use_id: string | null;
   metadata: Record<string, string | string[]>;
   tip_amount: number | null;
@@ -180,7 +192,6 @@ export interface Policy {
   days_since_last_use: number | null;
   subscription_id: string | null;
   definition: PolicyDefinition;
-  image_url: string | null;
 }
 export interface UserSubscription {
   user_id: string;
@@ -211,7 +222,7 @@ export interface Package {
   end_time: string;
 }
 
-export type ItemSpecification = string[];
+export type ItemSpecification = string;
 
 export interface PolicyDefinition {
   tag: string;

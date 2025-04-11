@@ -10,39 +10,33 @@ import LiquorForm from "./liquor_form";
 import { titleCase } from "title-case";
 import { Cart, Item, Restaurant, SingleMenuItem } from "@/types";
 import { project_url } from "@/utils/supabase_client";
-import { isEqual } from "lodash";
-import { getMenuItemFromPath } from "@/utils/pricer";
-import { isPassItem } from "@/utils/parse";
+import { ItemUtils } from "@/utils/item_utils";
 
 export function DrinkItem({
   key,
   cart,
   restaurant,
-  name,
   addToCart,
   removeFromCart,
-  drinkPath,
+  itemId,
   primaryColor,
 }: {
   key: string;
   cart: Cart;
   restaurant: Restaurant;
-  name: string;
   addToCart: (item: Item) => Promise<void>;
   removeFromCart: (item: Item) => Promise<void>;
-  drinkPath: string[];
+  itemId: string;
   primaryColor: string;
 }) {
-  const isPass = isPassItem(drinkPath);
-  const menuItem = getMenuItemFromPath(drinkPath, restaurant);
-  const modifiedDrinkPath =
-    isPass && menuItem?.for_date
-      ? [...drinkPath, menuItem.for_date]
-      : drinkPath;
-  const cartItem = cart.find((item) =>
-    isEqual(item.item.path, modifiedDrinkPath)
+  const menuItem = ItemUtils.getMenuItemFromItemId(itemId, restaurant);
+  const isPass = ItemUtils.isPassItem(itemId, restaurant);
+
+  const cartItem = cart.find((item) => item.item.id === itemId);
+  const quantity = cart.reduce(
+    (total, item) => (item.item.id === itemId ? total + item.quantity : total),
+    0
   );
-  const quantity = cartItem?.quantity || 0;
   const [loading, setLoading] = useState(false);
   return (
     <div className="flex items-stretch m-3 border p-3 rounded-3xl bg-white">
@@ -50,10 +44,10 @@ export function DrinkItem({
       <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 p-3">
         <img
           src={
-            menuItem?.imageUrl ||
+            menuItem?.image_url ||
             `${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`
           }
-          alt={name}
+          alt={menuItem?.name}
           className="h-full w-full object-cover"
         />
       </div>
@@ -62,7 +56,7 @@ export function DrinkItem({
       <div className="flex flex-1 flex-col justify-between">
         <div>
           <div className="flex justify-between items-start">
-            <h3 className="font-bold text-base">{titleCase(name)}</h3>
+            <h3 className="font-bold text-base">{titleCase(menuItem?.name)}</h3>
             {isPass && (
               <span className="text-xs text-gray-500 ml-2">
                 {menuItem?.for_date}
@@ -105,7 +99,7 @@ export function DrinkItem({
                 onClick={async () => {
                   setLoading(true);
                   await addToCart({
-                    path: modifiedDrinkPath,
+                    id: itemId,
                     modifiers: [],
                   });
                   setLoading(false);
@@ -123,7 +117,7 @@ export function DrinkItem({
               onClick={async () => {
                 setLoading(true);
                 await addToCart({
-                  path: modifiedDrinkPath,
+                  id: itemId,
                   modifiers: [],
                 });
                 setLoading(false);
@@ -161,60 +155,36 @@ export const DrinkList = ({
     if (label === HOUSE_MIXER_LABEL || label === SHOTS_SHOOTERS_LABEL) {
       return {};
     } else {
-      const keys = MENU_DISPLAY_MAP[label];
-      const x = keys.reduce(
-        (acc, key) => (acc && acc[key] !== undefined ? acc[key] : null),
-        menu
-      );
-      return x;
+      const categoryId = MENU_DISPLAY_MAP[label];
+      return ItemUtils.getAllItemsInCategory(categoryId, restaurant);
     }
   }
-  const drinks = useMemo(() => {
+  const drinks: string[] = useMemo(() => {
     return getNestedObject(label, restaurant.menu);
   }, [label, restaurant.menu]);
 
   return (
     <div className="space-y-4">
       {label === HOUSE_MIXER_LABEL || label === SHOTS_SHOOTERS_LABEL ? (
-        <LiquorForm
-          type={label}
-          menu={restaurant.menu}
-          addToCart={addToCart}
-          primaryColor={primaryColor}
-        />
-      ) : label === "Passes" ? (
+        // <LiquorForm
+        //   type={label}
+        //   menu={restaurant.menu}
+        //   addToCart={addToCart}
+        //   primaryColor={primaryColor}
+        // />
         <div>
-          {Object.entries(drinks).map(([name, dateObjects], index) =>
-            Object.entries(dateObjects).map(([date, itemInfo], index) => {
-              console.log(drinks);
-              console.log(name, date, itemInfo);
-              itemInfo["for_date"] = date;
-              return (
-                <DrinkItem
-                  key={name}
-                  cart={cart}
-                  restaurant={restaurant}
-                  name={name}
-                  addToCart={addToCart}
-                  removeFromCart={removeFromCart}
-                  drinkPath={[...MENU_DISPLAY_MAP[label], name, date]}
-                  primaryColor={primaryColor}
-                />
-              );
-            })
-          )}
+          <h1>Liquor Form</h1>
         </div>
       ) : (
         <div>
-          {Object.entries(drinks).map(([name, menuItem], index) => (
+          {drinks.map((id, index) => (
             <DrinkItem
-              key={name}
+              key={id}
               cart={cart}
               restaurant={restaurant}
-              name={name}
               addToCart={addToCart}
               removeFromCart={removeFromCart}
-              drinkPath={[...MENU_DISPLAY_MAP[label], name]}
+              itemId={id}
               primaryColor={primaryColor}
             />
           ))}

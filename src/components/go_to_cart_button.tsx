@@ -3,6 +3,7 @@ import { ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { DRINK_CHECKOUT_PATH } from "@/constants";
 import { Restaurant } from "@/types";
+import { adjustColor } from "@/utils/color";
 
 const GoToCartButton = ({
   restaurant,
@@ -57,7 +58,14 @@ const GoToCartButton = ({
             ? "translate-y-0 opacity-100"
             : "translate-y-20 opacity-0 pointer-events-none"
         }`}
-      style={{ backgroundColor: restaurant.metadata.primaryColor }}
+      style={{
+        background: restaurant.metadata.primaryColor
+          ? `linear-gradient(135deg, 
+      ${adjustColor(restaurant.metadata.primaryColor as string, -40)},
+      ${adjustColor(restaurant.metadata.primaryColor as string, 40)}
+    )`
+          : undefined,
+      }}
     >
       {/* Shopping Cart Icon with Adjusted Position */}
       <div className="relative">

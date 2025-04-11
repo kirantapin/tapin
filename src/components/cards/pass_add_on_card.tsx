@@ -1,6 +1,6 @@
 import { Policy, Restaurant } from "@/types";
-import { itemToStringDescription } from "@/utils/parse";
-import { getMenuItemFromPath } from "@/utils/pricer";
+import { ItemUtils } from "@/utils/item_utils";
+import { getMenuItemFromItemId } from "@/utils/pricer";
 import { Check } from "lucide-react";
 
 interface PassAddOnCardProps {
@@ -20,11 +20,18 @@ export const PassAddOnCard: React.FC<PassAddOnCardProps> = ({
     return null;
   }
   const item = {
-    path: policy.definition.action.items[0],
+    id: policy.definition.action.items[0],
     modifiers: [],
   };
-  const menuItem = getMenuItemFromPath(item.path, restaurant);
-  const name = itemToStringDescription(item);
+  const passItemId = ItemUtils.policyItemSpecificationsToItemIds(
+    [item.id],
+    restaurant
+  )[0];
+  if (!passItemId) {
+    return null;
+  }
+  const menuItem = ItemUtils.getMenuItemFromItemId(passItemId, restaurant);
+  const name = menuItem?.name;
   const originalPrice = menuItem?.price;
   const newPrice = Math.max(0, originalPrice - policy.definition.action.amount);
   // Get policy IDs from all deal effect sources

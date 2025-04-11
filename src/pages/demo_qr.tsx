@@ -159,10 +159,13 @@ export default function DemoQR({
   const itemFrequencyMap: Record<string, number> = {};
 
   transactionsToRedeem.forEach((transaction) => {
-    const itemDescription = itemToStringDescription({
-      path: transaction.item,
-      modifiers: transaction.metadata.modifiers || [],
-    });
+    const itemDescription = itemToStringDescription(
+      {
+        id: transaction.item,
+        modifiers: transaction.metadata.modifiers || [],
+      },
+      restaurant
+    );
     itemFrequencyMap[itemDescription] =
       (itemFrequencyMap[itemDescription] || 0) + 1;
   });

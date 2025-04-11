@@ -1,6 +1,7 @@
 import { Policy, Restaurant } from "@/types";
+import { ItemUtils } from "@/utils/item_utils";
 import { itemToStringDescription } from "@/utils/parse";
-import { getMenuItemFromPath, priceItem } from "@/utils/pricer";
+import { getMenuItemFromItemId, priceItem } from "@/utils/pricer";
 import { project_url } from "@/utils/supabase_client";
 import { Check, Plus } from "lucide-react";
 import React from "react";
@@ -18,17 +19,19 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
   restaurant,
   addPolicy,
 }) => {
+  console.log(policy);
   if (policy.definition.action.type !== "apply_add_on") {
     return null;
   }
   const item = {
-    path: policy.definition.action.items[0],
+    id: policy.definition.action.items[0],
     modifiers: [],
   };
-  const name = itemToStringDescription(item);
-  const originalPrice = priceItem(item, restaurant);
+  const menuItem = ItemUtils.getMenuItemFromItemId(item.id, restaurant);
+  const name = menuItem?.name;
+  const originalPrice = menuItem?.price;
   const newPrice = Math.max(0, originalPrice - policy.definition.action.amount);
-  const menuItem = getMenuItemFromPath(item.path, restaurant);
+
   const primaryColor = restaurant.metadata.primaryColor;
   const policyIds = state.dealEffect.modifiedItems
     .map((item) => item.policy_id)
@@ -44,7 +47,7 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
       <div className="relative aspect-square overflow-hidden rounded-lg">
         <img
           src={
-            menuItem?.imageUrl ||
+            menuItem?.image_url ||
             `${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`
           }
           alt={name}

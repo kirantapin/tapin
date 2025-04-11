@@ -5,6 +5,7 @@ import { fetch_policies } from "@/utils/queries/policies";
 import { LOYALTY_REWARD_TAG, OFFERS_PAGE_PATH } from "@/constants";
 import { ChevronUp, ChevronDown, ChevronRight } from "lucide-react";
 import { itemToStringDescription } from "@/utils/parse";
+import { adjustColor } from "@/utils/color";
 
 interface RewardsProps {
   userData: User;
@@ -104,7 +105,12 @@ const Rewards: React.FC<RewardsProps> = ({
                   className="h-full  rounded-full transition-all duration-300"
                   style={{
                     width: `${widthPercentage === 0 ? 2 : widthPercentage}%`,
-                    backgroundColor: restaurant.metadata.primaryColor,
+                    background: restaurant?.metadata.primaryColor
+                      ? `linear-gradient(90deg, 
+        ${adjustColor(restaurant.metadata.primaryColor as string, 40)},
+        ${adjustColor(restaurant.metadata.primaryColor as string, -30)}
+      )`
+                      : undefined,
                   }}
                 ></div>
               </div>
@@ -124,7 +130,7 @@ const Rewards: React.FC<RewardsProps> = ({
           isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <div className="bg-gray-50 rounded-lg p-4 mt-4 border-2 border-gray-200">
+        <div className="bg-gray-50 rounded-lg p-4 mt-6 mb-6 border-2 border-gray-200">
           <h3 className="text-black text-lg font-semibold mb-4">
             Rewards you can get
           </h3>
@@ -154,10 +160,13 @@ const Rewards: React.FC<RewardsProps> = ({
 
                 {/* Description - Takes Remaining Space */}
                 <div className="text-gray-700 font-[Gilroy]">
-                  {itemToStringDescription({
-                    path: policy.definition.action.items[0],
-                    modifiers: [],
-                  })}
+                  {itemToStringDescription(
+                    {
+                      id: policy.definition.action.items[0],
+                      modifiers: [],
+                    },
+                    restaurant
+                  )}
                 </div>
 
                 {/* Chevron - Auto Width */}
@@ -185,7 +194,12 @@ const Rewards: React.FC<RewardsProps> = ({
         }
         className="mt-4 rounded-lg flex items-center justify-left gap-2 text-white w-fit max-w-sm px-5 py-2.5 text-sm"
         style={{
-          backgroundColor: restaurant.metadata.primaryColor, // Matches red button color
+          background: restaurant?.metadata.primaryColor
+            ? `linear-gradient(45deg, 
+        ${adjustColor(restaurant.metadata.primaryColor as string, -30)},
+        ${adjustColor(restaurant.metadata.primaryColor as string, 40)}
+      )`
+            : undefined,
         }}
       >
         Redeem Rewards

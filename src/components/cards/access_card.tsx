@@ -1,16 +1,16 @@
 import { Cart, CartItem, DealEffectPayload, Restaurant } from "@/types";
-import { getItemName } from "@/utils/parse";
-import { getMenuItemFromPath, modifiedItemFlair } from "@/utils/pricer";
+import { ItemUtils } from "@/utils/item_utils";
+import { getMenuItemFromItemId, modifiedItemFlair } from "@/utils/pricer";
 import { isEqual } from "lodash";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { titleCase } from "title-case";
-
+import { generateGradientColors } from "@/utils/color";
 interface CardProps {
   cart: Cart;
   cartItem: CartItem | null;
   restaurant: Restaurant;
-  itemPath: string[];
+  itemId: string;
   addToCart;
   removeFromCart;
   modifiedFlair: {
@@ -20,37 +20,11 @@ interface CardProps {
   } | null;
 }
 
-function generateGradientColors(baseColor: string) {
-  // Convert hex to RGB
-  const r = Number.parseInt(baseColor.slice(1, 3), 16);
-  const g = Number.parseInt(baseColor.slice(3, 5), 16);
-  const b = Number.parseInt(baseColor.slice(5, 7), 16);
-
-  // Create darker shade for 'from' color (20% darker)
-  const darkerShade = `rgb(${r * 0.8}, ${g * 0.8}, ${b * 0.8})`;
-
-  // Create even darker shade for 'to' color (40% darker)
-  const darkestShade = `rgb(${r * 0.6}, ${g * 0.6}, ${b * 0.6})`;
-
-  // Create lighter shade for overlay (30% lighter with transparency)
-  const lighterShade = `rgba(${Math.min(r * 1.3, 255)}, ${Math.min(
-    g * 1.3,
-    255
-  )}, ${Math.min(b * 1.3, 255)}, 0.2)`;
-
-  return {
-    from: darkerShade,
-    via: baseColor,
-    to: darkestShade,
-    overlay: lighterShade,
-  };
-}
-
 export default function Card({
   cart,
   cartItem,
   restaurant,
-  itemPath,
+  itemId,
   addToCart,
   removeFromCart,
   modifiedFlair,
@@ -64,18 +38,14 @@ export default function Card({
 
   if (cartItem) {
     quantity = cartItem.quantity || 0;
-    itemInfo = getMenuItemFromPath(cartItem.item.path, restaurant);
-    name = getItemName(cartItem.item.path);
-    itemPath = cartItem.item.path;
+    itemInfo = ItemUtils.getMenuItemFromItemId(cartItem.item.id, restaurant);
+    name = itemInfo?.name;
+    itemId = cartItem.item.id;
   } else {
-    itemInfo = getMenuItemFromPath(itemPath, restaurant);
-    quantity = cart.reduce((acc, item) => {
-      if (isEqual(item.item.path, itemPath)) {
-        return acc + item.quantity;
-      }
-      return acc;
-    }, 0);
-    name = getItemName(itemPath);
+    itemInfo = ItemUtils.getMenuItemFromItemId(itemId, restaurant);
+    cartItem = cart.find((item) => isEqual(item.item.id, itemId)) || null;
+    quantity = cartItem?.quantity || 0;
+    name = itemInfo?.name;
   }
 
   return (
@@ -151,6 +121,7 @@ export default function Card({
             <button
               onClick={async () => {
                 setLoading(true);
+                console.log("removing", cartItem?.id);
                 await removeFromCart(cartItem?.id, {
                   quantity: quantity - 1,
                 });
@@ -175,7 +146,7 @@ export default function Card({
             <button
               onClick={async () => {
                 setLoading(true);
-                await addToCart({ path: itemPath, modifiers: [] });
+                await addToCart({ id: itemId, modifiers: [] });
                 setLoading(false);
               }}
               className="w-6 h-6 flex items-center justify-center rounded-full"
@@ -190,7 +161,7 @@ export default function Card({
             style={{ backgroundColor: "white" }}
             onClick={async () => {
               setLoading(true);
-              await addToCart({ path: itemPath, modifiers: [] });
+              await addToCart({ id: itemId, modifiers: [] });
               setLoading(false);
             }}
           >

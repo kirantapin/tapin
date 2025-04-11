@@ -1,17 +1,21 @@
 import type React from "react";
-import { BadgeCheck, Check, Plus, Ticket } from "lucide-react";
-import { Policy } from "@/types";
+import { BadgeCheck, Check, Plus, Tag, Ticket } from "lucide-react";
+import { Cart, DealEffectPayload, Policy } from "@/types";
 import { Restaurant } from "@/types";
 import { truncate } from "fs/promises";
 import { getPolicyFlair, sentenceCase } from "@/utils/parse";
 import { titleCase } from "title-case";
 import { getMissingItemsForPolicy } from "@/utils/item_recommender";
+import { GradientIcon } from "@/utils/gradient";
+import { PolicyManager } from "@/utils/policy_manager";
 
 interface DealCardProps {
+  cart: Cart;
   policy: Policy;
   restaurant: Restaurant;
   setPolicy: (policy: Policy) => void;
   setIsOpen: (isOpen: boolean) => void;
+  dealEffect: DealEffectPayload;
 }
 
 const DealCard: React.FC<DealCardProps> = ({
@@ -20,8 +24,17 @@ const DealCard: React.FC<DealCardProps> = ({
   restaurant,
   setPolicy,
   setIsOpen,
+  dealEffect,
 }) => {
-  const missingItems = getMissingItemsForPolicy(policy, cart);
+  const policyIsActive = PolicyManager.getActivePolicyIds(dealEffect).has(
+    policy.policy_id
+  );
+  const missingItems = getMissingItemsForPolicy(
+    policy,
+    cart,
+    restaurant,
+    dealEffect
+  );
   const flair = getPolicyFlair(policy);
   const totalMissingQuantity = missingItems.reduce(
     (sum, item) => sum + item.quantityNeeded,
@@ -34,7 +47,6 @@ const DealCard: React.FC<DealCardProps> = ({
         } to get ${flair}`
       : "";
 
-  console.log(missingItems);
   return (
     <div
       className="flex-shrink-0 w-80"
@@ -56,18 +68,26 @@ const DealCard: React.FC<DealCardProps> = ({
 
           {/* Title Row */}
           <div className="flex items-center gap-2 mb-1">
-            <Ticket size={20} className="text-gray-800" />
-            <h3 className="text-lg font-bold text-gray-800">
+            <GradientIcon
+              icon={Tag}
+              primaryColor={restaurant?.metadata.primaryColor as string}
+              size={20}
+            />
+            <h3 className="text-lg font-bold text-gray-800 truncate">
               {titleCase(policy.name)}
             </h3>
           </div>
 
           <p
             className={`text-sm ${
-              totalMissingQuantity > 0 ? "text-red-500" : "text-green-500"
+              !policyIsActive && totalMissingQuantity > 0
+                ? "text-red-500"
+                : "text-green-500"
             }`}
           >
-            {totalMissingQuantity > 0
+            {policyIsActive
+              ? `Deal Applied`
+              : totalMissingQuantity > 0
               ? missingItemsText
               : `Apply to cart for ${flair}`}
           </p>
