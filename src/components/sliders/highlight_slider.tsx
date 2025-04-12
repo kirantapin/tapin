@@ -44,7 +44,6 @@ const HighlightSlider = ({
   useEffect(() => {
     const fetchHighlights = async () => {
       const highlights = await fetch_highlights(restaurant.id);
-      console.log(highlights);
       const filteredHighlights = highlights.filter((highlight) => {
         if (highlight.content_type === "item") {
           const menuItem = ItemUtils.getMenuItemFromItemId(
@@ -63,7 +62,7 @@ const HighlightSlider = ({
       setHighlights(filteredHighlights);
     };
     fetchHighlights();
-  }, []);
+  }, [restaurant]);
 
   const handleHighlightClick = (highlight: Highlight) => {
     if (highlight.content_type === "item") {
@@ -73,89 +72,134 @@ const HighlightSlider = ({
     }
   };
 
-  return (
-    // <div className="mt-8">
-    //   <div
-    //     ref={scrollContainerRef}
-    //     className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar"
-    //     onScroll={handleScroll}
-    //   >
-    //     {highlights.map((highlight, index) => {
-    //       return (
-    //         <div key={index} className="snap-center shrink-0 w-full px-4">
-    //           <HighlightCard
-    //             content_type={highlight.content_type}
-    //             content_pointer={highlight.content_pointer}
-    //             title_override={highlight.title_override}
-    //             description_override={highlight.description_override}
-    //             image_url_override={highlight.image_url_override}
-    //             restaurant={restaurant}
-    //           />
-    //         </div>
-    //       );
-    //     })}
-    //   </div>
+  if (highlights.length > 0) {
+    return (
+      <div className="mt-7">
+        <div
+          className="overflow-x-auto whitespace-nowrap no-scrollbar scrollbar-hide"
+          onScroll={handleScroll}
+        >
+          <div className="flex snap-x snap-mandatory pl-1 pr-1">
+            {highlights.map((highlight, index) => (
+              <HighlightCard
+                content_type={highlight.content_type}
+                content_pointer={highlight.content_pointer}
+                title_override={highlight.title_override}
+                description_override={highlight.description_override}
+                image_url_override={highlight.image_url_override}
+                restaurant={restaurant}
+                onClick={() => {
+                  handleHighlightClick(highlight);
+                }}
+              />
+            ))}
+          </div>
+        </div>
 
-    //   {/* Scroll Indicator Dots */}
-    //   <div className="flex justify-center">
-    //     {highlights.map((highlight, index) => (
-    //       <button
-    //         key={index}
-    //         onClick={() => scrollToCard(index)}
-    //         className={`h-2 w-2 mx-1 rounded-full transition-colors duration-300 ${
-    //           activeIndex === index ? "" : "bg-gray-300"
-    //         }`}
-    //         style={{
-    //           backgroundColor:
-    //             activeIndex === index
-    //               ? restaurant.metadata.primaryColor
-    //               : undefined,
-    //         }}
-    //       ></button>
-    //     ))}
-    //   </div>
-    // </div>
-    <div className="mt-7">
-      <div
-        className="overflow-x-auto whitespace-nowrap no-scrollbar scrollbar-hide"
-        onScroll={handleScroll}
-      >
-        <div className="flex snap-x snap-mandatory pl-1 pr-1">
-          {highlights.map((highlight, index) => (
-            <HighlightCard
-              content_type={highlight.content_type}
-              content_pointer={highlight.content_pointer}
-              title_override={highlight.title_override}
-              description_override={highlight.description_override}
-              image_url_override={highlight.image_url_override}
-              restaurant={restaurant}
-              onClick={() => {
-                handleHighlightClick(highlight);
+        {/* Dot indicators */}
+        <div className="flex justify-center gap-2 mt-4">
+          {highlights.map((_, index) => (
+            <div
+              key={index}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                activePromo === index ? "w-4" : "w-2"
+              }`}
+              style={{
+                backgroundColor:
+                  activePromo === index
+                    ? restaurant?.metadata.primaryColor
+                    : "#E5E7EB",
               }}
             />
           ))}
         </div>
       </div>
+    );
+  } else {
+    return null;
+  }
+  //   // <div className="mt-8">
+  //   //   <div
+  //   //     ref={scrollContainerRef}
+  //   //     className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar"
+  //   //     onScroll={handleScroll}
+  //   //   >
+  //   //     {highlights.map((highlight, index) => {
+  //   //       return (
+  //   //         <div key={index} className="snap-center shrink-0 w-full px-4">
+  //   //           <HighlightCard
+  //   //             content_type={highlight.content_type}
+  //   //             content_pointer={highlight.content_pointer}
+  //   //             title_override={highlight.title_override}
+  //   //             description_override={highlight.description_override}
+  //   //             image_url_override={highlight.image_url_override}
+  //   //             restaurant={restaurant}
+  //   //           />
+  //   //         </div>
+  //   //       );
+  //   //     })}
+  //   //   </div>
 
-      {/* Dot indicators */}
-      <div className="flex justify-center gap-2 mt-4">
-        {highlights.map((_, index) => (
-          <div
-            key={index}
-            className={`h-2 rounded-full transition-all duration-300 ${
-              activePromo === index ? "w-4" : "w-2"
-            }`}
-            style={{
-              backgroundColor:
-                activePromo === index
-                  ? restaurant?.metadata.primaryColor
-                  : "#E5E7EB",
-            }}
-          />
-        ))}
-      </div>
-    </div>
-  );
+  //   //   {/* Scroll Indicator Dots */}
+  //   //   <div className="flex justify-center">
+  //   //     {highlights.map((highlight, index) => (
+  //   //       <button
+  //   //         key={index}
+  //   //         onClick={() => scrollToCard(index)}
+  //   //         className={`h-2 w-2 mx-1 rounded-full transition-colors duration-300 ${
+  //   //           activeIndex === index ? "" : "bg-gray-300"
+  //   //         }`}
+  //   //         style={{
+  //   //           backgroundColor:
+  //   //             activeIndex === index
+  //   //               ? restaurant.metadata.primaryColor
+  //   //               : undefined,
+  //   //         }}
+  //   //       ></button>
+  //   //     ))}
+  //   //   </div>
+  //   // </div>
+  //   <div className="mt-7">
+  //     <div
+  //       className="overflow-x-auto whitespace-nowrap no-scrollbar scrollbar-hide"
+  //       onScroll={handleScroll}
+  //     >
+  //       <div className="flex snap-x snap-mandatory pl-1 pr-1">
+  //         {highlights.map((highlight, index) => (
+  //           <HighlightCard
+  //             content_type={highlight.content_type}
+  //             content_pointer={highlight.content_pointer}
+  //             title_override={highlight.title_override}
+  //             description_override={highlight.description_override}
+  //             image_url_override={highlight.image_url_override}
+  //             restaurant={restaurant}
+  //             onClick={() => {
+  //               handleHighlightClick(highlight);
+  //             }}
+  //           />
+  //         ))}
+  //       </div>
+  //     </div>
+
+  //     {/* Dot indicators */}
+  //     <div className="flex justify-center gap-2 mt-4">
+  //       {highlights.map((_, index) => (
+  //         <div
+  //           key={index}
+  //           className={`h-2 rounded-full transition-all duration-300 ${
+  //             activePromo === index ? "w-4" : "w-2"
+  //           }`}
+  //           style={{
+  //             backgroundColor:
+  //               activePromo === index
+  //                 ? restaurant?.metadata.primaryColor
+  //                 : "#E5E7EB",
+  //           }}
+  //         />
+  //       ))}
+  //     </div>
+  //   </div>
+  // );
 };
 
 export default HighlightSlider;

@@ -63,89 +63,96 @@ const AccessCardSlider = ({
 
     flattened.push(...items);
 
-    console.log(flattened, displayCartPasses);
-
     return flattened;
   }, [restaurant, cart]);
 
-  return (
-    <div className="mt-8">
-      {/* Scrollable Access Cards Container */}
-      {!displayCartPasses && (
-        <h1 className="text-xl font-bold">Live Passes at {restaurant.name}</h1>
-      )}
-      {flatAccessCards.length > 0 ? (
-        <div
-          ref={scrollContainerRef}
-          className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar"
-          onScroll={handleScroll}
-        >
-          {flatAccessCards.map((x, index) => {
-            if (displayCartPasses) {
-              let modifiedFlair = null;
-              if (dealEffect) {
-                if (x) {
-                  modifiedFlair = modifiedItemFlair(x, restaurant, dealEffect);
+  if (flatAccessCards.length > 0) {
+    return (
+      <div className="mt-8">
+        {/* Scrollable Access Cards Container */}
+        {!displayCartPasses && (
+          <h1 className="text-xl font-bold">
+            Live Passes at {restaurant.name}
+          </h1>
+        )}
+        {flatAccessCards.length > 0 ? (
+          <div
+            ref={scrollContainerRef}
+            className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar"
+            onScroll={handleScroll}
+          >
+            {flatAccessCards.map((x, index) => {
+              if (displayCartPasses) {
+                let modifiedFlair = null;
+                if (dealEffect) {
+                  if (x) {
+                    modifiedFlair = modifiedItemFlair(
+                      x,
+                      restaurant,
+                      dealEffect
+                    );
+                  }
                 }
+                return (
+                  <div key={index} className="snap-center shrink-0 w-full px-4">
+                    <AccessCard
+                      cart={cart}
+                      cartItem={x}
+                      restaurant={restaurant}
+                      itemId={null}
+                      addToCart={addToCart}
+                      removeFromCart={removeFromCart}
+                      modifiedFlair={modifiedFlair}
+                    />
+                  </div>
+                );
+              } else {
+                return (
+                  <div key={index} className="snap-center shrink-0 w-full px-4">
+                    <AccessCard
+                      cart={cart}
+                      cartItemId={null}
+                      restaurant={restaurant}
+                      itemId={x}
+                      addToCart={addToCart}
+                      removeFromCart={removeFromCart}
+                      modifiedFlair={null}
+                    />
+                  </div>
+                );
               }
-              console.log(x);
-              return (
-                <div key={index} className="snap-center shrink-0 w-full px-4">
-                  <AccessCard
-                    cart={cart}
-                    cartItem={x}
-                    restaurant={restaurant}
-                    itemId={null}
-                    addToCart={addToCart}
-                    removeFromCart={removeFromCart}
-                    modifiedFlair={modifiedFlair}
-                  />
-                </div>
-              );
-            } else {
-              return (
-                <div key={index} className="snap-center shrink-0 w-full px-4">
-                  <AccessCard
-                    cart={cart}
-                    cartItemId={null}
-                    restaurant={restaurant}
-                    itemId={x}
-                    addToCart={addToCart}
-                    removeFromCart={removeFromCart}
-                    modifiedFlair={null}
-                  />
-                </div>
-              );
-            }
-          })}
-        </div>
-      ) : (
-        !displayCartPasses && (
-          <div className="flex justify-center mt-4">
-            <h2>No Live Passes at this time</h2>
+            })}
           </div>
-        )
-      )}
-      {/* Scroll Indicator Dots */}
-      <div className="flex justify-center">
-        {flatAccessCards.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => scrollToCard(index)}
-            className={`h-2 mx-1 rounded-full transition-all duration-300 ${
-              activeIndex === index ? "w-4" : "bg-gray-300 w-2"
-            }`}
-            style={{
-              backgroundColor:
-                activeIndex === index
-                  ? restaurant.metadata.primaryColor
-                  : undefined,
-            }}
-          ></button>
-        ))}
+        ) : (
+          !displayCartPasses && (
+            <div className="flex justify-center mt-4">
+              <h2>No Live Passes at this time</h2>
+            </div>
+          )
+        )}
+        {/* Scroll Indicator Dots */}
+        <div className="flex justify-center">
+          {flatAccessCards.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => scrollToCard(index)}
+              className={`h-2 mx-1 rounded-full transition-all duration-300 ${
+                activeIndex === index ? "w-4" : "bg-gray-300 w-2"
+              }`}
+              style={{
+                backgroundColor:
+                  activeIndex === index
+                    ? restaurant.metadata.primaryColor
+                    : undefined,
+              }}
+            ></button>
+          ))}
+        </div>
       </div>
-    </div>
-  );
+    );
+  } else {
+    return null;
+  }
 };
 
 export default AccessCardSlider;

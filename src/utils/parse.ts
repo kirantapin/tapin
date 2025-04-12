@@ -196,7 +196,7 @@ export function keywordExtraction(
   const keywords: string[] = [];
 
   // Get the full path by traversing the menu object
-  const path = restaurant.menu[item];
+  const path = restaurant.menu[item].path;
   for (const segment of path) {
     const name = restaurant.menu[segment].info.name;
     keywords.push(

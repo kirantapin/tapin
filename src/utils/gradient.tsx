@@ -1,6 +1,7 @@
 import React, { RefObject, useEffect, useState } from "react";
 import { adjustColor } from "./color";
 import { project_url } from "./supabase_client";
+import { RESTAURANT_IMAGE_BUCKET } from "@/constants";
 
 export function GradientIcon({
   icon: Icon,
@@ -43,53 +44,21 @@ export function GradientIcon({
   );
 }
 
-/** Returns a HEX string like "#3a6f8e" once `src` has loaded. */
-export function useAverageColor(src: string | undefined) {
-  const [hex, setHex] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!src) return;
-
-    const img = new Image();
-    img.crossOrigin = "anonymous"; // allow CORS images
-    img.src = src;
-
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = canvas.height = 1; // 1 × 1 pixel is enough
-      const ctx = canvas.getContext("2d")!;
-      ctx.drawImage(img, 0, 0, 1, 1); // browser downsamples for us
-      const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
-      setHex(
-        `#${[r, g, b].map((x) => x.toString(16).padStart(2, "0")).join("")}`
-      );
-    };
-  }, [src]);
-
-  return hex;
-}
-
-export function Hero({
-  hero_image,
-  profile_image,
-}: {
-  hero_image: string;
-  profile_image: string;
-}) {
+export function Hero({ restaurant_id }: { restaurant_id: string }) {
   return (
     <div
-      className="relative h-52 rounded-b-2xl bg-cover bg-center"
+      className="relative h-52 rounded-b-2xl  bg-cover bg-center"
       style={{
-        backgroundImage: `url(${hero_image})`,
+        backgroundImage: `url(${project_url}/storage/v1/object/public/${RESTAURANT_IMAGE_BUCKET}/${restaurant_id}_hero.jpeg)`,
       }}
     >
       {/* Profile Image */}
       <div className="absolute -bottom-5" style={{ left: "18px" }}>
         {" "}
         {/* Moved further down */}
-        <div className="w-24 h-24 rounded-full border-2 border-white  overflow-hidden shadow-lg">
+        <div className="w-24 h-24 rounded-full border-2 border-white  overflow-hidden shadow-xl">
           <img
-            src={profile_image}
+            src={`${project_url}/storage/v1/object/public/${RESTAURANT_IMAGE_BUCKET}/${restaurant_id}_profile.png`}
             alt="Profile"
             className="w-full h-full object-cover"
           />
@@ -97,21 +66,4 @@ export function Hero({
       </div>
     </div>
   );
-}
-
-export function useThemeColorOnScroll(
-  colorInView: string,
-  colorOutOfView = "#ffffff"
-) {
-  const meta = document.querySelector(
-    'meta[name="theme-color"]'
-  ) as HTMLMetaElement | null;
-  if (!meta) return;
-
-  // Helper to swap the meta tag
-  const setTheme = (hex: string) => {
-    console.log(hex);
-    meta.setAttribute("content", hex);
-  };
-  return setTheme;
 }

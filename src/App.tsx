@@ -1,13 +1,7 @@
 import { useAuth } from "./context/auth_context";
 
 import React, { useEffect, useState } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-  useNavigate,
-} from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 import Discovery from "./pages/discovery.tsx";
 import {
@@ -22,6 +16,7 @@ import {
   OFFERS_PAGE_PATH,
   SINGLE_POLICY_PAGE_PATH,
   INFO_PAGE_PATH,
+  DEVICE_NOT_SUPPORTED_PATH,
 } from "./constants.ts";
 import SignIn from "./components/signin/signin.tsx";
 import CheckoutPage from "./pages/demo_checkout.tsx";
@@ -32,18 +27,21 @@ import TransactionList from "./pages/previous_transactions.tsx";
 import PoliciesPage from "./pages/policies.tsx";
 import RestaurantInfo from "./pages/restaurant_info.tsx";
 import SignInModal from "./components/signin/signin_modal.tsx";
+import { ToastContainer } from "react-toastify";
+import DeviceNotSupported from "./pages/device_not_supported.tsx";
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const { showSignInModal, setShowSignInModal } = useAuth();
 
   return (
-    <Router>
+    <>
       <SignInModal
         isOpen={showSignInModal}
         onClose={() => setShowSignInModal(false)}
       />
       <AppLoader />
+      <ToastContainer stacked className="w-full" style={{ width: "100%" }} />
       <Routes>
         <Route path={BASE_PATH} element={<Discovery />} />
         <Route path={DISCOVER_PATH} element={<Discovery />} />
@@ -70,8 +68,12 @@ const App: React.FC = () => {
           }
         />
         <Route path="*" element={<NotFoundPage />} />
+        <Route
+          path={DEVICE_NOT_SUPPORTED_PATH}
+          element={<DeviceNotSupported />}
+        />
       </Routes>
-    </Router>
+    </>
   );
 };
 

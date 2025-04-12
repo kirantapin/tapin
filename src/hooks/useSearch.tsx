@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { SearchEngine } from "@/utils/search_engine";
 import { ItemSpecification, Restaurant } from "@/types";
+import { rest } from "lodash";
 
 interface UseSearchProps {
   restaurant: Restaurant;
@@ -17,8 +18,10 @@ interface UseSearchReturn {
 function getAllItemIds(menu: any): ItemSpecification[] {
   const paths: ItemSpecification[] = [];
 
-  for (const key of Object.keys(menu)) {
-    if (menu[key]?.price !== undefined) {
+  // Loop through menu object keys
+  for (const key in menu) {
+    // If item has a price, it's a leaf node (actual menu item)
+    if (menu[key].info.price) {
       paths.push(key);
     }
   }
@@ -39,10 +42,10 @@ export function useSearch({
   }, [restaurant?.menu]);
 
   // Create a memoized instance of SearchEngine with all item paths
-  const searchEngine = useMemo(
-    () => new SearchEngine(itemIds, restaurant),
-    [itemIds]
-  );
+  const searchEngine = useMemo(() => {
+    console.log("in search engine", restaurant);
+    return new SearchEngine(itemIds, restaurant);
+  }, [itemIds, restaurant]);
 
   // Memoize search results
   const searchResults = useMemo(() => {

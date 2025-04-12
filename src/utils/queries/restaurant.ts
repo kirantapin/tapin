@@ -1,6 +1,8 @@
 import { supabase } from "../supabase_client";
 import { Restaurant, Pass } from "../../types";
-import { PASS_MENU_TAG, DRINK_MENU_TAG } from "@/constants";
+import { PASS_MENU_TAG, DRINK_MENU_TAG, HISTORY_KEY } from "@/constants";
+
+const HistoryCacheTTL = 30000;
 
 export const fetchRestaurantById = async (
   restaurantId: string | undefined
@@ -8,29 +10,61 @@ export const fetchRestaurantById = async (
   if (!restaurantId) {
     return null;
   }
-  const { data, error } = await supabase
-    .from("restaurants")
-    .select("*")
-    .eq("id", restaurantId)
-    .single();
+
+  console.log("Fetching restaurant by id", restaurantId);
+
+  // Check local storage for recent restaurant data
+  const historyStr = localStorage.getItem(HISTORY_KEY);
+  let data;
+  let error;
+
+  if (historyStr) {
+    try {
+      const history = JSON.parse(historyStr);
+      const recentRestaurant = history.find(
+        (item: any) => item.restaurant.id === restaurantId
+      );
+
+      if (recentRestaurant) {
+        const timestamp = new Date(recentRestaurant.timestamp).getTime();
+        const now = new Date().getTime();
+        const age = now - timestamp;
+
+        // If data is less than 30 seconds old, return it
+        if (age < HistoryCacheTTL) {
+          data = recentRestaurant.restaurant;
+          error = null;
+        }
+      }
+    } catch (error) {
+      console.error("Error parsing restaurant history:", error);
+    }
+  }
+
+  // Always fetch from Supabase to ensure data is fresh
+  if (!data) {
+    const response = await supabase
+      .from("restaurants")
+      .select("*")
+      .eq("id", restaurantId)
+      .eq("active", true)
+      .single();
+
+    data = response.data;
+    error = response.error;
+  }
 
   if (error) {
     console.error("Error fetching restaurant:", error.message);
     return null;
   }
 
+  logVisit(data);
+
   const passes = await fetchPasses(restaurantId);
 
-  // const tempMenu = data.menu;
-  // const liquorMenu = tempMenu[DRINK_MENU_TAG]["liquor"];
-  // tempMenu[DRINK_MENU_TAG]["house_mixer"] = liquorMenu;
-  // tempMenu[DRINK_MENU_TAG]["shots_or_shooters"] = liquorMenu;
-  // delete tempMenu[DRINK_MENU_TAG]["liquor"];
-  // data.menu = tempMenu;
-  // data.menu[PASS_MENU_TAG] = passes;
-
   for (const pass of passes) {
-    const passMenu = data.alt_menu[PASS_MENU_TAG];
+    const passMenu = data.menu[PASS_MENU_TAG];
     passMenu[pass.itemId][pass.pass_id] = {
       name: passMenu[pass.itemId].name,
       price: pass.price,
@@ -41,11 +75,7 @@ export const fetchRestaurantById = async (
     };
   }
 
-  console.log("data.alt_menu", data.alt_menu);
-
-  data.menu = indexMenu(data.alt_menu);
-
-  console.log("new menu", data.menu);
+  data.menu = indexMenu(data.menu);
 
   return data;
 };
@@ -63,24 +93,6 @@ export const fetchPasses = async (
     console.error("Error fetch temporary items.", error.message);
     return {};
   }
-
-  // const passMenu = {};
-
-  // for (const pass of data) {
-  //   if (pass.item_name in passMenu) {
-  //     passMenu[pass.item_name][pass.for_date] = {
-  //       price: pass.price,
-  //       description: pass.item_description,
-  //     };
-  //   } else {
-  //     passMenu[pass.item_name] = {
-  //       [pass.for_date]: {
-  //         price: pass.price,
-  //         description: pass.item_description,
-  //       },
-  //     };
-  //   }
-  // }
 
   return data;
 };
@@ -127,4 +139,39 @@ export function indexMenu(menu: Record<string, any>): FlatIndex {
   }
 
   return index;
+}
+
+export function logVisit(restaurant: any) {
+  // Get existing history from localStorage or initialize empty array
+  const historyStr = localStorage.getItem(HISTORY_KEY);
+  const history = historyStr ? JSON.parse(historyStr) : [];
+
+  // Find if restaurant already exists in history
+  const existingIndex = history.findIndex(
+    (item: any) => item.restaurant.id === restaurant.id
+  );
+
+  const visitedRestaurant = {
+    restaurant,
+    timestamp: new Date().toISOString(),
+  };
+
+  if (existingIndex !== -1) {
+    // Update existing entry
+    history.splice(existingIndex, 1);
+  }
+
+  // Add to front of array
+  history.unshift(visitedRestaurant);
+
+  // Keep only latest 5 items
+  const trimmedHistory = history.slice(0, 5);
+
+  // Sort by timestamp descending
+  trimmedHistory.sort((a: any, b: any) => {
+    return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+  });
+
+  // Save back to localStorage
+  localStorage.setItem("history", JSON.stringify(trimmedHistory));
 }

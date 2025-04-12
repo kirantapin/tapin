@@ -27,6 +27,7 @@ const Rewards: React.FC<RewardsProps> = ({
   const [isOpen, setIsOpen] = useState(true);
 
   const computeRange = (policies: Policy[]) => {
+    if (policies.length === 0) return;
     const maxValue = policies[policies.length - 1].definition.action.amount;
     const fourth = maxValue / 4;
     const intervals = [0, fourth, 2 * fourth, 3 * fourth, 4 * fourth];
@@ -37,7 +38,6 @@ const Rewards: React.FC<RewardsProps> = ({
     );
     setPointsToGo(nextLargest?.definition.action.amount - userPoints);
     setIntervals(roundedNumbers);
-    console.log("hello", progress > 100 ? 100 : progress);
     setWidthPercentage(progress > 100 ? 100 : progress);
   };
 
@@ -55,7 +55,7 @@ const Rewards: React.FC<RewardsProps> = ({
       computeRange(sortedByValueAsc);
     };
     fetchData();
-  }, []);
+  }, [restaurant]);
 
   return (
     <>
@@ -85,7 +85,7 @@ const Rewards: React.FC<RewardsProps> = ({
           >
             {userPoints} Points
           </h3>
-          {userPoints === 0 ? (
+          {loyaltyPolicies.length === 0 || userPoints === 0 ? (
             <p className="text-sm text-black-600 mb-11">
               Start earning points and claim rewards!
             </p>
@@ -98,92 +98,103 @@ const Rewards: React.FC<RewardsProps> = ({
           )}
 
           {/* Progress Bar */}
-          {widthPercentage !== null && intervals && (
-            <>
-              <div className="mt-4 h-3 bg-gray-200 rounded-full w-full">
-                <div
-                  className="h-full  rounded-full transition-all duration-300"
-                  style={{
-                    width: `${widthPercentage === 0 ? 2 : widthPercentage}%`,
-                    background: restaurant?.metadata.primaryColor
-                      ? `linear-gradient(90deg, 
+          {loyaltyPolicies.length > 0 &&
+            widthPercentage !== null &&
+            intervals && (
+              <>
+                <div className="mt-4 h-3 bg-gray-200 rounded-full w-full">
+                  <div
+                    className="h-full  rounded-full transition-all duration-300"
+                    style={{
+                      width: `${widthPercentage === 0 ? 2 : widthPercentage}%`,
+                      background: restaurant?.metadata.primaryColor
+                        ? `linear-gradient(90deg, 
         ${adjustColor(restaurant.metadata.primaryColor as string, 40)},
         ${adjustColor(restaurant.metadata.primaryColor as string, -30)}
       )`
-                      : undefined,
-                  }}
-                ></div>
-              </div>
+                        : undefined,
+                    }}
+                  ></div>
+                </div>
 
-              <div className="flex justify-between text-sm text-gray-500 mt-1">
-                {intervals.map((val) => (
-                  <span>{val}</span>
-                ))}
-              </div>
-            </>
-          )}
+                <div className="flex justify-between text-sm text-gray-500 mt-1">
+                  {intervals.map((val) => (
+                    <span>{val}</span>
+                  ))}
+                </div>
+              </>
+            )}
         </div>
       )}
 
-      <div
-        className={`transition-all duration-300 ease-in-out overflow-hidden ${
-          isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
-        }`}
-      >
-        <div className="bg-gray-50 rounded-lg p-4 mt-6 mb-6 border-2 border-gray-200">
-          <h3 className="text-black text-lg font-semibold mb-4">
-            Rewards you can get
-          </h3>
+      {loyaltyPolicies.length > 0 && (
+        <div
+          className={`transition-all duration-300 ease-in-out overflow-hidden ${
+            isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+          }`}
+        >
+          <div className="bg-gray-50 rounded-lg p-4 mt-6 mb-6 border-2 border-gray-200">
+            <h3 className="text-black text-lg font-semibold mb-4">
+              Rewards you can get
+            </h3>
 
-          <div className="space-y-4">
-            {loyaltyPolicies.map((policy) => (
-              <div
-                key={policy.policy_id}
-                className="grid grid-cols-[4rem_6rem_1fr_auto] items-center gap-4"
-              >
-                {/* Image - Fixed Width */}
-                <div className="w-12 h-12 flex items-center justify-center">
-                  <img
-                    src={
-                      "https://s-sdistributing.com/wp-content/uploads/Bud-Light-2.png" ||
-                      "/placeholder.svg"
-                    }
-                    alt={policy.header}
-                    className="max-h-full max-w-full object-contain"
-                  />
-                </div>
+            <div className="space-y-4">
+              {loyaltyPolicies.map((policy) => (
+                <div
+                  key={policy.policy_id}
+                  className="grid grid-cols-[4rem_6rem_1fr_auto] items-center gap-4"
+                >
+                  {/* Image - Fixed Width */}
+                  <div className="w-12 h-12 flex items-center justify-center">
+                    <img
+                      src={
+                        "https://s-sdistributing.com/wp-content/uploads/Bud-Light-2.png" ||
+                        "/placeholder.svg"
+                      }
+                      alt={policy.header}
+                      className="max-h-full max-w-full object-contain"
+                    />
+                  </div>
 
-                {/* Amount - Fixed Width */}
-                <div className="text-xl text-black font-bold font-[Gilroy] text-left">
-                  {policy.definition.action.amount}
-                </div>
+                  {/* Amount - Fixed Width */}
+                  <div className="text-xl text-black font-bold font-[Gilroy] text-left">
+                    {policy.definition.action.amount}
+                  </div>
 
-                {/* Description - Takes Remaining Space */}
-                <div className="text-gray-700 font-[Gilroy]">
-                  {itemToStringDescription(
-                    {
-                      id: policy.definition.action.items[0],
-                      modifiers: [],
-                    },
-                    restaurant
+                  {/* Description - Takes Remaining Space */}
+                  <div className="text-gray-700 font-[Gilroy]">
+                    {itemToStringDescription(
+                      {
+                        id: policy.definition.action.items[0],
+                        modifiers: [],
+                      },
+                      restaurant
+                    )}
+                  </div>
+
+                  {/* Chevron - Auto Width */}
+                  {userPoints >= policy.definition.conditions[0].amount && (
+                    <div
+                      className="text-gray-700 inline-flex items-center rounded-full px-4 py-1 w-fit  text-white"
+                      style={{
+                        background: restaurant?.metadata.primaryColor
+                          ? `linear-gradient(90deg, 
+        ${adjustColor(restaurant.metadata.primaryColor as string, 40)},
+        ${adjustColor(restaurant.metadata.primaryColor as string, -30)}
+      )`
+                          : undefined,
+                      }}
+                      onClick={() => onIntentionToRedeem(policy)}
+                    >
+                      <span className="text-[10px]">Redeem</span>
+                    </div>
                   )}
                 </div>
-
-                {/* Chevron - Auto Width */}
-                {userPoints >= policy.definition.conditions[0].amount && (
-                  <div
-                    className="text-gray-700 inline-flex items-center bg-white rounded-full px-2 py-1 w-fit border border-gray-400"
-                    style={{ color: restaurant.metadata.primaryColor }}
-                    onClick={() => onIntentionToRedeem(policy)}
-                  >
-                    <span className="text-[10px]">Redeem</span>
-                  </div>
-                )}
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Bottom Rewards Button */}
       <button

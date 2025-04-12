@@ -40,18 +40,17 @@ import {
   NORMAL_DEAL_TAG,
   INFO_PAGE_PATH,
   LOYALTY_REWARD_TAG,
+  RESTAURANT_IMAGE_BUCKET,
 } from "../constants.ts";
 
 import { fetch_policies } from "../utils/queries/policies.ts";
 import { fetchRestaurantById } from "../utils/queries/restaurant.ts";
-import PolicyCard from "@/components/cards/shad_policy_card.tsx";
 
 import { project_url } from "../utils/supabase_client.ts";
 import { DrinkItem, DrinkList } from "@/components/menu_items.tsx";
 import GoToCartButton from "@/components/go_to_cart_button.tsx";
 import AccessCardSlider from "../components/sliders/access_card_slider.tsx";
 import Rewards from "@/components/rewards.tsx";
-import { ToastContainer } from "react-toastify";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { Sidebar } from "@/components/sidebar.tsx";
@@ -59,14 +58,10 @@ import DealCard from "@/components/cards/small_policy.tsx";
 import PolicyModal from "@/components/bottom_sheets/policy_modal.tsx";
 import { useCartManager } from "@/hooks/useCartManager.tsx";
 import { useSearch } from "@/hooks/useSearch.tsx";
-import { adjustColor } from "@/utils/color";
-import {
-  GradientIcon,
-  Hero,
-  useThemeColorOnScroll,
-} from "@/utils/gradient.tsx";
+import { GradientIcon, Hero } from "@/utils/gradient.tsx";
 import { useBannerColor } from "@/hooks/useBannerColor.tsx";
 import HighlightSlider from "@/components/sliders/highlight_slider.tsx";
+import { RecentActivity } from "@/components/sliders/recent_activity.tsx";
 
 export default function RestaurantPage() {
   const { userSession, userData, transactions, logout, setShowSignInModal } =
@@ -103,20 +98,11 @@ export default function RestaurantPage() {
     });
   };
 
-  const [activePromo, setActivePromo] = useState(0);
-
-  const handleScroll = (e) => {
-    const scrollPosition = e.currentTarget.scrollLeft;
-    const itemWidth = e.currentTarget.offsetWidth;
-    const newActivePromo = Math.round(scrollPosition / itemWidth);
-    setActivePromo(newActivePromo);
-  };
-
   useEffect(() => {
     if (!restaurant_id) {
       navigate("/not_found_page");
     }
-  }, []);
+  }, [restaurant_id]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -131,59 +117,39 @@ export default function RestaurantPage() {
       setLoading(false);
     };
     fetchData();
-  }, []);
+  }, [restaurant_id]);
 
   const titleRef = useRef<HTMLHeadingElement>(null);
-
-  useBannerColor(titleRef);
+  useBannerColor(titleRef, restaurant);
 
   return !loading ? (
     <div className="min-h-screen bg-gray-25">
       {/* Header Icons */}
-      <div className="absolute w-full top-0 z-50 flex justify-between items-center px-4 py-3">
-        <div
-          className="bg-black/60 p-2 rounded-full"
-          onClick={() => {
-            setSidebarOpen(true);
-          }}
-        >
-          <Menu className="w-5 h-5 text-white" />
-        </div>
+      {!isOpen && (
+        <div className="absolute w-full top-0 z-50 flex justify-between items-center px-4 py-3">
+          <div
+            className="bg-white p-2 rounded-full"
+            onClick={() => {
+              setSidebarOpen(true);
+            }}
+          >
+            <Menu className="w-5 h-5 text-black" />
+          </div>
 
-        {/* Shopping Bag & User Icons */}
-        <div className="flex items-center gap-5">
-          <div className="bg-black/60 p-2 rounded-full">
-            <ShoppingBag className="w-5 h-5 text-white" />
-          </div>
-          <div className="bg-black/60 p-2 rounded-full">
-            <User className="w-5 h-5 text-white" />
+          {/* Shopping Bag & User Icons */}
+          <div className="flex items-center gap-5">
+            <div className="bg-white p-2 rounded-full">
+              <ShoppingBag className="w-5 h-5 text-black" />
+            </div>
+            <div className="bg-white p-2 rounded-full">
+              <User className="w-5 h-5 text-black" />
+            </div>
           </div>
         </div>
-      </div>
+      )}
       {/* Hero Image */}
-      {/* <div
-        className="relative h-52 rounded-b-2xl bg-cover bg-center"
-        style={{
-          backgroundImage: `url('${project_url}/storage/v1/object/public/restaurant_images/${restaurant_id}_hero.jpeg')`,
-        }}
-      >
-        
-        <div className="absolute -bottom-5" style={{ left: "18px" }}>
-          {" "}
-          
-          <div className="w-24 h-24 rounded-full border-2 border-white  overflow-hidden shadow-lg">
-            <img
-              src={`${project_url}/storage/v1/object/public/restaurant_images/${restaurant_id}_profile.png`}
-              alt="Profile"
-              className="w-full h-full object-cover"
-            />
-          </div>
-        </div>
-      </div> */}
-      <Hero
-        hero_image={`${project_url}/storage/v1/object/public/restaurant_images/${restaurant_id}_hero.jpeg`}
-        profile_image={`${project_url}/storage/v1/object/public/restaurant_images/${restaurant_id}_profile.png`}
-      />
+      {restaurant && <Hero restaurant_id={restaurant_id as string} />}
+
       {/* Restaurant Info */}
       <div className="mt-10 px-4">
         <div className="flex items-center gap-2">
@@ -244,116 +210,134 @@ export default function RestaurantPage() {
         </div>
 
         {/* Promo Banner */}
-        <HighlightSlider
-          restaurant={restaurant as Restaurant}
-          addToCart={(itemId: string) => {
-            addToCart({ id: itemId, modifiers: [] });
-          }}
-          setPolicyModal={(policy_id: string) => {
-            const policy = policies.find((p) => p.policy_id === policy_id);
-            if (policy) {
-              setPolicy(policy);
-              setIsOpen(true);
-            }
-          }}
-          policies={policies}
-        />
+        {restaurant && (
+          <HighlightSlider
+            restaurant={restaurant}
+            addToCart={(itemId: string) => {
+              addToCart({ id: itemId, modifiers: [] });
+            }}
+            setPolicyModal={(policy_id: string) => {
+              const policy = policies.find((p) => p.policy_id === policy_id);
+              if (policy) {
+                setPolicy(policy);
+                setIsOpen(true);
+              }
+            }}
+            policies={policies}
+          />
+        )}
 
         {/* My Spot Section */}
-        <div className="mt-6">
-          <h1 className="text-xl font-bold flex items-center gap-2">My Spot</h1>
+        {userSession && (
+          <div className="mt-6">
+            <h1 className="text-xl font-bold flex items-center gap-2">
+              My Spot
+            </h1>
 
-          <div className="flex gap-4 mt-4 overflow-x-auto pb-2">
-            {/* Card 1: My Passes */}
-            <div
-              className="relative flex-shrink-0 w-[145px] h-[115px] bg-gray-50 rounded-xl border p-4 cursor-pointer"
-              onClick={() => {
-                navigate(
-                  PREVIOUS_TRANSACTIONS_PATH.replace(":id", restaurant_id),
-                  {
-                    state: { showPasses: true },
-                  }
-                );
-              }}
-            >
-              {/* Ticket icon in top-left */}
-              <div className="absolute top-3 left-3">
-                <GradientIcon
-                  icon={Ticket}
-                  primaryColor={restaurant?.metadata.primaryColor as string}
-                />
+            <div className="flex gap-4 mt-4 overflow-x-auto pb-2">
+              {/* Card 1: My Passes */}
+              <div
+                className="relative flex-shrink-0 w-[145px] h-[115px] bg-gray-50 rounded-xl border p-4 cursor-pointer"
+                onClick={() => {
+                  navigate(
+                    PREVIOUS_TRANSACTIONS_PATH.replace(":id", restaurant_id),
+                    {
+                      state: { showPasses: true },
+                    }
+                  );
+                }}
+              >
+                {/* Ticket icon in top-left */}
+                <div className="absolute top-3 left-3">
+                  <GradientIcon
+                    icon={Ticket}
+                    primaryColor={restaurant?.metadata.primaryColor as string}
+                  />
+                </div>
+
+                {/* Arrow in top-right */}
+                <div className="absolute top-3 right-3 bg-gray-100 rounded-full p-1">
+                  <ChevronRight className="w-4 h-4 text-gray-400" />
+                </div>
+
+                {/* Text in bottom-left */}
+                <div className="absolute bottom-3 left-4">
+                  <p className="font-14 text-gray-500 font-medium">My Passes</p>
+                  <p className="font-16 font-semibold text-gray-900">
+                    {
+                      transactions.filter(
+                        (t) =>
+                          t.fulfilled_by === null && t.item[0] === PASS_MENU_TAG
+                      ).length
+                    }{" "}
+                    Active Passes
+                  </p>
+                </div>
               </div>
 
-              {/* Arrow in top-right */}
-              <div className="absolute top-3 right-3 bg-gray-100 rounded-full p-1">
-                <ChevronRight className="w-4 h-4 text-gray-400" />
-              </div>
+              {/* Card 2: My Orders */}
+              <div
+                className="relative flex-shrink-0 w-[145px] h-[115px] bg-gray-50 rounded-xl border p-4 cursor-pointer"
+                onClick={() => {
+                  navigate(
+                    PREVIOUS_TRANSACTIONS_PATH.replace(":id", restaurant_id),
+                    {
+                      state: { showPasses: false },
+                    }
+                  );
+                }}
+              >
+                <div className="absolute top-3 left-3">
+                  <GradientIcon
+                    icon={GlassWater}
+                    primaryColor={restaurant?.metadata.primaryColor as string}
+                  />
+                </div>
+                <div className="absolute top-3 right-3 bg-gray-100 rounded-full p-1">
+                  <ChevronRight className="w-4 h-4 text-gray-400" />
+                </div>
 
-              {/* Text in bottom-left */}
-              <div className="absolute bottom-3 left-4">
-                <p className="font-14 text-gray-500 font-medium">My Passes</p>
-                <p className="font-16 font-semibold text-gray-900">
-                  {
-                    transactions.filter(
-                      (t) =>
-                        t.fulfilled_by === null && t.item[0] === PASS_MENU_TAG
-                    ).length
-                  }{" "}
-                  Active Passes
-                </p>
-              </div>
-            </div>
-
-            {/* Card 2: My Orders */}
-            <div
-              className="relative flex-shrink-0 w-[145px] h-[115px] bg-gray-50 rounded-xl border p-4 cursor-pointer"
-              onClick={() => {
-                navigate(
-                  PREVIOUS_TRANSACTIONS_PATH.replace(":id", restaurant_id),
-                  {
-                    state: { showPasses: false },
-                  }
-                );
-              }}
-            >
-              <div className="absolute top-3 left-3">
-                <GradientIcon
-                  icon={GlassWater}
-                  primaryColor={restaurant?.metadata.primaryColor as string}
-                />
-              </div>
-              <div className="absolute top-3 right-3 bg-gray-100 rounded-full p-1">
-                <ChevronRight className="w-4 h-4 text-gray-400" />
-              </div>
-
-              <div className="absolute bottom-3 left-4">
-                <p className="font-14 text-gray-500 font-medium">My Orders</p>
-                <p className="font-16 font-semibold text-gray-900">
-                  {
-                    transactions.filter(
-                      (t) =>
-                        t.fulfilled_by === null && t.item[0] !== PASS_MENU_TAG
-                    ).length
-                  }{" "}
-                  Items
-                </p>
+                <div className="absolute bottom-3 left-4">
+                  <p className="font-14 text-gray-500 font-medium">My Orders</p>
+                  <p className="font-16 font-semibold text-gray-900">
+                    {
+                      transactions.filter(
+                        (t) =>
+                          t.fulfilled_by === null && t.item[0] !== PASS_MENU_TAG
+                      ).length
+                    }{" "}
+                    Items
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {/* Recent Activity Section*/}
+
+        <RecentActivity
+          transactions={transactions}
+          restaurant={restaurant as Restaurant}
+          addToCart={addToCart}
+          removeFromCart={removeFromCart}
+          state={state}
+        />
 
         {/* Rewards Section */}
         <div className="mt-6">
-          {userData && restaurant && (
-            <Rewards
-              userData={userData}
-              restaurant={restaurant}
-              onIntentionToRedeem={(policy) => {
-                setPolicy(policy);
-                setIsOpen(true);
-              }}
-            />
-          )}
+          {userData &&
+            restaurant &&
+            restaurant.metadata.enableLoyaltyProgram && (
+              <Rewards
+                userData={userData}
+                restaurant={restaurant}
+                onIntentionToRedeem={(policy) => {
+                  setPolicy(policy);
+                  setIsOpen(true);
+                }}
+              />
+            )}
 
           <div className="mt-8">
             {restaurant && state.cart && (
@@ -367,40 +351,47 @@ export default function RestaurantPage() {
             )}
           </div>
           {/* Awesome Deals Section */}
-          <div className="mt-8">
-            <div className="flex justify-between items-center mb-4">
-              <h1 className="text-xl font-bold">Awesome Deals</h1>
-              <button
-                className="text-sm font-semibold "
-                style={{ color: restaurant?.metadata["primaryColor"] }}
-                onClick={() => {
-                  navigate(
-                    OFFERS_PAGE_PATH.replace(":id", restaurant_id as string)
-                  );
-                }}
-              >
-                View All
-              </button>
-            </div>
+          {policies.filter(
+            (policy) => policy.definition.tag === NORMAL_DEAL_TAG
+          ).length > 0 && (
+            <div className="mt-8">
+              <div className="flex justify-between items-center mb-4">
+                <h1 className="text-xl font-bold">Awesome Deals</h1>
+                <button
+                  className="text-sm font-semibold "
+                  style={{ color: restaurant?.metadata["primaryColor"] }}
+                  onClick={() => {
+                    navigate(
+                      OFFERS_PAGE_PATH.replace(":id", restaurant_id as string)
+                    );
+                  }}
+                >
+                  View All
+                </button>
+              </div>
 
-            <div className="overflow-x-auto pb-2 no-scrollbar">
-              <div className="flex gap-4 whitespace-nowrap">
-                {policies
-                  .filter((policy) => policy.definition.tag === NORMAL_DEAL_TAG)
-                  .map((policy) => (
-                    <DealCard
-                      cart={state.cart}
-                      policy={policy}
-                      restaurant={restaurant}
-                      primaryColor={restaurant?.metadata.primaryColor}
-                      setPolicy={setPolicy}
-                      setIsOpen={setIsOpen}
-                      dealEffect={state.dealEffect}
-                    />
-                  ))}
+              <div className="overflow-x-auto pb-2 no-scrollbar">
+                <div className="flex gap-4 whitespace-nowrap">
+                  {policies
+                    .filter(
+                      (policy) => policy.definition.tag === NORMAL_DEAL_TAG
+                    )
+                    .map((policy) => (
+                      <DealCard
+                        cart={state.cart}
+                        policy={policy}
+                        restaurant={restaurant}
+                        primaryColor={restaurant?.metadata.primaryColor}
+                        setPolicy={setPolicy}
+                        setIsOpen={setIsOpen}
+                        dealEffect={state.dealEffect}
+                      />
+                    ))}
+                </div>
               </div>
             </div>
-          </div>
+          )}
+
           <div
             ref={orderDrinksRef}
             className="flex justify-between items-center mb-2 mt-6"
@@ -415,7 +406,15 @@ export default function RestaurantPage() {
               type="text"
               placeholder="Search"
               className="w-full pl-12 pr-4 py-3 border rounded-full text-base"
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                const searchBarRect = e.currentTarget.getBoundingClientRect();
+                console.log(searchBarRect);
+                window.scrollTo({
+                  top: window.scrollY + searchBarRect.top - 50,
+                  behavior: "smooth",
+                });
+              }}
               value={searchQuery}
             />
             {searchQuery && (
@@ -440,7 +439,6 @@ export default function RestaurantPage() {
                     addToCart={addToCart}
                     removeFromCart={removeFromCart}
                     itemId={searchResult}
-                    primaryColor={restaurant?.metadata.primaryColor as string}
                   />
                 ))}
               </pre>
@@ -490,22 +488,6 @@ export default function RestaurantPage() {
             </>
           )}
         </div>
-
-        {!userSession ? (
-          <button
-            onClick={() => setShowSignInModal(true)}
-            className="mt-5 mb-5 px-4 py-2 bg-blue-600 text-white rounded-full font-medium shadow-sm hover:bg-blue-700 transition"
-          >
-            Sign in
-          </button>
-        ) : (
-          <button
-            onClick={logout}
-            className="mt-5 mb-5 px-4 py-2 bg-gray-200 text-gray-800 rounded-full font-medium shadow-sm hover:bg-gray-300 transition"
-          >
-            Log out
-          </button>
-        )}
         {restaurant && (
           <GoToCartButton
             restaurant={restaurant}
@@ -514,12 +496,24 @@ export default function RestaurantPage() {
             }
           />
         )}
-        <ToastContainer />
+        {searchQuery && (
+          <>
+            <div className="h-64" />
+            <div className="h-64" />
+            <div className="h-64" />
+          </>
+        )}
+
         <Sidebar
           isOpen={sidebarOpen}
           onClose={() => {
             setSidebarOpen(false);
           }}
+          navigateToSignIn={() => {
+            setSidebarOpen(false);
+            setShowSignInModal(true);
+          }}
+          setLoading={setLoading}
         />
         {policy && (
           <PolicyModal
@@ -542,33 +536,66 @@ export default function RestaurantPage() {
 
 const RestaurantHeaderSkeleton = () => {
   return (
-    <div className="bg-white relative pb-10 min-h-[65vh]">
+    <div className="bg-white relative pb-10 min-h-screen">
       {/* Header Icons */}
       <div className="absolute w-full top-0 z-50 flex justify-between items-center px-4 py-3">
         <div className="w-9 h-9 rounded-full overflow-hidden">
-          <Skeleton circle width="100%" height="100%" />
+          <Skeleton
+            circle
+            width="100%"
+            height="100%"
+            baseColor="#e5e7eb"
+            highlightColor="#d1d5db"
+          />
         </div>
 
         <div className="flex items-center gap-5">
           <div className="w-9 h-9 rounded-full overflow-hidden">
-            <Skeleton circle width="100%" height="100%" />
+            <Skeleton
+              circle
+              width="100%"
+              height="100%"
+              baseColor="#e5e7eb"
+              highlightColor="#d1d5db"
+            />
           </div>
           <div className="w-9 h-9 rounded-full overflow-hidden">
-            <Skeleton circle width="100%" height="100%" />
+            <Skeleton
+              circle
+              width="100%"
+              height="100%"
+              baseColor="#e5e7eb"
+              highlightColor="#d1d5db"
+            />
           </div>
         </div>
       </div>
 
       {/* Hero Image */}
       <div className="h-48 w-full rounded-b-xl overflow-hidden">
-        <Skeleton width="100%" height="100%" />
+        <Skeleton
+          width="100%"
+          height="100%"
+          baseColor="#e5e7eb"
+          highlightColor="#d1d5db"
+          style={{
+            margin: 0,
+            padding: 0,
+            display: "block",
+          }}
+        />
       </div>
 
       {/* Restaurant Info + Action Buttons */}
-      <div className="mt-20 px-4 space-y-4">
+      <div className="mt-10 px-4 space-y-4">
         {/* Restaurant Name */}
         <div className="w-2/3 h-6">
-          <Skeleton width="100%" height="100%" />
+          <Skeleton
+            width="100%"
+            height="100%"
+            baseColor="#e5e7eb"
+            highlightColor="#d1d5db"
+          />
         </div>
 
         {/* Action Buttons */}
@@ -578,21 +605,46 @@ const RestaurantHeaderSkeleton = () => {
               key={i}
               className="flex-1 h-11 rounded-full overflow-hidden border border-gray-200 shadow-sm"
             >
-              <Skeleton width="100%" height="100%" />
+              <Skeleton
+                width="100%"
+                height="100%"
+                baseColor="#e5e7eb"
+                highlightColor="#d1d5db"
+                style={{
+                  margin: 0,
+                  padding: 0,
+                  display: "block",
+                }}
+              />
             </div>
           ))}
         </div>
 
         {/* Promo Banner */}
         <div className="mt-6 w-full h-[120px] rounded-3xl overflow-hidden">
-          <Skeleton width="100%" height="100%" />
+          <Skeleton
+            width="100%"
+            height="100%"
+            baseColor="#e5e7eb"
+            highlightColor="#d1d5db"
+            style={{
+              margin: 0,
+              padding: 0,
+              display: "block",
+            }}
+          />
         </div>
 
         {/* "My Spot" Section */}
         <div className="mt-8 space-y-3">
           {/* Section Title */}
           <div className="w-32 h-6">
-            <Skeleton width="100%" height="100%" />
+            <Skeleton
+              width="100%"
+              height="100%"
+              baseColor="#e5e7eb"
+              highlightColor="#d1d5db"
+            />
           </div>
 
           {/* Card Grid */}
@@ -602,11 +654,67 @@ const RestaurantHeaderSkeleton = () => {
                 key={i}
                 className="p-4 bg-gray-50 rounded-lg shadow space-y-2"
               >
-                <Skeleton height={20} width="60%" />
-                <Skeleton height={14} width="80%" />
-                <Skeleton height={12} width="40%" />
+                <Skeleton
+                  height={20}
+                  width="60%"
+                  baseColor="#e5e7eb"
+                  highlightColor="#d1d5db"
+                />
+                <Skeleton
+                  height={14}
+                  width="80%"
+                  baseColor="#e5e7eb"
+                  highlightColor="#d1d5db"
+                />
+                <Skeleton
+                  height={12}
+                  width="40%"
+                  baseColor="#e5e7eb"
+                  highlightColor="#d1d5db"
+                />
               </div>
             ))}
+          </div>
+        </div>
+        {/* Access Cards Section */}
+        <div className="mt-8 space-y-3">
+          {/* Section Title */}
+          <div className="w-40 h-6">
+            <Skeleton
+              width="100%"
+              height="100%"
+              baseColor="#e5e7eb"
+              highlightColor="#d1d5db"
+              style={{
+                margin: 0,
+                padding: 0,
+                display: "block",
+              }}
+            />
+          </div>
+
+          {/* Access Cards */}
+          <div className="overflow-x-hidden">
+            <div className="flex gap-4">
+              {[1, 2, 3].map((_, i) => (
+                <div
+                  key={i}
+                  className="flex-shrink-0 w-[280px] h-[160px] rounded-xl overflow-hidden"
+                >
+                  <Skeleton
+                    width="100%"
+                    height="100%"
+                    baseColor="#e5e7eb"
+                    highlightColor="#d1d5db"
+                    style={{
+                      margin: 0,
+                      padding: 0,
+                      display: "block",
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

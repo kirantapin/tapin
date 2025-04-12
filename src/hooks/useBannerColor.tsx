@@ -1,9 +1,10 @@
+import { Restaurant } from "@/types";
 import { useEffect, useRef, useState } from "react";
 
 export const useBannerColor = (
-  titleRef: React.RefObject<HTMLHeadingElement>
+  titleRef: React.RefObject<HTMLHeadingElement>,
+  restaurant: Restaurant | null | undefined
 ) => {
-  const [lastScrollY, setLastScrollY] = useState(0);
   const observerRef = useRef<IntersectionObserver | null>(null);
   useEffect(() => {
     // First, add a transition style to the meta theme-color
@@ -19,7 +20,11 @@ export const useBannerColor = (
       const meta = document.querySelector(
         'meta[name="theme-color"]'
       ) as HTMLMetaElement | null;
-      if (!meta || !titleRef.current) return;
+      console.log("creating observer", titleRef.current);
+
+      if (!meta || !titleRef.current || !restaurant) {
+        return;
+      }
 
       if (observerRef.current) {
         observerRef.current.disconnect();
@@ -27,16 +32,12 @@ export const useBannerColor = (
 
       observerRef.current = new IntersectionObserver(
         ([entry]) => {
-          const currentScrollY = window.scrollY;
-
           if (entry.isIntersecting) {
             // Use requestAnimationFrame for smooth transition
             meta.setAttribute("content", "#000000");
           } else {
             meta.setAttribute("content", "#ffffff");
           }
-
-          setLastScrollY(currentScrollY);
         },
         {
           threshold: 0,
@@ -44,7 +45,9 @@ export const useBannerColor = (
         }
       );
 
-      observerRef.current.observe(titleRef.current);
+      if (meta && titleRef.current && restaurant) {
+        observerRef.current.observe(titleRef.current);
+      }
     };
 
     createObserver();
@@ -56,5 +59,5 @@ export const useBannerColor = (
       // Clean up the style
       document.head.removeChild(style);
     };
-  }, [lastScrollY, titleRef.current]);
+  }, [titleRef.current, restaurant]);
 };

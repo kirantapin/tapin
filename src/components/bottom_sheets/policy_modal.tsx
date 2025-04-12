@@ -64,7 +64,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
             <div className="flex-1 overflow-y-auto p-6 pb-40">
               <button
                 onClick={onClose}
-                className="absolute top-5 right-5 text-gray-500 hover:text-black bg-gray-100 rounded-full p-2 z-10"
+                className="text-gray-500 bg-gray-200 rounded-full p-2 float-right"
               >
                 <X size={20} />
               </button>
@@ -136,9 +136,6 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                               addToCart={addToCart}
                               removeFromCart={removeFromCart}
                               itemId={itemId}
-                              primaryColor={
-                                restaurant.metadata.primaryColor as string
-                              }
                             />
                           );
                         })}

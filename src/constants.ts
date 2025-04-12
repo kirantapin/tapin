@@ -23,6 +23,7 @@ export const PREVIOUS_TRANSACTIONS_PATH =
 export const OFFERS_PAGE_PATH = "/restaurant/:id/offers";
 export const SINGLE_POLICY_PAGE_PATH = "/restaurant/:id/offers/:policy_id";
 export const INFO_PAGE_PATH = "/restaurant/:id/info";
+export const DEVICE_NOT_SUPPORTED_PATH = "/device-not-supported";
 
 //objects
 export const emptyDealEffect: DealEffectPayload = {
@@ -79,3 +80,7 @@ export const REMOVE_ITEM = "remove_item";
 export const ADD_POLICY = "add_policy";
 export const REMOVE_POLICY = "remove_policy";
 export const SANITY_CHECK = "sanity_check";
+
+export const HISTORY_KEY = "history";
+
+export const RESTAURANT_IMAGE_BUCKET = "restaurant_images";

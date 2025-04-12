@@ -29,7 +29,6 @@ function isCartItemAffectedByPolicy(
   cartItem: CartItem,
   dealEffect: DealEffectPayload
 ) {
-  console.log(dealEffect);
   const { id } = cartItem;
   const { addedItems, modifiedItems } = dealEffect;
   if (addedItems.find((item) => item.cartItem.id === id)) {
@@ -48,9 +47,6 @@ export function getMissingItemsForPolicy(
   dealEffect: DealEffectPayload
 ) {
   // Initialize result object
-  if (policy.definition.tag === ADD_ON_TAG) {
-    console.log(policy);
-  }
   const results: {
     missingItems: ItemSpecification[];
     currentQuantity: number;
@@ -94,9 +90,6 @@ export function getMissingItemsForPolicy(
         quantityNeeded: condition.quantity - currentQuantity,
       });
     }
-  }
-  if (policy.definition.tag === ADD_ON_TAG) {
-    console.log(results);
   }
   return results;
 }

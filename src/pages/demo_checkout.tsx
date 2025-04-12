@@ -14,8 +14,6 @@ import { CartItem, Policy, Restaurant, Item } from "../types.ts";
 import { DISCOVER_PATH } from "../constants.ts";
 import { fetch_policies } from "../utils/queries/policies.ts";
 import { fetchRestaurantById } from "../utils/queries/restaurant.ts";
-import PolicyCard from "@/components/cards/shad_policy_card.tsx";
-import { ToastContainer, toast } from "react-toastify";
 import { CheckoutItemCard } from "@/components/checkout/checkout_item_card.tsx";
 import AccessCardSlider from "../components/sliders/access_card_slider.tsx";
 import { priceCartNormally } from "@/utils/pricer.ts";
@@ -29,9 +27,21 @@ import AddOnCard from "@/components/cards/add_on_card.tsx";
 import { useTimer } from "@/hooks/useTimer.tsx";
 import DealCard from "@/components/cards/small_policy.tsx";
 import PolicyModal from "@/components/bottom_sheets/policy_modal.tsx";
-import { isPassItem } from "@/utils/parse.ts";
 import { PassAddOnCard } from "@/components/cards/pass_add_on_card.tsx";
 import { ItemUtils } from "@/utils/item_utils.ts";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../components/ui/alert-dialog";
+import { Alert } from "@/components/display_utils/alert.tsx";
 export default function CheckoutPage() {
   const { userSession, setShowSignInModal } = useAuth();
   const [policies, setPolicies] = useState<Policy[]>([]);
@@ -141,17 +151,25 @@ export default function CheckoutPage() {
           policyManager.getActivePolicies(state.dealEffect).map((policy) => {
             if (policy.definition.tag !== NORMAL_DEAL_TAG) return null;
             return (
-              <button
-                key={policy.policy_id}
-                onClick={async () => {
+              <Alert
+                trigger={
+                  <button
+                    key={policy.policy_id}
+                    onClick={() => console.log("intention to remove")}
+                    className="px-2 py-2 bg-gray-200 rounded-full text-xs flex items-center gap-1"
+                  >
+                    <Tag size={13} className="text-gray-800" />
+                    <span>{titleCase(policy.name)}</span>
+                    <X className="text-gray-800 h-3.5 w-3.5" />
+                  </button>
+                }
+                title="Are you absolutely sure?"
+                description="You’re about to remove a deal from your cart. Are you sure you want to do this?"
+                onConfirm={async () => {
                   await removePolicy(policy);
+                  console.log("removed");
                 }}
-                className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-sm flex items-center gap-1"
-              >
-                <Tag size={15} className="text-gray-800 mr-1" />
-                <span>{titleCase(policy.name)}</span>
-                <X className="text-gray-800 h-4 w-4" />
-              </button>
+              />
             );
           })}
       </div>
@@ -395,7 +413,6 @@ export default function CheckoutPage() {
           removeFromCart={removeFromCart}
         />
       )}
-      <ToastContainer />
     </div>
   );
 }

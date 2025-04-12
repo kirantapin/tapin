@@ -56,7 +56,7 @@ const DealCard: React.FC<DealCardProps> = ({
       }}
     >
       <div className="mx-auto w-full px-2 sm:px-4 sm:max-w-sm md:max-w-md">
-        <div className="bg-white rounded-xl p-4  border border-gray-300 flex flex-col">
+        <div className="bg-white rounded-xl p-4  border border-gray-400 flex flex-col">
           {false && (
             <div className="self-start mb-2">
               <div className="bg-gray-700 text-amber-300 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1 border border-amber-300">

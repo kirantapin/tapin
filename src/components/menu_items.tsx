@@ -19,7 +19,6 @@ export function DrinkItem({
   addToCart,
   removeFromCart,
   itemId,
-  primaryColor,
 }: {
   key: string;
   cart: Cart;
@@ -27,8 +26,8 @@ export function DrinkItem({
   addToCart: (item: Item) => Promise<void>;
   removeFromCart: (item: Item) => Promise<void>;
   itemId: string;
-  primaryColor: string;
 }) {
+  const primaryColor = restaurant.metadata.primaryColor as string;
   const menuItem = ItemUtils.getMenuItemFromItemId(itemId, restaurant);
   const isPass = ItemUtils.isPassItem(itemId, restaurant);
 
@@ -37,11 +36,13 @@ export function DrinkItem({
     (total, item) => (item.item.id === itemId ? total + item.quantity : total),
     0
   );
+
   const [loading, setLoading] = useState(false);
+  console.log(itemId, quantity, loading);
   return (
-    <div className="flex items-stretch m-3 border p-3 rounded-3xl bg-white">
+    <div className="flex-none min-w-[14rem] flex items-stretch m-3 border p-3 rounded-3xl bg-white">
       {/* Image */}
-      <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 p-3">
+      <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-200 flex-shrink-0 p-3">
         <img
           src={
             menuItem?.image_url ||

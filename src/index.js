@@ -6,14 +6,20 @@ import reportWebVitals from "./reportWebVitals";
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 import { AuthProvider } from "./context/auth_context.tsx";
 import { SupabaseProvider } from "./context/supabase_context.tsx";
+import { DeviceProvider } from "./context/device_context.tsx";
+import { BrowserRouter as Router } from "react-router-dom";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <SupabaseProvider>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
-  </SupabaseProvider>
+  <Router>
+    <DeviceProvider>
+      <SupabaseProvider>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </SupabaseProvider>
+    </DeviceProvider>
+  </Router>
 );
 serviceWorkerRegistration.register();
 // If you want to start measuring performance in your app, pass a function

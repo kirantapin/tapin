@@ -11,7 +11,7 @@ import {
   CartResultsPayload,
 } from "../types";
 import { UserSession } from "../types";
-import { emptyDealEffect } from "@/constants";
+import { emptyDealEffect, PASS_MENU_TAG } from "@/constants";
 import { isPassItem } from "@/utils/parse";
 import { ItemUtils } from "@/utils/item_utils";
 
@@ -64,6 +64,7 @@ export function useCartManager(
 
   // Cart operations
   const addToCart = async (item: Item) => {
+    console.log(cartManagerRef.current);
     if (!cartManagerRef.current || !restaurant) return;
     const result = await cartManagerRef.current.addToCart(item, restaurant);
     dispatch(cartManagerRef.current.getCartState());
