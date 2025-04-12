@@ -391,15 +391,6 @@ export default function CheckoutPage() {
           )}
         </div>
       )}
-      <button
-        onClick={() => {
-          console.log(
-            policyManager?.getAddOns(state.cart, state.dealEffect).allAddOns
-          );
-        }}
-      >
-        test
-      </button>
 
       {policy && (
         <PolicyModal

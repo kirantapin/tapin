@@ -38,9 +38,8 @@ export function DrinkItem({
   );
 
   const [loading, setLoading] = useState(false);
-  console.log(itemId, quantity, loading);
   return (
-    <div className="flex-none min-w-[14rem] flex items-stretch m-3 border p-3 rounded-3xl bg-white">
+    <div className="flex-none flex items-stretch m-3 border p-3 rounded-3xl bg-white">
       {/* Image */}
       <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-200 flex-shrink-0 p-3">
         <img

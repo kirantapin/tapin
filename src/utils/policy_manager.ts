@@ -61,6 +61,9 @@ export class PolicyManager {
         return sumA - sumB;
       })
       .map(({ deal }) => deal);
+    if (sortedDeals.length > 3) {
+      return sortedDeals.slice(0, 3);
+    }
     return sortedDeals;
   }
 
