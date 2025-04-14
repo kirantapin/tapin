@@ -57,6 +57,10 @@ const Rewards: React.FC<RewardsProps> = ({
     fetchData();
   }, [restaurant]);
 
+  if (!restaurant || !restaurant?.metadata?.enableLoyaltyProgram) {
+    return null;
+  }
+
   return (
     <>
       <div className="flex justify-between items-center">

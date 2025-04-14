@@ -88,7 +88,7 @@ export const Sidebar = ({
 
       <div className="px-4 py-2">
         <button
-          className="w-full bg-[linear-gradient(45deg,#ca8a04,#fde047)] text-white font-semibold py-3 px-4 rounded-full shadow-md hover:shadow-lg transform transition-all duration-200 flex items-center justify-center gap-2"
+          className="w-full bg-[linear-gradient(225deg,#CAA650,#F4E4A8)] text-white font-semibold py-3 px-4 rounded-full shadow-md hover:shadow-lg transform transition-all duration-200 flex items-center justify-center gap-2"
           onClick={() => {
             navigate(DISCOVER_PATH);
             onClose();
@@ -129,7 +129,7 @@ export const Sidebar = ({
           className={`w-full ${
             isSignedIn
               ? "bg-gray-200"
-              : "bg-[linear-gradient(45deg,#ca8a04,#fde047)]"
+              : "bg-[linear-gradient(45deg,#CAA650,#F4E4A8)]"
           } text-${
             isSignedIn ? "black" : "white"
           } font-semibold py-2 px-4 rounded-full shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2`}

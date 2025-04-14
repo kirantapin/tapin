@@ -43,7 +43,6 @@ export function useSearch({
 
   // Create a memoized instance of SearchEngine with all item paths
   const searchEngine = useMemo(() => {
-    console.log("in search engine", restaurant);
     return new SearchEngine(itemIds, restaurant);
   }, [itemIds, restaurant]);
 

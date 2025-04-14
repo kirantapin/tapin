@@ -104,8 +104,8 @@ export function Verification({
               onKeyDown={(e) => handleKeyDown(index, e)}
               onPaste={handlePaste}
               className={`w-14 h-14 rounded-xl border text-center text-2xl bg-transparent
-                ${digit ? "border-[#F5B14C] bg-gray-800" : "border-gray-700"}
-                focus:outline-none focus:border-[#F5B14C] focus:ring-1 focus:ring-[#F5B14C]`}
+                ${digit ? "border-[#CAA650] bg-gray-800" : "border-gray-700"}
+                focus:outline-none focus:border-[#CAA650] focus:ring-1 focus:ring-[#CAA650]`}
               aria-label={`Digit ${index + 1} of verification code`}
             />
           </div>
@@ -117,7 +117,7 @@ export function Verification({
       </div>
       <div className="text-center">
         <button
-          className="text-[#F5B14C] mb-8"
+          className="text-black mb-8"
           disabled={timeLeft > 0}
           onClick={() => setTimeLeft(60)}
         >

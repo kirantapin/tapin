@@ -8,6 +8,7 @@ import { QR_CODE_PATH, PASS_MENU_TAG, RESTAURANT_PATH } from "@/constants";
 import { ArrowLeft } from "lucide-react";
 import { checkoutStyles } from "@/styles/checkout_styles";
 import { rest } from "lodash";
+import { ItemUtils } from "@/utils/item_utils";
 
 // Transaction List Component
 const TransactionList: React.FC = () => {
@@ -81,7 +82,7 @@ const TransactionList: React.FC = () => {
     try {
       // TODO: Add API call to update transactions as redeemed in Supabase
       // Example: Call Supabase to update 'fulfilled_by' field with currentUser ID
-      navigate(QR_CODE_PATH.replace(":id", restaurant.id), {
+      navigate(QR_CODE_PATH.replace(":id", restaurant_id), {
         state: {
           transactions: selectedTransactions,
         },
@@ -90,6 +91,10 @@ const TransactionList: React.FC = () => {
       console.error("Error navigating to redeem page:", error);
     }
   };
+
+  if (!restaurant) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className={checkoutStyles.pageContainer}>
@@ -160,7 +165,7 @@ const TransactionList: React.FC = () => {
                   />
                   <div>
                     <p className="font-semibold text-gray-700">
-                      {itemToStringDescription(
+                      {ItemUtils.getItemName(
                         {
                           id: transaction.item,
                           modifiers: transaction.metadata.modifiers || [],
@@ -213,7 +218,7 @@ const TransactionList: React.FC = () => {
                 {/* Checkbox for selection */}
                 <div>
                   <p className="font-semibold text-gray-700">
-                    {itemToStringDescription(
+                    {ItemUtils.getItemName(
                       {
                         id: transaction.item,
                         modifiers: transaction.metadata.modifiers || [],

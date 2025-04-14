@@ -11,7 +11,9 @@ import { useAuth } from "../context/auth_context";
 import { useNavigate } from "react-router-dom";
 
 import { Transaction, User } from "../types.ts";
-import { QR_CODE_PATH } from "../constants.ts";
+import { QR_CODE_PATH, RESTAURANT_PATH } from "../constants.ts";
+import { submitPurchase } from "@/utils/purchase.ts";
+import RedeemButton from "./redeem_button.tsx";
 
 const stripePublishableKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || "";
 const stripePromise = loadStripe(stripePublishableKey);
@@ -21,32 +23,6 @@ const PayButton = ({ payload, sanityCheck }) => {
   const elements = useElements();
   const { setTransactions, setUserData } = useAuth();
   const navigate = useNavigate();
-
-  const purchase_drink = async (payload) => {
-    try {
-      const { data, error } = await supabase_local.functions.invoke(
-        "submit_order",
-        {
-          body: {
-            user_id: payload.user_id,
-            restaurant_id: payload.restaurant_id,
-            totalWithTip: payload.totalWithTip,
-            cart: payload.state.cart,
-            userDealEffect: payload.state.dealEffect,
-            userPolicy: payload.state.selectedPolicy,
-            userCartResults: payload.state.cartResults,
-            token: payload.state.token,
-          },
-        }
-      );
-      if (error || !data) return null;
-      const { transactions, modifiedUserData } = data;
-      return { transactions, modifiedUserData };
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      return null;
-    }
-  };
 
   const handleTapInResponse = async (
     transactions: Transaction[],
@@ -63,7 +39,7 @@ const PayButton = ({ payload, sanityCheck }) => {
         ...transactions,
       ]);
 
-      navigate(QR_CODE_PATH.replace(":id", payload.restaurant_id), {
+      navigate(RESTAURANT_PATH.replace(":id", payload.restaurant_id), {
         state: {
           transactions: transactions,
         },
@@ -120,13 +96,13 @@ const PayButton = ({ payload, sanityCheck }) => {
         console.error("No Payment Intent Generated");
       } else {
         const paymentData = {
-          connectedAccountId: payload.connectedAccountId, // Connected account ID
+          connectedAccountId: payload.connectedAccountId,
           paymentIntentId: paymentIntent.id,
           additionalOrderData: {},
         };
 
         payload["paymentData"] = paymentData;
-        const tapInResponse = await purchase_drink(payload);
+        const tapInResponse = await submitPurchase(payload);
         if (tapInResponse) {
           const { transactions, modifiedUserData } = tapInResponse;
           handleTapInResponse(transactions, modifiedUserData);
@@ -172,21 +148,26 @@ const PayButton = ({ payload, sanityCheck }) => {
 };
 
 function ApplePayButton({ payload, sanityCheck }) {
+  console.log(payload);
   return payload.state.token ? (
-    <Elements
-      stripe={stripePromise}
-      options={{
-        mode: "payment",
-        amount: payload.totalWithTip,
-        currency: "usd",
-        // Customizable with appearance API.
-        appearance: {
-          /*...*/
-        },
-      }}
-    >
-      <PayButton payload={payload} sanityCheck={sanityCheck} />
-    </Elements>
+    payload.totalWithTip > 0 ? (
+      <Elements
+        stripe={stripePromise}
+        options={{
+          mode: "payment",
+          amount: payload.totalWithTip,
+          currency: "usd",
+          // Customizable with appearance API.
+          appearance: {
+            /*...*/
+          },
+        }}
+      >
+        <PayButton payload={payload} sanityCheck={sanityCheck} />
+      </Elements>
+    ) : (
+      <RedeemButton payload={payload} sanityCheck={sanityCheck} />
+    )
   ) : (
     <p>Loading</p>
   );

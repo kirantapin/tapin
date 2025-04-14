@@ -30,18 +30,9 @@ import PolicyModal from "@/components/bottom_sheets/policy_modal.tsx";
 import { PassAddOnCard } from "@/components/cards/pass_add_on_card.tsx";
 import { ItemUtils } from "@/utils/item_utils.ts";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "../components/ui/alert-dialog";
 import { Alert } from "@/components/display_utils/alert.tsx";
+import { adjustColor } from "@/utils/color.ts";
+import RedeemButton from "@/components/redeem_button.tsx";
 export default function CheckoutPage() {
   const { userSession, setShowSignInModal } = useAuth();
   const [policies, setPolicies] = useState<Policy[]>([]);
@@ -301,7 +292,7 @@ export default function CheckoutPage() {
             <span>${state.cartResults.subtotal.toFixed(2)}</span>
           </div>
           <div className={checkoutStyles.summaryRow}>
-            <span>Tax</span>
+            <span>Fees & Tax</span>
             <span>${state.cartResults.tax.toFixed(2)}</span>
           </div>
           <div className={checkoutStyles.summaryRow}>
@@ -312,20 +303,23 @@ export default function CheckoutPage() {
           </div>
           {restaurant && (
             <div className={checkoutStyles.summaryRow}>
-              <div className="relative flex w-full bg-gray-100 rounded-full p-1 border border-gray-200">
+              <div className="relative flex w-full bg-gray-100 rounded-full border border-gray-200">
                 {/* Animated highlight */}
                 <motion.div
                   layout
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  className="absolute top-1 bottom-1 bg-yellow-400 rounded-full z-0"
+                  className="absolute inset-0 rounded-full z-0"
                   style={{
                     left: `${
-                      (tipAmounts.indexOf(tipPercent) / tipAmounts.length) *
-                        100 +
-                      (100 / tipAmounts.length) * 0.15
+                      (tipAmounts.indexOf(tipPercent) / tipAmounts.length) * 100
                     }%`,
-                    width: `${(100 / tipAmounts.length) * 0.7}%`,
-                    backgroundColor: restaurant.metadata.primaryColor,
+                    width: `${100 / tipAmounts.length}%`,
+                    background: restaurant?.metadata.primaryColor
+                      ? `linear-gradient(45deg, 
+        ${adjustColor(restaurant.metadata.primaryColor as string, -30)},
+        ${adjustColor(restaurant.metadata.primaryColor as string, 40)}
+      )`
+                      : undefined,
                   }}
                 />
 
@@ -361,8 +355,7 @@ export default function CheckoutPage() {
         <div className={checkoutStyles.paymentContainer}>
           {userSession ? (
             state.token &&
-            state.cartResults &&
-            state.cartResults.totalPrice > 0 && (
+            state.cartResults && (
               <ApplePayButton
                 payload={{
                   user_id: userSession.user.phone,

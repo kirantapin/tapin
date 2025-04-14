@@ -3,56 +3,33 @@ import {
   ShoppingBag,
   User,
   Info,
-  MapPin,
   Gift,
-  ChevronRight,
   Search,
-  Plus,
   BadgeCheck,
   Beer,
   X,
-  Ticket,
-  Martini,
-  GlassWater,
 } from "lucide-react";
 
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/auth_context.tsx";
+import { Restaurant, Policy } from "../types.ts";
 import {
-  Cart,
-  Restaurant,
-  Policy,
-  CartItem,
-  Item,
-  Subscription,
-} from "../types.ts";
-import { assignIds } from "../utils/submit_drink_order.ts";
-import {
-  DRINK_CHECKOUT_PATH,
-  LOYALTY_REWARD_PATH,
-  PASS_MENU_TAG,
-  PREVIOUS_TRANSACTIONS_PATH,
   MENU_DISPLAY_MAP,
   HOUSE_MIXER_LABEL,
-  SIGNIN_PATH,
   OFFERS_PAGE_PATH,
   NORMAL_DEAL_TAG,
   INFO_PAGE_PATH,
   LOYALTY_REWARD_TAG,
-  RESTAURANT_IMAGE_BUCKET,
 } from "../constants.ts";
 
 import { fetch_policies } from "../utils/queries/policies.ts";
 import { fetchRestaurantById } from "../utils/queries/restaurant.ts";
 
-import { project_url } from "../utils/supabase_client.ts";
 import { DrinkItem, DrinkList } from "@/components/menu_items.tsx";
 import GoToCartButton from "@/components/go_to_cart_button.tsx";
 import AccessCardSlider from "../components/sliders/access_card_slider.tsx";
 import Rewards from "@/components/rewards.tsx";
-import Skeleton from "react-loading-skeleton";
-import "react-loading-skeleton/dist/skeleton.css";
 import { Sidebar } from "@/components/sidebar.tsx";
 import DealCard from "@/components/cards/small_policy.tsx";
 import PolicyModal from "@/components/bottom_sheets/policy_modal.tsx";
@@ -62,10 +39,12 @@ import { GradientIcon, Hero } from "@/utils/gradient.tsx";
 import { useBannerColor } from "@/hooks/useBannerColor.tsx";
 import HighlightSlider from "@/components/sliders/highlight_slider.tsx";
 import { RecentActivity } from "@/components/sliders/recent_activity.tsx";
+import { MySpot } from "@/components/my_spot.tsx";
+import { RestaurantSkeleton } from "@/components/skeletons/restaurant.tsx";
+import { PolicySlider } from "@/components/sliders/policy_slider.tsx";
 
 export default function RestaurantPage() {
-  const { userSession, userData, transactions, logout, setShowSignInModal } =
-    useAuth();
+  const { userSession, userData, transactions, setShowSignInModal } = useAuth();
   const navigate = useNavigate();
   const [restaurant, setRestaurant] = useState<Restaurant>();
   const [policies, setPolicies] = useState<Policy[]>([]);
@@ -76,14 +55,10 @@ export default function RestaurantPage() {
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [policy, setPolicy] = useState<Policy | null>(null);
-  const {
-    state,
-    addToCart,
-    removeFromCart,
-    addPolicy,
-    removePolicy,
-    refreshCart,
-  } = useCartManager(restaurant as Restaurant, userSession);
+  const { state, addToCart, removeFromCart, addPolicy } = useCartManager(
+    restaurant as Restaurant,
+    userSession
+  );
 
   const { searchResults, searchQuery, setSearchQuery, clearSearch } = useSearch(
     {
@@ -93,7 +68,11 @@ export default function RestaurantPage() {
   );
 
   const scrollToOrderDrinks = () => {
-    orderDrinksRef.current?.scrollIntoView({
+    if (!orderDrinksRef.current) return;
+    const elementPosition = orderDrinksRef.current.getBoundingClientRect().top;
+    const offsetPosition = elementPosition + window.pageYOffset - 20;
+    window.scrollTo({
+      top: offsetPosition,
       behavior: "smooth",
     });
   };
@@ -122,7 +101,11 @@ export default function RestaurantPage() {
   const titleRef = useRef<HTMLHeadingElement>(null);
   useBannerColor(titleRef, restaurant);
 
-  return !loading ? (
+  if (loading) {
+    return <RestaurantSkeleton />;
+  }
+
+  return (
     <div className="min-h-screen bg-gray-25">
       {/* Header Icons */}
       {!isOpen && (
@@ -148,7 +131,7 @@ export default function RestaurantPage() {
         </div>
       )}
       {/* Hero Image */}
-      {restaurant && <Hero restaurant_id={restaurant_id as string} />}
+      <Hero restaurant_id={restaurant_id as string} />
 
       {/* Restaurant Info */}
       <div className="mt-10 px-4">
@@ -158,7 +141,6 @@ export default function RestaurantPage() {
           </h1>
           <BadgeCheck className="w-5 h-5 text-blue-500" />
         </div>
-
         {/* Action Buttons */}
         <div className="flex gap-2 sm:gap-3 mt-5 px-2">
           <button
@@ -208,114 +190,30 @@ export default function RestaurantPage() {
             </span>
           </button>
         </div>
-
-        {/* Promo Banner */}
-        {restaurant && (
-          <HighlightSlider
-            restaurant={restaurant}
-            addToCart={(itemId: string) => {
-              addToCart({ id: itemId, modifiers: [] });
-            }}
-            setPolicyModal={(policy_id: string) => {
-              const policy = policies.find((p) => p.policy_id === policy_id);
-              if (policy) {
-                setPolicy(policy);
-                setIsOpen(true);
-              }
-            }}
-            policies={policies}
-          />
-        )}
-
+        {/* Highlight Slider */}
+        <HighlightSlider
+          restaurant={restaurant as Restaurant}
+          addToCart={(itemId: string) => {
+            addToCart({ id: itemId, modifiers: [] });
+          }}
+          setPolicyModal={(policy_id: string) => {
+            const policy = policies.find((p) => p.policy_id === policy_id);
+            if (policy) {
+              setPolicy(policy);
+              setIsOpen(true);
+            }
+          }}
+          policies={policies}
+        />
         {/* My Spot Section */}
-        {userSession && (
-          <div className="mt-6">
-            <h1 className="text-xl font-bold flex items-center gap-2">
-              My Spot
-            </h1>
 
-            <div className="flex gap-4 mt-4 overflow-x-auto pb-2">
-              {/* Card 1: My Passes */}
-              <div
-                className="relative flex-shrink-0 w-[145px] h-[115px] bg-gray-50 rounded-xl border p-4 cursor-pointer"
-                onClick={() => {
-                  navigate(
-                    PREVIOUS_TRANSACTIONS_PATH.replace(":id", restaurant_id),
-                    {
-                      state: { showPasses: true },
-                    }
-                  );
-                }}
-              >
-                {/* Ticket icon in top-left */}
-                <div className="absolute top-3 left-3">
-                  <GradientIcon
-                    icon={Ticket}
-                    primaryColor={restaurant?.metadata.primaryColor as string}
-                  />
-                </div>
-
-                {/* Arrow in top-right */}
-                <div className="absolute top-3 right-3 bg-gray-100 rounded-full p-1">
-                  <ChevronRight className="w-4 h-4 text-gray-400" />
-                </div>
-
-                {/* Text in bottom-left */}
-                <div className="absolute bottom-3 left-4">
-                  <p className="font-14 text-gray-500 font-medium">My Passes</p>
-                  <p className="font-16 font-semibold text-gray-900">
-                    {
-                      transactions.filter(
-                        (t) =>
-                          t.fulfilled_by === null && t.item[0] === PASS_MENU_TAG
-                      ).length
-                    }{" "}
-                    Active Passes
-                  </p>
-                </div>
-              </div>
-
-              {/* Card 2: My Orders */}
-              <div
-                className="relative flex-shrink-0 w-[145px] h-[115px] bg-gray-50 rounded-xl border p-4 cursor-pointer"
-                onClick={() => {
-                  navigate(
-                    PREVIOUS_TRANSACTIONS_PATH.replace(":id", restaurant_id),
-                    {
-                      state: { showPasses: false },
-                    }
-                  );
-                }}
-              >
-                <div className="absolute top-3 left-3">
-                  <GradientIcon
-                    icon={GlassWater}
-                    primaryColor={restaurant?.metadata.primaryColor as string}
-                  />
-                </div>
-                <div className="absolute top-3 right-3 bg-gray-100 rounded-full p-1">
-                  <ChevronRight className="w-4 h-4 text-gray-400" />
-                </div>
-
-                <div className="absolute bottom-3 left-4">
-                  <p className="font-14 text-gray-500 font-medium">My Orders</p>
-                  <p className="font-16 font-semibold text-gray-900">
-                    {
-                      transactions.filter(
-                        (t) =>
-                          t.fulfilled_by === null && t.item[0] !== PASS_MENU_TAG
-                      ).length
-                    }{" "}
-                    Items
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        <MySpot
+          userSession={userSession}
+          restaurant={restaurant}
+          transactions={transactions}
+        />
 
         {/* Recent Activity Section*/}
-
         <RecentActivity
           transactions={transactions}
           restaurant={restaurant as Restaurant}
@@ -323,24 +221,21 @@ export default function RestaurantPage() {
           removeFromCart={removeFromCart}
           state={state}
         />
-
         {/* Rewards Section */}
         <div className="mt-6">
-          {userData &&
-            restaurant &&
-            restaurant.metadata.enableLoyaltyProgram && (
-              <Rewards
-                userData={userData}
-                restaurant={restaurant}
-                onIntentionToRedeem={(policy) => {
-                  setPolicy(policy);
-                  setIsOpen(true);
-                }}
-              />
-            )}
+          {userData && (
+            <Rewards
+              userData={userData}
+              restaurant={restaurant}
+              onIntentionToRedeem={(policy) => {
+                setPolicy(policy);
+                setIsOpen(true);
+              }}
+            />
+          )}
 
           <div className="mt-8">
-            {restaurant && state.cart && (
+            {state.cart && (
               <AccessCardSlider
                 restaurant={restaurant}
                 cart={state.cart}
@@ -351,46 +246,13 @@ export default function RestaurantPage() {
             )}
           </div>
           {/* Awesome Deals Section */}
-          {policies.filter(
-            (policy) => policy.definition.tag === NORMAL_DEAL_TAG
-          ).length > 0 && (
-            <div className="mt-8">
-              <div className="flex justify-between items-center mb-4">
-                <h1 className="text-xl font-bold">Awesome Deals</h1>
-                <button
-                  className="text-sm font-semibold "
-                  style={{ color: restaurant?.metadata["primaryColor"] }}
-                  onClick={() => {
-                    navigate(
-                      OFFERS_PAGE_PATH.replace(":id", restaurant_id as string)
-                    );
-                  }}
-                >
-                  View All
-                </button>
-              </div>
-
-              <div className="overflow-x-auto pb-2 no-scrollbar">
-                <div className="flex gap-4 whitespace-nowrap">
-                  {policies
-                    .filter(
-                      (policy) => policy.definition.tag === NORMAL_DEAL_TAG
-                    )
-                    .map((policy) => (
-                      <DealCard
-                        cart={state.cart}
-                        policy={policy}
-                        restaurant={restaurant}
-                        primaryColor={restaurant?.metadata.primaryColor}
-                        setPolicy={setPolicy}
-                        setIsOpen={setIsOpen}
-                        dealEffect={state.dealEffect}
-                      />
-                    ))}
-                </div>
-              </div>
-            </div>
-          )}
+          <PolicySlider
+            restaurant={restaurant}
+            policies={policies}
+            state={state}
+            setPolicy={setPolicy}
+            setIsOpen={setIsOpen}
+          />
 
           <div
             ref={orderDrinksRef}
@@ -409,7 +271,6 @@ export default function RestaurantPage() {
               onChange={(e) => {
                 setSearchQuery(e.target.value);
                 const searchBarRect = e.currentTarget.getBoundingClientRect();
-                console.log(searchBarRect);
                 window.scrollTo({
                   top: window.scrollY + searchBarRect.top - 50,
                   behavior: "smooth",
@@ -475,27 +336,23 @@ export default function RestaurantPage() {
                 ))}
               </div>
               {/* Drinks List */}
-              {restaurant && (
-                <DrinkList
-                  cart={state.cart}
-                  label={activeFilter}
-                  restaurant={restaurant}
-                  addToCart={addToCart}
-                  removeFromCart={removeFromCart}
-                  primaryColor={restaurant.metadata.primaryColor as string}
-                />
-              )}
+              <DrinkList
+                cart={state.cart}
+                label={activeFilter}
+                restaurant={restaurant}
+                addToCart={addToCart}
+                removeFromCart={removeFromCart}
+                setActiveLabel={setActiveFilter}
+              />
             </>
           )}
         </div>
-        {restaurant && (
-          <GoToCartButton
-            restaurant={restaurant}
-            cartCount={
-              state.cart.reduce((total, item) => total + item.quantity, 0) || 0
-            }
-          />
-        )}
+        <GoToCartButton
+          restaurant={restaurant}
+          cartCount={
+            state.cart.reduce((total, item) => total + item.quantity, 0) || 0
+          }
+        />
         {searchQuery && (
           <>
             <div className="h-64" />
@@ -503,7 +360,6 @@ export default function RestaurantPage() {
             <div className="h-64" />
           </>
         )}
-
         <Sidebar
           isOpen={sidebarOpen}
           onClose={() => {
@@ -529,195 +385,5 @@ export default function RestaurantPage() {
         )}
       </div>
     </div>
-  ) : (
-    <RestaurantHeaderSkeleton />
   );
 }
-
-const RestaurantHeaderSkeleton = () => {
-  return (
-    <div className="bg-white relative pb-10 min-h-screen">
-      {/* Header Icons */}
-      <div className="absolute w-full top-0 z-50 flex justify-between items-center px-4 py-3">
-        <div className="w-9 h-9 rounded-full overflow-hidden">
-          <Skeleton
-            circle
-            width="100%"
-            height="100%"
-            baseColor="#e5e7eb"
-            highlightColor="#d1d5db"
-          />
-        </div>
-
-        <div className="flex items-center gap-5">
-          <div className="w-9 h-9 rounded-full overflow-hidden">
-            <Skeleton
-              circle
-              width="100%"
-              height="100%"
-              baseColor="#e5e7eb"
-              highlightColor="#d1d5db"
-            />
-          </div>
-          <div className="w-9 h-9 rounded-full overflow-hidden">
-            <Skeleton
-              circle
-              width="100%"
-              height="100%"
-              baseColor="#e5e7eb"
-              highlightColor="#d1d5db"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Hero Image */}
-      <div className="h-48 w-full rounded-b-xl overflow-hidden">
-        <Skeleton
-          width="100%"
-          height="100%"
-          baseColor="#e5e7eb"
-          highlightColor="#d1d5db"
-          style={{
-            margin: 0,
-            padding: 0,
-            display: "block",
-          }}
-        />
-      </div>
-
-      {/* Restaurant Info + Action Buttons */}
-      <div className="mt-10 px-4 space-y-4">
-        {/* Restaurant Name */}
-        <div className="w-2/3 h-6">
-          <Skeleton
-            width="100%"
-            height="100%"
-            baseColor="#e5e7eb"
-            highlightColor="#d1d5db"
-          />
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex gap-2">
-          {[1, 2, 3].map((_, i) => (
-            <div
-              key={i}
-              className="flex-1 h-11 rounded-full overflow-hidden border border-gray-200 shadow-sm"
-            >
-              <Skeleton
-                width="100%"
-                height="100%"
-                baseColor="#e5e7eb"
-                highlightColor="#d1d5db"
-                style={{
-                  margin: 0,
-                  padding: 0,
-                  display: "block",
-                }}
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* Promo Banner */}
-        <div className="mt-6 w-full h-[120px] rounded-3xl overflow-hidden">
-          <Skeleton
-            width="100%"
-            height="100%"
-            baseColor="#e5e7eb"
-            highlightColor="#d1d5db"
-            style={{
-              margin: 0,
-              padding: 0,
-              display: "block",
-            }}
-          />
-        </div>
-
-        {/* "My Spot" Section */}
-        <div className="mt-8 space-y-3">
-          {/* Section Title */}
-          <div className="w-32 h-6">
-            <Skeleton
-              width="100%"
-              height="100%"
-              baseColor="#e5e7eb"
-              highlightColor="#d1d5db"
-            />
-          </div>
-
-          {/* Card Grid */}
-          <div className="grid grid-cols-2 gap-4">
-            {[1, 2].map((_, i) => (
-              <div
-                key={i}
-                className="p-4 bg-gray-50 rounded-lg shadow space-y-2"
-              >
-                <Skeleton
-                  height={20}
-                  width="60%"
-                  baseColor="#e5e7eb"
-                  highlightColor="#d1d5db"
-                />
-                <Skeleton
-                  height={14}
-                  width="80%"
-                  baseColor="#e5e7eb"
-                  highlightColor="#d1d5db"
-                />
-                <Skeleton
-                  height={12}
-                  width="40%"
-                  baseColor="#e5e7eb"
-                  highlightColor="#d1d5db"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-        {/* Access Cards Section */}
-        <div className="mt-8 space-y-3">
-          {/* Section Title */}
-          <div className="w-40 h-6">
-            <Skeleton
-              width="100%"
-              height="100%"
-              baseColor="#e5e7eb"
-              highlightColor="#d1d5db"
-              style={{
-                margin: 0,
-                padding: 0,
-                display: "block",
-              }}
-            />
-          </div>
-
-          {/* Access Cards */}
-          <div className="overflow-x-hidden">
-            <div className="flex gap-4">
-              {[1, 2, 3].map((_, i) => (
-                <div
-                  key={i}
-                  className="flex-shrink-0 w-[280px] h-[160px] rounded-xl overflow-hidden"
-                >
-                  <Skeleton
-                    width="100%"
-                    height="100%"
-                    baseColor="#e5e7eb"
-                    highlightColor="#d1d5db"
-                    style={{
-                      margin: 0,
-                      padding: 0,
-                      display: "block",
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};

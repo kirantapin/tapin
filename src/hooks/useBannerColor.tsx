@@ -20,7 +20,6 @@ export const useBannerColor = (
       const meta = document.querySelector(
         'meta[name="theme-color"]'
       ) as HTMLMetaElement | null;
-      console.log("creating observer", titleRef.current);
 
       if (!meta || !titleRef.current || !restaurant) {
         return;

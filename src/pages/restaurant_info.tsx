@@ -21,6 +21,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { fetchRestaurantById } from "@/utils/queries/restaurant";
 import { Restaurant } from "@/types";
 import { project_url } from "@/utils/supabase_client";
+import { GradientIcon } from "@/utils/gradient";
 
 const RestaurantInfo: React.FC = () => {
   const [openingHoursExpanded, setOpeningHoursExpanded] = useState(true);
@@ -59,6 +60,10 @@ const RestaurantInfo: React.FC = () => {
     fetchData();
   }, []);
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="flex flex-col w-full max-w-md mx-auto bg-white min-h-screen">
       {/* Header */}
@@ -92,7 +97,11 @@ const RestaurantInfo: React.FC = () => {
       {/* Address */}
       <div className="flex items-center justify-between p-4 border-b">
         <div className="flex items-start gap-3">
-          <MapPin size={20} className="text-gray-500 mt-0.5" />
+          <GradientIcon
+            icon={MapPin}
+            primaryColor={restaurant?.metadata.primaryColor as string}
+            size={20}
+          />
           <div>
             <div className="font-medium">901 U St NW</div>
             <div className="text-gray-500">Washington, DC 20001</div>
@@ -108,7 +117,11 @@ const RestaurantInfo: React.FC = () => {
           onClick={toggleOpeningHours}
         >
           <div className="flex items-center gap-3">
-            <Clock size={20} className="text-gray-500" />
+            <GradientIcon
+              icon={Clock}
+              primaryColor={restaurant?.metadata.primaryColor as string}
+              size={20}
+            />
             <span className="font-medium">Opening Hours</span>
           </div>
           {openingHoursExpanded ? (
@@ -143,7 +156,11 @@ const RestaurantInfo: React.FC = () => {
       {/* Phone */}
       <div className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-3">
-          <Phone size={20} className="text-gray-500" />
+          <GradientIcon
+            icon={Phone}
+            primaryColor={restaurant?.metadata.primaryColor as string}
+            size={20}
+          />
           <span>(202) 525-3276</span>
         </div>
         <ChevronRight size={20} className="text-gray-400" />
@@ -152,7 +169,11 @@ const RestaurantInfo: React.FC = () => {
       {/* Website */}
       <div className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-3">
-          <Globe size={20} className="text-gray-500" />
+          <GradientIcon
+            icon={Globe}
+            primaryColor={restaurant?.metadata.primaryColor as string}
+            size={20}
+          />
           <span>www.yourbar.com</span>
         </div>
         <ChevronRight size={20} className="text-gray-400" />
@@ -165,7 +186,11 @@ const RestaurantInfo: React.FC = () => {
           onClick={toggleSocialMedia}
         >
           <div className="flex items-center gap-3">
-            <UserSearch size={20} className="text-gray-500" />
+            <GradientIcon
+              icon={UserSearch}
+              primaryColor={restaurant?.metadata.primaryColor as string}
+              size={20}
+            />
             <span className="font-medium">Socials</span>
           </div>
           {socialMediaExpanded ? (
@@ -180,7 +205,11 @@ const RestaurantInfo: React.FC = () => {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Facebook size={20} className="text-gray-500" />
+                  <GradientIcon
+                    icon={Facebook}
+                    primaryColor={restaurant?.metadata.primaryColor as string}
+                    size={20}
+                  />
                   <span>Facebook</span>
                 </div>
                 <ExternalLink size={18} className="text-gray-400" />
@@ -188,7 +217,11 @@ const RestaurantInfo: React.FC = () => {
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Twitter size={20} className="text-gray-500" />
+                  <GradientIcon
+                    icon={Twitter}
+                    primaryColor={restaurant?.metadata.primaryColor as string}
+                    size={20}
+                  />
                   <span>Twitter</span>
                 </div>
                 <ExternalLink size={18} className="text-gray-400" />
@@ -196,7 +229,11 @@ const RestaurantInfo: React.FC = () => {
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Instagram size={20} className="text-gray-500" />
+                  <GradientIcon
+                    icon={Instagram}
+                    primaryColor={restaurant?.metadata.primaryColor as string}
+                    size={20}
+                  />
                   <span>Instagram</span>
                 </div>
                 <ExternalLink size={18} className="text-gray-400" />
@@ -204,7 +241,11 @@ const RestaurantInfo: React.FC = () => {
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Music size={20} className="text-gray-500" />
+                  <GradientIcon
+                    icon={Music}
+                    primaryColor={restaurant?.metadata.primaryColor as string}
+                    size={20}
+                  />
                   <span>TikTok</span>
                 </div>
                 <ExternalLink size={18} className="text-gray-400" />

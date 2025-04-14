@@ -30,12 +30,17 @@ export function Alert({
       <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
 
       <AlertDialogContent
-        className={cn("w-[90vw] max-w-xs rounded-lg", contentClassName)}
+        className={cn(
+          "w-[90vw] max-w-xs rounded-lg font-gilroy",
+          contentClassName
+        )}
       >
         <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogTitle className="font-gilroy">{title}</AlertDialogTitle>
           {description && (
-            <AlertDialogDescription>{description}</AlertDialogDescription>
+            <AlertDialogDescription className="font-gilroy">
+              {description}
+            </AlertDialogDescription>
           )}
           {children}
         </AlertDialogHeader>
@@ -43,7 +48,7 @@ export function Alert({
         <AlertDialogFooter className="flex-col gap-2">
           <AlertDialogCancel
             className={cn(
-              "w-full rounded-full px-3 py-2 text-sm border border-gray-300",
+              "w-full rounded-full px-3 py-2 text-sm border border-gray-300 font-gilroy",
               cancelClassName
             )}
           >
@@ -53,8 +58,8 @@ export function Alert({
           <AlertDialogAction
             onClick={onConfirm}
             className={cn(
-              "w-full rounded-full px-3 py-2 text-sm text-white " +
-                "bg-[linear-gradient(45deg,#ca8a04,#fde047)]",
+              "w-full rounded-full px-3 py-2 text-sm text-white font-gilroy " +
+                "bg-[linear-gradient(45deg,#CAA650,#F4E4A8)]",
               confirmClassName
             )}
           >

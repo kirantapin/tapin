@@ -48,7 +48,7 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
 
     if (error) {
       console.error("Error verifying OTP:", error.message);
-      setErrorMessage("Invalid OTP. Please try again.");
+      setErrorMessage("We couldn't verify your code. Please try again.");
     } else if (session) {
       console.log("User authenticated:", session.user);
       // When the user is authenticated, just close the modal

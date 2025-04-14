@@ -21,12 +21,13 @@ const processTransactionItems = (
   restaurant: Restaurant
 ) => {
   const recentTransactionItems: Transaction[] = transactions
-    .slice(0, 10)
+    .filter((transaction) => transaction.restaurant_id === restaurant.id)
     .sort(
-      (a, b) =>
+      (a: Transaction, b: Transaction) =>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    ) // Sort by created_at desc
-    .reduce((unique: Array<Transaction>, transaction) => {
+    )
+    .slice(0, 10)
+    .reduce((unique: Array<Transaction>, transaction: Transaction) => {
       // Only add if we haven't seen this item ID before
       if (!unique.find((t) => t.item === transaction.item)) {
         unique.push(transaction);
@@ -37,7 +38,7 @@ const processTransactionItems = (
     .map((transactionItem) => {
       const itemId = transactionItem.item;
       const metadata = transactionItem.metadata;
-      if (metadata?.path.includes(PASS_MENU_TAG)) {
+      if (metadata?.path?.includes(PASS_MENU_TAG)) {
         // Get second to last item from path array
         const item = ItemUtils.getMenuItemFromItemId(itemId, restaurant);
         if (item) {

@@ -21,25 +21,57 @@ const HighlightSlider = ({
 }) => {
   const scrollContainerRef = useRef(null);
   const [highlights, setHighlights] = useState<Highlight[]>([]);
-  // Function to update active card based on scroll position
   const [activePromo, setActivePromo] = useState(0);
+  const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
+  const autoScrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleScroll = (e) => {
+  const handleUserInteraction = () => {
+    if (autoScrollEnabled) {
+      setAutoScrollEnabled(false);
+      if (autoScrollIntervalRef.current) {
+        clearInterval(autoScrollIntervalRef.current);
+      }
+    }
+  };
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const scrollPosition = e.currentTarget.scrollLeft;
     const itemWidth = e.currentTarget.offsetWidth;
     const newActivePromo = Math.round(scrollPosition / itemWidth);
     setActivePromo(newActivePromo);
   };
 
-  // Scroll to a specific card when clicking a dot
-  const scrollToCard = (index) => {
+  const scrollToCard = (index: number) => {
     if (!scrollContainerRef.current) return;
+
     const cardWidth = scrollContainerRef.current.clientWidth;
     scrollContainerRef.current.scrollTo({
       left: index * cardWidth,
       behavior: "smooth",
     });
   };
+
+  useEffect(() => {
+    if (!autoScrollEnabled || highlights.length <= 1) return;
+
+    const startAutoScroll = () => {
+      autoScrollIntervalRef.current = setInterval(() => {
+        setActivePromo((current) => {
+          const nextIndex = current === highlights.length - 1 ? 0 : current + 1;
+          scrollToCard(nextIndex);
+          return nextIndex;
+        });
+      }, 3500);
+    };
+
+    startAutoScroll();
+
+    return () => {
+      if (autoScrollIntervalRef.current) {
+        clearInterval(autoScrollIntervalRef.current);
+      }
+    };
+  }, [highlights.length, autoScrollEnabled]);
 
   useEffect(() => {
     const fetchHighlights = async () => {
@@ -76,41 +108,49 @@ const HighlightSlider = ({
     return (
       <div className="mt-7">
         <div
-          className="overflow-x-auto whitespace-nowrap no-scrollbar scrollbar-hide"
+          ref={scrollContainerRef}
+          className="overflow-x-auto snap-x snap-mandatory no-scrollbar scrollbar-hide"
           onScroll={handleScroll}
+          onWheel={() => {
+            handleUserInteraction();
+          }}
+          onTouchStart={() => {
+            handleUserInteraction();
+          }}
         >
-          <div className="flex snap-x snap-mandatory pl-1 pr-1">
-            {highlights.map((highlight, index) => (
-              <HighlightCard
-                content_type={highlight.content_type}
-                content_pointer={highlight.content_pointer}
-                title_override={highlight.title_override}
-                description_override={highlight.description_override}
-                image_url_override={highlight.image_url_override}
-                restaurant={restaurant}
-                onClick={() => {
-                  handleHighlightClick(highlight);
-                }}
-              />
+          <div className="flex gap-4">
+            {highlights.map((h, idx) => (
+              <div key={idx} className="snap-center shrink-0 w-full">
+                <HighlightCard
+                  content_type={h.content_type}
+                  content_pointer={h.content_pointer}
+                  title_override={h.title_override}
+                  description_override={h.description_override}
+                  image_url_override={h.image_url_override}
+                  restaurant={restaurant}
+                  onClick={() => {
+                    handleHighlightClick(h);
+                  }}
+                />
+              </div>
             ))}
           </div>
         </div>
 
-        {/* Dot indicators */}
-        <div className="flex justify-center gap-2 mt-4">
+        <div className="flex justify-center mt-4">
           {highlights.map((_, index) => (
-            <div
+            <button
               key={index}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                activePromo === index ? "w-4" : "w-2"
+              className={`h-2 mx-1 rounded-full transition-all duration-300 ${
+                activePromo === index ? "w-4" : "bg-gray-300 w-2"
               }`}
               style={{
                 backgroundColor:
                   activePromo === index
-                    ? restaurant?.metadata.primaryColor
-                    : "#E5E7EB",
+                    ? restaurant.metadata.primaryColor
+                    : undefined,
               }}
-            />
+            ></button>
           ))}
         </div>
       </div>
@@ -118,88 +158,6 @@ const HighlightSlider = ({
   } else {
     return null;
   }
-  //   // <div className="mt-8">
-  //   //   <div
-  //   //     ref={scrollContainerRef}
-  //   //     className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar"
-  //   //     onScroll={handleScroll}
-  //   //   >
-  //   //     {highlights.map((highlight, index) => {
-  //   //       return (
-  //   //         <div key={index} className="snap-center shrink-0 w-full px-4">
-  //   //           <HighlightCard
-  //   //             content_type={highlight.content_type}
-  //   //             content_pointer={highlight.content_pointer}
-  //   //             title_override={highlight.title_override}
-  //   //             description_override={highlight.description_override}
-  //   //             image_url_override={highlight.image_url_override}
-  //   //             restaurant={restaurant}
-  //   //           />
-  //   //         </div>
-  //   //       );
-  //   //     })}
-  //   //   </div>
-
-  //   //   {/* Scroll Indicator Dots */}
-  //   //   <div className="flex justify-center">
-  //   //     {highlights.map((highlight, index) => (
-  //   //       <button
-  //   //         key={index}
-  //   //         onClick={() => scrollToCard(index)}
-  //   //         className={`h-2 w-2 mx-1 rounded-full transition-colors duration-300 ${
-  //   //           activeIndex === index ? "" : "bg-gray-300"
-  //   //         }`}
-  //   //         style={{
-  //   //           backgroundColor:
-  //   //             activeIndex === index
-  //   //               ? restaurant.metadata.primaryColor
-  //   //               : undefined,
-  //   //         }}
-  //   //       ></button>
-  //   //     ))}
-  //   //   </div>
-  //   // </div>
-  //   <div className="mt-7">
-  //     <div
-  //       className="overflow-x-auto whitespace-nowrap no-scrollbar scrollbar-hide"
-  //       onScroll={handleScroll}
-  //     >
-  //       <div className="flex snap-x snap-mandatory pl-1 pr-1">
-  //         {highlights.map((highlight, index) => (
-  //           <HighlightCard
-  //             content_type={highlight.content_type}
-  //             content_pointer={highlight.content_pointer}
-  //             title_override={highlight.title_override}
-  //             description_override={highlight.description_override}
-  //             image_url_override={highlight.image_url_override}
-  //             restaurant={restaurant}
-  //             onClick={() => {
-  //               handleHighlightClick(highlight);
-  //             }}
-  //           />
-  //         ))}
-  //       </div>
-  //     </div>
-
-  //     {/* Dot indicators */}
-  //     <div className="flex justify-center gap-2 mt-4">
-  //       {highlights.map((_, index) => (
-  //         <div
-  //           key={index}
-  //           className={`h-2 rounded-full transition-all duration-300 ${
-  //             activePromo === index ? "w-4" : "w-2"
-  //           }`}
-  //           style={{
-  //             backgroundColor:
-  //               activePromo === index
-  //                 ? restaurant?.metadata.primaryColor
-  //                 : "#E5E7EB",
-  //           }}
-  //         />
-  //       ))}
-  //     </div>
-  //   </div>
-  // );
 };
 
 export default HighlightSlider;

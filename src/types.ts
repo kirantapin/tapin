@@ -31,6 +31,7 @@ export interface JWTPayloadType extends Record<string, unknown> {
 export interface CartResultsPayload {
   subtotal: number;
   tax: number;
+  serviceFee: number;
   totalPrice: number;
   totalPoints: number;
   totalPointCost: number;
@@ -96,8 +97,9 @@ export interface DealUse {
 }
 
 export interface CreateTransactionsPayload {
-  deal_use: DealUse | null;
+  order: Order;
   transactions: Transaction[];
+  policies: string[];
 }
 
 export interface ReturnTransactionsPayload {
@@ -166,6 +168,19 @@ export interface Transaction {
   points_awarded: number | null;
   point_cost: number | 0;
   payment_intent_id: string;
+}
+
+export interface Order {
+  order_id: string;
+  created_at: string;
+  user_id: string;
+  restaurant_id: string;
+  total_price: number | null;
+  tip: number | null;
+  tax: number | null;
+  type: string | null;
+  type_id: string | null;
+  payment_intent_id: string | null;
 }
 
 export interface User {

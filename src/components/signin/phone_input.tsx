@@ -37,7 +37,7 @@ export function PhoneInput({
         <form onSubmit={handleSubmit}>
           <label className="block text-lg mb-2">Phone Number</label>
           <div className="relative mb-4">
-            <div className="flex items-center bg-[#FFFFFF] rounded-xl p-4 border border-[#F5B14C]">
+            <div className="flex items-center bg-[#FFFFFF] rounded-xl p-4 border border-[#CAA650]">
               <div className="flex items-center gap-2 pr-3 border-r border-gray-600">
                 <img
                   src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAABmJLR0QA/wD/AP+gvaeTAAAA50lEQVRIie3WMQ6CMRQG4B8TB2/gIcTVG+jkETyFMTExunoWJyfv4eAF3JwcXGBQByeeSUhoGgptGejwJ09I0/Z7/0BeA/+WM1QnVnmCU5RHuEWHD3xzPEeHt5YbvEeHn1tu8YwGl+jwDg8NnqLDB7y2eMB9dHiPpxbvsMUcmwT4BjfYxL6Td7jFY+qbzrBKhK/xkPqmU6wT4Bs8pr7pBJsE+Br3qW86xjYBvsZd6puO8JIA3+Ih9U2H2CXAnxLhu9Q3HeBc7v/6G3yR+qYDXEWG/0Uq3P0C/JtZZIafM8PzM8PPM8PPvgAHQElZXVw6lQAAAABJRU5ErkJggg=="
@@ -59,7 +59,7 @@ export function PhoneInput({
 
           <button
             type="submit"
-            className="w-full bg-[#F5B14C] text-black py-4 rounded-full text-lg font-medium hover:bg-[#E4A43B] transition-colors"
+            className="w-full bg-[linear-gradient(225deg,#CAA650,#F4E4A8)] text-white py-4 rounded-full text-lg font-semibold hover:bg-[#E4A43B] transition-colors"
           >
             Continue
           </button>

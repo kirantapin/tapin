@@ -11,8 +11,6 @@ export const fetchRestaurantById = async (
     return null;
   }
 
-  console.log("Fetching restaurant by id", restaurantId);
-
   // Check local storage for recent restaurant data
   const historyStr = localStorage.getItem(HISTORY_KEY);
   let data;

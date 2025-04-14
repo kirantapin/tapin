@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { Plus, Trash2, Minus } from "lucide-react";
 import {
   HOUSE_MIXER_LABEL,
@@ -142,54 +142,95 @@ export const DrinkList = ({
   restaurant,
   addToCart,
   removeFromCart,
-  primaryColor,
+  setActiveLabel,
 }: {
   cart: Cart;
   label: string;
   restaurant: Restaurant;
   addToCart;
   removeFromCart;
-  primaryColor: string;
+  setActiveLabel: (label: string) => void;
 }) => {
-  function getNestedObject(label, menu) {
+  const labelRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isInitialMount = useRef(true);
+
+  const scrollToLabel = (menuLabel: string) => {
+    const el = labelRefs.current.get(menuLabel);
+    const container = containerRef.current;
+    if (el && container) {
+      const offset = el.offsetTop - container.offsetTop;
+      container.scrollTo({ top: offset, behavior: "smooth" });
+    }
+  };
+
+  function getNestedObject(label: string) {
     if (label === HOUSE_MIXER_LABEL || label === SHOTS_SHOOTERS_LABEL) {
-      return {};
+      return [];
     } else {
       const categoryId = MENU_DISPLAY_MAP[label];
       return ItemUtils.getAllItemsInCategory(categoryId, restaurant);
     }
   }
-  const drinks: string[] = useMemo(() => {
-    return getNestedObject(label, restaurant.menu);
-  }, [label, restaurant.menu]);
+  const drinks: { id: string; label: string }[] = useMemo(() => {
+    const allItemIds: { id: string; label: string }[] = [];
+    for (const key of Object.keys(MENU_DISPLAY_MAP)) {
+      const itemIds = getNestedObject(key);
+      itemIds.forEach((id) => allItemIds.push({ id: id, label: key }));
+    }
+    return allItemIds;
+  }, [restaurant.menu]);
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    if (label) {
+      scrollToLabel(label);
+    }
+  }, [label]);
 
   return (
-    <div className="space-y-4">
-      {label === HOUSE_MIXER_LABEL || label === SHOTS_SHOOTERS_LABEL ? (
-        // <LiquorForm
-        //   type={label}
-        //   menu={restaurant.menu}
-        //   addToCart={addToCart}
-        //   primaryColor={primaryColor}
-        // />
-        <div>
-          <h1>Liquor Form</h1>
-        </div>
-      ) : (
-        <div>
-          {drinks.map((id, index) => (
-            <DrinkItem
-              key={id}
-              cart={cart}
-              restaurant={restaurant}
-              addToCart={addToCart}
-              removeFromCart={removeFromCart}
-              itemId={id}
-              primaryColor={primaryColor}
-            />
-          ))}
-        </div>
-      )}
+    <div
+      ref={containerRef}
+      className="space-y-4 h-[calc(100vh-200px)] overflow-y-auto scroll-smooth no-scrollbar"
+    >
+      <div>
+        {Object.keys(MENU_DISPLAY_MAP).map((menuLabel) => {
+          const drinksForLabel = drinks.filter(
+            (drink) => drink.label === menuLabel
+          );
+
+          return drinksForLabel.length > 0 ? (
+            <div
+              key={menuLabel}
+              ref={(el) => {
+                if (el) {
+                  labelRefs.current.set(menuLabel, el);
+                }
+              }}
+            >
+              <h3 className="text-lg font-bold mb-2 ml-3 mt-4 pb-2 sticky top-0 bg-white z-10">
+                {menuLabel.toUpperCase()}
+              </h3>
+              <div className="space-y-2">
+                {drinksForLabel.map(({ id }) => (
+                  <DrinkItem
+                    key={id}
+                    cart={cart}
+                    restaurant={restaurant}
+                    addToCart={addToCart}
+                    removeFromCart={removeFromCart}
+                    itemId={id}
+                  />
+                ))}
+              </div>
+            </div>
+          ) : null;
+        })}
+      </div>
     </div>
   );
 };

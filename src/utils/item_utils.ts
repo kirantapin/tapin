@@ -54,8 +54,11 @@ export class ItemUtils {
     return itemIds;
   }
 
-  static getItemName(itemId: string, restaurant: Restaurant): string {
-    return titleCase(restaurant.menu[itemId].info.name);
+  static getItemName(item: Item, restaurant: Restaurant): string {
+    return (
+      titleCase(restaurant.menu[item.id].info.name) +
+      (item.modifiers.length > 0 ? ` (${item.modifiers.join(", ")})` : "")
+    );
   }
 
   static isPassItem(itemId: string, restaurant: Restaurant): boolean {

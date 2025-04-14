@@ -3,6 +3,7 @@ import {
   ADD_POLICY,
   emptyDealEffect,
   MENU_DISPLAY_MAP,
+  REFRESH,
   REMOVE_ITEM,
   REMOVE_POLICY,
 } from "@/constants";
@@ -265,7 +266,7 @@ export class CartManager {
   }
 
   public async refresh(): Promise<string | null> {
-    await this.verifyOrder();
+    await this.verifyOrder(REFRESH, "");
     if (this.errorDisplay) {
       return this.errorDisplay;
     }

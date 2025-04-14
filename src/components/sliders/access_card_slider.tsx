@@ -35,6 +35,7 @@ const AccessCardSlider = ({
 
   // Scroll to a specific card when clicking a dot
   const scrollToCard = (index) => {
+    console.log("scrollToCard", index);
     if (!scrollContainerRef.current) return;
     const cardWidth = scrollContainerRef.current.clientWidth;
     scrollContainerRef.current.scrollTo({

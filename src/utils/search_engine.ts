@@ -17,7 +17,7 @@ export class SearchEngine {
   constructor(items: ItemSpecification[], restaurant: Restaurant) {
     this.items = items.map((item) => ({
       id: item,
-      name: ItemUtils.getItemName(item, restaurant),
+      name: ItemUtils.getItemName({ id: item, modifiers: [] }, restaurant),
       keywords: keywordExtraction(item, restaurant),
       originalItem: item,
     }));
@@ -47,8 +47,8 @@ export class SearchEngine {
 
   addItem(item: ItemSpecification, restaurant: Restaurant) {
     const searchableItem = {
-      id: item.join("_"),
-      name: ItemUtils.getItemName(item, restaurant),
+      id: item,
+      name: ItemUtils.getItemName({ id: item, modifiers: [] }, restaurant),
       keywords: keywordExtraction(item, restaurant),
       originalItem: item,
     };
@@ -57,7 +57,7 @@ export class SearchEngine {
   }
 
   removeItem(item: ItemSpecification) {
-    const id = item.join("_");
+    const id = item;
     const index = this.items.findIndex((i) => i.id === id);
     if (index > -1) {
       this.items.splice(index, 1);

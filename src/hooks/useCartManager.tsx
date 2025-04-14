@@ -49,6 +49,7 @@ export function useCartManager(
     if (!restaurant?.id || !userSession) return;
 
     const initCartManager = async () => {
+      console.log("initCartManager");
       if (
         !cartManagerRef.current ||
         cartManagerRef.current.userSession !== userSession
@@ -110,8 +111,8 @@ export function useCartManager(
     }
   };
 
-  const refreshCart = async () => {
-    if (!cartManagerRef.current) return;
+  const refreshCart = async (): Promise<string | null> => {
+    if (!cartManagerRef.current) return null;
     const result = await cartManagerRef.current.refresh();
     dispatch(cartManagerRef.current.getCartState());
     return result;

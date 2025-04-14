@@ -70,7 +70,7 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
       }}
     >
       {/* Left: Text Content */}
-      <div className="flex flex-col justify-between flex-1 p-4 pr-0">
+      <div className="flex flex-col justify-between flex-1 pt-4 pb-4 pl-4 pr-1 pr-0">
         <div>
           <h3 className="text-lg  overflow-hidden  custom-line-clamp-1 font-bold ">
             {titleCase(title_override || title || "")}
