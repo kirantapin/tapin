@@ -38,3 +38,10 @@ export function generateGradientColors(baseColor: string) {
     overlay: lighterShade,
   };
 }
+
+export function setThemeColor(color: string = "#ffffff") {
+  const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+  if (metaThemeColor) {
+    metaThemeColor.setAttribute("content", color);
+  }
+}

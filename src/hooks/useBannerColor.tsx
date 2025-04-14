@@ -1,4 +1,5 @@
 import { Restaurant } from "@/types";
+import { setThemeColor } from "@/utils/color";
 import { useEffect, useRef, useState } from "react";
 
 export const useBannerColor = (
@@ -17,11 +18,11 @@ export const useBannerColor = (
     document.head.appendChild(style);
 
     const createObserver = () => {
-      const meta = document.querySelector(
-        'meta[name="theme-color"]'
-      ) as HTMLMetaElement | null;
+      //   const meta = document.querySelector(
+      //     'meta[name="theme-color"]'
+      //   ) as HTMLMetaElement | null;
 
-      if (!meta || !titleRef.current || !restaurant) {
+      if (!titleRef.current || !restaurant) {
         return;
       }
 
@@ -33,9 +34,9 @@ export const useBannerColor = (
         ([entry]) => {
           if (entry.isIntersecting) {
             // Use requestAnimationFrame for smooth transition
-            meta.setAttribute("content", "#000000");
+            setThemeColor("#000000");
           } else {
-            meta.setAttribute("content", "#ffffff");
+            setThemeColor("#ffffff");
           }
         },
         {
@@ -44,7 +45,7 @@ export const useBannerColor = (
         }
       );
 
-      if (meta && titleRef.current && restaurant) {
+      if (titleRef.current && restaurant) {
         observerRef.current.observe(titleRef.current);
       }
     };

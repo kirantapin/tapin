@@ -31,11 +31,11 @@ import { PassAddOnCard } from "@/components/cards/pass_add_on_card.tsx";
 import { ItemUtils } from "@/utils/item_utils.ts";
 
 import { Alert } from "@/components/display_utils/alert.tsx";
-import { adjustColor } from "@/utils/color.ts";
-import RedeemButton from "@/components/redeem_button.tsx";
+import { adjustColor, setThemeColor } from "@/utils/color.ts";
+
 export default function CheckoutPage() {
+  setThemeColor();
   const { userSession, setShowSignInModal } = useAuth();
-  const [policies, setPolicies] = useState<Policy[]>([]);
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const navigate = useNavigate();
   const { id: restaurant_id } = useParams<{ id: string }>();

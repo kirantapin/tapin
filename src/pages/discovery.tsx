@@ -5,8 +5,9 @@ import { Restaurant } from "../types";
 import { useNavigate } from "react-router-dom";
 import { RESTAURANT_PATH } from "../constants.ts";
 import { project_url } from "../utils/supabase_client.ts";
-
+import { setThemeColor } from "../utils/color";
 export default function RestaurantDiscovery() {
+  setThemeColor();
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<Restaurant[]>([]);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
