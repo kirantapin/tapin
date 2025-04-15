@@ -1,4 +1,10 @@
-import { Restaurant, Item, ItemSpecification, SingleMenuItem } from "@/types";
+import {
+  Restaurant,
+  Item,
+  ItemSpecification,
+  SingleMenuItem,
+  CartItem,
+} from "@/types";
 import { PASS_MENU_TAG, KNOWN_MODIFIERS } from "@/constants";
 import { titleCase } from "title-case";
 
@@ -85,5 +91,13 @@ export class ItemUtils {
     }
 
     return temp.price * multiple;
+  }
+  static doesCartItemMeetItemSpec(
+    cartItem: CartItem,
+    itemSpec: ItemSpecification,
+    restaurant: Restaurant
+  ) {
+    const path = restaurant.menu[cartItem.item.id].path;
+    return path.includes(itemSpec);
   }
 }

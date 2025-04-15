@@ -11,6 +11,7 @@ import {
   SingleMenuItem,
 } from "../types";
 import { KNOWN_MODIFIERS, MENU_DISPLAY_MAP, PASS_MENU_TAG } from "@/constants";
+import { formatPoints } from "./parse";
 
 export function modifiedItemFlair(
   cartItem: CartItem,
@@ -41,7 +42,9 @@ export function modifiedItemFlair(
 
   if (addedItem) {
     if (addedItem.cartItem.point_cost > 0) {
-      temp["discountDescription"] = `-${addedItem.cartItem.point_cost} points`;
+      temp["discountDescription"] = `-${formatPoints(
+        addedItem.cartItem.point_cost
+      )} points`;
     } else if (addedItem.cartItem.price == 0) {
       temp["discountDescription"] = "Free Item";
     } else {
@@ -72,7 +75,9 @@ export function modifiedItemFlair(
       break;
     case "apply_point_cost":
       // Add logic for point cost
-      temp["discountDescription"] = `-${modifiedItem.amount} points`;
+      temp["discountDescription"] = `-${formatPoints(
+        modifiedItem.amount
+      )} points`;
       break;
     case "apply_percent_discount":
       temp["discountDescription"] = `%${(modifiedItem.amount * 100).toFixed(

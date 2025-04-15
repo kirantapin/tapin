@@ -4,7 +4,7 @@ import { Policy, Restaurant, User } from "@/types";
 import { fetch_policies } from "@/utils/queries/policies";
 import { LOYALTY_REWARD_TAG, OFFERS_PAGE_PATH } from "@/constants";
 import { ChevronUp, ChevronDown, ChevronRight } from "lucide-react";
-import { itemToStringDescription } from "@/utils/parse";
+import { formatPoints, itemToStringDescription } from "@/utils/parse";
 import { adjustColor } from "@/utils/color";
 
 interface RewardsProps {
@@ -87,7 +87,7 @@ const Rewards: React.FC<RewardsProps> = ({
             className="text-5xl font-bold mb-1"
             style={{ color: restaurant.metadata.primaryColor }}
           >
-            {userPoints} Points
+            {formatPoints(userPoints)} Points
           </h3>
           {loyaltyPolicies.length === 0 || userPoints === 0 ? (
             <p className="text-sm text-black-600 mb-11">
@@ -95,7 +95,7 @@ const Rewards: React.FC<RewardsProps> = ({
             </p>
           ) : pointsToGo ? (
             <p className="text-sm text-black-600 mb-11">
-              {pointsToGo} points until your next reward!
+              {formatPoints(pointsToGo)} points until your next reward!
             </p>
           ) : (
             <p className="text-sm text-black-600 mb-11">Claim your reward!</p>
@@ -123,7 +123,7 @@ const Rewards: React.FC<RewardsProps> = ({
 
                 <div className="flex justify-between text-sm text-gray-500 mt-1">
                   {intervals.map((val) => (
-                    <span>{val}</span>
+                    <span>{formatPoints(val)}</span>
                   ))}
                 </div>
               </>
@@ -162,7 +162,7 @@ const Rewards: React.FC<RewardsProps> = ({
 
                   {/* Amount - Fixed Width */}
                   <div className="text-xl text-black font-bold font-[Gilroy] text-left">
-                    {policy.definition.action.amount}
+                    {formatPoints(policy.definition.action.amount)}
                   </div>
 
                   {/* Description - Takes Remaining Space */}

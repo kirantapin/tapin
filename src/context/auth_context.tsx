@@ -22,6 +22,8 @@ interface AuthContextProps {
   loadingUser: boolean;
   showSignInModal: boolean;
   setShowSignInModal: React.Dispatch<React.SetStateAction<boolean>>;
+  showOrderHistoryModal: boolean;
+  setShowOrderHistoryModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const AuthContext = createContext<AuthContextProps | undefined>(
@@ -39,6 +41,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loadingUser, setLoadingUser] = useState(true);
   const [showSignInModal, setShowSignInModal] = useState(false);
+  const [showOrderHistoryModal, setShowOrderHistoryModal] = useState(false);
 
   const setData = async (session: Session | null) => {
     if (!session) {
@@ -104,6 +107,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       if (error) throw error;
       setTransactions(data);
     } catch (error) {
+      setTransactions([]);
       console.error("Error fetching transactions:", error);
     }
   };
@@ -129,6 +133,8 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         loadingUser,
         showSignInModal,
         setShowSignInModal,
+        showOrderHistoryModal,
+        setShowOrderHistoryModal,
       }}
     >
       {children}

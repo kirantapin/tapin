@@ -29,9 +29,10 @@ import DealCard from "@/components/cards/small_policy.tsx";
 import PolicyModal from "@/components/bottom_sheets/policy_modal.tsx";
 import { PassAddOnCard } from "@/components/cards/pass_add_on_card.tsx";
 import { ItemUtils } from "@/utils/item_utils.ts";
-
+import { formatPoints } from "@/utils/parse.ts";
 import { Alert } from "@/components/display_utils/alert.tsx";
 import { adjustColor, setThemeColor } from "@/utils/color.ts";
+import { SignInButton } from "@/components/signin/signin_button.tsx";
 
 export default function CheckoutPage() {
   setThemeColor();
@@ -65,6 +66,7 @@ export default function CheckoutPage() {
     getActivePolicies,
     removePolicy,
     isPreEntry,
+    clearCart,
   } = useCartManager(restaurant as Restaurant, userSession);
 
   useEffect(() => {
@@ -221,7 +223,7 @@ export default function CheckoutPage() {
       {policyManager &&
         policyManager.getRecommendedDeals(state.cart, state.dealEffect).length >
           0 && (
-          <div className="bg-white mt-6">
+          <div className="mt-6">
             <div className="overflow-x-auto pb-2 no-scrollbar mb-4">
               <h2 className="text-2xl font-bold mb-4">Save More</h2>
               <div className="flex gap-2 whitespace-nowrap">
@@ -265,17 +267,14 @@ export default function CheckoutPage() {
               <span>Discounts</span>
               <span>
                 -$
-                {(
-                  priceCartNormally(state.cart, restaurant as Restaurant) -
-                  state.cartResults.subtotal
-                ).toFixed(2)}
+                {state.cartResults.discount.toFixed(2)}
               </span>
             </div>
           )}
           {state.cartResults.totalPointCost > 0 && (
             <div className={checkoutStyles.summaryRow}>
               <span>Point Cost</span>
-              <span>-{state.cartResults.totalPointCost} points</span>
+              <span>-{formatPoints(state.cartResults.totalPointCost)}</span>
             </div>
           )}
           {state.cartResults.totalPoints > 0 && (
@@ -283,8 +282,8 @@ export default function CheckoutPage() {
               className={checkoutStyles.summaryRow}
               style={{ color: "#40C4AA" }}
             >
-              <span>Points</span>
-              <span>+{state.cartResults.totalPoints} points</span>
+              <span>Points Earned</span>
+              <span>+{formatPoints(state.cartResults.totalPoints)}</span>
             </div>
           )}
           <div className={checkoutStyles.summaryRow}>
@@ -367,20 +366,11 @@ export default function CheckoutPage() {
                   connectedAccountId: restaurant?.stripe_account_id,
                 }}
                 sanityCheck={refreshCart}
+                clearCart={clearCart}
               />
             )
           ) : (
-            <div className="mt-6 flex justify-between items-center text-black bg-[#F5B14C] p-2 rounded-md">
-              <button
-                className="text-black"
-                onClick={() => {
-                  setShowSignInModal(true);
-                }}
-              >
-                Sign In
-              </button>
-              <span className="text-gray-600">Purchase by Signing In</span>
-            </div>
+            <SignInButton onClose={() => {}} />
           )}
         </div>
       )}

@@ -41,7 +41,7 @@ export function DrinkItem({
   return (
     <div className="flex-none flex items-stretch m-3 border p-3 rounded-3xl bg-white">
       {/* Image */}
-      <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-200 flex-shrink-0 p-3">
+      <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 p-3">
         <img
           src={
             menuItem?.image_url ||

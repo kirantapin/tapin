@@ -1,5 +1,5 @@
 import { Policy, Restaurant } from "@/types";
-import { policyToStringDescription } from "@/utils/parse";
+import { convertUtcToLocal, policyToStringDescription } from "@/utils/parse";
 import React from "react";
 
 export function PolicyDescriptionDisplay({
@@ -14,17 +14,30 @@ export function PolicyDescriptionDisplay({
 
   return (
     <div>
-      <p className="text-lg font-bold text-black">{actionDescription}</p>
-      {conditionDescriptions.length > 0 && <p>Requirements :</p>}
-      <ul style={{ listStyleType: "disc", paddingLeft: "20px" }}>
+      <p className="text-lg font-normal text-black">{actionDescription}</p>
+      {conditionDescriptions.length > 0 && (
+        <p className="font-normal text-lg text-black">Requirements :</p>
+      )}
+      <ul
+        style={{ listStyleType: "disc", paddingLeft: "20px", marginBottom: 6 }}
+      >
         {conditionDescriptions.map(
           (conditionDescription: string, index: number) => (
-            <li key={index}>{conditionDescription}</li>
+            <li key={index} className="font-normal text-lg text-black">
+              {conditionDescription}
+            </li>
           )
         )}
       </ul>
       <span className="text-xs">
-        Items must be unmodified to be counted towards a deal
+        {policy.begin_time &&
+          policy.end_time &&
+          "This Offer is valid from " +
+            convertUtcToLocal(policy.begin_time) +
+            " to " +
+            convertUtcToLocal(policy.end_time) +
+            "."}{" "}
+        Items must be unmodified to be counted towards a deal.
       </span>
     </div>
   );

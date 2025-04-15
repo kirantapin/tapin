@@ -8,6 +8,7 @@ import {
   BadgeCheck,
   Beer,
   X,
+  Star,
 } from "lucide-react";
 
 import { useState, useEffect, useRef } from "react";
@@ -42,9 +43,16 @@ import { RecentActivity } from "@/components/sliders/recent_activity.tsx";
 import { MySpot } from "@/components/my_spot.tsx";
 import { RestaurantSkeleton } from "@/components/skeletons/restaurant.tsx";
 import { PolicySlider } from "@/components/sliders/policy_slider.tsx";
+import { ActionButtons } from "@/components/sliders/action_buttons.tsx";
 
 export default function RestaurantPage() {
-  const { userSession, userData, transactions, setShowSignInModal } = useAuth();
+  const {
+    userSession,
+    userData,
+    transactions,
+    setShowSignInModal,
+    setShowOrderHistoryModal,
+  } = useAuth();
   const navigate = useNavigate();
   const [restaurant, setRestaurant] = useState<Restaurant>();
   const [policies, setPolicies] = useState<Policy[]>([]);
@@ -70,7 +78,7 @@ export default function RestaurantPage() {
   const scrollToOrderDrinks = () => {
     if (!orderDrinksRef.current) return;
     const elementPosition = orderDrinksRef.current.getBoundingClientRect().top;
-    const offsetPosition = elementPosition + window.pageYOffset - 20;
+    const offsetPosition = elementPosition;
     window.scrollTo({
       top: offsetPosition,
       behavior: "smooth",
@@ -121,7 +129,12 @@ export default function RestaurantPage() {
 
           {/* Shopping Bag & User Icons */}
           <div className="flex items-center gap-5">
-            <div className="bg-white p-2 rounded-full">
+            <div
+              className="bg-white p-2 rounded-full"
+              onClick={() => {
+                setShowOrderHistoryModal(true);
+              }}
+            >
               <ShoppingBag className="w-5 h-5 text-black" />
             </div>
             <div className="bg-white p-2 rounded-full">
@@ -142,54 +155,10 @@ export default function RestaurantPage() {
           <BadgeCheck className="w-5 h-5 text-blue-500" />
         </div>
         {/* Action Buttons */}
-        <div className="flex gap-2 sm:gap-3 mt-5 px-2">
-          <button
-            onClick={scrollToOrderDrinks}
-            className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-300 bg-white shadow-md"
-          >
-            <GradientIcon
-              icon={Beer}
-              primaryColor={restaurant?.metadata.primaryColor as string}
-              size={17}
-            />
-            {/* <Info className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" /> */}
-            <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
-              Order
-            </span>
-          </button>
-          <button
-            className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-300 bg-white shadow-md"
-            onClick={() => {
-              navigate(INFO_PAGE_PATH.replace(":id", restaurant_id));
-            }}
-          >
-            <GradientIcon
-              icon={Info}
-              primaryColor={restaurant?.metadata.primaryColor as string}
-              size={17}
-            />
-            <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
-              More Info
-            </span>
-          </button>
-          <button
-            className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-300 bg-white shadow-md"
-            onClick={() =>
-              navigate(OFFERS_PAGE_PATH.replace(":id", restaurant.id), {
-                state: { tag: LOYALTY_REWARD_TAG },
-              })
-            }
-          >
-            <GradientIcon
-              icon={Gift}
-              primaryColor={restaurant?.metadata.primaryColor as string}
-              size={17}
-            />
-            <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
-              Rewards
-            </span>
-          </button>
-        </div>
+        <ActionButtons
+          restaurant={restaurant as Restaurant}
+          scrollToOrderDrinks={scrollToOrderDrinks}
+        />
         {/* Highlight Slider */}
         <HighlightSlider
           restaurant={restaurant as Restaurant}
@@ -361,6 +330,7 @@ export default function RestaurantPage() {
           </>
         )}
         <Sidebar
+          restaurant={restaurant as Restaurant}
           isOpen={sidebarOpen}
           onClose={() => {
             setSidebarOpen(false);

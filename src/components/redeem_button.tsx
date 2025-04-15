@@ -6,9 +6,11 @@ import { Transaction, User } from "@/types";
 const RedeemButton = ({
   payload,
   sanityCheck,
+  clearCart,
 }: {
   payload: any;
   sanityCheck: () => Promise<string | null>;
+  clearCart: () => void;
 }) => {
   const { setTransactions, setUserData } = useAuth();
   const navigate = useNavigate();
@@ -26,7 +28,7 @@ const RedeemButton = ({
         ...prevTransactions,
         ...transactions,
       ]);
-
+      clearCart();
       navigate(RESTAURANT_PATH.replace(":id", payload.restaurant_id), {
         state: {
           transactions: transactions,

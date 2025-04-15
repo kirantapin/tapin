@@ -118,6 +118,12 @@ export function useCartManager(
     return result;
   };
 
+  const clearCart = async () => {
+    if (!cartManagerRef.current) return;
+    cartManagerRef.current.clearCart();
+    dispatch(cartManagerRef.current.getCartState());
+  };
+
   const getActivePolicies = () => {
     if (!cartManagerRef.current) return [];
     return cartManagerRef.current.getActivePolicies();
@@ -138,6 +144,7 @@ export function useCartManager(
     addPolicy,
     removePolicy,
     refreshCart,
+    clearCart,
     getActivePolicies,
     cartManager: cartManagerRef.current,
     isPreEntry: state.cart.some((item) =>

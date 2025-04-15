@@ -1,4 +1,3 @@
-import { ADD_ON_TAG } from "@/constants";
 import {
   Cart,
   Policy,
@@ -7,23 +6,7 @@ import {
   CartItem,
   DealEffectPayload,
 } from "@/types";
-import { isEqual } from "lodash";
-/**
- * Analyzes a user's cart against a policy to determine what items are missing to qualify
- *
- * @param policy - The policy to check against
- * @param cart - The user's current cart
- * @returns Object containing qualification status and missing items
- */
-
-function doesCartItemMeetItemSpec(
-  cartItem: CartItem,
-  itemSpec: ItemSpecification,
-  restaurant: Restaurant
-) {
-  const path = restaurant.menu[cartItem.item.id].path;
-  return path.includes(itemSpec);
-}
+import { ItemUtils } from "./item_utils";
 
 function isCartItemAffectedByPolicy(
   cartItem: CartItem,
@@ -73,7 +56,7 @@ export function getMissingItemsForPolicy(
     for (const cartItem of cart) {
       for (const itemSpec of condition.items) {
         if (
-          doesCartItemMeetItemSpec(cartItem, itemSpec, restaurant) &&
+          ItemUtils.doesCartItemMeetItemSpec(cartItem, itemSpec, restaurant) &&
           !isCartItemAffectedByPolicy(cartItem, dealEffect)
         ) {
           currentQuantity += cartItem.quantity;

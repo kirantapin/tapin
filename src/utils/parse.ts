@@ -1,7 +1,6 @@
 import { PASS_MENU_TAG } from "@/constants";
 import { Item, ItemSpecification, Policy, Restaurant } from "@/types";
 import { titleCase } from "title-case";
-import { ItemUtils } from "./item_utils";
 
 export const itemToStringDescription = (item: Item, restaurant: Restaurant) => {
   return titleCase(restaurant.menu[item.id].info.name);
@@ -142,7 +141,7 @@ export function convertUtcToLocal(utcTimestampz: string): string {
     month: "short",
     day: "numeric",
     hour: "numeric",
-    minute: undefined,
+    minute: "2-digit",
     second: undefined,
   }).format(date);
 }
@@ -175,7 +174,7 @@ export function getPolicyFlair(policy: Policy): string {
     case "apply_point_multiplier":
       return `${action.amount}x Points`;
     case "apply_point_cost":
-      return `Redeem for ${action.amount} Points`;
+      return `Redeem for ${formatPoints(action.amount)} Points`;
     case "apply_order_point_multiplier":
       return `${action.amount}x Points on Whole Order`;
     case "apply_fixed_order_discount":
@@ -184,6 +183,8 @@ export function getPolicyFlair(policy: Policy): string {
       return `$${action.amount} Total on Select Items`;
     case "apply_order_percent_discount":
       return `${(action.amount * 100).toFixed(0)}% Off Whole Order`;
+    case "apply_loyalty_reward":
+      return `Redeem for ${formatPoints(action.amount)} Points`;
     default:
       return "";
   }
@@ -215,3 +216,14 @@ export function keywordExtraction(
   const stopWords = ["the", "and", "with", "for", "from"];
   return uniqueKeywords.filter((word) => !stopWords.includes(word));
 }
+
+export const formatPoints = (points: number) => {
+  if (points >= 10000) {
+    if (points % 1000 === 0) {
+      return `${points / 1000}k Points`;
+    } else {
+      return `${(points / 1000).toFixed(1)}k Points`;
+    }
+  }
+  return `${points}`;
+};

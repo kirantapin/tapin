@@ -1,16 +1,30 @@
 import React from "react";
 import { Sheet } from "react-modal-sheet";
-import { X, Moon, ShoppingCart, AlertCircle, CheckCircle } from "lucide-react";
+import {
+  X,
+  Moon,
+  ShoppingCart,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  RefreshCw,
+  Lock,
+} from "lucide-react";
 import { Policy, Restaurant, Cart, SingleMenuItem } from "@/types";
 import { DrinkItem } from "@/components/menu_items";
 import { project_url } from "@/utils/supabase_client";
 import { titleCase } from "title-case";
-import { convertUtcToLocal, getPolicyFlair, sentenceCase } from "@/utils/parse";
+import {
+  convertUtcToLocal,
+  formatPoints,
+  getPolicyFlair,
+  sentenceCase,
+} from "@/utils/parse";
 import { PolicyDescriptionDisplay } from "@/components/display_utils/policy_description_display";
 import { getMissingItemsForPolicy } from "@/utils/item_recommender";
 import { motion } from "framer-motion";
 import { PolicyManager } from "@/utils/policy_manager";
-import { DRINK_CHECKOUT_PATH } from "@/constants";
+import { DRINK_CHECKOUT_PATH, LOYALTY_REWARD_TAG } from "@/constants";
 import { useNavigate } from "react-router-dom";
 import { ItemUtils } from "@/utils/item_utils";
 import { adjustColor } from "@/utils/color";
@@ -51,17 +65,17 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
     <Sheet
       isOpen={isOpen}
       onClose={onClose}
-      snapPoints={[0.9, 0]}
+      snapPoints={[policy.definition.tag === LOYALTY_REWARD_TAG ? 0.5 : 0.9, 0]}
       initialSnap={0}
       tweenConfig={{
-        duration: 0.8,
-        ease: [0.85, 0, 0.15, 1], // cubic‑bezier curve
+        duration: 0.2,
+        ease: [0.4, 0, 0.6, 1],
       }}
     >
       <Sheet.Container className="rounded-t-3xl">
         <Sheet.Content>
-          <div className="relative h-full flex flex-col">
-            <div className="flex-1 overflow-y-auto p-6 pb-40">
+          <div className="relative h-full flex flex-col mt-2">
+            <div className="flex-1 overflow-y-auto p-6 pb-24">
               <button
                 onClick={onClose}
                 className="text-gray-500 bg-gray-200 rounded-full p-2 float-right"
@@ -71,19 +85,104 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
 
               <div>
                 <h2 className="text-2xl font-bold pr-14 break-words">
-                  {titleCase(policy.name || "")}
+                  {policy.definition.tag === LOYALTY_REWARD_TAG
+                    ? `${titleCase(
+                        ItemUtils.getMenuItemFromItemId(
+                          policy.definition.action.items[0],
+                          restaurant
+                        )?.name || ""
+                      )} for ${formatPoints(
+                        policy.definition.action.amount
+                      )} points!`
+                    : titleCase(policy.name || "")}
                 </h2>
-                <div className="relative mb-4 mt-2 bg-black/70 text-white px-3 py-1 rounded-full w-fit">
-                  <div className="flex items-center gap-2">
-                    <Moon size={16} className="text-yellow-400" />
-                    <span className="font-medium text-sm">
+
+                <div className="flex flex-wrap gap-2 mt-4 mb-4">
+                  <div className="inline-flex bg-[linear-gradient(225deg,#CAA650,#F4E4A8)] text-white px-3 py-2 rounded-full">
+                    <span className="font-medium text-xs">
                       {getPolicyFlair(policy)}
                     </span>
                   </div>
+                  {policy.begin_time && policy.end_time && (
+                    <div
+                      className="relative text-white px-3 py-2 rounded-full flex items-center gap-1"
+                      style={{
+                        background: `linear-gradient(225deg, ${adjustColor(
+                          restaurant?.metadata.primaryColor as string,
+                          -30
+                        )}, ${adjustColor(
+                          restaurant?.metadata.primaryColor as string,
+                          40
+                        )})`,
+                      }}
+                    >
+                      <Clock size={16} />
+                      <span className="font-medium text-xs">
+                        Limited Time Offer
+                      </span>
+                    </div>
+                  )}
+
+                  <div
+                    className="relative text-white px-3 py-2 rounded-full flex items-center gap-1"
+                    style={{
+                      background: `linear-gradient(225deg, ${adjustColor(
+                        restaurant?.metadata.primaryColor as string,
+                        -30
+                      )}, ${adjustColor(
+                        restaurant?.metadata.primaryColor as string,
+                        40
+                      )})`,
+                    }}
+                  >
+                    <span className="font-medium text-xs">
+                      {policy.total_usages
+                        ? `${policy.total_usages} Uses`
+                        : "Unlimited Uses"}
+                    </span>
+                  </div>
+                  {policy.days_since_last_use && (
+                    <div
+                      className="relative text-white px-3 py-2 rounded-full flex items-center gap-1"
+                      style={{
+                        background: `linear-gradient(225deg, ${adjustColor(
+                          restaurant?.metadata.primaryColor as string,
+                          -30
+                        )}, ${adjustColor(
+                          restaurant?.metadata.primaryColor as string,
+                          40
+                        )})`,
+                      }}
+                    >
+                      <RefreshCw size={16} />
+                      <span className="font-medium text-xs">
+                        {policy.days_since_last_use} Day Between Uses
+                      </span>
+                    </div>
+                  )}
+                  {policy.count_as_deal && (
+                    <div
+                      className="relative text-white px-3 py-2 rounded-full flex items-center gap-1"
+                      style={{
+                        background: `linear-gradient(225deg, ${adjustColor(
+                          restaurant?.metadata.primaryColor as string,
+                          -30
+                        )}, ${adjustColor(
+                          restaurant?.metadata.primaryColor as string,
+                          40
+                        )})`,
+                      }}
+                    >
+                      <Lock size={16} />
+                      <span className="font-medium text-xs">
+                        Counts As Deal
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 <p className="mt-3 text-xl  text-black whitespace-normal break-words">
-                  {sentenceCase(policy.header || "")}
+                  {titleCase(policy.header || "")}
                 </p>
 
                 <div className="flex items-center mt-4 text-gray-500">
@@ -91,26 +190,6 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                     policy={policy}
                     restaurant={restaurant}
                   />
-                </div>
-
-                <div className="flex items-center mt-4 text-gray-500">
-                  <div>
-                    {policy.begin_time && policy.end_time ? (
-                      <span>
-                        {convertUtcToLocal(policy.begin_time)} -{" "}
-                        {convertUtcToLocal(policy.end_time)}
-                      </span>
-                    ) : (
-                      "Anytime"
-                    )}
-
-                    {!policy.count_as_deal && (
-                      <div>
-                        <span className="mx-2">•</span>
-                        <span>Unlimited</span>
-                      </div>
-                    )}
-                  </div>
                 </div>
 
                 {!policyIsActive && hasMissingItems ? (
@@ -149,7 +228,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                       <span className="font-medium">
                         {policyIsActive
                           ? "This deal is already active in your cart."
-                          : "All conditions met! You're ready to add this deal."}
+                          : "You're ready to add this deal."}
                       </span>
                     </div>
                   </div>
@@ -157,61 +236,19 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
               </div>
             </div>
 
-            <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-2 bg-white py-3 px-4 border-t rounded-t-3xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.2)]">
-              <motion.div
-                animate={{
-                  height: !policyIsActive && hasMissingItems ? "auto" : 0,
-                }}
-                initial={false}
-                transition={{ duration: 0.2 }}
-                style={{ overflow: "hidden" }}
-              >
-                <button
-                  className="w-full text-white py-3 rounded-full flex items-center justify-center gap-2 mb-2"
-                  style={{
-                    background: restaurant?.metadata.primaryColor
-                      ? `linear-gradient(45deg, 
-          ${adjustColor(restaurant.metadata.primaryColor as string, -30)},
-          ${adjustColor(restaurant.metadata.primaryColor as string, 40)}
-        )`
-                      : undefined,
-                  }}
-                  onClick={async () => {
-                    missingItemsResults.forEach(async (result) => {
-                      const addItemPromises: Promise<void>[] = [];
-                      const itemIds =
-                        ItemUtils.policyItemSpecificationsToItemIds(
-                          result.missingItems,
-                          restaurant
-                        );
-                      for (let i = 0; i < result.quantityNeeded; i++) {
-                        let itemId = itemIds[i % itemIds.length];
-                        addItemPromises.push(
-                          addToCart({
-                            id: itemId,
-                            modifiers: [],
-                          })
-                        );
-                      }
-                      await Promise.all(addItemPromises);
-                      onAddToCart(policy);
-                    });
-                  }}
-                >
-                  <ShoppingCart size={18} />
-                  Add All Items & Apply Deal
-                </button>
-              </motion.div>
-
+            <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-2 bg-[rgba(255,255,255,0.9)] py-3 px-4 border-t rounded-t-3xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.2)]">
               <button
                 className="w-full text-white py-3 rounded-full flex items-center justify-center gap-2"
                 style={{
-                  background: restaurant?.metadata.primaryColor
-                    ? `linear-gradient(45deg, 
+                  background:
+                    hasMissingItems && !policyIsActive
+                      ? "#969292"
+                      : restaurant?.metadata.primaryColor
+                      ? `linear-gradient(45deg, 
         ${adjustColor(restaurant.metadata.primaryColor as string, -30)},
         ${adjustColor(restaurant.metadata.primaryColor as string, 40)}
       )`
-                    : undefined,
+                      : undefined,
                 }}
                 onClick={() => {
                   if (policyIsActive) {
@@ -220,7 +257,6 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                     onAddToCart(policy);
                   }
                 }}
-                disabled={hasMissingItems}
               >
                 <ShoppingCart size={18} />
                 {policyIsActive ? "Go to Checkout" : "Add to Cart"}

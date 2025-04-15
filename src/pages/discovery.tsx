@@ -40,7 +40,7 @@ export default function RestaurantDiscovery() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center gap-8 px-4 py-8 bg-gray-50">
+    <div className="min-h-screen flex flex-col items-center gap-8 px-4 py-8 bg-white">
       <img
         src="/tapin_logo_black.png"
         alt="Tap In Logo"

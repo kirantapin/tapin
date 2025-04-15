@@ -1,6 +1,6 @@
 import { CartItem, DealEffectPayload, Item, Restaurant } from "@/types";
 import { itemToStringDescription } from "@/utils/parse";
-import { getMenuItemFromItemId, modifiedItemFlair } from "@/utils/pricer";
+import { modifiedItemFlair } from "@/utils/pricer";
 import { project_url } from "@/utils/supabase_client";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";

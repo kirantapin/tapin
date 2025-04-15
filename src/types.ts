@@ -29,6 +29,7 @@ export interface JWTPayloadType extends Record<string, unknown> {
 }
 
 export interface CartResultsPayload {
+  discount: number;
   subtotal: number;
   tax: number;
   serviceFee: number;
@@ -161,13 +162,12 @@ export interface Transaction {
   restaurant_id: string;
   user_id: string;
   item: string;
-  deal_use_id: string | null;
+  order_id: string;
   metadata: Record<string, string | string[]>;
   tip_amount: number | null;
   price: number | null;
   points_awarded: number | null;
   point_cost: number | 0;
-  payment_intent_id: string;
 }
 
 export interface Order {
@@ -178,6 +178,7 @@ export interface Order {
   total_price: number | null;
   tip: number | null;
   tax: number | null;
+  discount: number;
   type: string | null;
   type_id: string | null;
   payment_intent_id: string | null;
@@ -308,6 +309,11 @@ export type PolicyDefinitionAction =
       items: ItemSpecification[];
       amount: number;
       frequency: number;
+    }
+  | {
+      type: "apply_loyalty_reward";
+      items: ItemSpecification[];
+      amount: number;
     };
 
 export interface HouseMixerTemplate {

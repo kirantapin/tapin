@@ -21,7 +21,7 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     if (!isMobile) {
       console.log("not mobile");
-      navigate(DEVICE_NOT_SUPPORTED_PATH);
+      //navigate(DEVICE_NOT_SUPPORTED_PATH);
     } else {
       console.log("mobile");
     }

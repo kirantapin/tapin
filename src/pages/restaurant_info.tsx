@@ -61,7 +61,7 @@ const RestaurantInfo: React.FC = () => {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return null;
   }
 
   return (
@@ -69,12 +69,12 @@ const RestaurantInfo: React.FC = () => {
       {/* Header */}
       <div className="flex items-center p-4">
         <button
-          className="p-2 rounded-full bg-gray-100"
+          className="w-9 h-9 flex items-center justify-center rounded-full bg-black/10"
           onClick={() => {
             navigate(RESTAURANT_PATH.replace(":id", restaurant_id));
           }}
         >
-          <ChevronLeft size={20} />
+          <ChevronLeft className="w-6 h-6" />
         </button>
         {restaurant && (
           <h1 className="text-lg font-semibold flex-1 text-center">

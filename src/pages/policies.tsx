@@ -16,11 +16,9 @@ import {
 import { Policy, Restaurant } from "@/types";
 import { fetchRestaurantById } from "@/utils/queries/restaurant";
 import { fetch_policies } from "@/utils/queries/policies";
-import { project_url } from "@/utils/supabase_client";
 
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-import { getPolicyFlair } from "@/utils/parse";
 import DealCard from "@/components/cards/small_policy";
 import { useCartManager } from "@/hooks/useCartManager";
 import { useAuth } from "@/context/auth_context";
@@ -78,12 +76,12 @@ export default function PoliciesPage() {
       {/* Header */}
       <div className="flex justify-between items-center p-4">
         <button
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100"
+          className="w-9 h-9 flex items-center justify-center rounded-full bg-black/10"
           onClick={() => {
             navigate(RESTAURANT_PATH.replace(":id", restaurant_id));
           }}
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="w-6 h-6" />
         </button>
         <h1 className="text-2xl font-semibold">Awesome Deals</h1>
         <button className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100">

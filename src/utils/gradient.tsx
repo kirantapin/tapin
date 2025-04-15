@@ -54,7 +54,6 @@ export function Hero({ restaurant_id }: { restaurant_id: string }) {
     >
       {/* Profile Image */}
       <div className="absolute -bottom-5" style={{ left: "18px" }}>
-        {" "}
         {/* Moved further down */}
         <div className="w-24 h-24 rounded-full border-2 border-white  overflow-hidden shadow-xl">
           <img

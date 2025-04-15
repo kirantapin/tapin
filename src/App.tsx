@@ -29,16 +29,25 @@ import RestaurantInfo from "./pages/restaurant_info.tsx";
 import SignInModal from "./components/signin/signin_modal.tsx";
 import { ToastContainer } from "react-toastify";
 import DeviceNotSupported from "./pages/device_not_supported.tsx";
-
+import OrderHistoryModal from "./components/bottom_sheets/history_modal.tsx";
 const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
-  const { showSignInModal, setShowSignInModal } = useAuth();
+  const {
+    showSignInModal,
+    setShowSignInModal,
+    showOrderHistoryModal,
+    setShowOrderHistoryModal,
+  } = useAuth();
 
   return (
-    <>
+    <div>
       <SignInModal
         isOpen={showSignInModal}
         onClose={() => setShowSignInModal(false)}
+      />
+      <OrderHistoryModal
+        isOpen={showOrderHistoryModal}
+        onClose={() => setShowOrderHistoryModal(false)}
       />
       <AppLoader />
       <ToastContainer stacked className="w-full" style={{ width: "100%" }} />
@@ -73,7 +82,7 @@ const App: React.FC = () => {
           element={<DeviceNotSupported />}
         />
       </Routes>
-    </>
+    </div>
   );
 };
 

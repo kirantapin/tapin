@@ -18,7 +18,7 @@ import RedeemButton from "./redeem_button.tsx";
 const stripePublishableKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || "";
 const stripePromise = loadStripe(stripePublishableKey);
 
-const PayButton = ({ payload, sanityCheck }) => {
+const PayButton = ({ payload, sanityCheck, clearCart }) => {
   const stripe = useStripe();
   const elements = useElements();
   const { setTransactions, setUserData } = useAuth();
@@ -38,7 +38,7 @@ const PayButton = ({ payload, sanityCheck }) => {
         ...prevTransactions,
         ...transactions,
       ]);
-
+      clearCart();
       navigate(RESTAURANT_PATH.replace(":id", payload.restaurant_id), {
         state: {
           transactions: transactions,
@@ -147,7 +147,7 @@ const PayButton = ({ payload, sanityCheck }) => {
   );
 };
 
-function ApplePayButton({ payload, sanityCheck }) {
+function ApplePayButton({ payload, sanityCheck, clearCart }) {
   console.log(payload);
   return payload.state.token ? (
     payload.totalWithTip > 0 ? (
@@ -163,10 +163,18 @@ function ApplePayButton({ payload, sanityCheck }) {
           },
         }}
       >
-        <PayButton payload={payload} sanityCheck={sanityCheck} />
+        <PayButton
+          payload={payload}
+          sanityCheck={sanityCheck}
+          clearCart={clearCart}
+        />
       </Elements>
     ) : (
-      <RedeemButton payload={payload} sanityCheck={sanityCheck} />
+      <RedeemButton
+        payload={payload}
+        sanityCheck={sanityCheck}
+        clearCart={clearCart}
+      />
     )
   ) : (
     <p>Loading</p>

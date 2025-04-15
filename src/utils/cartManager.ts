@@ -26,7 +26,6 @@ const CART_EXPIRATION_MINUTES = 15;
 
 export class CartManager {
   cart: Cart;
-  selectedPolicy: Policy | null;
   dealEffect: DealEffectPayload;
   cartResults: CartResultsPayload | null;
   errorDisplay: string | null;
@@ -54,7 +53,6 @@ export class CartManager {
         if (parsedData.timestamp && isCartValid(parsedData.timestamp)) {
           // Set existing cart if timestamp is valid
           this.cart = parsedData.cart || [];
-          this.selectedPolicy = parsedData.selectedPolicy || null;
           this.dealEffect = parsedData.dealEffect || emptyDealEffect;
           this.cartResults = parsedData.cartResults || null;
           this.errorDisplay = null;
@@ -74,7 +72,6 @@ export class CartManager {
 
     // Initialize with default values if no valid cart is found
     this.cart = [];
-    this.selectedPolicy = null;
     this.dealEffect = emptyDealEffect;
     this.cartResults = null;
     this.errorDisplay = null;
@@ -93,7 +90,6 @@ export class CartManager {
   private saveCartToLocalStorage() {
     const data = {
       cart: this.cart,
-      selectedPolicy: this.selectedPolicy,
       dealEffect: this.dealEffect,
       cartResults: this.cartResults,
       token: this.token,
@@ -111,7 +107,6 @@ export class CartManager {
     if (!this.userSession?.user?.phone) {
       this.cart = this.cart;
       this.dealEffect = emptyDealEffect;
-      this.selectedPolicy = this.selectedPolicy;
       this.cartResults = null;
       this.errorDisplay = "User must sign in.";
       this.token = null;
@@ -151,7 +146,6 @@ export class CartManager {
       if (returnData) {
         this.cart = returnData.payload.cart;
         this.dealEffect = returnData.payload.dealEffectPayload;
-        this.selectedPolicy = returnData.payload.policy;
         this.cartResults = returnData.payload.cartResultsPayload;
         this.errorDisplay = errorMessage;
         this.token = returnData.jwtToken;
@@ -162,50 +156,6 @@ export class CartManager {
         "An unexpected error occurred while verifying the cart.";
     }
     this.saveCartToLocalStorage();
-  }
-
-  private handleUpdateItem(
-    itemKey: number,
-    updatedFields: Partial<CartItem>
-  ): void {
-    if (itemKey <= this.cart.length) {
-      this.cart = this.cart
-        .map((item) =>
-          item.id === itemKey ? { ...item, ...updatedFields } : item
-        )
-        .filter((item) => item.quantity !== 0) // Remove items with quantity 0
-        .map((item, index) => ({
-          ...item,
-          id: index + 1, // Reassign IDs starting from 1
-        }));
-    } else {
-      this.dealEffect = {
-        ...this.dealEffect,
-        addedItems: this.dealEffect.addedItems.map((item) =>
-          item.id === itemKey ? { ...item, ...updatedFields } : item
-        ),
-      };
-    }
-  }
-  public async updateItem(
-    itemKey: number,
-    updatedFields: Partial<CartItem>
-  ): Promise<string | null> {
-    this.handleUpdateItem(itemKey, updatedFields);
-    await this.verifyOrder();
-    if (this.errorDisplay) {
-      return this.errorDisplay;
-    }
-    return null;
-  }
-
-  public async setPolicy(policy: Policy | null): Promise<string | null> {
-    this.selectedPolicy = policy;
-    await this.verifyOrder();
-    if (this.errorDisplay) {
-      return this.errorDisplay;
-    }
-    return null;
   }
 
   public async addPolicy(policy: Policy): Promise<string | null> {
@@ -271,5 +221,14 @@ export class CartManager {
       return this.errorDisplay;
     }
     return null;
+  }
+
+  public clearCart() {
+    this.cart = [];
+    this.dealEffect = emptyDealEffect;
+    this.cartResults = null;
+    this.token = null;
+    this.errorDisplay = null;
+    this.saveCartToLocalStorage();
   }
 }

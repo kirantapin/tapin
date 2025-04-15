@@ -93,13 +93,15 @@ const DealCard: React.FC<DealCardProps> = ({
           </p>
 
           {/* Button Row */}
-          <div className="flex justify-between items-center mt-1">
-            <p className=" whitespace-normal text-sm text-gray-500 max-w-[80%] line-clamp-2 overflow-hidden text-ellipsis">
-              {sentenceCase(policy.header)}
+          <div className="flex justify-between items-start mt-1 min-h-10">
+            <p className="whitespace-normal text-sm text-gray-500 max-w-[80%] line-clamp-2 overflow-hidden text-ellipsis">
+              {sentenceCase(policy.header ?? "")}
             </p>
             <button
               className="text-white p-1 rounded-full text-sm font-medium transition-colors ml-2 whitespace-nowrap"
-              style={{ backgroundColor: restaurant?.metadata.primaryColor }}
+              style={{
+                backgroundColor: restaurant?.metadata.primaryColor || undefined,
+              }}
             >
               <Plus size={16} />
             </button>
