@@ -64,11 +64,11 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
       initialSnap={0} // Start at the first snapPoint (60%)
     >
       {/* Use a custom border radius and max-height on the container */}
-      <Sheet.Container className="rounded-t-3xl max-h-[80vh]">
+      <Sheet.Container className="rounded-t-3xl h-fit overflow-hidden">
         {/* Remove <Sheet.Header /> to get rid of the default header */}
         <Sheet.Content>
           {/* Your sign-in logic goes inside the content */}
-          <div className="p-6 relative h-full overflow-y-auto">
+          <div className="p-6 relative h-fit overflow-hidden">
             {/* Close button at the top right */}
             <button
               onClick={onClose}

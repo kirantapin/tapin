@@ -11,9 +11,9 @@ import {
   CartResultsPayload,
 } from "../types";
 import { UserSession } from "../types";
-import { emptyDealEffect, PASS_MENU_TAG } from "@/constants";
-import { isPassItem } from "@/utils/parse";
+import { emptyDealEffect } from "@/constants";
 import { ItemUtils } from "@/utils/item_utils";
+import { isEqual } from "lodash";
 
 interface CartState {
   cart: Cart;
@@ -46,18 +46,30 @@ export function useCartManager(
 
   // Initialize CartManager
   useEffect(() => {
-    if (!restaurant?.id || !userSession) return;
+    if (!restaurant?.id) return;
 
     const initCartManager = async () => {
-      console.log("initCartManager");
+      //either initial page load or change of restaurant
       if (
         !cartManagerRef.current ||
-        cartManagerRef.current.userSession !== userSession
+        cartManagerRef.current.restaurant_id !== restaurant.id
       ) {
+        //reset cart managers state
+        console.log("reinitializing cart manager", new Date().toISOString());
         cartManagerRef.current = new CartManager(restaurant.id, userSession);
-        // await cartManagerRef.current.init();
-        dispatch(cartManagerRef.current.getCartState());
       }
+      //updated user sesssion is different from what is stored in cart manager
+      if (!isEqual(cartManagerRef.current.userSession, userSession)) {
+        //login or change of account(however through the frontend it isn't possible to change accounts so most likely a login)
+        if (userSession) {
+          await cartManagerRef.current.newUserSession(userSession);
+        } else {
+          //logout, first wipe the cart, then create a new Cart Manager so it reflects the new session
+          await cartManagerRef.current.clearCart();
+          cartManagerRef.current = new CartManager(restaurant.id, userSession);
+        }
+      }
+      dispatch(cartManagerRef.current.getCartState());
     };
 
     initCartManager();

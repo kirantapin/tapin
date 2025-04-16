@@ -11,12 +11,14 @@ interface RewardsProps {
   userData: User;
   restaurant: Restaurant;
   onIntentionToRedeem: (policy: Policy) => void;
+  viewAll: boolean;
 }
 
 const Rewards: React.FC<RewardsProps> = ({
   userData,
   restaurant,
   onIntentionToRedeem,
+  viewAll,
 }) => {
   const userPoints = userData.points[restaurant.id] || 0;
   const [loyaltyPolicies, setLoyaltyPolicies] = useState<Policy[]>([]);
@@ -65,7 +67,7 @@ const Rewards: React.FC<RewardsProps> = ({
     <>
       <div className="flex justify-between items-center">
         <h1 className="text-xl font-bold">Rewards</h1>
-        <button
+        {/* {<button
           onClick={() => {
             setIsOpen(!isOpen); // Toggles the arrow direction
           }}
@@ -78,7 +80,7 @@ const Rewards: React.FC<RewardsProps> = ({
           ) : (
             <ChevronDown className="w-6 h-6" />
           )}
-        </button>
+        </button>} */}
       </div>
 
       {userData && (
@@ -131,7 +133,7 @@ const Rewards: React.FC<RewardsProps> = ({
         </div>
       )}
 
-      {loyaltyPolicies.length > 0 && (
+      {loyaltyPolicies.length > 0 && viewAll && (
         <div
           className={`transition-all duration-300 ease-in-out overflow-hidden ${
             isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
@@ -201,24 +203,26 @@ const Rewards: React.FC<RewardsProps> = ({
       )}
 
       {/* Bottom Rewards Button */}
-      <button
-        onClick={() =>
-          navigate(OFFERS_PAGE_PATH.replace(":id", restaurant.id), {
-            state: { tag: LOYALTY_REWARD_TAG },
-          })
-        }
-        className="mt-4 rounded-lg flex items-center justify-left gap-2 text-white w-fit max-w-sm px-5 py-2.5 text-sm"
-        style={{
-          background: restaurant?.metadata.primaryColor
-            ? `linear-gradient(45deg, 
+      {!viewAll && restaurant && (
+        <button
+          onClick={() =>
+            navigate(OFFERS_PAGE_PATH.replace(":id", restaurant.id), {
+              state: { tag: LOYALTY_REWARD_TAG },
+            })
+          }
+          className="mt-4 rounded-lg flex items-center justify-left gap-2 text-white w-fit max-w-sm px-5 py-2.5 text-sm"
+          style={{
+            background: restaurant?.metadata.primaryColor
+              ? `linear-gradient(45deg, 
         ${adjustColor(restaurant.metadata.primaryColor as string, -30)},
         ${adjustColor(restaurant.metadata.primaryColor as string, 40)}
       )`
-            : undefined,
-        }}
-      >
-        Redeem Rewards
-      </button>
+              : undefined,
+          }}
+        >
+          View All Rewards
+        </button>
+      )}
     </>
   );
 };

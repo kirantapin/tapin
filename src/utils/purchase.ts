@@ -6,7 +6,7 @@ export const submitPurchase = async (payload) => {
       "submit_order",
       {
         body: {
-          user_id: payload.user_id,
+          userAccessToken: payload.userAccessToken,
           restaurant_id: payload.restaurant_id,
           totalWithTip: payload.totalWithTip,
           cart: payload.state.cart,

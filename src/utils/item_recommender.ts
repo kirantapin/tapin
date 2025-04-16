@@ -54,13 +54,15 @@ export function getMissingItemsForPolicy(
 
     // Count matching items in cart
     for (const cartItem of cart) {
-      for (const itemSpec of condition.items) {
-        if (
-          ItemUtils.doesCartItemMeetItemSpec(cartItem, itemSpec, restaurant) &&
-          !isCartItemAffectedByPolicy(cartItem, dealEffect)
-        ) {
-          currentQuantity += cartItem.quantity;
-        }
+      if (
+        ItemUtils.doesItemMeetItemSpecification(
+          condition.items,
+          cartItem.item,
+          restaurant
+        ) &&
+        !isCartItemAffectedByPolicy(cartItem, dealEffect)
+      ) {
+        currentQuantity += cartItem.quantity;
       }
     }
 

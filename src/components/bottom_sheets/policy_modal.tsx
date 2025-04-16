@@ -28,6 +28,8 @@ import { DRINK_CHECKOUT_PATH, LOYALTY_REWARD_TAG } from "@/constants";
 import { useNavigate } from "react-router-dom";
 import { ItemUtils } from "@/utils/item_utils";
 import { adjustColor } from "@/utils/color";
+import { useAuth } from "@/context/auth_context";
+import { SignInButton } from "../signin/signin_button";
 
 interface PolicyModalProps {
   isOpen: boolean;
@@ -50,6 +52,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
   addToCart,
   removeFromCart,
 }) => {
+  const { userSession } = useAuth();
   const missingItemsResults = getMissingItemsForPolicy(
     policy,
     state.cart,
@@ -65,7 +68,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
     <Sheet
       isOpen={isOpen}
       onClose={onClose}
-      snapPoints={[policy.definition.tag === LOYALTY_REWARD_TAG ? 0.5 : 0.9, 0]}
+      snapPoints={[policy.definition.tag === LOYALTY_REWARD_TAG ? 0.6 : 0.9, 0]}
       initialSnap={0}
       tweenConfig={{
         duration: 0.2,
@@ -237,30 +240,36 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
             </div>
 
             <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-2 bg-[rgba(255,255,255,0.9)] py-3 px-4 border-t rounded-t-3xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.2)]">
-              <button
-                className="w-full text-white py-3 rounded-full flex items-center justify-center gap-2"
-                style={{
-                  background:
-                    hasMissingItems && !policyIsActive
-                      ? "#969292"
-                      : restaurant?.metadata.primaryColor
-                      ? `linear-gradient(45deg, 
-        ${adjustColor(restaurant.metadata.primaryColor as string, -30)},
-        ${adjustColor(restaurant.metadata.primaryColor as string, 40)}
-      )`
-                      : undefined,
-                }}
-                onClick={() => {
-                  if (policyIsActive) {
-                    navigate(DRINK_CHECKOUT_PATH.replace(":id", restaurant.id));
-                  } else if (!hasMissingItems) {
-                    onAddToCart(policy);
-                  }
-                }}
-              >
-                <ShoppingCart size={18} />
-                {policyIsActive ? "Go to Checkout" : "Add to Cart"}
-              </button>
+              {userSession ? (
+                <button
+                  className="w-full text-white py-3 rounded-full flex items-center justify-center gap-2"
+                  style={{
+                    background:
+                      hasMissingItems && !policyIsActive
+                        ? "#969292"
+                        : restaurant?.metadata.primaryColor
+                        ? `linear-gradient(45deg, 
+          ${adjustColor(restaurant.metadata.primaryColor as string, -30)},
+          ${adjustColor(restaurant.metadata.primaryColor as string, 40)}
+        )`
+                        : undefined,
+                  }}
+                  onClick={() => {
+                    if (policyIsActive) {
+                      navigate(
+                        DRINK_CHECKOUT_PATH.replace(":id", restaurant.id)
+                      );
+                    } else if (!hasMissingItems) {
+                      onAddToCart(policy);
+                    }
+                  }}
+                >
+                  <ShoppingCart size={18} />
+                  {policyIsActive ? "Go to Checkout" : "Add to Cart"}
+                </button>
+              ) : (
+                <SignInButton onClose={onClose} />
+              )}
             </div>
           </div>
         </Sheet.Content>

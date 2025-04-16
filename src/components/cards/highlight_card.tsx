@@ -49,7 +49,6 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
       setDescription(
         item?.description || "Currently in stock. Purchase while supplies last."
       );
-      console.log(item);
       setImageUrl(item?.image_url);
     }
     if (content_type === "policy") {

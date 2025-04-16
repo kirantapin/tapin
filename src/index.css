@@ -4,7 +4,6 @@
 
 html,
 body {
-  overflow-x: hidden; /* Disable horizontal scrolling */
   margin: 0; /* Remove default margin */
   padding: 0; /* Remove default padding */
   width: 100%; /* Ensure full-width layout */
@@ -76,10 +75,6 @@ button {
   font-family: "Gilroy", Arial, sans-serif;
   font-weight: bold;
 }
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 @layer base {
   :root {

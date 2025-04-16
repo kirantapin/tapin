@@ -1,35 +1,34 @@
 import { useAuth } from "./context/auth_context";
-
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useState, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
-
-import Discovery from "./pages/discovery.tsx";
 import {
   BASE_PATH,
-  QR_CODE_PATH,
   DRINK_CHECKOUT_PATH,
-  SIGNIN_PATH,
   RESTAURANT_PATH,
   DISCOVER_PATH,
-  LOYALTY_REWARD_PATH,
   PREVIOUS_TRANSACTIONS_PATH,
   OFFERS_PAGE_PATH,
-  SINGLE_POLICY_PAGE_PATH,
   INFO_PAGE_PATH,
   DEVICE_NOT_SUPPORTED_PATH,
 } from "./constants.ts";
-import SignIn from "./components/signin/signin.tsx";
-import CheckoutPage from "./pages/demo_checkout.tsx";
-import DemoQR from "./pages/demo_qr.tsx";
-import NotFoundPage from "./pages/not_found_page.tsx";
-import RestaurantPage from "./pages/restaurant.tsx";
-import TransactionList from "./pages/previous_transactions.tsx";
-import PoliciesPage from "./pages/policies.tsx";
-import RestaurantInfo from "./pages/restaurant_info.tsx";
 import SignInModal from "./components/signin/signin_modal.tsx";
 import { ToastContainer } from "react-toastify";
-import DeviceNotSupported from "./pages/device_not_supported.tsx";
 import OrderHistoryModal from "./components/bottom_sheets/history_modal.tsx";
+import { RestaurantSkeleton } from "./components/skeletons/restaurant.tsx";
+import StickyTest from "./pages/sticky_test.tsx";
+
+// Lazy imports
+const Discovery = lazy(() => import("./pages/discovery.tsx"));
+const CheckoutPage = lazy(() => import("./pages/demo_checkout.tsx"));
+const NotFoundPage = lazy(() => import("./pages/not_found_page.tsx"));
+const TransactionList = lazy(() => import("./pages/previous_transactions.tsx"));
+const PoliciesPage = lazy(() => import("./pages/policies.tsx"));
+const RestaurantInfo = lazy(() => import("./pages/restaurant_info.tsx"));
+const DeviceNotSupported = lazy(
+  () => import("./pages/device_not_supported.tsx")
+);
+const RestaurantPage = lazy(() => import("./pages/restaurant.tsx"));
+
 const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const {
@@ -52,34 +51,85 @@ const App: React.FC = () => {
       <AppLoader />
       <ToastContainer stacked className="w-full" style={{ width: "100%" }} />
       <Routes>
-        <Route path={BASE_PATH} element={<Discovery />} />
-        <Route path={DISCOVER_PATH} element={<Discovery />} />
-        <Route path={SIGNIN_PATH} element={<SignIn />} />
-        <Route path={RESTAURANT_PATH} element={<RestaurantPage />} />
-        <Route path={DRINK_CHECKOUT_PATH} element={<CheckoutPage />} />
-        <Route path={OFFERS_PAGE_PATH} element={<PoliciesPage />} />
-        <Route path={INFO_PAGE_PATH} element={<RestaurantInfo />} />
         <Route
-          path={PREVIOUS_TRANSACTIONS_PATH}
-          element={<TransactionList />}
-        />
-        <Route
-          path={QR_CODE_PATH}
+          path={BASE_PATH}
           element={
-            <DemoQR
-              onBack={() => {
-                console.log("hello");
-              }}
-              onSkip={() => {
-                console.log("hello");
-              }}
-            />
+            <Suspense fallback={<div>...loading</div>}>
+              <Discovery />
+            </Suspense>
           }
         />
-        <Route path="*" element={<NotFoundPage />} />
+        <Route
+          path={DISCOVER_PATH}
+          element={
+            <Suspense fallback={<div>...loading</div>}>
+              <Discovery />
+            </Suspense>
+          }
+        />
+        <Route
+          path={"/sticky_test"}
+          element={
+            <Suspense fallback={<div>...loading</div>}>
+              <StickyTest />
+            </Suspense>
+          }
+        />
+        <Route
+          path={RESTAURANT_PATH}
+          element={
+            <Suspense fallback={<RestaurantSkeleton />}>
+              <RestaurantPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path={DRINK_CHECKOUT_PATH}
+          element={
+            <Suspense fallback={<div>...loading</div>}>
+              <CheckoutPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path={OFFERS_PAGE_PATH}
+          element={
+            <Suspense fallback={<div>...loading</div>}>
+              <PoliciesPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path={INFO_PAGE_PATH}
+          element={
+            <Suspense fallback={<div>...loading</div>}>
+              <RestaurantInfo />
+            </Suspense>
+          }
+        />
+        <Route
+          path={PREVIOUS_TRANSACTIONS_PATH}
+          element={
+            <Suspense fallback={<div>...loading</div>}>
+              <TransactionList />
+            </Suspense>
+          }
+        />
+        <Route
+          path="*"
+          element={
+            <Suspense fallback={<div>...loading</div>}>
+              <NotFoundPage />
+            </Suspense>
+          }
+        />
         <Route
           path={DEVICE_NOT_SUPPORTED_PATH}
-          element={<DeviceNotSupported />}
+          element={
+            <Suspense fallback={<div>...loading</div>}>
+              <DeviceNotSupported />
+            </Suspense>
+          }
         />
       </Routes>
     </div>

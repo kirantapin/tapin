@@ -1,12 +1,6 @@
-import { Search, ChevronLeft, ShoppingBag, Plus, Moon } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
+import { ChevronLeft, ShoppingBag } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { act, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   LOYALTY_REWARD_TAG,
   NORMAL_DEAL_TAG,
@@ -17,15 +11,16 @@ import { Policy, Restaurant } from "@/types";
 import { fetchRestaurantById } from "@/utils/queries/restaurant";
 import { fetch_policies } from "@/utils/queries/policies";
 
-import Skeleton from "react-loading-skeleton";
-import "react-loading-skeleton/dist/skeleton.css";
 import DealCard from "@/components/cards/small_policy";
 import { useCartManager } from "@/hooks/useCartManager";
 import { useAuth } from "@/context/auth_context";
 import PolicyModal from "@/components/bottom_sheets/policy_modal";
-
+import Rewards from "@/components/rewards.tsx";
+import { SignInButton } from "@/components/signin/signin_button";
+import { setThemeColor } from "@/utils/color";
 export default function PoliciesPage() {
-  const { userSession } = useAuth();
+  setThemeColor();
+  const { userSession, userData } = useAuth();
   const location = useLocation();
   const [activeTag, setActiveTag] = useState(
     location.state?.tag || NORMAL_DEAL_TAG
@@ -33,7 +28,6 @@ export default function PoliciesPage() {
   const [restaurant, setRestaurant] = useState<Restaurant>();
   const [policies, setPolicies] = useState<Policy[]>([]);
   const [activePolicies, setActivePolicies] = useState<Policy[]>([]);
-  const [showSkeleton, setShowSkeleton] = useState<boolean>(true);
   const { id: restaurant_id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -53,24 +47,26 @@ export default function PoliciesPage() {
       const policies = await fetch_policies(restaurant_id);
       setPolicies(policies);
       setRestaurant(restaurant);
-      setShowSkeleton(false);
     };
     fetchData();
   }, []);
 
-  const tagMap = {
+  const tagMap: Record<string, string> = {
     Deals: NORMAL_DEAL_TAG,
     Rewards: LOYALTY_REWARD_TAG,
   };
 
   useEffect(() => {
-    setShowSkeleton(true);
-    const filtered = policies.filter(
-      (policy) => policy.definition.tag === activeTag
-    );
-    setActivePolicies(filtered);
-    setShowSkeleton(false);
+    if (activeTag === NORMAL_DEAL_TAG) {
+      const filtered = policies.filter(
+        (policy) => policy.definition.tag === activeTag
+      );
+      setActivePolicies(filtered);
+    }
   }, [activeTag, policies]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   return (
     <div className="max-w-md mx-auto bg-white min-h-screen">
       {/* Header */}
@@ -83,7 +79,7 @@ export default function PoliciesPage() {
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
-        <h1 className="text-2xl font-semibold">Awesome Deals</h1>
+        <h1 className="text-2xl font-semibold">Exclusive Offers</h1>
         <button className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100">
           <ShoppingBag className="w-5 h-5" />
         </button>
@@ -94,17 +90,21 @@ export default function PoliciesPage() {
         {Object.keys(tagMap).map((tagLabel) => (
           <button
             key={tagMap[tagLabel]}
-            className={`px-6 py-2 rounded-full border  text-sm whitespace-nowrap ${
-              activeTag === tagMap[tagLabel] ? "" : " text-gray-500"
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full whitespace-nowrap border transition-all duration-150 font-medium ${
+              activeTag === tagMap[tagLabel]
+                ? "text-sm"
+                : "text-sm text-gray-500"
             }`}
             style={
               activeTag === tagMap[tagLabel]
                 ? {
                     color: restaurant?.metadata.primaryColor,
                     borderColor: restaurant?.metadata.primaryColor,
-                    backgroundColor: `${restaurant?.metadata.primaryColor}33`,
                   }
-                : {}
+                : {
+                    backgroundColor: "#f6f8fa",
+                    borderColor: "#e5e7eb", // neutral border for inactive
+                  }
             }
             onClick={() => {
               setActiveTag(tagMap[tagLabel]);
@@ -116,125 +116,45 @@ export default function PoliciesPage() {
       </div>
 
       {/* Deals */}
-      <div className="px-12 space-y-8 flex flex-col items-center w-full">
-        {/* Show Skeletons if `showSkeleton` is true */}
-        {showSkeleton ? (
-          [...Array(3)].map((_, index) => (
-            <Card
-              key={index}
-              className="overflow-hidden border-gray-200 rounded-2xl"
-            >
-              <CardHeader className="p-0">
-                <div className="relative mt-3 mx-3">
-                  <Skeleton width="100%" height={192} className="rounded-2xl" />
-                </div>
-              </CardHeader>
 
-              <CardContent className="pt-3 pb-1">
-                <div className="flex justify-between items-start">
-                  <Skeleton width="60%" height={20} />
-                  <Skeleton width={32} height={32} className="rounded-full" />
-                </div>
-                <Skeleton width="80%" height={14} className="mt-2" />
-              </CardContent>
+      {activeTag === NORMAL_DEAL_TAG && (
+        <div className="px-12 space-y-8 flex flex-col items-center w-full">
+          {activePolicies.length > 0 ? (
+            activePolicies.map((policy) => (
+              <DealCard
+                cart={state.cart}
+                policy={policy}
+                restaurant={restaurant as Restaurant}
+                setPolicy={setActivePolicy}
+                setIsOpen={setIsOpen}
+                dealEffect={state.dealEffect}
+              />
+            ))
+          ) : (
+            <p className="text-gray-500 text-center">
+              No active policies available.
+            </p>
+          )}
+        </div>
+      )}
 
-              <CardFooter className="py-2">
-                <div>
-                  <Skeleton width={100} height={12} />
-                  <Skeleton
-                    width={80}
-                    height={16}
-                    className="mt-1 rounded-full"
-                  />
-                </div>
-              </CardFooter>
-            </Card>
-          ))
-        ) : activePolicies.length > 0 ? (
-          activePolicies.map((policy) => (
-            // <Card
-            //   key={policy.policy_id} // Added key to prevent React warnings
-            //   className="overflow-hidden border-gray-200 rounded-2xl"
-            //   onClick={() => {
-            //     navigate(
-            //       SINGLE_POLICY_PAGE_PATH.replace(":id", restaurant_id).replace(
-            //         ":policy_id",
-            //         policy.policy_id
-            //       ),
-            //       {
-            //         state: {
-            //           previousPage: location.pathname,
-            //         },
-            //       }
-            //     );
-            //   }}
-            // >
-            //   <CardHeader className="p-0">
-            //     <div className="relative mt-3 mx-3">
-            //       <img
-            //         src={
-            //           policy.image_url ||
-            //           `${project_url}/storage/v1/object/public/restaurant_images/${policy.restaurant_id}_profile.png`
-            //         }
-            //         alt="TapIn Logo"
-            //         className="w-full h-48 object-cover rounded-2xl"
-            //         onError={(e) => {
-            //           e.currentTarget.src = ""; // Should be replaced with a generic TapIn logo in the public directory
-            //         }}
-            //       />
-            //       <div className="absolute bottom-2 left-2 bg-black/80 text-yellow-400 px-2 py-1 rounded-full text-xs flex items-center font-semibold">
-            //         <Moon className="w-3 h-3 mr-1" />
-            //         {getPolicyFlair(policy)}
-            //       </div>
-            //     </div>
-            //   </CardHeader>
-
-            //   <CardContent className="pt-3 pb-1">
-            //     <div className="flex justify-between items-start">
-            //       <h3 className="text-lg font-bold">{policy.name}</h3>
-            //       <button
-            //         className="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center ml-2 flex-shrink-0"
-            //         style={{
-            //           backgroundColor: restaurant?.metadata.primaryColor,
-            //         }}
-            //       >
-            //         <Plus className="w-5 h-5" />
-            //       </button>
-            //     </div>
-            //     <p className="text-gray-600 text-sm">{policy.header}</p>
-            //   </CardContent>
-
-            //   <CardFooter className="py-2">
-            //     <div>
-            //       <div className="text-gray-500 text-sm">
-            //         {policy.begin_time && policy.end_time
-            //           ? "8 PM – 12 AM • Unlimited"
-            //           : "Anytime"}
-            //       </div>
-            //       <div className="mt-1">
-            //         <span className="bg-gray-400 text-white text-xs px-3 py-1 rounded-full">
-            //           Open to All
-            //         </span>
-            //       </div>
-            //     </div>
-            //     <button onClick={() => console.log(policy)}></button>
-            //   </CardFooter>
-            // </Card>
-            <DealCard
-              cart={state.cart}
-              policy={policy}
+      {activeTag === LOYALTY_REWARD_TAG &&
+        restaurant &&
+        (userData ? (
+          <div className="px-4">
+            <Rewards
+              viewAll={true}
               restaurant={restaurant as Restaurant}
-              setPolicy={setActivePolicy}
-              setIsOpen={setIsOpen}
-              dealEffect={state.dealEffect}
+              userData={userData}
+              onIntentionToRedeem={(policy) => {
+                setActivePolicy(policy);
+                setIsOpen(true);
+              }}
             />
-          ))
+          </div>
         ) : (
-          <p className="text-gray-500 text-center">
-            No active policies available.
-          </p>
-        )}
-      </div>
+          <SignInButton onClose={() => {}} />
+        ))}
       {activePolicy && (
         <PolicyModal
           policy={activePolicy}

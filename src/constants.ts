@@ -11,9 +11,7 @@ export const TEST_USER_SESSION = {
 
 //paths
 export const BASE_PATH = "/";
-export const QR_CODE_PATH = "/restaurant/:id/qrcode";
 export const DRINK_CHECKOUT_PATH = "/restaurant/:id/drink_checkout";
-export const SIGNIN_PATH = "/signin";
 export const RESTAURANT_PATH = "/restaurant/:id";
 export const APPLOAD_PATH = "";
 export const DISCOVER_PATH = "/discover";
@@ -76,6 +74,7 @@ export const REMOVE_ITEM = "remove_item";
 export const ADD_POLICY = "add_policy";
 export const REMOVE_POLICY = "remove_policy";
 export const REFRESH = "refresh";
+export const NEW_USER_SESSION = "new_user_session";
 
 export const HISTORY_KEY = "history";
 

@@ -1,4 +1,4 @@
-import { QR_CODE_PATH, RESTAURANT_PATH } from "@/constants";
+import { RESTAURANT_PATH } from "@/constants";
 import { useAuth } from "@/context/auth_context";
 import { submitPurchase } from "@/utils/purchase";
 import { useNavigate } from "react-router-dom";
@@ -32,6 +32,7 @@ const RedeemButton = ({
       navigate(RESTAURANT_PATH.replace(":id", payload.restaurant_id), {
         state: {
           transactions: transactions,
+          qr: true,
         },
       });
     }

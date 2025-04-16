@@ -50,17 +50,24 @@ export class PolicyManager {
         ),
       }))
       .sort((a, b) => {
-        const sumA = a.missingItems.reduce(
+        let sumA = a.missingItems.reduce(
           (sum, item) => sum + item.quantityNeeded,
           0
         );
-        const sumB = b.missingItems.reduce(
+        let sumB = b.missingItems.reduce(
           (sum, item) => sum + item.quantityNeeded,
           0
         );
+        if (sumA === 0) {
+          sumA = 1000;
+        }
+        if (sumB === 0) {
+          sumB = 1000;
+        }
         return sumA - sumB;
       })
       .map(({ deal }) => deal);
+
     if (sortedDeals.length > 3) {
       return sortedDeals.slice(0, 3);
     }
@@ -75,7 +82,6 @@ export class PolicyManager {
     passAddOns: Policy[];
     normalAddOns: Policy[];
   } {
-    console.log(this.policies);
     const validPolicies: Policy[] = [];
     const seenItems = new Set<string>();
 

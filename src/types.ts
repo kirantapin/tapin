@@ -4,7 +4,7 @@ export interface VerifyOrderPayload {
   cart: Cart;
   userDealEffect: DealEffectPayload;
   restaurant_id: string;
-  user_id: string | null;
+  userAccessToken: string | null;
   cartResults: CartResultsPayload | null;
   request: { type: string; content: Item | string | number };
   jwtToken: string | null;

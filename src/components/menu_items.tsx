@@ -152,15 +152,12 @@ export const DrinkList = ({
   setActiveLabel: (label: string) => void;
 }) => {
   const labelRefs = useRef<Map<string, HTMLDivElement>>(new Map());
-  const containerRef = useRef<HTMLDivElement>(null);
   const isInitialMount = useRef(true);
 
   const scrollToLabel = (menuLabel: string) => {
     const el = labelRefs.current.get(menuLabel);
-    const container = containerRef.current;
-    if (el && container) {
-      const offset = el.offsetTop - container.offsetTop;
-      container.scrollTo({ top: offset, behavior: "smooth" });
+    if (el) {
+      window.scrollTo({ top: el.offsetTop - 210, behavior: "smooth" });
     }
   };
 
@@ -193,10 +190,7 @@ export const DrinkList = ({
   }, [label]);
 
   return (
-    <div
-      ref={containerRef}
-      className="space-y-4 h-[calc(100vh-200px)] overflow-y-auto scroll-smooth no-scrollbar"
-    >
+    <div className="space-y-4  overflow-y-auto scroll-smooth no-scrollbar">
       <div>
         {Object.keys(MENU_DISPLAY_MAP).map((menuLabel) => {
           const drinksForLabel = drinks.filter(
@@ -212,7 +206,7 @@ export const DrinkList = ({
                 }
               }}
             >
-              <h3 className="text-lg font-bold mb-2 ml-3 mt-4 pb-2 sticky top-0 bg-white z-10">
+              <h3 className="text-lg font-bold mb-1 ml-3 mt-4 pb-2 sticky top-0 bg-white z-5">
                 {menuLabel.toUpperCase()}
               </h3>
               <div className="space-y-2">

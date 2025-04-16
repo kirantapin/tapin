@@ -4,7 +4,7 @@ import { useAuth } from "@/context/auth_context";
 import { Transaction, Restaurant } from "@/types";
 import { convertUtcToLocal, itemToStringDescription } from "@/utils/parse";
 import { fetchRestaurantById } from "@/utils/queries/restaurant";
-import { QR_CODE_PATH, PASS_MENU_TAG, RESTAURANT_PATH } from "@/constants";
+import { PASS_MENU_TAG, RESTAURANT_PATH } from "@/constants";
 import { ArrowLeft } from "lucide-react";
 import { checkoutStyles } from "@/styles/checkout_styles";
 import { rest } from "lodash";

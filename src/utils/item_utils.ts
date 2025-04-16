@@ -1,10 +1,4 @@
-import {
-  Restaurant,
-  Item,
-  ItemSpecification,
-  SingleMenuItem,
-  CartItem,
-} from "@/types";
+import { Restaurant, Item, ItemSpecification, SingleMenuItem } from "@/types";
 import { PASS_MENU_TAG, KNOWN_MODIFIERS } from "@/constants";
 import { titleCase } from "title-case";
 
@@ -32,7 +26,6 @@ export class ItemUtils {
 
     return items;
   }
-
   static policyItemSpecificationsToItemIds(
     itemSpecifications: ItemSpecification[],
     restaurant: Restaurant
@@ -59,25 +52,21 @@ export class ItemUtils {
     }
     return itemIds;
   }
-
   static getItemName(item: Item, restaurant: Restaurant): string {
     return (
       titleCase(restaurant.menu[item.id].info.name) +
       (item.modifiers.length > 0 ? ` (${item.modifiers.join(", ")})` : "")
     );
   }
-
   static isPassItem(itemId: string, restaurant: Restaurant): boolean {
     return restaurant.menu[itemId].path.includes(PASS_MENU_TAG);
   }
-
   static getMenuItemFromItemId(
     itemId: string,
     restaurant: Restaurant
   ): SingleMenuItem | null {
     return restaurant.menu[itemId]?.info;
   }
-
   static priceItem(item: Item, restaurant: Restaurant): number {
     const { id, modifiers } = item;
     let multiple = modifiers.reduce(
@@ -92,12 +81,21 @@ export class ItemUtils {
 
     return temp.price * multiple;
   }
-  static doesCartItemMeetItemSpec(
-    cartItem: CartItem,
-    itemSpec: ItemSpecification,
+
+  static doesItemMeetItemSpecification(
+    itemSpecs: string[],
+    itemInCart: Item,
     restaurant: Restaurant
   ) {
-    const path = restaurant.menu[cartItem.item.id].path;
-    return path.includes(itemSpec);
+    const path = restaurant.menu[itemInCart.id].path;
+    if (!path) {
+      return false;
+    }
+    for (const spec of itemSpecs) {
+      if (path.includes(spec)) {
+        return true;
+      }
+    }
+    return false;
   }
 }

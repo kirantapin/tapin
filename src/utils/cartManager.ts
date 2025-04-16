@@ -3,6 +3,7 @@ import {
   ADD_POLICY,
   emptyDealEffect,
   MENU_DISPLAY_MAP,
+  NEW_USER_SESSION,
   REFRESH,
   REMOVE_ITEM,
   REMOVE_POLICY,
@@ -29,11 +30,11 @@ export class CartManager {
   dealEffect: DealEffectPayload;
   cartResults: CartResultsPayload | null;
   errorDisplay: string | null;
-  private restaurant_id: string;
-  userSession: any;
+  restaurant_id: string;
+  userSession: any | null;
   private token: string | null = null;
   private localStorageKey: string;
-  constructor(restaurant_id: string, userSession: any) {
+  constructor(restaurant_id: string, userSession: any | null) {
     this.restaurant_id = restaurant_id;
     this.userSession = userSession;
     const localStorageKey = `${restaurant_id}${localStorageCartTag}`;
@@ -59,10 +60,6 @@ export class CartManager {
           if (parsedData.token) {
             this.token = parsedData.token;
           }
-          // } else {
-          //   this.verifyOrder();
-          // }
-
           return;
         }
       } catch (error) {
@@ -75,13 +72,8 @@ export class CartManager {
     this.dealEffect = emptyDealEffect;
     this.cartResults = null;
     this.errorDisplay = null;
-    // Save the initial cart structure to localStorage
-    // this.verifyOrder();
+    this.saveCartToLocalStorage();
   }
-
-  // async init() {
-  //   if (!this.token) await this.verifyOrder();
-  // }
 
   /**
    * Saves the current cart state to localStorage with a timestamp.
@@ -104,21 +96,13 @@ export class CartManager {
     content: Item | string | number
   ): Promise<void> {
     console.log("verifyOrder", type, content);
-    if (!this.userSession?.user?.phone) {
-      this.cart = this.cart;
-      this.dealEffect = emptyDealEffect;
-      this.cartResults = null;
-      this.errorDisplay = "User must sign in.";
-      this.token = null;
-      this.saveCartToLocalStorage();
-      return;
-    }
+
     const payload: VerifyOrderPayload = {
       cart: this.cart,
       userDealEffect: this.dealEffect,
       restaurant_id: this.restaurant_id,
       cartResults: this.cartResults,
-      user_id: this.userSession?.user.phone,
+      userAccessToken: this.userSession?.access_token,
       request: { type: type, content: content },
       jwtToken: this.token,
     };
@@ -130,9 +114,6 @@ export class CartManager {
           body: payload,
         }
       );
-
-      console.log("data", data, error);
-
       const returnData = data?.data;
       const errorMessage = data?.error || "";
       console.log("returnData", returnData);
@@ -221,6 +202,16 @@ export class CartManager {
       return this.errorDisplay;
     }
     return null;
+  }
+
+  public async newUserSession(userSession: any) {
+    console.log("newUserSession for cart", userSession);
+    await this.verifyOrder(NEW_USER_SESSION, userSession.access_token);
+    if (this.errorDisplay) {
+      return this.errorDisplay;
+    }
+    this.userSession = userSession;
+    this.saveCartToLocalStorage();
   }
 
   public clearCart() {

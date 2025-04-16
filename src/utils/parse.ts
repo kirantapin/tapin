@@ -22,7 +22,6 @@ const listItemsToStringDescription = (
       injectWord ? injectWord + " " : ""
     }orders of either ${itemNames}`;
   } else if (items.length === 1) {
-    console.log(items[0]);
     const itemName = itemToStringDescription(
       { id: items[0], modifiers: [] },
       restaurant
@@ -64,7 +63,6 @@ export const policyToStringDescription = (
   });
 
   const actionDescription = (() => {
-    console.log(action.type);
     switch (action.type) {
       case "add_free_item":
         return `Receive ${listItemsToStringDescription(
@@ -218,11 +216,11 @@ export function keywordExtraction(
 }
 
 export const formatPoints = (points: number) => {
-  if (points >= 10000) {
+  if (points >= 1000) {
     if (points % 1000 === 0) {
-      return `${points / 1000}k Points`;
+      return `${points / 1000}K`;
     } else {
-      return `${(points / 1000).toFixed(1)}k Points`;
+      return `${(points / 1000).toFixed(1)}K`;
     }
   }
   return `${points}`;
