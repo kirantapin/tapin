@@ -10,19 +10,12 @@ import {
   RefreshCw,
   Lock,
 } from "lucide-react";
-import { Policy, Restaurant, Cart, SingleMenuItem } from "@/types";
+import { Policy, Restaurant, CartState, BundleItem } from "@/types";
 import { DrinkItem } from "@/components/menu_items";
-import { project_url } from "@/utils/supabase_client";
 import { titleCase } from "title-case";
-import {
-  convertUtcToLocal,
-  formatPoints,
-  getPolicyFlair,
-  sentenceCase,
-} from "@/utils/parse";
+import { formatPoints } from "@/utils/parse";
 import { PolicyDescriptionDisplay } from "@/components/display_utils/policy_description_display";
 import { getMissingItemsForPolicy } from "@/utils/item_recommender";
-import { motion } from "framer-motion";
 import { PolicyManager } from "@/utils/policy_manager";
 import { DRINK_CHECKOUT_PATH, LOYALTY_REWARD_TAG } from "@/constants";
 import { useNavigate } from "react-router-dom";
@@ -30,24 +23,26 @@ import { ItemUtils } from "@/utils/item_utils";
 import { adjustColor } from "@/utils/color";
 import { useAuth } from "@/context/auth_context";
 import { SignInButton } from "../signin/signin_button";
-
+import { PolicyUtils } from "@/utils/policy_utils";
 interface PolicyModalProps {
   isOpen: boolean;
   onClose: () => void;
   policy: Policy;
   restaurant: Restaurant;
-  onAddToCart: (policy: Policy) => void;
-  state;
+  addPolicy: (bundle_id: string | null, policy: Policy) => void;
+  state: CartState;
   addToCart: (item: any) => void;
   removeFromCart: (itemId: number, updates: any) => void;
+  bundle_id: string | null;
 }
 
 const PolicyModal: React.FC<PolicyModalProps> = ({
   isOpen,
   onClose,
+  bundle_id,
   policy,
   restaurant,
-  onAddToCart,
+  addPolicy,
   state,
   addToCart,
   removeFromCart,
@@ -64,6 +59,10 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
     policy.policy_id
   );
   const navigate = useNavigate();
+  const bundleObject = bundle_id
+    ? (ItemUtils.getMenuItemFromItemId(bundle_id, restaurant) as BundleItem)
+        .object
+    : null;
   return (
     <Sheet
       isOpen={isOpen}
@@ -101,11 +100,17 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                 </h2>
 
                 <div className="flex flex-wrap gap-2 mt-4 mb-4">
-                  <div className="inline-flex bg-[linear-gradient(225deg,#CAA650,#F4E4A8)] text-white px-3 py-2 rounded-full">
-                    <span className="font-medium text-xs">
-                      {getPolicyFlair(policy)}
-                    </span>
-                  </div>
+                  {bundleObject && policy.locked && (
+                    <div className="bg-black/70 text-white text-xs font-medium px-3 py-2 rounded-full flex items-center gap-1 border border-[#d4af37]">
+                      <img
+                        src="/tapin_icon_white.png"
+                        alt="Tap In Icon"
+                        className="w-4 h-4"
+                      />
+                      <span>{bundleObject.name}</span>
+                    </div>
+                  )}
+
                   {policy.begin_time && policy.end_time && (
                     <div
                       className="relative text-white px-3 py-2 rounded-full flex items-center gap-1"
@@ -212,7 +217,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                         ).map((itemId, itemIndex) => {
                           return (
                             <DrinkItem
-                              key={`${index}-${itemIndex}`}
+                              key={itemId}
                               cart={state.cart}
                               restaurant={restaurant}
                               addToCart={addToCart}
@@ -254,13 +259,13 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
         )`
                         : undefined,
                   }}
-                  onClick={() => {
+                  onClick={async () => {
                     if (policyIsActive) {
                       navigate(
                         DRINK_CHECKOUT_PATH.replace(":id", restaurant.id)
                       );
                     } else if (!hasMissingItems) {
-                      onAddToCart(policy);
+                      addPolicy(bundle_id, policy);
                     }
                   }}
                 >

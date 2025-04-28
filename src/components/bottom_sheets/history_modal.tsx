@@ -96,18 +96,25 @@ const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({
                 <X size={20} />
               </button>
 
-              <div>
-                <h2 className="text-2xl font-bold pr-14 break-words">
+              <div className="flex items-center gap-2">
+                <h2 className="text-2xl font-bold break-words">
                   Your Order History
                 </h2>
+                <img
+                  src="/tapin_icon_black.png"
+                  alt="Tap In Icon"
+                  className="w-7 h-7"
+                />
               </div>
 
               {!userSession ? (
                 <div className="mt-4">
                   <p className="text-gray-600 mb-4 font-semibold">
-                    Sign in to view your order history
+                    Sign in to view your profile information
                   </p>
-                  <SignInButton onClose={onClose} />
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <SignInButton onClose={onClose} />
+                  </div>
                 </div>
               ) : (
                 <div className="mt-8">

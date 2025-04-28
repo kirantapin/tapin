@@ -64,8 +64,8 @@ const GoToCartButton = ({
       onClick={() => {
         navigate(DRINK_CHECKOUT_PATH.replace(":id", restaurant.id as string));
       }}
-      className={`fixed bottom-4 right-4 w-16 h-16 text-white rounded-full flex items-center justify-center 
-          shadow-xl hover:shadow-2xl hover:bg-gray-800 transition-all duration-300 z-50 ${
+      className={`fixed bottom-4 left-4 right-4 h-12 text-white rounded-full flex items-center justify-center gap-2
+          shadow-2xl transition-all duration-300 z-50 ${
             isVisible
               ? "translate-y-0 opacity-100"
               : "translate-y-20 opacity-0 pointer-events-none"
@@ -74,20 +74,21 @@ const GoToCartButton = ({
         background: restaurant.metadata.primaryColor
           ? `linear-gradient(135deg, 
         ${adjustColor(restaurant.metadata.primaryColor as string, -40)},
-        ${adjustColor(restaurant.metadata.primaryColor as string, 40)}
+        ${adjustColor(restaurant.metadata.primaryColor as string, 10)}
       )`
           : undefined,
       }}
     >
-      <div className="relative">
-        <ShoppingCart className="w-6 h-6 translate-x-[-2px] translate-y-[2px]" />
+      <ShoppingCart className="w-5 h-5" />
+      <span className="font-medium text-md flex items-center gap-2">
+        View Cart
         <span
-          className="absolute -top-2 -right-3 bg-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-md"
+          className="bg-white text-sm font-bold rounded-full w-6 h-6 flex items-center justify-center"
           style={{ color: restaurant.metadata.primaryColor }}
         >
           {cartCount}
         </span>
-      </div>
+      </span>
     </button>
   );
 };

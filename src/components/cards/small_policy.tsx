@@ -1,6 +1,6 @@
 import type React from "react";
 import { BadgeCheck, Check, Plus, Tag, Ticket } from "lucide-react";
-import { Cart, DealEffectPayload, Policy } from "@/types";
+import { Bundle, Cart, DealEffectPayload, Policy } from "@/types";
 import { Restaurant } from "@/types";
 import { truncate } from "fs/promises";
 import { getPolicyFlair, sentenceCase } from "@/utils/parse";
@@ -8,13 +8,17 @@ import { titleCase } from "title-case";
 import { getMissingItemsForPolicy } from "@/utils/item_recommender";
 import { GradientIcon } from "@/utils/gradient";
 import { PolicyManager } from "@/utils/policy_manager";
-
+import { BUNDLE_MENU_TAG, MY_SPOT_PATH } from "@/constants";
+import { useNavigate } from "react-router-dom";
+import { BundleUtils } from "@/utils/bundle_utils";
+import { useRestaurant } from "@/context/restaurant_context";
+import { toast } from "react-toastify";
+import { useBottomSheet } from "@/context/bottom_sheet_context";
+import { PolicyUtils } from "@/utils/policy_utils";
 interface DealCardProps {
   cart: Cart;
   policy: Policy;
   restaurant: Restaurant;
-  setPolicy: (policy: Policy) => void;
-  setIsOpen: (isOpen: boolean) => void;
   dealEffect: DealEffectPayload;
 }
 
@@ -22,10 +26,10 @@ const DealCard: React.FC<DealCardProps> = ({
   cart,
   policy,
   restaurant,
-  setPolicy,
-  setIsOpen,
   dealEffect,
 }) => {
+  const { userOwnershipMap } = useRestaurant();
+  const { handlePolicyClick } = useBottomSheet();
   const policyIsActive = PolicyManager.getActivePolicyIds(dealEffect).has(
     policy.policy_id
   );
@@ -35,7 +39,7 @@ const DealCard: React.FC<DealCardProps> = ({
     restaurant,
     dealEffect
   );
-  const flair = getPolicyFlair(policy);
+  const flair = PolicyUtils.getPolicyFlair(policy);
   const totalMissingQuantity = missingItems.reduce(
     (sum, item) => sum + item.quantityNeeded,
     0
@@ -51,21 +55,29 @@ const DealCard: React.FC<DealCardProps> = ({
     <div
       className="flex-shrink-0 w-80"
       onClick={() => {
-        setPolicy(policy);
-        setIsOpen(true);
+        handlePolicyClick(policy, userOwnershipMap);
       }}
     >
       <div className="mx-auto w-full px-2 sm:px-4 sm:max-w-sm md:max-w-md">
         <div className="bg-white rounded-xl p-4  border border-gray-400 flex flex-col">
-          {false && (
+          {policy.locked ? (
             <div className="self-start mb-2">
-              <div className="bg-gray-700 text-amber-300 text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1 border border-amber-300">
-                <BadgeCheck size={14} className="text-amber-300" />
-                <span>Bar Members Only</span>
+              <div className="bg-white/70 text-black text-xs font-medium px-3 py-2 rounded-full flex items-center gap-1 border border-gray-300">
+                <img
+                  src="/tapin_icon_black.png"
+                  alt="Tap In Icon"
+                  className="w-4 h-4"
+                />
+                <span>Requires Bundle</span>
+              </div>
+            </div>
+          ) : (
+            <div className="self-start mb-2">
+              <div className="bg-white/70 text-black text-xs font-medium px-3 py-2 rounded-full flex items-center gap-1 border border-gray-300">
+                <span>Open to All</span>
               </div>
             </div>
           )}
-
           {/* Title Row */}
           <div className="flex items-center gap-2 mb-1">
             <GradientIcon

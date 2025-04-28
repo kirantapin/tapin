@@ -10,7 +10,7 @@ body {
 }
 html {
   /* 20 % more contrast, 25 % more saturation */
-  filter: contrast(1.1);
+  filter: contrast(1);
 }
 
 code {
@@ -172,4 +172,8 @@ button {
   max-height: 3rem; /* Adjust based on font-size to fit exactly 2 lines */
   line-height: 1.5rem; /* Ensures consistent line spacing */
   white-space: normal; /* Allows wrapping */
+}
+
+.enhance-contrast {
+  filter: contrast(1.1);
 }

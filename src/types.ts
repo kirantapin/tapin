@@ -6,7 +6,17 @@ export interface VerifyOrderPayload {
   restaurant_id: string;
   userAccessToken: string | null;
   cartResults: CartResultsPayload | null;
-  request: { type: string; content: Item | string | number };
+  request: {
+    type: string;
+    content:
+      | Item
+      | string
+      | number
+      | {
+          bundle_id: string | null;
+          policy_id: string;
+        };
+  };
   jwtToken: string | null;
 }
 
@@ -30,6 +40,8 @@ export interface JWTPayloadType extends Record<string, unknown> {
 
 export interface CartResultsPayload {
   discount: number;
+  creditUsed: number;
+  creditToAdd: number;
   subtotal: number;
   tax: number;
   serviceFee: number;
@@ -39,13 +51,18 @@ export interface CartResultsPayload {
 }
 
 export interface DealEffectPayload {
-  addedItems: { policy_id: string; cartItem: CartItem }[];
+  addedItems: {
+    policy_id: string;
+    bundle_id: string | null;
+    cartItem: CartItem;
+  }[];
   modifiedItems: ModifiedCartItem[];
   wholeCartModification: WholeCartModification | null;
 }
 
 export interface WholeCartModification {
   policy_id: string;
+  bundle_id: string | null;
   modificationType: string;
   amount: number;
 }
@@ -53,6 +70,7 @@ export interface WholeCartModification {
 export interface ModifiedCartItem {
   id: number;
   policy_id: string;
+  bundle_id: string | null;
   modificationType: string;
   amount: number;
   quantity: number;
@@ -100,7 +118,8 @@ export interface DealUse {
 export interface CreateTransactionsPayload {
   order: Order;
   transactions: Transaction[];
-  policies: string[];
+  policies: Record<string, string | null>;
+  bundleTransactions: Transaction[];
 }
 
 export interface ReturnTransactionsPayload {
@@ -109,27 +128,41 @@ export interface ReturnTransactionsPayload {
   modifiedUserData: User | null;
 }
 
-export type Menu = {
-  drink: DrinkMenu;
-} & Record<string, Record<string, number>>;
-
-export interface DrinkMenu {
-  liquor: LiquorMenu;
-  beer_and_cider: DrinkCategory;
-  classic_cocktail: DrinkCategory;
-  specialty_option: DrinkCategory;
+export type ItemId = string;
+export type Menu = Record<ItemId, MenuItem>;
+export interface MenuItem {
+  info: Category | NormalItem | PassItem | BundleItem;
+  path: ItemId[];
+  children: ItemId[];
 }
 
-type DrinkCategory = Record<string, number>;
-
-type LiquorMenu = Record<string, LiquorTypeMenu>;
-
-type LiquorTypeMenu = { house: number } & Record<string, number>;
-
-export interface SingleMenuItem {
+export interface Category {
+  name: string;
+}
+export interface NormalItem {
+  name: string;
   price: number;
-  description?: string | null;
-  imageUrl?: string | null;
+  description?: string;
+}
+export interface PassItem {
+  name: string;
+  price: number;
+  for_date: string;
+  amount_remaining: number | null;
+}
+export interface BundleItem {
+  name: string;
+  object: Bundle;
+  bundle_policies: string[];
+  price: number;
+}
+
+export interface CartState {
+  cart: Cart;
+  dealEffect: DealEffectPayload;
+  cartResults: CartResultsPayload | null;
+  errorDisplay: string | null;
+  token: string | null;
 }
 
 export interface Pass {
@@ -146,7 +179,7 @@ export interface Pass {
 export interface Highlight {
   highlight_id: string;
   restaurant_id: string;
-  content_type: "item" | "policy";
+  content_type: "item" | "policy" | "bundle";
   content_pointer: string;
   title_override: string;
   description_override: string;
@@ -188,10 +221,13 @@ export interface User {
   id: string;
   signed_up: string;
   points: Record<string, number>;
+  next_purchase_credit: Record<string, number>;
 }
 
 export interface UserSession {
-  phone: string;
+  user: {
+    phone: string;
+  };
   accessToken: string;
   refreshToken: string;
 }
@@ -206,36 +242,19 @@ export interface Policy {
   end_time: string | null;
   total_usages: number | null;
   days_since_last_use: number | null;
-  subscription_id: string | null;
+  locked: boolean;
   definition: PolicyDefinition;
 }
-export interface UserSubscription {
-  user_id: string;
-  restaurant_id: string;
-  subscription_id: string;
-  last_paid: string;
-  created_at: string;
-}
 
-export interface Subscription {
-  subscription_id: string;
+export interface Bundle {
+  bundle_id: string;
   restaurant_id: string;
-  display_name: string;
-  display_description: string;
-  display_perk_list: string[];
+  duration: number;
+  fixed_credit: number;
+  point_multiplier: number;
+  name: string;
   price: number;
-  added_nightly_deal_usages: number;
-}
-export interface Package {
-  package_id: string;
-  restaurant_id: string;
-  display_name: string;
-  display_description: string;
-  display_perk_list: string[];
-  price: number;
-  nightly_deal_usages: number;
-  begin_time: string;
-  end_time: string;
+  deactivated_at: string | null;
 }
 
 export type ItemSpecification = string;
@@ -315,18 +334,3 @@ export type PolicyDefinitionAction =
       items: ItemSpecification[];
       amount: number;
     };
-
-export interface HouseMixerTemplate {
-  name: string;
-  modifiers: string[];
-  liquorType: string;
-  liquorBrand: string;
-  quantity: number;
-}
-
-export interface ShotShooterTemplate {
-  modifiers: string[];
-  liquorType: string;
-  liquorBrand: string;
-  quantity: number;
-}

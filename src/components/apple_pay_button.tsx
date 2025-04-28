@@ -31,21 +31,18 @@ const PayButton = ({ payload, sanityCheck, clearCart }) => {
     if (modifiedUserData) {
       setUserData(modifiedUserData);
     }
-    if (!transactions || transactions?.length == 0) {
-      throw new Error("No transactions received or created");
-    } else {
-      setTransactions((prevTransactions) => [
-        ...prevTransactions,
-        ...transactions,
-      ]);
-      clearCart();
-      navigate(RESTAURANT_PATH.replace(":id", payload.restaurant_id), {
-        state: {
-          transactions: transactions,
-          qr: true,
-        },
-      });
-    }
+
+    setTransactions((prevTransactions) => [
+      ...prevTransactions,
+      ...transactions,
+    ]);
+    clearCart();
+    navigate(RESTAURANT_PATH.replace(":id", payload.restaurant_id), {
+      state: {
+        transactions: transactions,
+        qr: true,
+      },
+    });
   };
 
   const onConfirm = async () => {

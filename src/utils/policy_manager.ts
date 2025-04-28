@@ -1,27 +1,22 @@
-import { ADD_ON_TAG, NORMAL_DEAL_TAG } from "@/constants";
-import { fetch_policies } from "./queries/policies";
-import { supabase } from "./supabase_client";
+import { ADD_ON_TAG, BUNDLE_MENU_TAG, NORMAL_DEAL_TAG } from "@/constants";
 import { Cart, DealEffectPayload, Policy, Restaurant } from "@/types";
 import { getMissingItemsForPolicy } from "./item_recommender";
 import { ItemUtils } from "./item_utils";
-
+import { PolicyUtils } from "./policy_utils";
 export class PolicyManager {
-  private restaurant: Restaurant;
-  private policies: Policy[];
+  public policies: Policy[];
+  public restaurant_id: string;
 
-  constructor(restaurant: Restaurant) {
-    this.restaurant = restaurant;
+  constructor(restaurant_id: string) {
+    this.restaurant_id = restaurant_id;
     this.policies = [];
   }
 
   async init() {
-    await this.fetchPolicies(this.restaurant.id);
-  }
-
-  async fetchPolicies(restaurantId: string): Promise<Policy[]> {
-    const policies = await fetch_policies(restaurantId);
+    const policies = await PolicyUtils.fetchPoliciesByRestaurantId(
+      this.restaurant_id
+    );
     this.policies = policies;
-    return policies;
   }
 
   getDeals(): Policy[] {
@@ -30,8 +25,12 @@ export class PolicyManager {
     );
   }
 
-  getRecommendedDeals(cart: Cart, dealEffect: DealEffectPayload): Policy[] {
-    const activePolicies = this.getActivePolicies(dealEffect, this.restaurant);
+  getRecommendedDeals(
+    cart: Cart,
+    dealEffect: DealEffectPayload,
+    restaurant: Restaurant
+  ): Policy[] {
+    const activePolicies = this.getActivePolicies(dealEffect);
     const activeDeal = activePolicies.some(
       (policy) => policy.definition.tag === NORMAL_DEAL_TAG
     );
@@ -45,7 +44,7 @@ export class PolicyManager {
         missingItems: getMissingItemsForPolicy(
           deal,
           cart,
-          this.restaurant,
+          restaurant,
           dealEffect
         ),
       }))
@@ -76,7 +75,8 @@ export class PolicyManager {
 
   getAddOns(
     cart: Cart,
-    dealEffect: DealEffectPayload
+    dealEffect: DealEffectPayload,
+    restaurant: Restaurant
   ): {
     allAddOns: Policy[];
     passAddOns: Policy[];
@@ -94,15 +94,15 @@ export class PolicyManager {
 
       const actionItem = JSON.stringify(policy.definition.action.items[0]);
       if (seenItems.has(actionItem)) continue;
-
       if (
-        getMissingItemsForPolicy(policy, cart, this.restaurant, dealEffect)
+        getMissingItemsForPolicy(policy, cart, restaurant, dealEffect)
           .length === 0
       ) {
         seenItems.add(actionItem);
         validPolicies.push(policy);
         const item = policy.definition.action.items[0];
-        if (ItemUtils.isPassItem(item, this.restaurant)) {
+        if (ItemUtils.isPassItem(item, restaurant)) {
+          console.log("in here");
           passAddOns.push(policy);
         } else {
           normalAddOns.push(policy);
@@ -117,30 +117,33 @@ export class PolicyManager {
     };
   }
 
-  getAllPolicies(): Policy[] {
-    return this.policies;
+  getAllPolicies(restaurant: Restaurant): Policy[] {
+    const unlockedPolicies = this.getUnlockedPolicies();
+    const bundlePolicyIds = restaurant.menu[BUNDLE_MENU_TAG]
+      .children as string[];
+    const allPolicies = [...unlockedPolicies];
+    bundlePolicyIds.forEach((bundlePolicyId) => {
+      restaurant.menu[bundlePolicyId].info.bundle_policies.forEach(
+        (policyId: string) => {
+          const policy = this.getPolicyFromId(policyId);
+          if (
+            policy &&
+            !allPolicies.some((p) => p.policy_id === policy.policy_id)
+          ) {
+            allPolicies.push(policy);
+          }
+        }
+      );
+    });
+    return allPolicies;
   }
 
-  public getActivePolicies(
-    dealeffect: DealEffectPayload,
-    restaurant: Restaurant
-  ): Policy[] {
-    const activePolicyIds = new Set<string>();
+  getUnlockedPolicies(): Policy[] {
+    return this.policies.filter((policy) => !policy.locked);
+  }
 
-    // Get policy IDs from added items
-    dealeffect.addedItems.forEach(({ policy_id }) => {
-      activePolicyIds.add(policy_id);
-    });
-
-    // Get policy IDs from modified items
-    dealeffect.modifiedItems.forEach(({ policy_id }) => {
-      activePolicyIds.add(policy_id);
-    });
-
-    // Get policy ID from whole cart modification if it exists
-    if (dealeffect.wholeCartModification) {
-      activePolicyIds.add(dealeffect.wholeCartModification.policy_id);
-    }
+  public getActivePolicies(dealeffect: DealEffectPayload): Policy[] {
+    const activePolicyIds = PolicyManager.getActivePolicyIds(dealeffect);
 
     // Return policies that match the active IDs
     return this.policies.filter((policy) =>
@@ -167,5 +170,15 @@ export class PolicyManager {
 
     // Return policies that match the active IDs
     return activePolicyIds;
+  }
+
+  public getPolicyFromId(policyId: string): Policy | null {
+    const policy = this.policies.find(
+      (policy) => policy.policy_id === policyId
+    );
+    if (!policy) {
+      return null;
+    }
+    return policy;
   }
 }

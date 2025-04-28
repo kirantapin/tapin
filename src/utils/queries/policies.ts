@@ -1,27 +1,44 @@
 import { supabase } from "../supabase_client";
 import { Restaurant, Policy } from "../../types";
 
-export const fetch_policies = async (
-  restaurant_id: string | undefined
+export const fetchPoliciesForBundle = async (
+  bundle_id: string | undefined
 ): Promise<Policy[]> => {
-  if (!restaurant_id) {
+  if (!bundle_id) {
     return [];
   }
-  const currentTime = new Date().toISOString();
+
+  const {
+    data: bundle_policy_junction_data,
+    error: bundle_policy_junction_error,
+  } = await supabase
+    .from("bundle_policy_junction")
+    .select("policy_id")
+    .eq("bundle_id", bundle_id);
+
+  if (bundle_policy_junction_error) {
+    console.error(
+      "Error fetching bundle policy junction:",
+      bundle_policy_junction_error
+    );
+    return [];
+  }
+
+  const policy_ids = bundle_policy_junction_data.map(
+    (junction) => junction.policy_id
+  );
 
   const { data, error } = await supabase
     .from("policies")
     .select("*")
-    .eq("restaurant_id", restaurant_id)
-    .or(
-      `and(begin_time.lte.${currentTime},end_time.gte.${currentTime}),and(begin_time.is.null,end_time.is.null)`
-    );
+    .in("policy_id", policy_ids);
+
   if (error) {
-    console.error("Error fetching data:", error);
+    console.error("Error fetching policies:", error);
     return [];
-  } else {
-    return data;
   }
+
+  return data;
 };
 
 export const fetchPolicyById = async (

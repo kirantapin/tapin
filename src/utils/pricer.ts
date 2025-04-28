@@ -1,18 +1,7 @@
-import { rest } from "lodash";
-import {
-  Restaurant,
-  CartItem,
-  DrinkMenu,
-  Menu,
-  Item,
-  Cart,
-  ModifiedCartItem,
-  DealEffectPayload,
-  SingleMenuItem,
-} from "../types";
-import { KNOWN_MODIFIERS, MENU_DISPLAY_MAP, PASS_MENU_TAG } from "@/constants";
+import { Restaurant, CartItem, Item, Cart, DealEffectPayload } from "../types";
+import { KNOWN_MODIFIERS } from "@/constants";
 import { formatPoints } from "./parse";
-
+import { ItemUtils } from "./item_utils";
 export function modifiedItemFlair(
   cartItem: CartItem,
   restaurant: Restaurant,
@@ -36,7 +25,7 @@ export function modifiedItemFlair(
     discountDescription: string | null;
   } = {
     currentPrice: cartItem.price,
-    oldPrice: priceItem(cartItem.item, restaurant),
+    oldPrice: ItemUtils.priceItem(cartItem.item, restaurant),
     discountDescription: null,
   };
 
@@ -49,7 +38,7 @@ export function modifiedItemFlair(
       temp["discountDescription"] = "Free Item";
     } else {
       temp["discountDescription"] = `$${
-        priceItem(addedItem.cartItem.item, restaurant) -
+        ItemUtils.priceItem(addedItem.cartItem.item, restaurant) -
         addedItem.cartItem.price
       } off`;
     }
@@ -95,22 +84,7 @@ export function modifiedItemFlair(
 export function priceCartNormally(cart: Cart, restaurant: Restaurant): number {
   let total = 0;
   for (const cartItem of cart) {
-    total += priceItem(cartItem.item, restaurant) * cartItem.quantity;
+    total += ItemUtils.priceItem(cartItem.item, restaurant) * cartItem.quantity;
   }
   return total;
-}
-
-export function priceItem(item: Item, restaurant: Restaurant): number {
-  const { id, modifiers } = item;
-  let multiple = modifiers.reduce(
-    (acc, modifier) => acc * (KNOWN_MODIFIERS[modifier] || 1),
-    1
-  );
-
-  const temp = restaurant.menu[id].info;
-  if (!temp || !temp.price) {
-    throw new Error("Item cannot be priced");
-  }
-
-  return temp.price * multiple;
 }

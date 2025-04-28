@@ -8,19 +8,18 @@ import {
 } from "@/constants";
 import LiquorForm from "./liquor_form";
 import { titleCase } from "title-case";
-import { Cart, Item, Restaurant, SingleMenuItem } from "@/types";
+import { Cart, Item, Restaurant } from "@/types";
 import { project_url } from "@/utils/supabase_client";
 import { ItemUtils } from "@/utils/item_utils";
-
+import { adjustColor } from "@/utils/color";
+import { useAuth } from "@/context/auth_context";
 export function DrinkItem({
-  key,
   cart,
   restaurant,
   addToCart,
   removeFromCart,
   itemId,
 }: {
-  key: string;
   cart: Cart;
   restaurant: Restaurant;
   addToCart: (item: Item) => Promise<void>;
@@ -39,7 +38,14 @@ export function DrinkItem({
 
   const [loading, setLoading] = useState(false);
   return (
-    <div className="flex-none flex items-stretch m-3 border p-3 rounded-3xl bg-white">
+    <div
+      className={`flex-none flex items-stretch m-3 border p-3 rounded-3xl bg-white transition-colors duration-300 ${
+        quantity > 0 ? undefined : "border-gray-200"
+      }`}
+      style={{
+        borderColor: quantity > 0 ? primaryColor : undefined,
+      }}
+    >
       {/* Image */}
       <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 p-3">
         <img
@@ -112,7 +118,7 @@ export function DrinkItem({
             </div>
           ) : (
             <button
-              className="h-7 w-7 rounded-full flex items-center justify-center text-white"
+              className="h-6 w-6 rounded-full flex items-center justify-center text-white"
               style={{ backgroundColor: primaryColor }}
               onClick={async () => {
                 setLoading(true);
@@ -130,6 +136,171 @@ export function DrinkItem({
               )}
             </button>
           )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function LoyaltyRewardItem({
+  restaurant,
+  itemId,
+  numPoints,
+  onRedeem,
+}: {
+  restaurant: Restaurant;
+  itemId: string;
+  numPoints: number;
+  onRedeem: () => void;
+}) {
+  const { userData } = useAuth();
+  const hasEnoughPoints = (userData?.points[restaurant.id] || 0) >= numPoints;
+  const primaryColor = restaurant.metadata.primaryColor as string;
+  const menuItem = ItemUtils.getMenuItemFromItemId(itemId, restaurant);
+  const isPass = ItemUtils.isPassItem(itemId, restaurant);
+
+  return (
+    <div
+      className={`flex-none flex items-stretch m-3 border p-3 rounded-3xl bg-white transition-colors duration-300 border-gray-200`}
+    >
+      {/* Image */}
+      <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 p-3">
+        <img
+          src={
+            menuItem?.image_url ||
+            `${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`
+          }
+          alt={menuItem?.name}
+          className="h-full w-full object-cover"
+        />
+      </div>
+
+      {/* Text + Price + Button */}
+      <div className="flex flex-1 flex-col justify-between">
+        <div>
+          <div className="flex justify-between items-start">
+            <h3 className="font-bold text-base">{titleCase(menuItem?.name)}</h3>
+            {isPass && (
+              <span className="text-xs text-gray-500 ml-2">
+                {menuItem?.for_date}
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-gray-500 custom-line-clamp">
+            {menuItem?.description}
+          </p>
+        </div>
+
+        <div className="flex items-center justify-between mt-2">
+          <div className="flex items-center gap-2">
+            <p className="font-bold text-base" style={{ color: primaryColor }}>
+              {numPoints} points
+            </p>
+            <p className="text-sm text-gray-500 line-through">
+              ${menuItem?.price?.toFixed(2)}
+            </p>
+          </div>
+          {hasEnoughPoints && (
+            <button
+              className="px-4 py-1 rounded-full text-sm text-white enhance-contrast font-medium"
+              style={{
+                background: `linear-gradient(45deg, 
+                ${adjustColor(primaryColor, -30)},
+                ${adjustColor(primaryColor, 40)}
+              )`,
+              }}
+              onClick={onRedeem}
+            >
+              Redeem
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+export function PreviousTransactionItem({
+  key,
+  currentQuantity,
+  maxQuantity,
+  restaurant,
+  increment,
+  decrement,
+  itemId,
+}: {
+  key: string;
+  currentQuantity: number;
+  maxQuantity: number;
+  restaurant: Restaurant;
+  increment: () => void;
+  decrement: () => void;
+  itemId: string;
+}) {
+  const primaryColor = restaurant.metadata.primaryColor as string;
+  const menuItem = ItemUtils.getMenuItemFromItemId(itemId, restaurant);
+  const isPass = ItemUtils.isPassItem(itemId, restaurant);
+
+  const [loading, setLoading] = useState(false);
+  return (
+    <div className="flex-none flex items-stretch m-3 border p-3 rounded-3xl bg-white">
+      {/* Image */}
+      <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 p-3">
+        <img
+          src={
+            menuItem?.image_url ||
+            `${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`
+          }
+          alt={menuItem?.name}
+          className="h-full w-full object-cover"
+        />
+      </div>
+
+      {/* Text + Price + Button */}
+      <div className="flex flex-1 flex-col justify-between">
+        <div>
+          <div className="flex justify-between items-start">
+            <h3 className="font-bold text-base">{titleCase(menuItem?.name)}</h3>
+            {isPass && (
+              <span className="text-xs text-gray-500 ml-2">
+                {menuItem?.for_date}
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-gray-500 custom-line-clamp">
+            {menuItem?.description}
+          </p>
+        </div>
+
+        <div className="flex items-center justify-between mt-2">
+          <p className="font-bold text-base">${menuItem?.price?.toFixed(2)}</p>
+
+          <div className="flex items-center">
+            <button
+              onClick={async () => {
+                setLoading(true);
+                decrement();
+                setLoading(false);
+              }}
+              className="w-6 h-6 flex items-center justify-center rounded-full mr-2"
+              style={{ backgroundColor: primaryColor }}
+            >
+              <Minus className="w-4 h-4 text-white" />
+            </button>
+            <p>
+              {currentQuantity} / {maxQuantity}
+            </p>
+            <button
+              onClick={async () => {
+                setLoading(true);
+                increment();
+                setLoading(false);
+              }}
+              className="w-6 h-6 flex items-center justify-center bg-gray-100 rounded-full ml-2"
+              style={{ backgroundColor: primaryColor }}
+            >
+              <Plus className="w-4 h-4 text-white" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -157,17 +328,13 @@ export const DrinkList = ({
   const scrollToLabel = (menuLabel: string) => {
     const el = labelRefs.current.get(menuLabel);
     if (el) {
-      window.scrollTo({ top: el.offsetTop - 210, behavior: "smooth" });
+      window.scrollTo({ top: el.offsetTop - 190, behavior: "smooth" });
     }
   };
 
   function getNestedObject(label: string) {
-    if (label === HOUSE_MIXER_LABEL || label === SHOTS_SHOOTERS_LABEL) {
-      return [];
-    } else {
-      const categoryId = MENU_DISPLAY_MAP[label];
-      return ItemUtils.getAllItemsInCategory(categoryId, restaurant);
-    }
+    const categoryId = MENU_DISPLAY_MAP[label];
+    return ItemUtils.getAllItemsInCategory(categoryId, restaurant);
   }
   const drinks: { id: string; label: string }[] = useMemo(() => {
     const allItemIds: { id: string; label: string }[] = [];
@@ -210,16 +377,26 @@ export const DrinkList = ({
                 {menuLabel.toUpperCase()}
               </h3>
               <div className="space-y-2">
-                {drinksForLabel.map(({ id }) => (
-                  <DrinkItem
-                    key={id}
-                    cart={cart}
+                {menuLabel === HOUSE_MIXER_LABEL ||
+                menuLabel === SHOTS_SHOOTERS_LABEL ? (
+                  <LiquorForm
+                    type={menuLabel}
                     restaurant={restaurant}
                     addToCart={addToCart}
-                    removeFromCart={removeFromCart}
-                    itemId={id}
+                    primaryColor={restaurant.metadata.primaryColor}
                   />
-                ))}
+                ) : (
+                  drinksForLabel.map(({ id }) => (
+                    <DrinkItem
+                      key={id}
+                      cart={cart}
+                      restaurant={restaurant}
+                      addToCart={addToCart}
+                      removeFromCart={removeFromCart}
+                      itemId={id}
+                    />
+                  ))
+                )}
               </div>
             </div>
           ) : null;

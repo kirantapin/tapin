@@ -1,7 +1,14 @@
 import { supabase } from "../supabase_client";
 import { Restaurant, Pass } from "../../types";
-import { PASS_MENU_TAG, DRINK_MENU_TAG, HISTORY_KEY } from "@/constants";
-
+import {
+  PASS_MENU_TAG,
+  DRINK_MENU_TAG,
+  HISTORY_KEY,
+  BUNDLE_MENU_TAG,
+} from "@/constants";
+import { fetchPasses } from "./items";
+import { BundleUtils } from "../bundle_utils";
+import { PassUtils } from "../pass_utils";
 const HistoryCacheTTL = 30000;
 
 export const fetchRestaurantById = async (
@@ -59,7 +66,10 @@ export const fetchRestaurantById = async (
 
   logVisit(data);
 
-  const passes = await fetchPasses(restaurantId);
+  const [passes, bundleObjects] = await Promise.all([
+    PassUtils.fetchPasses(restaurantId),
+    BundleUtils.fetchBundles(restaurantId),
+  ]);
 
   for (const pass of passes) {
     const passMenu = data.menu[PASS_MENU_TAG];
@@ -67,30 +77,27 @@ export const fetchRestaurantById = async (
       name: passMenu[pass.itemId].name,
       price: pass.price,
       description: pass.item_description,
+      amount_remaining: pass.amount_remaining,
       imageUrl: pass.image_url,
       for_date: pass.for_date,
       isPass: true,
     };
   }
 
-  data.menu = indexMenu(data.menu);
-
-  return data;
-};
-
-export const fetchPasses = async (
-  restaurantId: string | null
-): Promise<any> => {
-  const { data, error } = await supabase
-    .from("passes")
-    .select("*")
-    .eq("restaurant_id", restaurantId)
-    .gte("end_time", new Date().toISOString());
-  if (error) {
-    console.error("Error fetch temporary items.", error.message);
-    return {};
+  for (const bundleObject of bundleObjects) {
+    console.log(bundleObject);
+    const bundleMenu = data.menu[BUNDLE_MENU_TAG];
+    bundleMenu[bundleObject.bundle.bundle_id] = {
+      name: bundleObject.bundle.name,
+      price: bundleObject.bundle.price,
+      object: bundleObject.bundle,
+      bundle_policies: bundleObject.bundlePolicies,
+    };
   }
 
+  data.menu = indexMenu(data.menu);
+  console.log(data.menu);
+  console.log("here");
   return data;
 };
 

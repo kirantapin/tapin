@@ -24,6 +24,8 @@ interface AuthContextProps {
   setShowSignInModal: React.Dispatch<React.SetStateAction<boolean>>;
   showOrderHistoryModal: boolean;
   setShowOrderHistoryModal: React.Dispatch<React.SetStateAction<boolean>>;
+  showProfile: boolean;
+  setShowProfile: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const AuthContext = createContext<AuthContextProps | undefined>(
@@ -42,6 +44,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const [loadingUser, setLoadingUser] = useState(true);
   const [showSignInModal, setShowSignInModal] = useState(false);
   const [showOrderHistoryModal, setShowOrderHistoryModal] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   const setData = async (session: Session | null) => {
     if (!session) {
@@ -135,6 +138,8 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         setShowSignInModal,
         showOrderHistoryModal,
         setShowOrderHistoryModal,
+        showProfile,
+        setShowProfile,
       }}
     >
       {children}

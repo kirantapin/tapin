@@ -1,6 +1,6 @@
 import { Policy, Restaurant } from "@/types";
-import { convertUtcToLocal, policyToStringDescription } from "@/utils/parse";
-import React from "react";
+import { convertUtcToLocal } from "@/utils/parse";
+import { PolicyUtils } from "@/utils/policy_utils";
 
 export function PolicyDescriptionDisplay({
   policy,
@@ -10,7 +10,7 @@ export function PolicyDescriptionDisplay({
   restaurant: Restaurant;
 }) {
   const { actionDescription, conditionDescriptions } =
-    policyToStringDescription(policy, restaurant);
+    PolicyUtils.policyToStringDescription(policy, restaurant);
 
   return (
     <div>

@@ -93,17 +93,17 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
         Recent Activity
       </h1>
 
-      <div className="overflow-x-auto no-scrollbar">
+      <div className="overflow-x-auto no-scrollbar -mx-4 px-4">
         <div className="grid grid-flow-col auto-cols-[minmax(22rem,max-content)] gap-2">
           {[...processedTransactionItems].slice(0, 3).map((itemId) => {
             return (
               <DrinkItem
-                itemId={itemId}
+                key={itemId}
                 restaurant={restaurant}
                 addToCart={addToCart}
                 removeFromCart={removeFromCart}
                 cart={state.cart}
-                dealEffect={state.dealEffect}
+                itemId={itemId}
               />
             );
           })}

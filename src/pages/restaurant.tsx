@@ -9,35 +9,33 @@ import {
   Beer,
   X,
   Star,
+  MapPin,
 } from "lucide-react";
 
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/auth_context.tsx";
-import { Restaurant, Policy, Transaction } from "../types.ts";
+import { Restaurant, Policy, Transaction, Bundle } from "../types.ts";
 import { MENU_DISPLAY_MAP, HOUSE_MIXER_LABEL } from "../constants.ts";
-
-import { fetch_policies } from "../utils/queries/policies.ts";
-import { fetchRestaurantById } from "../utils/queries/restaurant.ts";
 
 import { DrinkItem, DrinkList } from "@/components/menu_items.tsx";
 import GoToCartButton from "@/components/go_to_cart_button.tsx";
 import AccessCardSlider from "../components/sliders/access_card_slider.tsx";
 import Rewards from "@/components/rewards.tsx";
 import { Sidebar } from "@/components/sidebar.tsx";
-import PolicyModal from "@/components/bottom_sheets/policy_modal.tsx";
-import { useCartManager } from "@/hooks/useCartManager.tsx";
+import { useGlobalCartManager } from "@/hooks/useGlobalCartManager.tsx";
 import { useSearch } from "@/hooks/useSearch.tsx";
 import { Hero } from "@/utils/gradient.tsx";
 import { useBannerColor } from "@/hooks/useBannerColor.tsx";
 import HighlightSlider from "@/components/sliders/highlight_slider.tsx";
 import { RecentActivity } from "@/components/sliders/recent_activity.tsx";
 import { MySpot } from "@/components/my_spot.tsx";
-import { RestaurantSkeleton } from "@/components/skeletons/restaurant.tsx";
+import { RestaurantSkeleton } from "@/components/skeletons/restaurant_skeleton.tsx";
 import { PolicySlider } from "@/components/sliders/policy_slider.tsx";
 import { ActionButtons } from "@/components/sliders/action_buttons.tsx";
-import QRModal from "@/components/bottom_sheets/qr_modal.tsx";
-
+import { useRestaurant } from "@/context/restaurant_context.tsx";
+import BundleSlider from "@/components/sliders/bundle_slider.tsx";
+import { useBottomSheet } from "@/context/bottom_sheet_context.tsx";
 export default function RestaurantPage() {
   const {
     userSession,
@@ -45,23 +43,28 @@ export default function RestaurantPage() {
     transactions,
     setShowSignInModal,
     setShowOrderHistoryModal,
+    setShowProfile,
   } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [restaurant, setRestaurant] = useState<Restaurant>();
-  const [policies, setPolicies] = useState<Policy[]>([]);
-  const { id: restaurant_id } = useParams<{ id: string }>();
+  const {
+    restaurant,
+    loading,
+    setCurrentRestaurantId,
+    policyManager,
+    userOwnershipMap,
+  } = useRestaurant();
+  const policies = policyManager?.policies;
+  const { id } = useParams<{ id: string }>();
   const [activeFilter, setActiveFilter] = useState(HOUSE_MIXER_LABEL);
   const orderDrinksRef = useRef<HTMLDivElement>(null);
-  const [loading, setLoading] = useState<boolean>(true);
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
-  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [qrTransactions, setQrTransactions] = useState<Transaction[]>([]);
-  const [policy, setPolicy] = useState<Policy | null>(null);
-  const { state, addToCart, removeFromCart, addPolicy } = useCartManager(
+  const { state, addToCart, removeFromCart, addPolicy } = useGlobalCartManager(
     restaurant as Restaurant,
     userSession
   );
+  const { openPolicyModal, openBundleModal, openQrModal } = useBottomSheet();
 
   const { searchResults, searchQuery, setSearchQuery, clearSearch } = useSearch(
     {
@@ -76,7 +79,7 @@ export default function RestaurantPage() {
     if (qrFlag) {
       setQrTransactions(location.state?.transactions as Transaction[]);
       navigate(location.pathname, { replace: true, state: null });
-      setIsOpen(true);
+      openQrModal(qrTransactions);
     }
   };
 
@@ -95,78 +98,81 @@ export default function RestaurantPage() {
   };
 
   useEffect(() => {
-    if (!restaurant_id) {
-      navigate("/not_found_page");
+    if (id) {
+      setCurrentRestaurantId(id);
     }
-  }, [restaurant_id]);
+    handleLocation();
+  }, [id]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const restaurantData = await fetchRestaurantById(restaurant_id);
-      if (!restaurantData) {
-        navigate("/not_found_page");
-      }
-      const policies = await fetch_policies(restaurant_id);
+  const [titleElement, setTitleElement] = useState<HTMLHeadingElement | null>(
+    null
+  );
 
-      setRestaurant(restaurantData as Restaurant);
-      setPolicies(policies);
-      setLoading(false);
-      handleLocation();
-    };
-    fetchData();
-  }, [restaurant_id]);
+  const titleRefCallback = (element: HTMLHeadingElement | null) => {
+    setTitleElement(element); // This will trigger a re-render and useEffect
+  };
 
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  useBannerColor(titleRef, restaurant);
+  // Now useBannerColor can use titleElement instead of ref
+  useBannerColor(titleElement, restaurant);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
-  if (loading) {
-    return <RestaurantSkeleton />;
-  }
+  if (loading || !restaurant) return <RestaurantSkeleton />;
 
   return (
     <div className="min-h-screen bg-gray-25">
       {/* Header Icons */}
 
-      {!isOpen && (
-        <div className="absolute w-full top-0 z-50 flex justify-between items-center px-4 py-3">
+      <div className="absolute w-full top-0 z-10 flex justify-between items-center px-4 py-3">
+        <div
+          className="bg-white p-2 rounded-full"
+          onClick={() => {
+            setSidebarOpen(true);
+          }}
+        >
+          <Menu className="w-5 h-5 text-black" />
+        </div>
+
+        {/* Shopping Bag & User Icons */}
+        <div className="flex items-center gap-5">
           <div
             className="bg-white p-2 rounded-full"
             onClick={() => {
-              setSidebarOpen(true);
+              setShowOrderHistoryModal(true);
             }}
           >
-            <Menu className="w-5 h-5 text-black" />
+            <ShoppingBag className="w-5 h-5 text-black" />
           </div>
-
-          {/* Shopping Bag & User Icons */}
-          <div className="flex items-center gap-5">
-            <div
-              className="bg-white p-2 rounded-full"
-              onClick={() => {
-                setShowOrderHistoryModal(true);
-              }}
-            >
-              <ShoppingBag className="w-5 h-5 text-black" />
-            </div>
-            <div className="bg-white p-2 rounded-full">
-              <User className="w-5 h-5 text-black" />
-            </div>
+          <div
+            className="bg-white p-2 rounded-full"
+            onClick={() => {
+              setShowProfile(true);
+            }}
+          >
+            <User className="w-5 h-5 text-black" />
           </div>
         </div>
-      )}
+      </div>
       {/* Hero Image */}
-      <Hero restaurant_id={restaurant_id as string} />
+      <Hero restaurant_id={id as string} />
 
       {/* Restaurant Info */}
-      <div className="mt-10 px-4">
+      <div className="mt-10 px-5">
         <div className="flex items-center gap-2">
-          <h1 ref={titleRef} className="text-2xl font-bold">
+          <h1
+            ref={titleRefCallback} // Use the callback ref instead
+            className="text-2xl font-bold"
+          >
             {restaurant?.name}
           </h1>
           <BadgeCheck className="w-5 h-5 text-blue-500" />
+        </div>
+        <div className="flex items-center gap-1 mt-1 mb-4">
+          <MapPin className="w-4 h-4 text-gray-500" />
+          <span className="text-sm text-gray-500">
+            {restaurant?.metadata.locationTag}
+          </span>
         </div>
         {/* Action Buttons */}
         <ActionButtons
@@ -174,6 +180,7 @@ export default function RestaurantPage() {
           scrollToOrderDrinks={scrollToOrderDrinks}
         />
         {/* Highlight Slider */}
+
         <HighlightSlider
           restaurant={restaurant as Restaurant}
           addToCart={(itemId: string) => {
@@ -182,14 +189,13 @@ export default function RestaurantPage() {
           setPolicyModal={(policy_id: string) => {
             const policy = policies.find((p) => p.policy_id === policy_id);
             if (policy) {
-              setPolicy(policy);
-              setIsOpen(true);
+              openPolicyModal(policy, null);
             }
           }}
-          policies={policies}
+          policies={policies || []}
         />
-        {/* My Spot Section */}
 
+        {/* My Spot Section */}
         <MySpot
           userSession={userSession}
           restaurant={restaurant}
@@ -206,17 +212,7 @@ export default function RestaurantPage() {
         />
         {/* Rewards Section */}
         <div className="mt-6">
-          {userData && (
-            <Rewards
-              userData={userData}
-              restaurant={restaurant}
-              viewAll={false}
-              onIntentionToRedeem={(policy) => {
-                setPolicy(policy);
-                setIsOpen(true);
-              }}
-            />
-          )}
+          {userData && <Rewards viewAll={false} />}
 
           <div className="mt-8">
             {state.cart && (
@@ -232,17 +228,23 @@ export default function RestaurantPage() {
           {/* Awesome Deals Section */}
           <PolicySlider
             restaurant={restaurant}
-            policies={policies}
+            policies={policies || []}
             state={state}
-            setPolicy={setPolicy}
-            setIsOpen={setIsOpen}
           />
+
+          {userOwnershipMap &&
+            Object.values(userOwnershipMap).some((isOwned) => !isOwned) && (
+              <div className="mt-8">
+                <h1 className="text-xl font-bold">Great Value</h1>
+                <BundleSlider onCardClick={openBundleModal} />
+              </div>
+            )}
 
           <div
             ref={orderDrinksRef}
-            className="sticky top-0 z-10 bg-white border-b shadow-[0_4px_6px_-6px_rgba(0,0,0,0.1)] pt-1"
+            className="sticky top-0 z-10 bg-white border-b shadow-[0_4px_6px_-6px_rgba(0,0,0,0.1)] pt-1 -mx-4 px-4"
           >
-            <div className="flex justify-between items-center mb-4 mt-6">
+            <div className="flex justify-between items-center mb-3 mt-3">
               <h2 className="text-xl font-bold">Order Drinks</h2>
             </div>
 
@@ -306,7 +308,7 @@ export default function RestaurantPage() {
                     const button = buttonRefs.current.get(filter);
                     const container = scrollContainerRef.current;
                     if (button && container) {
-                      const scrollLeft = button.offsetLeft;
+                      const scrollLeft = button.offsetLeft - 10;
                       container.scrollTo({
                         left: scrollLeft,
                         behavior: "smooth",
@@ -326,7 +328,7 @@ export default function RestaurantPage() {
               <pre className="whitespace-pre-wrap break-words">
                 {searchResults.map((searchResult, index) => (
                   <DrinkItem
-                    key={index}
+                    key={searchResult}
                     cart={state.cart}
                     restaurant={restaurant as Restaurant}
                     addToCart={addToCart}
@@ -373,25 +375,6 @@ export default function RestaurantPage() {
             setSidebarOpen(false);
             setShowSignInModal(true);
           }}
-          setLoading={setLoading}
-        />
-        {policy && (
-          <PolicyModal
-            isOpen={isOpen}
-            onClose={() => setIsOpen(false)}
-            policy={policy as Policy}
-            restaurant={restaurant as Restaurant}
-            onAddToCart={addPolicy}
-            state={state}
-            addToCart={addToCart}
-            removeFromCart={removeFromCart}
-          />
-        )}
-        <QRModal
-          isOpen={isOpen}
-          onClose={() => setIsOpen(false)}
-          transactionsToRedeem={qrTransactions}
-          restaurant={restaurant as Restaurant}
         />
       </div>
     </div>

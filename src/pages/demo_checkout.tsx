@@ -4,50 +4,35 @@ import { checkoutStyles } from "../styles/checkout_styles";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/auth_context.tsx";
 import ApplePayButton from "../components/apple_pay_button.tsx";
-import {
-  NORMAL_DEAL_TAG,
-  PASS_MENU_TAG,
-  RESTAURANT_PATH,
-  SIGNIN_PATH,
-} from "../constants.ts";
-import { CartItem, Policy, Restaurant, Item } from "../types.ts";
-import { DISCOVER_PATH } from "../constants.ts";
-import { fetchRestaurantById } from "../utils/queries/restaurant.ts";
+import { NORMAL_DEAL_TAG, RESTAURANT_PATH } from "../constants.ts";
+import { CartItem, Policy, Restaurant } from "../types.ts";
 import { CheckoutItemCard } from "@/components/checkout/checkout_item_card.tsx";
 import AccessCardSlider from "../components/sliders/access_card_slider.tsx";
-import { priceCartNormally } from "@/utils/pricer.ts";
 import DealPreOrderBar from "@/components/checkout/deal_checkout_bar.tsx";
 import { motion } from "framer-motion";
 import { titleCase } from "title-case";
-import { useCartManager } from "@/hooks/useCartManager.tsx";
-import { PolicyManager } from "@/utils/policy_manager.ts";
+import { useGlobalCartManager } from "@/hooks/useGlobalCartManager.tsx";
 import AddOnCard from "@/components/cards/add_on_card.tsx";
 import { useTimer } from "@/hooks/useTimer.tsx";
 import DealCard from "@/components/cards/small_policy.tsx";
-import PolicyModal from "@/components/bottom_sheets/policy_modal.tsx";
 import { PassAddOnCard } from "@/components/cards/pass_add_on_card.tsx";
 import { ItemUtils } from "@/utils/item_utils.ts";
 import { formatPoints } from "@/utils/parse.ts";
 import { Alert } from "@/components/display_utils/alert.tsx";
 import { adjustColor, setThemeColor } from "@/utils/color.ts";
 import { SignInButton } from "@/components/signin/signin_button.tsx";
+import { useRestaurant } from "@/context/restaurant_context.tsx";
+import { CheckoutSkeleton } from "@/components/skeletons/checkout_skeleton.tsx";
 
 export default function CheckoutPage() {
   setThemeColor();
   const { userSession, setShowSignInModal } = useAuth();
-  const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+  const { restaurant, policyManager, setCurrentRestaurantId } = useRestaurant();
   const navigate = useNavigate();
-  const { id: restaurant_id } = useParams<{ id: string }>();
-  if (!restaurant_id) {
-    navigate(DISCOVER_PATH);
-  }
+  const { id } = useParams<{ id: string }>();
   const [tipPercent, setTipPercent] = useState<number>(0.2);
   const tipAmounts = [0.1, 0.15, 0.2];
-  const [policyManager, setPolicyManager] = useState<PolicyManager | null>(
-    null
-  );
-  const [policy, setPolicy] = useState<Policy | null>(null);
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+
   const {
     timeRemaining: addOnTime,
     isRunning,
@@ -65,33 +50,28 @@ export default function CheckoutPage() {
     removePolicy,
     isPreEntry,
     clearCart,
-  } = useCartManager(restaurant as Restaurant, userSession);
+  } = useGlobalCartManager(restaurant as Restaurant, userSession);
 
   useEffect(() => {
-    const fetch = async () => {
-      const restaurant = await fetchRestaurantById(restaurant_id);
-      if (!restaurant) {
-        navigate(DISCOVER_PATH);
-        return;
-      }
-      const policyManager = new PolicyManager(restaurant as Restaurant);
-      await policyManager.init();
-      setPolicyManager(policyManager);
-      setRestaurant(restaurant);
-    };
+    if (id) {
+      setCurrentRestaurantId(id);
+    }
     window.scrollTo(0, 0);
-    fetch();
-    start();
-  }, []);
+    // start();
+  }, [id]);
+
+  if (!restaurant || !policyManager || !state) {
+    return <CheckoutSkeleton />;
+  }
 
   return (
     <div className={checkoutStyles.pageContainer}>
-      <div className="relative flex items-center justify-center mb-6">
+      <div className="relative flex items-center justify-center mb-6 sticky top-0 bg-white border-b shadow-sm -mx-4 pb-5 pr-4 pl-4 z-20">
         {/* Back Button */}
         <button
-          className="absolute left-0 w-9 h-9 bg-black/10 rounded-full flex items-center justify-center"
+          className="absolute left-0 w-9 h-9 bg-black/10 rounded-full flex items-center justify-center ml-4"
           onClick={() => {
-            navigate(RESTAURANT_PATH.replace(":id", restaurant_id));
+            navigate(RESTAURANT_PATH.replace(":id", id as string));
           }}
         >
           <ChevronLeft className="w-6 h-6" />
@@ -169,8 +149,8 @@ export default function CheckoutPage() {
       </div>
       {restaurant && policyManager && state.cart.length > 0 && (
         <div className="mt-4">
-          {policyManager.getAddOns(state.cart, state.dealEffect).allAddOns
-            .length > 0 && (
+          {policyManager.getAddOns(state.cart, state.dealEffect, restaurant)
+            .allAddOns.length > 0 && (
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-bold mb-4">
                 {isPreEntry ? "Exclusive Pre-entry Deals" : "Exclusive Deals"}
@@ -191,7 +171,7 @@ export default function CheckoutPage() {
             <div className="flex gap-2" style={{ minWidth: "max-content" }}>
               {addOnTime > 0 &&
                 policyManager
-                  .getAddOns(state.cart, state.dealEffect)
+                  .getAddOns(state.cart, state.dealEffect, restaurant)
                   .normalAddOns.map((policy) => (
                     <AddOnCard
                       state={state}
@@ -199,7 +179,7 @@ export default function CheckoutPage() {
                       restaurant={restaurant}
                       key={policy.policy_id}
                       addPolicy={async () => {
-                        await addPolicy(policy);
+                        await addPolicy(null, policy);
                         pause();
                       }}
                     />
@@ -208,11 +188,12 @@ export default function CheckoutPage() {
           </div>
           <div className="mt-2">
             {policyManager
-              .getAddOns(state.cart, state.dealEffect)
+              .getAddOns(state.cart, state.dealEffect, restaurant)
               .passAddOns.map((policy) => (
                 <PassAddOnCard
                   state={state}
                   addPolicy={addPolicy}
+                  removePolicy={removePolicy}
                   restaurant={restaurant as Restaurant}
                   policy={policy as Policy}
                 />
@@ -222,23 +203,27 @@ export default function CheckoutPage() {
       )}
       <div className="flex flex-col justify-end h-full">
         {policyManager &&
-          policyManager.getRecommendedDeals(state.cart, state.dealEffect)
-            .length > 0 && (
+          policyManager.getRecommendedDeals(
+            state.cart,
+            state.dealEffect,
+            restaurant as Restaurant
+          ).length > 0 && (
             <div className="mt-6">
-              <div className="overflow-x-auto pb-2 no-scrollbar">
-                <h2 className="text-2xl font-bold mb-4">Save More</h2>
+              <h2 className="text-2xl font-bold mb-4">Save More</h2>
+              <div className="overflow-x-auto pb-2 no-scrollbar -mx-4 px-4">
                 <div className="flex gap-2 whitespace-nowrap">
                   {policyManager
-                    .getRecommendedDeals(state.cart, state.dealEffect)
+                    .getRecommendedDeals(
+                      state.cart,
+                      state.dealEffect,
+                      restaurant as Restaurant
+                    )
                     .map((policy) => (
                       <DealCard
                         key={policy.policy_id}
                         cart={state.cart}
                         policy={policy}
                         restaurant={restaurant as Restaurant}
-                        primaryColor={restaurant?.metadata.primaryColor}
-                        setPolicy={setPolicy}
-                        setIsOpen={setIsOpen}
                         dealEffect={state.dealEffect}
                       />
                     ))}
@@ -280,6 +265,15 @@ export default function CheckoutPage() {
               >
                 <span>Points Earned</span>
                 <span>+{formatPoints(state.cartResults.totalPoints)}</span>
+              </div>
+            )}
+            {state.cartResults.creditUsed > 0 && (
+              <div
+                className={checkoutStyles.summaryRow}
+                style={{ color: "#40C4AA" }}
+              >
+                <span>Credit Applied</span>
+                <span>-${state.cartResults.creditUsed.toFixed(2)}</span>
               </div>
             )}
             <div className={checkoutStyles.summaryRow}>
@@ -354,7 +348,7 @@ export default function CheckoutPage() {
                 <ApplePayButton
                   payload={{
                     userAccessToken: userSession.access_token,
-                    restaurant_id: restaurant_id,
+                    restaurant_id: restaurant?.id,
                     state: state,
                     totalWithTip: Math.round(
                       state.cartResults.totalPrice * (1 + tipPercent) * 100
@@ -371,19 +365,6 @@ export default function CheckoutPage() {
           </div>
         )}
       </div>
-
-      {policy && (
-        <PolicyModal
-          isOpen={isOpen}
-          onClose={() => setIsOpen(false)}
-          policy={policy as Policy}
-          restaurant={restaurant as Restaurant}
-          onAddToCart={addPolicy}
-          state={state}
-          addToCart={addToCart}
-          removeFromCart={removeFromCart}
-        />
-      )}
     </div>
   );
 }

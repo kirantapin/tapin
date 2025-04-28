@@ -1,22 +1,23 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import AccessCard from "@/components/cards/access_card.tsx";
-import { Highlight, Policy, Restaurant } from "@/types";
+import { BundleItem, Highlight, Policy, Restaurant } from "@/types";
 import { modifiedItemFlair } from "@/utils/pricer";
 import { fetch_highlights } from "@/utils/queries/highlights";
 import HighlightCard from "../cards/highlight_card";
 import { adjustColor } from "@/utils/color";
 import { ItemUtils } from "@/utils/item_utils";
-import { NORMAL_DEAL_TAG } from "@/constants";
-
+import { MY_SPOT_PATH, NORMAL_DEAL_TAG } from "@/constants";
+import { BundleUtils } from "@/utils/bundle_utils";
+import { useBottomSheet } from "@/context/bottom_sheet_context";
+import { useRestaurant } from "@/context/restaurant_context";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/auth_context";
 const HighlightSlider = ({
-  restaurant,
   addToCart,
-  setPolicyModal,
   policies,
 }: {
-  restaurant: Restaurant;
   addToCart: (item_id: string) => void;
-  setPolicyModal: (policy_id: string) => void;
   policies: Policy[];
 }) => {
   const scrollContainerRef = useRef(null);
@@ -24,6 +25,31 @@ const HighlightSlider = ({
   const [activePromo, setActivePromo] = useState(0);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
   const autoScrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const { openBundleModal, openPolicyModal, handlePolicyClick } =
+    useBottomSheet();
+  const { restaurant, policyManager, userOwnershipMap } = useRestaurant();
+  const navigate = useNavigate();
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        console.log("entry", entry);
+        if (!entry.isIntersecting) {
+          setAutoScrollEnabled(true);
+        }
+      },
+      { threshold: 0 }
+    );
+
+    if (scrollContainerRef.current) {
+      observer.observe(scrollContainerRef.current);
+    }
+
+    return () => {
+      if (scrollContainerRef.current) {
+        observer.unobserve(scrollContainerRef.current);
+      }
+    };
+  }, []);
 
   const handleUserInteraction = () => {
     if (autoScrollEnabled) {
@@ -88,6 +114,12 @@ const HighlightSlider = ({
             (p) => p.policy_id === highlight.content_pointer
           );
           return policy?.definition?.tag === NORMAL_DEAL_TAG;
+        } else if (highlight.content_type === "bundle") {
+          const bundle = ItemUtils.getMenuItemFromItemId(
+            highlight.content_pointer,
+            restaurant
+          );
+          return bundle?.price && bundle.object.deactivated_at === null;
         }
         return false;
       });
@@ -96,11 +128,24 @@ const HighlightSlider = ({
     fetchHighlights();
   }, [restaurant]);
 
+  if (!restaurant || !policyManager) return null;
+
   const handleHighlightClick = (highlight: Highlight) => {
     if (highlight.content_type === "item") {
       addToCart(highlight.content_pointer);
-    } else {
-      setPolicyModal(highlight.content_pointer);
+    } else if (highlight.content_type === "bundle") {
+      const bundle = ItemUtils.getMenuItemFromItemId(
+        highlight.content_pointer,
+        restaurant
+      ) as BundleItem;
+      openBundleModal(bundle.object);
+    } else if (highlight.content_type === "policy") {
+      const policy = policyManager.getPolicyFromId(highlight.content_pointer);
+      if (policy) {
+        handlePolicyClick(policy, userOwnershipMap);
+      } else {
+        toast.error("This offering no longer exists");
+      }
     }
   };
 
@@ -109,7 +154,7 @@ const HighlightSlider = ({
       <div className="mt-5">
         <div
           ref={scrollContainerRef}
-          className="overflow-x-auto snap-x snap-mandatory no-scrollbar scrollbar-hide"
+          className="overflow-x-auto snap-x snap-mandatory no-scrollbar scrollbar-hide "
           onScroll={handleScroll}
           onWheel={() => {
             handleUserInteraction();

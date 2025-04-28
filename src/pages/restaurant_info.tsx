@@ -49,6 +49,7 @@ const RestaurantInfo: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      console.log("there");
       const restaurantData = await fetchRestaurantById(restaurant_id);
       if (!restaurantData) {
         navigate("/not_found_page");

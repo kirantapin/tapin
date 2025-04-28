@@ -55,7 +55,7 @@ export default function RestaurantDiscovery() {
       </h1>
 
       <h3 className="text-xl font-normal tracking-tighter sm:text-5xl text-gray-900 self-start">
-        More Locations Coming Soon!
+        More Locations Coming Soon
       </h3>
 
       <div className="w-full max-w-md">
@@ -65,7 +65,7 @@ export default function RestaurantDiscovery() {
             placeholder="Search for restaurants..."
             value={searchTerm}
             onChange={handleSearch}
-            className="w-full p-4 pl-12 text-sm rounded-full border-2 border-black focus:outline-none focus:ring-2 focus:ring-[#CAA650] focus:border-transparent transition duration-300 ease-in-out"
+            className="w-full p-4 pl-12 text-sm rounded-full border border-black focus:outline-none focus:ring-2 focus:ring-[#CAA650] focus:border-transparent transition duration-300 ease-in-out"
           />
           <Search
             className="absolute left-4 top-1/2 transform -translate-y-1/2 text-black"

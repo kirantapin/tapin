@@ -14,6 +14,7 @@ import { UserSession } from "../types";
 import { emptyDealEffect } from "@/constants";
 import { ItemUtils } from "@/utils/item_utils";
 import { isEqual } from "lodash";
+import { useWatcher } from "./useWatcher";
 
 interface CartState {
   cart: Cart;
@@ -37,12 +38,37 @@ const cartReducer = (state: CartState, action: Partial<CartState>) => {
   return { ...state, ...action };
 };
 
-export function useCartManager(
+export function useGlobalCartManager(
   restaurant: Restaurant | null,
-  userSession: UserSession | null
+  userSession: UserSession | null,
+  global: boolean = true
 ) {
   const cartManagerRef = useRef<CartManager | null>(null);
   const [state, dispatch] = useReducer(cartReducer, initialState);
+
+  const triggerToast = (
+    message: string,
+    type: "success" | "error" | "info"
+  ): void => {
+    toast[type](message, {
+      icon:
+        type === "error" ? undefined : (
+          <img
+            src="/tapin_icon_black.png"
+            alt=""
+            style={{ width: 24, height: 24 }}
+          />
+        ),
+      className: "font-[Gilroy] font-semibold text-black",
+      autoClose: 2000,
+    });
+  };
+
+  useWatcher({
+    cart: state.cart,
+    restaurant: restaurant as Restaurant,
+    triggerToast,
+  });
 
   // Initialize CartManager
   useEffect(() => {
@@ -55,17 +81,29 @@ export function useCartManager(
         cartManagerRef.current.restaurant_id !== restaurant.id
       ) {
         //reset cart managers state
-        console.log("reinitializing cart manager", new Date().toISOString());
-        cartManagerRef.current = new CartManager(restaurant.id, userSession);
+
+        cartManagerRef.current = new CartManager(
+          restaurant.id,
+          userSession,
+          global
+        );
       }
       //updated user sesssion is different from what is stored in cart manager
       if (!isEqual(cartManagerRef.current.userSession, userSession)) {
-        //login or change of account(however through the frontend it isn't possible to change accounts so most likely a login)
         if (userSession) {
-          await cartManagerRef.current.newUserSession(userSession);
+          if (
+            userSession.user.phone ===
+            cartManagerRef.current.userSession?.user?.phone
+          ) {
+            //this is a refresh of the tokens
+            cartManagerRef.current.userSession = userSession;
+          } else {
+            //this is a login
+            await cartManagerRef.current.newUserSession(userSession);
+          }
         } else {
           //logout, first wipe the cart, then create a new Cart Manager so it reflects the new session
-          await cartManagerRef.current.clearCart();
+          cartManagerRef.current.clearCart();
           cartManagerRef.current = new CartManager(restaurant.id, userSession);
         }
       }
@@ -76,76 +114,82 @@ export function useCartManager(
   }, [restaurant, userSession]);
 
   // Cart operations
-  const addToCart = async (item: Item) => {
+  const addToCart = async (item: Item): Promise<void> => {
     console.log(cartManagerRef.current);
     if (!cartManagerRef.current || !restaurant) return;
-    const result = await cartManagerRef.current.addToCart(item, restaurant);
-    dispatch(cartManagerRef.current.getCartState());
-
+    const result = await cartManagerRef.current.addToCart(item);
     if (result) {
       triggerToast(result, "error");
     } else {
-      triggerToast("Item added to cart", "success");
+      dispatch(cartManagerRef.current.getCartState());
     }
   };
 
-  const removeFromCart = async (itemId: number) => {
+  const removeFromCart = async (itemId: number): Promise<void> => {
     if (!cartManagerRef.current) return;
     const result = await cartManagerRef.current.removeFromCart(itemId);
-    dispatch(cartManagerRef.current.getCartState());
-
-    if (result) {
-      triggerToast(result, "error");
-    }
-  };
-
-  const addPolicy = async (policy: Policy) => {
-    if (!cartManagerRef.current) return;
-    const result = await cartManagerRef.current.addPolicy(policy);
-    dispatch(cartManagerRef.current.getCartState());
 
     if (result) {
       triggerToast(result, "error");
     } else {
-      triggerToast("Deal added successfully", "success");
+      dispatch(cartManagerRef.current.getCartState());
     }
   };
 
-  const removePolicy = async (policy: Policy) => {
+  const addPolicy = async (
+    bundle_id: string | null,
+    policy: Policy
+  ): Promise<void> => {
+    if (!cartManagerRef.current) return;
+    console.log("adding policy", policy);
+    const result = await cartManagerRef.current.addPolicy(bundle_id, policy);
+
+    if (result) {
+      if (global) {
+        triggerToast(result, "error");
+      }
+    } else {
+      if (global) {
+        triggerToast("Deal added successfully", "success");
+      }
+      dispatch(cartManagerRef.current.getCartState());
+    }
+  };
+
+  const removePolicy = async (policy: Policy): Promise<void> => {
     if (!cartManagerRef.current) return;
     const result = await cartManagerRef.current.removePolicy(policy);
-    dispatch(cartManagerRef.current.getCartState());
 
     if (result) {
-      triggerToast(result, "error");
+      if (global) {
+        triggerToast(result, "error");
+      }
     } else {
-      triggerToast("Deal removed successfully", "success");
+      if (global) {
+        triggerToast("Deal removed", "success");
+      }
+      dispatch(cartManagerRef.current.getCartState());
     }
   };
 
   const refreshCart = async (): Promise<string | null> => {
     if (!cartManagerRef.current) return null;
     const result = await cartManagerRef.current.refresh();
-    dispatch(cartManagerRef.current.getCartState());
+    if (!result) {
+      dispatch(cartManagerRef.current.getCartState());
+    }
     return result;
   };
 
-  const clearCart = async () => {
+  const clearCart = async (): Promise<void> => {
     if (!cartManagerRef.current) return;
     cartManagerRef.current.clearCart();
     dispatch(cartManagerRef.current.getCartState());
   };
 
-  const getActivePolicies = () => {
+  const getActivePolicies = (): string[] => {
     if (!cartManagerRef.current) return [];
     return cartManagerRef.current.getActivePolicies();
-  };
-
-  const triggerToast = (message: string, type: "success" | "error") => {
-    toast[type](message, {
-      className: "font-[Gilroy]",
-      autoClose: 2000,
-    });
   };
 
   return {

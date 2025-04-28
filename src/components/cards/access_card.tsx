@@ -49,7 +49,7 @@ export default function Card({
   }
 
   return (
-    <div className="w-full aspect-[9/5] rounded-3xl p-3 sm:p-4 relative overflow-hidden text-white my-4">
+    <div className="w-full aspect-[9/5] rounded-3xl p-3 sm:p-4 relative overflow-hidden text-white my-4 enhance-contrast">
       <div
         style={{
           background: `linear-gradient(to bottom right, ${colors.from}, ${colors.via}, ${colors.to})`,
@@ -57,17 +57,23 @@ export default function Card({
         className="absolute inset-0"
       />
 
-      {/* Circular gradient overlay */}
-      <div
-        className="absolute top-0 right-0 w-48 h-48 rounded-full transform translate-x-20 -translate-y-20"
-        style={{
-          background: `linear-gradient(to bottom right, ${colors.overlay}, transparent)`,
-        }}
-      />
+      {/* Tap In icon overlay in bottom right */}
+      <div className="absolute bottom-0 right-0 w-40 h-40 opacity-10 transform translate-x-6 translate-y-6">
+        <img
+          src="/tapin_icon.svg"
+          alt="Tap In"
+          className="w-full h-full scale-x-[-1]"
+        />
+      </div>
 
-      {/* Date in top right corner */}
-      <div className="absolute top-3 sm:top-4 right-4 sm:right-6 text-sm text-white/150 font-[Gilroy]">
-        {itemInfo?.for_date}
+      {/* Date and Amount Remaining in top right corner */}
+      <div className="absolute top-3 sm:top-4 right-4 sm:right-6 text-right">
+        <div className="text-sm text-white/150 font-[Gilroy]">
+          {itemInfo?.for_date}
+        </div>
+        <div className="text-md text-white font-bold mt-1">
+          {itemInfo?.amount_remaining} Left
+        </div>
       </div>
 
       {/* Main content */}

@@ -1,5 +1,19 @@
-import { Restaurant, Item, ItemSpecification, SingleMenuItem } from "@/types";
-import { PASS_MENU_TAG, KNOWN_MODIFIERS } from "@/constants";
+import {
+  Restaurant,
+  Item,
+  ItemSpecification,
+  PassItem,
+  NormalItem,
+  BundleItem,
+  Category,
+} from "@/types";
+import {
+  PASS_MENU_TAG,
+  KNOWN_MODIFIERS,
+  BUNDLE_MENU_TAG,
+  LIQUOR_MENU_TAG,
+  HOUSE_MIXER_LABEL,
+} from "@/constants";
 import { titleCase } from "title-case";
 
 export class ItemUtils {
@@ -14,8 +28,7 @@ export class ItemUtils {
     while (queue.length > 0) {
       const currentId = queue.shift()!;
       const currentNode = restaurant.menu[currentId];
-
-      if (currentNode?.info?.price) {
+      if ("price" in currentNode.info) {
         // If it's a leaf node (has a price), add it to our results
         items.push(currentId);
       } else {
@@ -36,52 +49,104 @@ export class ItemUtils {
       itemIds.push(...items);
     }
     // For pass items, sort by date
-    const passItems = itemIds.filter((id) => restaurant.menu[id].info.for_date);
-    if (passItems.length > 0) {
-      passItems.sort((a, b) => {
-        const dateA = restaurant.menu[a].info.for_date;
-        const dateB = restaurant.menu[b].info.for_date;
+    const passItemIds: string[] = itemIds.filter((id) =>
+      this.isPassItem(id, restaurant)
+    );
+
+    if (passItemIds.length > 0) {
+      passItemIds.sort((a, b) => {
+        const itemA = restaurant.menu[a].info as PassItem;
+        const itemB = restaurant.menu[b].info as PassItem;
+        const dateA = itemA.for_date;
+        const dateB = itemB.for_date;
         return new Date(dateA).getTime() - new Date(dateB).getTime();
       });
       // Replace pass items in original array with sorted version
-      const nonPassItems = itemIds.filter(
-        (id) => !restaurant.menu[id].info.for_date
+      const nonPassItemIds = itemIds.filter(
+        (id) => !this.isPassItem(id, restaurant)
       );
       itemIds.length = 0;
-      itemIds.push(...nonPassItems, ...passItems);
+      itemIds.push(...nonPassItemIds, ...passItemIds);
     }
     return itemIds;
   }
   static getItemName(item: Item, restaurant: Restaurant): string {
-    return (
-      titleCase(restaurant.menu[item.id].info.name) +
-      (item.modifiers.length > 0 ? ` (${item.modifiers.join(", ")})` : "")
-    );
+    const menu = restaurant.menu;
+    if (this.isPassItem(item.id, restaurant)) {
+      const itemObject = menu[item.id].info as PassItem;
+      return (
+        titleCase(itemObject.name) +
+        (itemObject.for_date ? ` (${itemObject.for_date})` : "")
+      );
+    } else if (this.isLiquorItem(item.id, restaurant)) {
+      const path = menu[item.id].path;
+      const liquorType = menu[path[path.length - 2]].info.name;
+      let liquorBrand: string | null = menu[path[path.length - 1]].info.name;
+      if (liquorBrand.toLowerCase().includes("house")) {
+        liquorBrand = null;
+      }
+      const tempModifiers = structuredClone(item.modifiers);
+      const mixerIndex = tempModifiers.findIndex((mod) => mod.includes("with"));
+      const mixer =
+        mixerIndex >= 0 ? tempModifiers.splice(mixerIndex, 1)[0] : undefined;
+      let name = "";
+      if (mixer) {
+        name = `${titleCase(liquorType)} ${mixer || ""}${
+          liquorBrand ? `, ${titleCase(liquorBrand)}` : ""
+        }`;
+      } else {
+        name = `Shot of ${titleCase(liquorType)}${
+          liquorBrand ? `, ${titleCase(liquorBrand)}` : ""
+        }`;
+      }
+      if (tempModifiers.length > 0) {
+        name += `, ${tempModifiers.map((mod) => titleCase(mod)).join(", ")}`;
+      }
+      return name;
+    } else {
+      const itemObject = menu[item.id].info as
+        | NormalItem
+        | BundleItem
+        | Category;
+      return (
+        titleCase(itemObject.name) +
+        (item.modifiers.length > 0 ? ` (${item.modifiers.join(", ")})` : "")
+      );
+    }
   }
   static isPassItem(itemId: string, restaurant: Restaurant): boolean {
     return restaurant.menu[itemId].path.includes(PASS_MENU_TAG);
   }
+  static isBundleItem(itemId: string, restaurant: Restaurant): boolean {
+    return restaurant.menu[itemId].path.includes(BUNDLE_MENU_TAG);
+  }
+  static isLiquorItem(itemId: string, restaurant: Restaurant): boolean {
+    return restaurant.menu[itemId].path.includes(LIQUOR_MENU_TAG);
+  }
   static getMenuItemFromItemId(
     itemId: string,
     restaurant: Restaurant
-  ): SingleMenuItem | null {
-    return restaurant.menu[itemId]?.info;
+  ): NormalItem | PassItem | BundleItem | undefined {
+    return restaurant.menu[itemId]?.info as
+      | NormalItem
+      | PassItem
+      | BundleItem
+      | undefined;
   }
-  static priceItem(item: Item, restaurant: Restaurant): number {
+  static priceItem(item: Item, restaurant: Restaurant): number | null {
     const { id, modifiers } = item;
     let multiple = modifiers.reduce(
       (acc, modifier) => acc * (KNOWN_MODIFIERS[modifier] || 1),
       1
     );
 
-    const temp = restaurant.menu[id].info;
-    if (!temp || !temp.price) {
-      throw new Error("Item cannot be priced");
+    const temp = restaurant.menu[id]?.info;
+    if (!temp || !("price" in temp)) {
+      return null;
     }
 
     return temp.price * multiple;
   }
-
   static doesItemMeetItemSpecification(
     itemSpecs: string[],
     itemInCart: Item,
@@ -97,5 +162,8 @@ export class ItemUtils {
       }
     }
     return false;
+  }
+  static isItemRedeemable(itemId: string, restaurant: Restaurant): boolean {
+    return !this.isBundleItem(itemId, restaurant);
   }
 }

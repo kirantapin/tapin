@@ -28,7 +28,7 @@ export default function NotFound() {
         className="
     inline-flex items-center justify-center
     rounded-full text-sm font-medium
-    bg-[#F5B14C] text-black
+    bg-[linear-gradient(225deg,#CAA650,#F4E4A8)] text-black
     h-11 px-8
   "
       >

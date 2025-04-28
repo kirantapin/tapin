@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Sheet } from "react-modal-sheet";
-import { ArrowLeft, X } from "lucide-react";
-import { Transaction, Order, Restaurant } from "@/types";
+import { X, ChevronDown } from "lucide-react";
+import { Transaction, Restaurant } from "@/types";
 import { useAuth } from "@/context/auth_context";
-import { supabase, supabase_local } from "@/utils/supabase_client";
+import { project_url, supabase, supabase_local } from "@/utils/supabase_client";
 import { QRCode } from "react-qrcode-logo";
-import { itemToStringDescription } from "@/utils/parse";
 import { toast } from "react-toastify";
+import { ItemUtils } from "@/utils/item_utils";
 
 interface QRModalProps {
   isOpen: boolean;
@@ -26,6 +26,7 @@ const QRModal: React.FC<QRModalProps> = ({
   const { userData, setTransactions } = useAuth();
 
   const [verifyingState, setVerifyingState] = useState("");
+  const [updatingTransactions, setUpdatingTransactions] = useState(false);
 
   const formatTransactions = (): string => {
     const displayList = [];
@@ -72,7 +73,6 @@ const QRModal: React.FC<QRModalProps> = ({
         },
       }
     );
-    console.log(response);
     const { success, updatedTransactions, error } = response.data;
     if (response.error || response.data.error || !response.data.success) {
       setRedeemError("Failed to Redeem Transactions");
@@ -127,7 +127,7 @@ const QRModal: React.FC<QRModalProps> = ({
   }
 
   transactionsToRedeem.forEach((transaction) => {
-    const itemDescription = itemToStringDescription(
+    const itemDescription = ItemUtils.getItemName(
       {
         id: transaction.item,
         modifiers: (transaction.metadata.modifiers as string[]) || [],
@@ -137,11 +137,42 @@ const QRModal: React.FC<QRModalProps> = ({
     itemFrequencyMap[itemDescription] =
       (itemFrequencyMap[itemDescription] || 0) + 1;
   });
+
+  const modifiedOnClose = async () => {
+    setUpdatingTransactions(true);
+    const { data: updatedTransactions } = await supabase
+      .from("transactions")
+      .select("transaction_id, fulfilled_by")
+      .in(
+        "transaction_id",
+        transactionsToRedeem.map((t) => t.transaction_id)
+      );
+
+    if (updatedTransactions) {
+      setTransactions((prevTransactions) =>
+        prevTransactions.map((transaction) => {
+          const updatedTransaction = updatedTransactions.find(
+            (ut) => ut.transaction_id === transaction.transaction_id
+          );
+          if (updatedTransaction) {
+            return {
+              ...transaction,
+              fulfilled_by: updatedTransaction.fulfilled_by,
+            };
+          }
+          return transaction;
+        })
+      );
+    }
+    setUpdatingTransactions(false);
+    onClose();
+  };
+
   return (
     <Sheet
       isOpen={isOpen}
-      onClose={onClose}
-      snapPoints={[0.7, 0]}
+      onClose={async () => await modifiedOnClose()}
+      snapPoints={[0.8, 0]}
       initialSnap={0}
       tweenConfig={{
         duration: 0.2,
@@ -150,27 +181,41 @@ const QRModal: React.FC<QRModalProps> = ({
     >
       <Sheet.Container className="rounded-t-3xl">
         <Sheet.Content>
-          <div className="bg-white text-black p-6 overflow-y-auto">
-            <div className="flex justify-end items-center mb-8">
+          <div className=" text-black p-6 pt-0 overflow-y-auto">
+            <div className="flex justify-between items-center mb-8 sticky top-0 bg-white shadow-md py-4 -mx-6 px-6">
+              <img
+                src="/tapin_icon_black.png"
+                alt="TapIn Logo"
+                className="h-8 w-8"
+              />
               <button
-                onClick={onClose}
-                className="text-black font-normal py-2 px-4  rounded-full bg-gray-200"
+                onClick={async () => await modifiedOnClose()}
+                className="text-black text-sm font-normal p-2 rounded-full bg-gray-200 flex items-center gap-1"
               >
-                Redeem Later
+                {updatingTransactions ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-black border-t-transparent" />
+                ) : (
+                  <X size={20} />
+                )}
               </button>
             </div>
 
             <h1 className="text-3xl font-bold mb-4">Scan QR Code</h1>
-            <p className="text-xl text-gray-500 mb-8">
-              Scan the QR code at the restaurant or have an employee enter their
-              code to redeem the purchase.
+            <p className="text-xl text-gray-500">
+              Or have an employee enter their code to redeem the purchase.
+              Unredeemed Items will be saved to your account.
             </p>
 
-            <div className="aspect-square w-full max-w-xs mx-auto bg-white flex items-center justify-center mb-8 rounded-xl">
+            <div className="w-full aspect-square flex items-center justify-center  rounded-xl">
               <QRCode
-                size={1024}
-                style={{ height: "auto", maxWidth: "100%", width: "100%" }}
                 value={formatTransactions()}
+                style={{
+                  width: "80%",
+                  height: "80%",
+                  maxWidth: "90%",
+                }}
+                qrStyle="dots"
+                eyeRadius={8}
               />
             </div>
             <div>
@@ -207,7 +252,7 @@ const QRModal: React.FC<QRModalProps> = ({
               </div>
               <button
                 type="submit"
-                className="w-full bg-[linear-gradient(225deg,#CAA650,#F4E4A8)] text-black py-4 rounded-full text-lg mt-4 hover:bg-[#E4A43B] transition-colors"
+                className="w-full bg-[linear-gradient(225deg,#CAA650,#F4E4A8)] text-white py-4 rounded-full text-lg mt-4 font-semibold"
               >
                 Submit Code
               </button>

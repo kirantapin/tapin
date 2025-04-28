@@ -3,7 +3,7 @@ import { setThemeColor } from "@/utils/color";
 import { useEffect, useRef, useState } from "react";
 
 export const useBannerColor = (
-  titleRef: React.RefObject<HTMLHeadingElement>,
+  titleElement: HTMLHeadingElement | null,
   restaurant: Restaurant | null | undefined
 ) => {
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -18,11 +18,7 @@ export const useBannerColor = (
     document.head.appendChild(style);
 
     const createObserver = () => {
-      //   const meta = document.querySelector(
-      //     'meta[name="theme-color"]'
-      //   ) as HTMLMetaElement | null;
-
-      if (!titleRef.current || !restaurant) {
+      if (!titleElement || !restaurant) {
         return;
       }
 
@@ -45,8 +41,8 @@ export const useBannerColor = (
         }
       );
 
-      if (titleRef.current && restaurant) {
-        observerRef.current.observe(titleRef.current);
+      if (titleElement && restaurant) {
+        observerRef.current.observe(titleElement);
       }
     };
 
@@ -59,5 +55,5 @@ export const useBannerColor = (
       // Clean up the style
       document.head.removeChild(style);
     };
-  }, [titleRef.current, restaurant]);
+  }, [titleElement, restaurant]);
 };

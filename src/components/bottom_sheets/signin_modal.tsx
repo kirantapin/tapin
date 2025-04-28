@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Sheet } from "react-modal-sheet";
-import { PhoneInput } from "./phone_input";
-import { Verification } from "./verification";
+import { PhoneInput } from "../signin/phone_input";
+import { Verification } from "../signin/verification";
 import { supabase } from "../../utils/supabase_client";
 import { X } from "lucide-react";
 
@@ -68,7 +68,7 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
         {/* Remove <Sheet.Header /> to get rid of the default header */}
         <Sheet.Content>
           {/* Your sign-in logic goes inside the content */}
-          <div className="p-6 relative h-fit overflow-hidden">
+          <div className="p-6 relative">
             {/* Close button at the top right */}
             <button
               onClick={onClose}

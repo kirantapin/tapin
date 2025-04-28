@@ -1,47 +1,103 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   HOUSE_MIXER_LABEL,
   MENU_DISPLAY_MAP,
   DRINK_MENU_TAG,
+  LIQUOR_MENU_TAG,
 } from "@/constants";
 import { titleCase } from "title-case";
+import { ItemUtils } from "@/utils/item_utils";
+import { adjustColor } from "@/utils/color";
+import { toast } from "react-toastify";
 
-const LiquorForm = ({ type, menu, addToCart, primaryColor }) => {
-  const [selectedLiquor, setSelectedLiquor] = useState("");
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [mixer, setMixer] = useState("");
+const LiquorForm = ({ type, restaurant, addToCart, primaryColor }) => {
+  const [liquorType, setLiquorType] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+  const [liquorBrand, setLiquorBrand] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+  const [selectedMixer, setSelectedMixer] = useState("");
+  const [isMixerDropdownOpen, setIsMixerDropdownOpen] = useState(false);
   const [modifiers, setModifiers] = useState<string[]>([]);
   const [currentCustomModifier, setCurrentCustomModifier] =
     useState<string>("");
+  const [loading, setLoading] = useState(false);
 
-  const liquorMenu = MENU_DISPLAY_MAP[type].reduce(
-    (acc, key) => (acc && acc[key] ? acc[key] : undefined),
-    menu
-  );
-  const liquors = Object.keys(liquorMenu);
+  const menu = restaurant.menu;
+  const liquorChildIds = menu[LIQUOR_MENU_TAG].children;
+  const liquors = liquorChildIds.map((id: string) => {
+    return { id: id, name: menu[id].info.name };
+  });
+  const liquorBrandIds = liquorType
+    ? restaurant.menu[liquorType.id].children
+    : [];
+  const liquorBrands = liquorBrandIds.map((id: string) => {
+    return { id: id, name: menu[id].info.name };
+  });
 
-  const handleSelectLiquor = (liquor) => {
-    setSelectedLiquor(liquor);
-    setIsDropdownOpen(false);
-  };
+  useEffect(() => {
+    if (liquorType) {
+      const houseBrand = liquorBrands.find((brand) =>
+        brand.name.toLowerCase().includes("house")
+      );
+      if (houseBrand) {
+        setLiquorBrand({ id: houseBrand.id, name: houseBrand.name });
+      } else {
+        setLiquorBrand(null);
+      }
+    }
+  }, [liquorType]);
 
-  const handleSubmit = (e) => {
+  const mixerOptions = [
+    "Coca Cola",
+    "Diet Coke",
+    "Sprite",
+    "Ginger Ale",
+    "Tonic",
+    "Soda",
+    "Cranberry",
+    "Orange Juice",
+    "Pineapple Juice",
+    "Grapefruit Juice",
+    "Red Bull",
+    "Water",
+    "Lemonade",
+  ];
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!selectedLiquor) {
+
+    if (!liquorType) {
+      toast.error("Please select a Liquor");
       return;
     }
-    const formData =
-      type === HOUSE_MIXER_LABEL
-        ? { liquor: selectedLiquor, mixer }
-        : { liquor: selectedLiquor };
+    if (!liquorBrand) {
+      toast.error(`Please select a specific ${liquorType.name}`);
+      return;
+    }
+    const itemToAdd = {
+      id: liquorBrand.id,
+      modifiers: modifiers,
+    };
 
-    const liquorPath = structuredClone(MENU_DISPLAY_MAP[type]);
-    liquorPath.push(selectedLiquor);
-    liquorPath.push("house");
-    addToCart({ path: liquorPath, modifiers: modifiers });
+    if (type === HOUSE_MIXER_LABEL) {
+      if (!selectedMixer) {
+        toast.error("Please select a Mixer");
+        return;
+      }
+      itemToAdd.modifiers.push(`with ${titleCase(selectedMixer)}`);
+    }
+    setLoading(true);
+    await addToCart(itemToAdd);
+    setLoading(false);
 
-    setSelectedLiquor("");
-    setMixer("");
+    setLiquorType(null);
+    setLiquorBrand(null);
+    setSelectedMixer("");
+    setModifiers([]);
   };
 
   const addModifier = (modifier: string) => {
@@ -67,78 +123,86 @@ const LiquorForm = ({ type, menu, addToCart, primaryColor }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-4 p-4 border rounded-lg shadow-md"
+      className="space-y-4 p-5 border rounded-2xl shadow-md"
     >
-      <div className="relative">
-        <label
-          htmlFor="liquor"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Liquor
+      {/* Liquor Buttons */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Select Liquor
         </label>
-        <div
-          className="mt-1 p-2 border border-gray-300 rounded-md shadow-sm cursor-pointer flex justify-between items-center"
-          onClick={() => setIsDropdownOpen((prev) => !prev)}
-        >
-          <span>{titleCase(selectedLiquor) || "Select a liquor"}</span>
-          <svg
-            className={`w-5 h-5 transform ${
-              isDropdownOpen ? "rotate-180" : "rotate-0"
-            } transition-transform`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M19 9l-7 7-7-7"
-            ></path>
-          </svg>
+        <div className="grid grid-cols-2 gap-2">
+          {liquors.map((liquor) => (
+            <button
+              key={liquor.id}
+              type="button"
+              onClick={() => setLiquorType(liquor)}
+              className="p-3 rounded-full text-sm font-medium transition-colors duration-200 border bg-transparent"
+              style={{
+                borderColor:
+                  liquorType?.id === liquor.id ? primaryColor : "#e5e7eb",
+                color: liquorType?.id === liquor.id ? primaryColor : "#374151",
+              }}
+            >
+              {titleCase(liquor.name)}
+            </button>
+          ))}
         </div>
-
-        {isDropdownOpen && (
-          <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 max-h-60 overflow-auto">
-            {liquors.map((liquor) => (
-              <div
-                key={liquor}
-                onClick={() => handleSelectLiquor(liquor)}
-                className="p-2 cursor-pointer"
-                style={{
-                  backgroundColor:
-                    selectedLiquor === liquor
-                      ? `${primaryColor}33` // Adds opacity (33 = 20% opacity)
-                      : "transparent",
-                }}
-              >
-                {titleCase(liquor)}
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
-      {type === HOUSE_MIXER_LABEL && (
+      {/* Liquor Brand Buttons (shows only if a liquor is selected) */}
+      {liquorType && liquorBrands.length > 0 && (
         <div>
-          <label
-            htmlFor="mixer"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Mixer
+          <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
+            Select {titleCase(liquorType.name)} Brand
           </label>
-          <input
-            type="text"
-            id="mixer"
-            value={mixer}
-            onChange={(e) => setMixer(e.target.value)}
-            className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"
-            placeholder="e.g., Coke, Orange Juice"
-            required
-          />
+          <div className="flex gap-2 overflow-x-auto whitespace-nowrap pb-2">
+            {liquorBrands.map((brand: { id: string; name: string }) => (
+              <button
+                key={brand.id}
+                type="button"
+                onClick={() => setLiquorBrand(brand)}
+                className="flex-none p-3 rounded-full text-sm font-medium transition-colors duration-200 border bg-transparent"
+                style={{
+                  borderColor:
+                    liquorBrand?.id === brand.id ? primaryColor : "#e5e7eb",
+                  color:
+                    liquorBrand?.id === brand.id ? primaryColor : "#374151",
+                }}
+              >
+                {titleCase(brand.name)}
+              </button>
+            ))}
+          </div>
         </div>
       )}
+
+      {/* Mixer Buttons */}
+      {type === HOUSE_MIXER_LABEL && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Select Mixer
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            {mixerOptions.map((mixer) => (
+              <button
+                key={mixer}
+                type="button"
+                onClick={() => setSelectedMixer(mixer)}
+                className="p-3 rounded-full text-sm font-medium transition-colors duration-200 border bg-transparent"
+                style={{
+                  borderColor:
+                    selectedMixer === mixer ? primaryColor : "#e5e7eb",
+                  color: selectedMixer === mixer ? primaryColor : "#374151",
+                }}
+              >
+                {mixer}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Modifiers Section */}
       {type === HOUSE_MIXER_LABEL && (
         <div>
           <label className="block text-sm font-medium text-gray-700">
@@ -150,64 +214,41 @@ const LiquorForm = ({ type, menu, addToCart, primaryColor }) => {
                 key={option}
                 type="button"
                 onClick={() => toggleModifier(option.toLowerCase())}
-                className={`px-4 py-2 border rounded-md cursor-pointer transition ${
-                  modifiers.includes(option.toLowerCase())
-                    ? "bg-gray-800 text-white"
-                    : "bg-gray-200"
-                }`}
+                className={`px-4 py-2 text-black border bg-white rounded-full cursor-pointer transition font-medium`}
+                style={{
+                  borderColor: modifiers.includes(option.toLowerCase())
+                    ? primaryColor
+                    : "#e5e7eb",
+                  color: modifiers.includes(option.toLowerCase())
+                    ? primaryColor
+                    : "#374151",
+                }}
               >
                 {option}
               </button>
             ))}
           </div>
-          {/* Custom Modifier Input */}
-          <input
-            type="text"
-            value={currentCustomModifier}
-            onChange={(e) => setCurrentCustomModifier(e.target.value)}
-            className="mt-2 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
-            placeholder="Custom modifier (e.g., Extra Ice, Less Sweet)"
-          />
-          <button
-            type="button"
-            onClick={() => {
-              addModifier(currentCustomModifier);
-              setCurrentCustomModifier("");
-            }}
-            className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md"
-          >
-            Add Modifier
-          </button>
-
-          {/* Display Selected Modifiers */}
-          {modifiers.length > 0 && (
-            <div className="mt-2">
-              <p className="text-sm font-medium text-gray-700">
-                Selected Modifiers:
-              </p>
-              <div className="flex flex-wrap gap-2 mt-1">
-                {modifiers.map((mod) => (
-                  <div
-                    key={mod}
-                    className="flex items-center gap-2 px-3 py-1 bg-gray-300 rounded-md cursor-pointer"
-                    onClick={() => removeModifier(mod)}
-                  >
-                    {mod}
-                    <span className="text-xs text-red-600 font-bold">✕</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       )}
 
       <button
         type="submit"
-        className="w-full  text-white py-2 rounded-md transition"
-        style={{ backgroundColor: primaryColor }}
+        onClick={handleSubmit}
+        className="w-full text-white py-2 rounded-full transition "
+        style={{
+          background: `linear-gradient(45deg, 
+          ${adjustColor(restaurant.metadata.primaryColor as string, -30)},
+          ${adjustColor(restaurant.metadata.primaryColor as string, 40)}
+        )`,
+        }}
       >
-        Add To Cart
+        {loading ? (
+          <div className="flex justify-center">
+            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+          </div>
+        ) : (
+          "Add To Cart"
+        )}
       </button>
     </form>
   );

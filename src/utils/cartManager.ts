@@ -34,12 +34,21 @@ export class CartManager {
   userSession: any | null;
   private token: string | null = null;
   private localStorageKey: string;
-  constructor(restaurant_id: string, userSession: any | null) {
+  global: boolean;
+  constructor(
+    restaurant_id: string,
+    userSession: any | null,
+    global: boolean = false
+  ) {
     this.restaurant_id = restaurant_id;
     this.userSession = userSession;
+    this.global = global;
     const localStorageKey = `${restaurant_id}${localStorageCartTag}`;
     this.localStorageKey = localStorageKey;
-    const storedCartData = localStorage.getItem(localStorageKey);
+
+    const storedCartData = this.global
+      ? localStorage.getItem(this.localStorageKey)
+      : null;
 
     const currentTime = Date.now();
     const isCartValid = (timestamp: number) => {
@@ -80,6 +89,9 @@ export class CartManager {
    * @param {string} key - The key to save in localStorage.
    */
   private saveCartToLocalStorage() {
+    if (!this.global) {
+      return;
+    }
     const data = {
       cart: this.cart,
       dealEffect: this.dealEffect,
@@ -93,7 +105,11 @@ export class CartManager {
 
   private async verifyOrder(
     type: string,
-    content: Item | string | number
+    content:
+      | Item
+      | string
+      | number
+      | { policy_id: string; bundle_id: string | null }
   ): Promise<void> {
     console.log("verifyOrder", type, content);
 
@@ -106,6 +122,8 @@ export class CartManager {
       request: { type: type, content: content },
       jwtToken: this.token,
     };
+
+    console.log("before verify order payload", payload);
 
     try {
       const { data, error } = await supabase_local.functions.invoke(
@@ -139,8 +157,15 @@ export class CartManager {
     this.saveCartToLocalStorage();
   }
 
-  public async addPolicy(policy: Policy): Promise<string | null> {
-    await this.verifyOrder(ADD_POLICY, policy.policy_id);
+  public async addPolicy(
+    bundle_id: string | null,
+    policy: Policy
+  ): Promise<string | null> {
+    console.log("adding policy", policy);
+    await this.verifyOrder(ADD_POLICY, {
+      policy_id: policy.policy_id,
+      bundle_id: bundle_id,
+    });
     if (this.errorDisplay) {
       return this.errorDisplay;
     }
@@ -156,10 +181,7 @@ export class CartManager {
     return null;
   }
 
-  public async addToCart(
-    item: Item,
-    restaurant: Restaurant
-  ): Promise<string | null> {
+  public async addToCart(item: Item): Promise<string | null> {
     await this.verifyOrder(ADD_ITEM, item);
     if (this.errorDisplay) {
       return this.errorDisplay;
@@ -178,7 +200,6 @@ export class CartManager {
   public getCartState() {
     return {
       cart: this.cart,
-      selectedPolicy: this.selectedPolicy,
       dealEffect: this.dealEffect,
       cartResults: this.cartResults,
       errorDisplay: this.errorDisplay,
@@ -205,12 +226,11 @@ export class CartManager {
   }
 
   public async newUserSession(userSession: any) {
-    console.log("newUserSession for cart", userSession);
     await this.verifyOrder(NEW_USER_SESSION, userSession.access_token);
+    this.userSession = userSession;
     if (this.errorDisplay) {
       return this.errorDisplay;
     }
-    this.userSession = userSession;
     this.saveCartToLocalStorage();
   }
 

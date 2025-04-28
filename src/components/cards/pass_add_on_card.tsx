@@ -1,18 +1,19 @@
-import { Policy, Restaurant } from "@/types";
+import { CartState, Policy, Restaurant } from "@/types";
 import { ItemUtils } from "@/utils/item_utils";
-import { getMenuItemFromItemId } from "@/utils/pricer";
 import { Check } from "lucide-react";
 
 interface PassAddOnCardProps {
-  addPolicy: (policy: Policy) => void;
+  addPolicy: (bundle_id: string | null, policy: Policy) => Promise<void>;
+  removePolicy: (policy: Policy) => void;
   restaurant: Restaurant;
   policy: Policy;
-  state;
+  state: CartState;
 }
 
 export const PassAddOnCard: React.FC<PassAddOnCardProps> = ({
   state,
   addPolicy,
+  removePolicy,
   restaurant,
   policy,
 }) => {
@@ -28,6 +29,7 @@ export const PassAddOnCard: React.FC<PassAddOnCardProps> = ({
     restaurant
   )[0];
   if (!passItemId) {
+    console.log("no pass item id");
     return null;
   }
   const menuItem = ItemUtils.getMenuItemFromItemId(passItemId, restaurant);
@@ -44,22 +46,25 @@ export const PassAddOnCard: React.FC<PassAddOnCardProps> = ({
     state.dealEffect.wholeCartModification?.policy_id,
   ].filter((id): id is string => id !== undefined);
 
+  console.log("pass add on card", policy);
+
   return (
     <div className="flex items-start gap-3 p-4 rounded-xl border border-gray-300 bg-white">
       {/* Checkbox */}
       {policyIds.includes(policy.policy_id) ? (
-        <div
+        <button
+          onClick={() => removePolicy(policy)}
           className="mt-1 w-5 h-5 rounded border flex items-center justify-center"
           style={{
-            backgroundColor: restaurant.metadata.primaryColor,
-            borderColor: restaurant.metadata.primaryColor,
+            backgroundColor: restaurant.metadata.primaryColor as string,
+            borderColor: restaurant.metadata.primaryColor as string,
           }}
         >
           <Check className="w-3 h-3 text-white" />
-        </div>
+        </button>
       ) : (
         <button
-          onClick={() => addPolicy(policy)}
+          onClick={() => addPolicy(null, policy)}
           className="mt-1 w-5 h-5 rounded border flex items-center justify-center transition-colors bg-white border-gray-300 hover:border-indigo-500"
         />
       )}
@@ -69,7 +74,9 @@ export const PassAddOnCard: React.FC<PassAddOnCardProps> = ({
         {/* Exclusive Badge */}
         <div
           className="inline-block text-white text-xs font-semibold rounded px-2 py-1 mb-1"
-          style={{ backgroundColor: restaurant.metadata.primaryColor }}
+          style={{
+            backgroundColor: restaurant.metadata.primaryColor as string,
+          }}
         >
           EXCLUSIVE (SAVE ${originalPrice - newPrice})
         </div>

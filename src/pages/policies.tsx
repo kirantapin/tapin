@@ -1,23 +1,27 @@
-import { ChevronLeft, ShoppingBag } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
   LOYALTY_REWARD_TAG,
   NORMAL_DEAL_TAG,
   RESTAURANT_PATH,
-  SINGLE_POLICY_PAGE_PATH,
 } from "@/constants";
 import { Policy, Restaurant } from "@/types";
-import { fetchRestaurantById } from "@/utils/queries/restaurant";
-import { fetch_policies } from "@/utils/queries/policies";
 
 import DealCard from "@/components/cards/small_policy";
-import { useCartManager } from "@/hooks/useCartManager";
+import { useGlobalCartManager } from "@/hooks/useGlobalCartManager";
 import { useAuth } from "@/context/auth_context";
-import PolicyModal from "@/components/bottom_sheets/policy_modal";
 import Rewards from "@/components/rewards.tsx";
 import { SignInButton } from "@/components/signin/signin_button";
 import { setThemeColor } from "@/utils/color";
+import { OffersSkeleton } from "@/components/skeletons/offers_skeleton";
+import { useRestaurant } from "@/context/restaurant_context";
+import { useBottomSheet } from "@/context/bottom_sheet_context";
+const tagMap: Record<string, string> = {
+  Deals: NORMAL_DEAL_TAG,
+  Rewards: LOYALTY_REWARD_TAG,
+};
+
 export default function PoliciesPage() {
   setThemeColor();
   const { userSession, userData } = useAuth();
@@ -25,64 +29,57 @@ export default function PoliciesPage() {
   const [activeTag, setActiveTag] = useState(
     location.state?.tag || NORMAL_DEAL_TAG
   );
-  const [restaurant, setRestaurant] = useState<Restaurant>();
-  const [policies, setPolicies] = useState<Policy[]>([]);
+  const { restaurant, setCurrentRestaurantId, policyManager } = useRestaurant();
+  const policies =
+    restaurant && policyManager
+      ? policyManager?.getAllPolicies(restaurant)
+      : [];
   const [activePolicies, setActivePolicies] = useState<Policy[]>([]);
-  const { id: restaurant_id } = useParams<{ id: string }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [activePolicy, setActivePolicy] = useState<Policy | null>(null);
-  const { state, addPolicy, addToCart, removeFromCart } = useCartManager(
+  const { state, addPolicy, addToCart, removeFromCart } = useGlobalCartManager(
     restaurant as Restaurant,
     userSession
   );
+  const [loading, setLoading] = useState<boolean>(false);
+  const { openPolicyModal } = useBottomSheet();
 
   useEffect(() => {
-    //fetch policies by restaurant ID
-    if (!restaurant_id) {
-      navigate("/not_found_page");
-    }
-    const fetchData = async () => {
-      const restaurant = await fetchRestaurantById(restaurant_id);
-      const policies = await fetch_policies(restaurant_id);
-      setPolicies(policies);
-      setRestaurant(restaurant);
-    };
-    fetchData();
-  }, []);
-
-  const tagMap: Record<string, string> = {
-    Deals: NORMAL_DEAL_TAG,
-    Rewards: LOYALTY_REWARD_TAG,
-  };
-
-  useEffect(() => {
-    if (activeTag === NORMAL_DEAL_TAG) {
+    if (activeTag === NORMAL_DEAL_TAG && policies) {
       const filtered = policies.filter(
         (policy) => policy.definition.tag === activeTag
       );
-      setActivePolicies(filtered);
+      if (JSON.stringify(filtered) !== JSON.stringify(activePolicies)) {
+        setActivePolicies(filtered);
+      }
     }
   }, [activeTag, policies]);
+
   useEffect(() => {
+    if (id) {
+      setCurrentRestaurantId(id);
+    }
     window.scrollTo(0, 0);
-  }, []);
+  }, [id]);
+
+  if (loading) {
+    return <OffersSkeleton />;
+  }
   return (
     <div className="max-w-md mx-auto bg-white min-h-screen">
       {/* Header */}
-      <div className="flex justify-between items-center p-4">
+      <div className="flex items-center p-4 sticky top-0 bg-white shadow-sm border-b relative">
         <button
-          className="w-9 h-9 flex items-center justify-center rounded-full bg-black/10"
+          className="w-9 h-9 flex items-center justify-center rounded-full bg-black/10 absolute left-4"
           onClick={() => {
-            navigate(RESTAURANT_PATH.replace(":id", restaurant_id));
+            navigate(RESTAURANT_PATH.replace(":id", id));
           }}
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
-        <h1 className="text-2xl font-semibold">Exclusive Offers</h1>
-        <button className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100">
-          <ShoppingBag className="w-5 h-5" />
-        </button>
+        <h1 className="text-xl font-semibold w-full text-center">
+          Exclusive Offers
+        </h1>
       </div>
 
       {/* Tabs */}
@@ -122,17 +119,16 @@ export default function PoliciesPage() {
           {activePolicies.length > 0 ? (
             activePolicies.map((policy) => (
               <DealCard
+                key={policy.policy_id}
                 cart={state.cart}
                 policy={policy}
                 restaurant={restaurant as Restaurant}
-                setPolicy={setActivePolicy}
-                setIsOpen={setIsOpen}
                 dealEffect={state.dealEffect}
               />
             ))
           ) : (
-            <p className="text-gray-500 text-center">
-              No active policies available.
+            <p className="text-2xl text-black text-center font-bold flex justify-center items-center min-h-[200px]">
+              No active Deals.
             </p>
           )}
         </div>
@@ -142,31 +138,11 @@ export default function PoliciesPage() {
         restaurant &&
         (userData ? (
           <div className="px-4">
-            <Rewards
-              viewAll={true}
-              restaurant={restaurant as Restaurant}
-              userData={userData}
-              onIntentionToRedeem={(policy) => {
-                setActivePolicy(policy);
-                setIsOpen(true);
-              }}
-            />
+            <Rewards viewAll={true} />
           </div>
         ) : (
           <SignInButton onClose={() => {}} />
         ))}
-      {activePolicy && (
-        <PolicyModal
-          policy={activePolicy}
-          isOpen={isOpen}
-          onClose={() => setIsOpen(false)}
-          restaurant={restaurant as Restaurant}
-          onAddToCart={addPolicy}
-          state={state}
-          addToCart={addToCart}
-          removeFromCart={removeFromCart}
-        />
-      )}
     </div>
   );
 }

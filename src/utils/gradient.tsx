@@ -15,7 +15,6 @@ export function GradientIcon({
 
   return (
     <>
-      {/* ➊ Define the gradient once */}
       <svg width="0" height="0" style={{ position: "absolute" }}>
         <defs>
           <linearGradient
@@ -55,7 +54,7 @@ export function Hero({ restaurant_id }: { restaurant_id: string }) {
       {/* Profile Image */}
       <div className="absolute -bottom-5" style={{ left: "18px" }}>
         {/* Moved further down */}
-        <div className="w-24 h-24 rounded-full border-2 border-white  overflow-hidden shadow-xl">
+        <div className="w-24 h-24 rounded-full border-2 border-white  overflow-hidden shadow-2xl">
           <img
             src={`${project_url}/storage/v1/object/public/${RESTAURANT_IMAGE_BUCKET}/${restaurant_id}_profile.png`}
             alt="Profile"

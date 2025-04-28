@@ -5,23 +5,24 @@ import {
   BASE_PATH,
   DRINK_CHECKOUT_PATH,
   RESTAURANT_PATH,
-  DISCOVER_PATH,
-  PREVIOUS_TRANSACTIONS_PATH,
+  MY_SPOT_PATH,
   OFFERS_PAGE_PATH,
   INFO_PAGE_PATH,
   DEVICE_NOT_SUPPORTED_PATH,
 } from "./constants.ts";
-import SignInModal from "./components/signin/signin_modal.tsx";
+import SignInModal from "./components/bottom_sheets/signin_modal.tsx";
 import { ToastContainer } from "react-toastify";
 import OrderHistoryModal from "./components/bottom_sheets/history_modal.tsx";
-import { RestaurantSkeleton } from "./components/skeletons/restaurant.tsx";
-import StickyTest from "./pages/sticky_test.tsx";
-
+import ProfileModal from "./components/bottom_sheets/profile_modal.tsx";
+import { RestaurantSkeleton } from "./components/skeletons/restaurant_skeleton.tsx";
+import { CheckoutSkeleton } from "./components/skeletons/checkout_skeleton.tsx";
+import { MySpotSkeleton } from "./components/skeletons/my_spot_skeleton.tsx";
+import { OffersSkeleton } from "./components/skeletons/offers_skeleton.tsx";
 // Lazy imports
 const Discovery = lazy(() => import("./pages/discovery.tsx"));
 const CheckoutPage = lazy(() => import("./pages/demo_checkout.tsx"));
 const NotFoundPage = lazy(() => import("./pages/not_found_page.tsx"));
-const TransactionList = lazy(() => import("./pages/previous_transactions.tsx"));
+const MySpotContent = lazy(() => import("./pages/my_spot_content.tsx"));
 const PoliciesPage = lazy(() => import("./pages/policies.tsx"));
 const RestaurantInfo = lazy(() => import("./pages/restaurant_info.tsx"));
 const DeviceNotSupported = lazy(
@@ -36,6 +37,8 @@ const App: React.FC = () => {
     setShowSignInModal,
     showOrderHistoryModal,
     setShowOrderHistoryModal,
+    showProfile,
+    setShowProfile,
   } = useAuth();
 
   return (
@@ -48,30 +51,17 @@ const App: React.FC = () => {
         isOpen={showOrderHistoryModal}
         onClose={() => setShowOrderHistoryModal(false)}
       />
-      <AppLoader />
+      <ProfileModal
+        isOpen={showProfile}
+        onClose={() => setShowProfile(false)}
+      />
       <ToastContainer stacked className="w-full" style={{ width: "100%" }} />
       <Routes>
         <Route
           path={BASE_PATH}
           element={
-            <Suspense fallback={<div>...loading</div>}>
+            <Suspense fallback={null}>
               <Discovery />
-            </Suspense>
-          }
-        />
-        <Route
-          path={DISCOVER_PATH}
-          element={
-            <Suspense fallback={<div>...loading</div>}>
-              <Discovery />
-            </Suspense>
-          }
-        />
-        <Route
-          path={"/sticky_test"}
-          element={
-            <Suspense fallback={<div>...loading</div>}>
-              <StickyTest />
             </Suspense>
           }
         />
@@ -86,7 +76,7 @@ const App: React.FC = () => {
         <Route
           path={DRINK_CHECKOUT_PATH}
           element={
-            <Suspense fallback={<div>...loading</div>}>
+            <Suspense fallback={<CheckoutSkeleton />}>
               <CheckoutPage />
             </Suspense>
           }
@@ -94,7 +84,7 @@ const App: React.FC = () => {
         <Route
           path={OFFERS_PAGE_PATH}
           element={
-            <Suspense fallback={<div>...loading</div>}>
+            <Suspense fallback={<OffersSkeleton />}>
               <PoliciesPage />
             </Suspense>
           }
@@ -102,23 +92,23 @@ const App: React.FC = () => {
         <Route
           path={INFO_PAGE_PATH}
           element={
-            <Suspense fallback={<div>...loading</div>}>
+            <Suspense fallback={null}>
               <RestaurantInfo />
             </Suspense>
           }
         />
         <Route
-          path={PREVIOUS_TRANSACTIONS_PATH}
+          path={MY_SPOT_PATH}
           element={
-            <Suspense fallback={<div>...loading</div>}>
-              <TransactionList />
+            <Suspense fallback={<MySpotSkeleton />}>
+              <MySpotContent />
             </Suspense>
           }
         />
         <Route
           path="*"
           element={
-            <Suspense fallback={<div>...loading</div>}>
+            <Suspense fallback={null}>
               <NotFoundPage />
             </Suspense>
           }
@@ -126,7 +116,7 @@ const App: React.FC = () => {
         <Route
           path={DEVICE_NOT_SUPPORTED_PATH}
           element={
-            <Suspense fallback={<div>...loading</div>}>
+            <Suspense fallback={null}>
               <DeviceNotSupported />
             </Suspense>
           }
@@ -134,25 +124,6 @@ const App: React.FC = () => {
       </Routes>
     </div>
   );
-};
-
-// Loader Component with Navigation Logic
-const AppLoader: React.FC = () => {
-  const { loadingUser } = useAuth();
-  const [loading, setLoading] = useState(true);
-
-  if (loadingUser) {
-    // Display a loader while fetching data
-    return (
-      <div
-        style={{ display: "flex", justifyContent: "center", marginTop: "50px" }}
-      >
-        <h1>Loading...</h1>
-      </div>
-    );
-  }
-
-  return null; // Render nothing once loading is done
 };
 
 export default App;

@@ -1,0 +1,242 @@
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/context/auth_context";
+import { Transaction } from "@/types";
+import { RESTAURANT_PATH } from "@/constants";
+import { ChevronLeft } from "lucide-react";
+import { ItemUtils } from "@/utils/item_utils";
+import { useRestaurant } from "@/context/restaurant_context";
+import { PreviousTransactionItem } from "@/components/menu_items";
+import { adjustColor } from "@/utils/color";
+import ManageBundles from "@/components/manage_bundles";
+import { MySpotSkeleton } from "@/components/skeletons/my_spot_skeleton";
+import { useBottomSheet } from "@/context/bottom_sheet_context";
+const MySpotContent: React.FC = () => {
+  const { transactions } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { id } = useParams();
+  const [type, setType] = useState<string>(location.state?.type || "Passes");
+  const [activeFilter, setActiveFilter] = useState<string>(
+    type === "Passes" ? "Passes" : type === "Orders" ? "Orders" : "My Bundles"
+  );
+
+  const { restaurant, setCurrentRestaurantId } = useRestaurant();
+  const [groupedTransactions, setGroupedTransactions] = useState<
+    Record<
+      string,
+      {
+        transactions: Transaction[];
+        maxQuantity: number;
+        currentQuantity: number;
+      }
+    >
+  >({});
+  const { openQrModal } = useBottomSheet();
+  useEffect(() => {
+    if (id) {
+      setCurrentRestaurantId(id);
+    }
+    window.scrollTo(0, 0);
+  }, [id]);
+
+  const filterTransactions = () => {
+    const filtered = transactions.filter(
+      (transaction) =>
+        transaction.restaurant_id === restaurant.id &&
+        transaction.fulfilled_by === null &&
+        ItemUtils.getMenuItemFromItemId(transaction.item, restaurant) &&
+        ItemUtils.isPassItem(transaction.item, restaurant) ===
+          (activeFilter === "Passes" ? true : false)
+    );
+
+    // Group transactions by item ID + modifiers
+    const groupedTransactions = filtered.reduce((acc, transaction) => {
+      const key =
+        transaction.item +
+        "|" +
+        (transaction.metadata.modifiers || []).join(",");
+
+      if (!acc[key]) {
+        acc[key] = {
+          transactions: [],
+          maxQuantity: 0,
+          currentQuantity: 0,
+        };
+      }
+      acc[key].transactions.push(transaction);
+      acc[key].maxQuantity = acc[key].transactions.length;
+      acc[key].currentQuantity = 0;
+      return acc;
+    }, {} as Record<string, { transactions: Transaction[]; maxQuantity: number; currentQuantity: number }>);
+
+    setGroupedTransactions(groupedTransactions);
+  };
+
+  useEffect(() => {
+    if (!restaurant) return;
+    if (activeFilter === "Passes") {
+      filterTransactions();
+    } else if (activeFilter === "Orders") {
+      filterTransactions();
+    } else if (activeFilter === "My Bundles") {
+      setGroupedTransactions({});
+    }
+  }, [transactions, activeFilter, restaurant]);
+
+  const addItem = (key: string) => {
+    setGroupedTransactions((prev) => {
+      const newGroupedTransactions = { ...prev };
+      if (
+        newGroupedTransactions[key].currentQuantity <
+        newGroupedTransactions[key].maxQuantity
+      ) {
+        newGroupedTransactions[key].currentQuantity += 1;
+      }
+      return newGroupedTransactions;
+    });
+  };
+  const removeItem = (key: string) => {
+    setGroupedTransactions((prev) => {
+      const newGroupedTransactions = { ...prev };
+      if (newGroupedTransactions[key].currentQuantity > 0) {
+        newGroupedTransactions[key].currentQuantity -= 1;
+      }
+      return newGroupedTransactions;
+    });
+  };
+
+  const grabSelectedTransactions = () => {
+    return Object.entries(groupedTransactions).reduce(
+      (acc, [key, { transactions, maxQuantity, currentQuantity }]) => {
+        if (currentQuantity > 0) {
+          acc.push(...transactions.slice(0, currentQuantity));
+        }
+        return acc;
+      },
+      [] as Transaction[]
+    );
+  };
+
+  const selectedTransactions = grabSelectedTransactions();
+
+  if (!restaurant) {
+    return <MySpotSkeleton />;
+  }
+
+  return (
+    <div className="p-3">
+      <div className="flex items-center p-4 sticky top-0 bg-white shadow-sm border-b -mx-3">
+        {/* Back button - absolute positioning to keep it in left corner */}
+        <div className="absolute left-4">
+          <button
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-black/10"
+            onClick={() => {
+              navigate(RESTAURANT_PATH.replace(":id", restaurant.id));
+            }}
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* Title - centered with flex-1 */}
+        <h1 className="flex-1 text-xl font-semibold text-center">My Spot</h1>
+      </div>
+
+      <div className="flex gap-3 mb-2 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar ml-1 mt-6">
+        {["Passes", "Orders", "My Bundles"].map((filter) => (
+          <button
+            key={filter}
+            className={`px-4 py-1.5 rounded-full text-sm whitespace-nowrap font-medium ${
+              activeFilter === filter ? " border " : "border text-gray-500"
+            }`}
+            style={
+              activeFilter === filter
+                ? {
+                    color: restaurant?.metadata.primaryColor,
+                    borderColor: restaurant?.metadata.primaryColor,
+                  }
+                : {}
+            }
+            onClick={() => {
+              setType(filter);
+              setActiveFilter(filter);
+            }}
+          >
+            {filter}
+          </button>
+        ))}
+      </div>
+
+      <p className="text-gray-500 text-sm px-4">
+        Unredeemed transactions expire after 90 days.
+      </p>
+
+      {Object.keys(groupedTransactions).length === 0 ? (
+        activeFilter === "My Bundles" ? (
+          <ManageBundles restaurant={restaurant} />
+        ) : (
+          <p className="text-black font-semibold flex items-center justify-center h-[50vh]">
+            You have no unredeemed transactions.
+          </p>
+        )
+      ) : (
+        <>
+          {/* Transactions List */}
+          <ul className="bg-white rounded-lg overflow-hidden space-y-6">
+            {Object.entries(groupedTransactions).map(
+              ([key, { transactions, maxQuantity, currentQuantity }]) => {
+                const item = ItemUtils.getMenuItemFromItemId(
+                  transactions[0].item,
+                  restaurant
+                );
+
+                if (!item) return null;
+
+                return (
+                  <PreviousTransactionItem
+                    key={key}
+                    itemId={transactions[0].item}
+                    currentQuantity={currentQuantity}
+                    maxQuantity={maxQuantity}
+                    restaurant={restaurant}
+                    increment={() => addItem(key)}
+                    decrement={() => removeItem(key)}
+                  />
+                );
+              }
+            )}
+          </ul>
+
+          {/* Redeem Button */}
+          <div className="fixed bottom-0 left-0 right-0 flex flex-col gap-2 bg-[rgba(255,255,255,0.9)] py-4 px-4 border-t rounded-t-3xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.2)]">
+            <button
+              className={`w-full py-3 rounded-full text-white font-semibold ${
+                selectedTransactions.length > 0 ? "" : "bg-gray-400 "
+              }`}
+              style={
+                selectedTransactions.length > 0
+                  ? {
+                      background: `linear-gradient(45deg, 
+          ${adjustColor(restaurant?.metadata.primaryColor as string, -30)},
+          ${adjustColor(restaurant?.metadata.primaryColor as string, 40)}
+        )`,
+                    }
+                  : { background: "#969292" }
+              }
+              onClick={() => openQrModal(selectedTransactions)}
+              disabled={selectedTransactions.length === 0}
+            >
+              Redeem{" "}
+              {selectedTransactions.length > 0
+                ? `(${selectedTransactions.length})`
+                : ""}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+export default MySpotContent;

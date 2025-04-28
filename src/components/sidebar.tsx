@@ -9,7 +9,7 @@ import CloseIcon from "@mui/icons-material/Close"; // or use Lucide if preferred
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/auth_context.tsx";
-import { DISCOVER_PATH, HISTORY_KEY, RESTAURANT_PATH } from "../constants.ts";
+import { BASE_PATH, HISTORY_KEY, RESTAURANT_PATH } from "../constants.ts";
 import { ArrowLeft, UserRound } from "lucide-react";
 import { project_url } from "@/utils/supabase_client.ts";
 import { Restaurant } from "@/types.ts";
@@ -19,7 +19,6 @@ interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   navigateToSignIn: () => void;
-  setLoading: (loading: boolean) => void;
 }
 
 export const Sidebar = ({
@@ -27,7 +26,6 @@ export const Sidebar = ({
   isOpen,
   onClose,
   navigateToSignIn,
-  setLoading,
 }: SidebarProps) => {
   const { userSession, logout } = useAuth();
   const [isSignedIn, setIsSignedIn] = useState(false);
@@ -65,7 +63,6 @@ export const Sidebar = ({
       onClose();
       return;
     }
-    setLoading(true);
     onClose();
     navigate(RESTAURANT_PATH.replace(":id", restaurantId));
     window.location.reload();
@@ -97,7 +94,7 @@ export const Sidebar = ({
         <button
           className="w-full bg-[linear-gradient(225deg,#CAA650,#F4E4A8)] text-white font-semibold py-3 px-4 rounded-full shadow-md flex items-center justify-center gap-2"
           onClick={() => {
-            navigate(DISCOVER_PATH);
+            navigate(BASE_PATH);
             onClose();
           }}
         >

@@ -1,5 +1,4 @@
 import { CartItem, DealEffectPayload, Item, Restaurant } from "@/types";
-import { itemToStringDescription } from "@/utils/parse";
 import { modifiedItemFlair } from "@/utils/pricer";
 import { project_url } from "@/utils/supabase_client";
 import { Minus, Plus, Trash2 } from "lucide-react";
@@ -38,14 +37,14 @@ export function CheckoutItemCard({
             itemInfo.image_url ||
             `${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`
           }
-          alt={itemToStringDescription(item.item, restaurant)}
+          alt={ItemUtils.getItemName(item.item, restaurant)}
           className="w-20 h-20 rounded-md object-cover bg-gray-100"
         />
 
         {/* Info */}
         <div>
-          <p className="text-xl font-semibold text-gray-900">
-            {itemToStringDescription(item.item, restaurant)}
+          <p className="text-lg font-semibold text-gray-900">
+            {ItemUtils.getItemName(item.item, restaurant)}
           </p>
           <div className="flex items-center gap-2 mt-1">
             <span className="text-md text-gray-600 font-medium">

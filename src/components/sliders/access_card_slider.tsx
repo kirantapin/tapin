@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import AccessCard from "@/components/cards/access_card.tsx";
-import { Cart, CartItem, DealEffectPayload, Restaurant } from "@/types";
-import { MENU_DISPLAY_MAP, PASS_LABEL, PASS_MENU_TAG } from "@/constants";
-import { getAllItemsInCategory, isPassItem } from "@/utils/parse";
+import { Cart, CartItem, DealEffectPayload, Item, Restaurant } from "@/types";
+import { MENU_DISPLAY_MAP, PASS_LABEL } from "@/constants";
 import { modifiedItemFlair } from "@/utils/pricer";
 import { ItemUtils } from "@/utils/item_utils";
 
@@ -16,8 +15,8 @@ const AccessCardSlider = ({
 }: {
   cart: Cart;
   restaurant: Restaurant;
-  addToCart;
-  removeFromCart;
+  addToCart: (item: Item) => Promise<void>;
+  removeFromCart: (itemId: number) => Promise<void>;
   displayCartPasses: boolean;
   dealEffect: DealEffectPayload | null;
 }) => {
@@ -98,7 +97,7 @@ const AccessCardSlider = ({
                   <div key={index} className="snap-center shrink-0 w-full px-4">
                     <AccessCard
                       cart={cart}
-                      cartItem={x}
+                      cartItem={x as CartItem | null}
                       restaurant={restaurant}
                       itemId={null}
                       addToCart={addToCart}
@@ -114,7 +113,7 @@ const AccessCardSlider = ({
                       cart={cart}
                       cartItemId={null}
                       restaurant={restaurant}
-                      itemId={x}
+                      itemId={x as string}
                       addToCart={addToCart}
                       removeFromCart={removeFromCart}
                       modifiedFlair={null}

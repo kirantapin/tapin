@@ -1,22 +1,18 @@
 import { useNavigate } from "react-router-dom";
 import DealCard from "@/components/cards/small_policy.tsx";
-import { Policy, Restaurant } from "@/types";
+import { Policy, Restaurant, Bundle } from "@/types";
 import { NORMAL_DEAL_TAG, OFFERS_PAGE_PATH } from "@/constants";
 
 interface PolicySliderProps {
   restaurant: Restaurant | null;
   policies: Policy[];
   state: any;
-  setPolicy: (policy: Policy) => void;
-  setIsOpen: (isOpen: boolean) => void;
 }
 
 export const PolicySlider: React.FC<PolicySliderProps> = ({
   restaurant,
   policies,
   state,
-  setPolicy,
-  setIsOpen,
 }) => {
   const navigate = useNavigate();
 
@@ -43,7 +39,7 @@ export const PolicySlider: React.FC<PolicySliderProps> = ({
         </button>
       </div>
 
-      <div className="overflow-x-auto pb-2 no-scrollbar">
+      <div className="overflow-x-auto pb-2 no-scrollbar -mx-4 px-4">
         <div className="flex gap-4 whitespace-nowrap">
           {dealPolicies.map((policy, index) => (
             <DealCard
@@ -51,9 +47,6 @@ export const PolicySlider: React.FC<PolicySliderProps> = ({
               cart={state.cart}
               policy={policy}
               restaurant={restaurant}
-              primaryColor={restaurant?.metadata.primaryColor}
-              setPolicy={setPolicy}
-              setIsOpen={setIsOpen}
               dealEffect={state.dealEffect}
             />
           ))}

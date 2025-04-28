@@ -39,7 +39,7 @@ const RedeemButton = ({
   };
   return (
     <button
-      className=" bg-[linear-gradient(90deg,#CAA650,#F4E4A8)] w-full py-3 px-4 rounded-lg font-medium text-white"
+      className=" bg-[linear-gradient(90deg,#CAA650,#F4E4A8)] w-full py-3 px-4 rounded-full font-medium text-white"
       onClick={async () => {
         try {
           const potentialError = await sanityCheck();
