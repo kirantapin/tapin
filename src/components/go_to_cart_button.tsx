@@ -71,12 +71,7 @@ const GoToCartButton = ({
               : "translate-y-20 opacity-0 pointer-events-none"
           }`}
       style={{
-        background: restaurant.metadata.primaryColor
-          ? `linear-gradient(135deg, 
-        ${adjustColor(restaurant.metadata.primaryColor as string, -40)},
-        ${adjustColor(restaurant.metadata.primaryColor as string, 10)}
-      )`
-          : undefined,
+        backgroundColor: restaurant.metadata.primaryColor,
       }}
     >
       <ShoppingCart className="w-5 h-5" />

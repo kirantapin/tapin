@@ -23,7 +23,7 @@ import { ItemUtils } from "@/utils/item_utils";
 import { adjustColor } from "@/utils/color";
 import { useAuth } from "@/context/auth_context";
 import { SignInButton } from "../signin/signin_button";
-import { PolicyUtils } from "@/utils/policy_utils";
+import { useBottomSheet } from "@/context/bottom_sheet_context";
 interface PolicyModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -44,10 +44,9 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
   restaurant,
   addPolicy,
   state,
-  addToCart,
-  removeFromCart,
 }) => {
   const { userSession } = useAuth();
+  const { addToCart, removeFromCart } = useBottomSheet();
   const missingItemsResults = getMissingItemsForPolicy(
     policy,
     state.cart,
@@ -222,7 +221,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                               restaurant={restaurant}
                               addToCart={addToCart}
                               removeFromCart={removeFromCart}
-                              itemId={itemId}
+                              item={{ id: itemId, modifiers: [] }}
                             />
                           );
                         })}

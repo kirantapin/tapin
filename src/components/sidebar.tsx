@@ -13,20 +13,15 @@ import { BASE_PATH, HISTORY_KEY, RESTAURANT_PATH } from "../constants.ts";
 import { ArrowLeft, UserRound } from "lucide-react";
 import { project_url } from "@/utils/supabase_client.ts";
 import { Restaurant } from "@/types.ts";
+import { SignInButton } from "./signin/signin_button.tsx";
 
 interface SidebarProps {
   restaurant: Restaurant | null;
   isOpen: boolean;
   onClose: () => void;
-  navigateToSignIn: () => void;
 }
 
-export const Sidebar = ({
-  restaurant,
-  isOpen,
-  onClose,
-  navigateToSignIn,
-}: SidebarProps) => {
+export const Sidebar = ({ restaurant, isOpen, onClose }: SidebarProps) => {
   const { userSession, logout } = useAuth();
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [tabs, setTabs] = useState<string[]>(["Discover"]);
@@ -129,26 +124,24 @@ export const Sidebar = ({
         </div>
       )}
       <div className="px-4 py-2 mt-auto mb-4">
-        <button
-          className={`w-full ${
-            isSignedIn
-              ? "bg-gray-200"
-              : "bg-[linear-gradient(45deg,#CAA650,#F4E4A8)]"
-          } text-${
-            isSignedIn ? "black" : "white"
-          } font-semibold py-2 px-4 rounded-full shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2`}
-          onClick={() => {
-            if (isSignedIn) {
+        {isSignedIn ? (
+          <button
+            className="w-full bg-gray-200 text-black font-semibold py-2 px-4 rounded-full shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2"
+            onClick={() => {
               logout();
-            } else {
-              navigateToSignIn();
-            }
-            onClose();
-          }}
-        >
-          <UserRound size={20} />
-          <span>{isSignedIn ? "Logout" : "Sign In"}</span>
-        </button>
+              onClose();
+            }}
+          >
+            <UserRound size={20} />
+            <span>Logout</span>
+          </button>
+        ) : (
+          <SignInButton
+            onClose={() => {
+              onClose();
+            }}
+          />
+        )}
       </div>
     </Drawer>
   );

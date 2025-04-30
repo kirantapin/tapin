@@ -183,6 +183,28 @@ export const RestaurantSkeleton = () => {
               ))}
             </div>
           </div>
+          <div className="overflow-x-hidden mt-4">
+            <div className="flex gap-4">
+              {[1, 2, 3].map((_, i) => (
+                <div
+                  key={i}
+                  className="flex-shrink-0 w-[280px] h-[160px] rounded-xl overflow-hidden"
+                >
+                  <Skeleton
+                    width="100%"
+                    height="100%"
+                    baseColor="#e5e7eb"
+                    highlightColor="#d1d5db"
+                    style={{
+                      margin: 0,
+                      padding: 0,
+                      display: "block",
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>

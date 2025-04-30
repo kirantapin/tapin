@@ -11,7 +11,6 @@ import AccessCardSlider from "../components/sliders/access_card_slider.tsx";
 import DealPreOrderBar from "@/components/checkout/deal_checkout_bar.tsx";
 import { motion } from "framer-motion";
 import { titleCase } from "title-case";
-import { useGlobalCartManager } from "@/hooks/useGlobalCartManager.tsx";
 import AddOnCard from "@/components/cards/add_on_card.tsx";
 import { useTimer } from "@/hooks/useTimer.tsx";
 import DealCard from "@/components/cards/small_policy.tsx";
@@ -23,15 +22,17 @@ import { adjustColor, setThemeColor } from "@/utils/color.ts";
 import { SignInButton } from "@/components/signin/signin_button.tsx";
 import { useRestaurant } from "@/context/restaurant_context.tsx";
 import { CheckoutSkeleton } from "@/components/skeletons/checkout_skeleton.tsx";
-
+import { useBottomSheet } from "@/context/bottom_sheet_context.tsx";
+import { PolicyCard } from "@/components/cards/policy_card.tsx";
 export default function CheckoutPage() {
   setThemeColor();
-  const { userSession, setShowSignInModal } = useAuth();
+  const { userSession } = useAuth();
   const { restaurant, policyManager, setCurrentRestaurantId } = useRestaurant();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [tipPercent, setTipPercent] = useState<number>(0.2);
   const tipAmounts = [0.1, 0.15, 0.2];
+  const { openSignInModal } = useBottomSheet();
 
   const {
     timeRemaining: addOnTime,
@@ -50,7 +51,7 @@ export default function CheckoutPage() {
     removePolicy,
     isPreEntry,
     clearCart,
-  } = useGlobalCartManager(restaurant as Restaurant, userSession);
+  } = useBottomSheet();
 
   useEffect(() => {
     if (id) {
@@ -211,7 +212,7 @@ export default function CheckoutPage() {
             <div className="mt-6">
               <h2 className="text-2xl font-bold mb-4">Save More</h2>
               <div className="overflow-x-auto pb-2 no-scrollbar -mx-4 px-4">
-                <div className="flex gap-2 whitespace-nowrap">
+                <div className="flex gap-6 snap-x snap-mandatory">
                   {policyManager
                     .getRecommendedDeals(
                       state.cart,
@@ -219,13 +220,15 @@ export default function CheckoutPage() {
                       restaurant as Restaurant
                     )
                     .map((policy) => (
-                      <DealCard
-                        key={policy.policy_id}
-                        cart={state.cart}
-                        policy={policy}
-                        restaurant={restaurant as Restaurant}
-                        dealEffect={state.dealEffect}
-                      />
+                      <div className="w-[90%] flex-shrink-0 snap-center">
+                        <PolicyCard
+                          key={policy.policy_id}
+                          cart={state.cart}
+                          policy={policy}
+                          restaurant={restaurant as Restaurant}
+                          dealEffect={state.dealEffect}
+                        />
+                      </div>
                     ))}
                 </div>
               </div>

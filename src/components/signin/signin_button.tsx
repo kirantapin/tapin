@@ -1,4 +1,5 @@
 import { useAuth } from "@/context/auth_context";
+import { useBottomSheet } from "@/context/bottom_sheet_context";
 
 interface SignInButtonProps {
   onClose: () => void;
@@ -7,18 +8,19 @@ interface SignInButtonProps {
 export const SignInButton: React.FC<SignInButtonProps> = ({
   onClose = () => {},
 }) => {
-  const { setShowSignInModal } = useAuth();
+  const { openSignInModal } = useBottomSheet();
   return (
     <button
       onClick={() => {
         onClose();
-        setShowSignInModal(true);
+        openSignInModal();
       }}
       className={
-        "w-full mx-1 bg-[linear-gradient(225deg,#CAA650,#F4E4A8)] text-white py-3 rounded-full mt-auto mb-2"
+        "w-full mx-1 bg-[linear-gradient(225deg,#CAA650,#F4E4A8)] text-white py-3 rounded-full mt-auto mb-2 flex items-center justify-center gap-2"
       }
     >
-      Sign In
+      <span className="font-semibold">Sign In</span>
+      <img src="/tapin_icon_full_white.png" alt="Tap In Icon" className="h-5" />
     </button>
   );
 };

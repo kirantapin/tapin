@@ -1,5 +1,5 @@
 import React from "react";
-import { Restaurant, Transaction } from "@/types";
+import { Item, PassItem, Restaurant, Transaction } from "@/types";
 import { DrinkItem } from "../menu_items";
 import { rest } from "lodash";
 import { ItemUtils } from "@/utils/item_utils";
@@ -38,35 +38,48 @@ const processTransactionItems = (
     .map((transactionItem) => {
       const itemId = transactionItem.item;
       const metadata = transactionItem.metadata;
+      const modifiers = metadata?.modifiers || [];
       if (metadata?.path?.includes(PASS_MENU_TAG)) {
         // Get second to last item from path array
         const item = ItemUtils.getMenuItemFromItemId(itemId, restaurant);
         if (item) {
-          return itemId;
+          return {
+            id: itemId,
+            modifiers: [],
+          };
         }
         const sameCurrentPassItems = ItemUtils.getAllItemsInCategory(
           metadata?.path[metadata?.path.length - 2],
           restaurant
         );
         if (sameCurrentPassItems.length > 0) {
-          return sameCurrentPassItems.reduce((earliest, itemId) => {
-            const earliestDate = ItemUtils.getMenuItemFromItemId(
-              earliest,
-              restaurant
-            )?.for_date;
-            const currentDate = ItemUtils.getMenuItemFromItemId(
-              itemId,
-              restaurant
-            )?.for_date;
-            return currentDate < earliestDate ? itemId : earliest;
-          }, sameCurrentPassItems[0]);
+          return {
+            id: sameCurrentPassItems.reduce((earliest, currentId) => {
+              const currentItem = ItemUtils.getMenuItemFromItemId(
+                currentId,
+                restaurant
+              ) as PassItem;
+              const earliestItem = ItemUtils.getMenuItemFromItemId(
+                earliest,
+                restaurant
+              ) as PassItem;
+              return new Date(currentItem.for_date) <
+                new Date(earliestItem.for_date)
+                ? currentId
+                : earliest;
+            }, sameCurrentPassItems[0]),
+            modifiers: [],
+          };
         } else {
           return null;
         }
       }
-      return itemId;
+      return {
+        id: itemId,
+        modifiers: modifiers,
+      };
     })
-    .filter((itemId) => itemId !== null);
+    .filter((item) => item?.id !== null);
   return processedTransactionItems;
 };
 
@@ -95,15 +108,15 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
 
       <div className="overflow-x-auto no-scrollbar -mx-4 px-4">
         <div className="grid grid-flow-col auto-cols-[minmax(22rem,max-content)] gap-2">
-          {[...processedTransactionItems].slice(0, 3).map((itemId) => {
+          {[...processedTransactionItems].slice(0, 3).map((item) => {
             return (
               <DrinkItem
-                key={itemId}
+                key={item?.id}
                 restaurant={restaurant}
                 addToCart={addToCart}
                 removeFromCart={removeFromCart}
                 cart={state.cart}
-                itemId={itemId}
+                item={item as Item}
               />
             );
           })}

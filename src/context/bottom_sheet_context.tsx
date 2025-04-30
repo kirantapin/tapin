@@ -8,6 +8,8 @@ import React, {
 import PolicyModal from "@/components/bottom_sheets/policy_modal";
 import {
   BundleItem,
+  CartState,
+  Item,
   Policy,
   Restaurant,
   Transaction,
@@ -23,6 +25,10 @@ import { BundleUtils } from "@/utils/bundle_utils";
 import { toast } from "react-toastify";
 import { MY_SPOT_PATH } from "@/constants";
 import { ItemUtils } from "@/utils/item_utils";
+import { CartManager } from "@/utils/cartManager";
+import ProfileModal from "@/components/bottom_sheets/profile_modal";
+import OrderHistoryModal from "@/components/bottom_sheets/history_modal";
+import SignInModal from "@/components/bottom_sheets/signin_modal";
 
 // Define the shape of your sheet registry: keys → sheet components
 type SheetMap = Record<string, FC<any>>;
@@ -39,6 +45,18 @@ interface BottomSheetContextValue {
     policy: Policy,
     userOwnershipMap: Record<string, boolean>
   ) => void;
+  state: CartState;
+  addPolicy: (policy: Policy) => void;
+  addToCart: (item: Item) => Promise<void>;
+  removeFromCart: (id: number) => Promise<void>;
+  removePolicy: (policy: Policy) => void;
+  refreshCart: () => void;
+  clearCart: () => void;
+  getActivePolicies: () => string[];
+  cartManager: CartManager;
+  isPreEntry: boolean;
+  openSignInModal: () => void;
+  openProfileModal: () => void;
 }
 
 const BottomSheetContext = createContext<BottomSheetContextValue>({
@@ -50,6 +68,17 @@ const BottomSheetContext = createContext<BottomSheetContextValue>({
   isOpen: false,
   openQrModal: () => {},
   handlePolicyClick: () => {},
+  state: {
+    cart: [],
+    dealEffect: [],
+    dealEffectMap: {},
+  },
+  addPolicy: () => {},
+  addToCart: () => Promise.resolve(),
+  removeFromCart: () => Promise.resolve(),
+  removePolicy: () => {},
+  openSignInModal: () => {},
+  openProfileModal: () => {},
 });
 
 interface BottomSheetProviderProps {
@@ -62,10 +91,19 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
 }) => {
   const { restaurant } = useRestaurant();
   const { userSession } = useAuth();
-  const { addToCart, removeFromCart, state, addPolicy } = useGlobalCartManager(
-    restaurant as Restaurant,
-    userSession
-  );
+  const {
+    state,
+    dispatch,
+    addToCart,
+    removeFromCart,
+    addPolicy,
+    removePolicy,
+    refreshCart,
+    clearCart,
+    getActivePolicies,
+    cartManager,
+    isPreEntry,
+  } = useGlobalCartManager(restaurant as Restaurant, userSession);
   const [isOpen, setIsOpen] = useState(false);
   const [bundleModal, setBundleModal] = useState<Bundle | null>(null);
   const [policyModal, setPolicyModal] = useState<{
@@ -75,6 +113,8 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
   const [qrModal, setQrModal] = useState<{
     transactionsToRedeem: Transaction[];
   } | null>(null);
+  const [showSignInModal, setShowSignInModal] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   const handlePolicyClick = (
     policy: Policy,
@@ -117,31 +157,59 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
     if (isOpen) {
       closeSheet();
     }
-    setPolicyModal({ policy, bundle_id });
-    setIsOpen(true);
+    setTimeout(() => {
+      setPolicyModal({ policy, bundle_id });
+      setIsOpen(true);
+    }, 200); // Wait for animation to complete
   };
 
   const openBundleModal = (bundle: Bundle) => {
     if (isOpen) {
       closeSheet();
     }
-    setBundleModal(bundle);
-    setIsOpen(true);
+    setTimeout(() => {
+      setBundleModal(bundle);
+      setIsOpen(true);
+    }, 200); // Wait for animation to complete
   };
 
   const openQrModal = (transactionsToRedeem: Transaction[]) => {
     if (isOpen) {
       closeSheet();
     }
-    setQrModal({ transactionsToRedeem });
-    setIsOpen(true);
+    setTimeout(() => {
+      setQrModal({ transactionsToRedeem });
+      setIsOpen(true);
+    }, 200); // Wait for animation to complete
   };
+
+  const openSignInModal = () => {
+    if (isOpen) {
+      closeSheet();
+    }
+    setTimeout(() => {
+      setShowSignInModal(true);
+      setIsOpen(true);
+    }, 200); // Wait for animation to complete
+  };
+
+  const openProfileModal = () => {
+    if (isOpen) {
+      closeSheet();
+    }
+    setTimeout(() => {
+      setShowProfile(true);
+      setIsOpen(true);
+    }, 200); // Wait for animation to complete
+  };
+
   const closeSheet = () => {
     setIsOpen(false);
-    setTimeout(() => {
-      setBundleModal(null);
-      setPolicyModal(null);
-    }, 300); // Wait for animation to complete
+    setBundleModal(null);
+    setPolicyModal(null);
+    setQrModal(null);
+    setShowSignInModal(false);
+    setShowProfile(false);
   };
 
   return (
@@ -152,6 +220,18 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
         closeSheet,
         openQrModal,
         handlePolicyClick,
+        state,
+        addPolicy,
+        addToCart,
+        removeFromCart,
+        removePolicy,
+        refreshCart,
+        clearCart,
+        getActivePolicies,
+        cartManager,
+        isPreEntry,
+        openSignInModal,
+        openProfileModal,
       }}
     >
       {children}
@@ -184,6 +264,15 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
           restaurant={restaurant as Restaurant}
         />
       )}
+      <SignInModal
+        isOpen={showSignInModal}
+        onClose={() => setShowSignInModal(false)}
+      />
+
+      <ProfileModal
+        isOpen={showProfile}
+        onClose={() => setShowProfile(false)}
+      />
     </BottomSheetContext.Provider>
   );
 };

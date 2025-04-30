@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import DealCard from "@/components/cards/small_policy.tsx";
 import { Policy, Restaurant, Bundle } from "@/types";
 import { NORMAL_DEAL_TAG, OFFERS_PAGE_PATH } from "@/constants";
+import { PolicyCard } from "../cards/policy_card.tsx";
 
 interface PolicySliderProps {
   restaurant: Restaurant | null;
@@ -40,15 +41,16 @@ export const PolicySlider: React.FC<PolicySliderProps> = ({
       </div>
 
       <div className="overflow-x-auto pb-2 no-scrollbar -mx-4 px-4">
-        <div className="flex gap-4 whitespace-nowrap">
+        <div className="flex gap-4">
           {dealPolicies.map((policy, index) => (
-            <DealCard
-              key={index}
-              cart={state.cart}
-              policy={policy}
-              restaurant={restaurant}
-              dealEffect={state.dealEffect}
-            />
+            <div className="flex-none w-[80vw]" key={index}>
+              <PolicyCard
+                cart={state.cart}
+                policy={policy}
+                restaurant={restaurant}
+                dealEffect={state.dealEffect}
+              />
+            </div>
           ))}
         </div>
       </div>

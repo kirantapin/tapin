@@ -61,7 +61,7 @@ const BundleCard = ({
   return (
     <div className="mt-3">
       <div className="flex justify-center items-center p-4">
-        <div className="w-full max-w-[380px] rounded-[24px] overflow-hidden bg-white shadow-xl border border-gray-400 ">
+        <div className="w-full max-w-[380px] rounded-[24px] overflow-hidden bg-white shadow-lg border border-gray-400 ">
           <div className="p-4 pb-0">
             <div className="relative w-full h-[180px] rounded-2xl overflow-hidden border border-gray-400">
               <img
@@ -159,13 +159,7 @@ const BundleCard = ({
               <button
                 className="w-full bg-[linear-gradient(225deg,#CAA650,#F4E4A8)] text-white border-none rounded-full py-[14px] text-base font-medium enhance-contrast"
                 style={{
-                  background: `linear-gradient(225deg, ${adjustColor(
-                    restaurant?.metadata.primaryColor as string,
-                    -30
-                  )}, ${adjustColor(
-                    restaurant?.metadata.primaryColor as string,
-                    40
-                  )})`,
+                  background: restaurant?.metadata.primaryColor,
                 }}
                 onClick={() => {
                   onCardClick(bundle);

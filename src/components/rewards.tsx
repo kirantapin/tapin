@@ -15,7 +15,7 @@ interface RewardsProps {
 
 const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
   const { restaurant, policyManager } = useRestaurant();
-  const { openPolicyModal } = useBottomSheet();
+  const { openPolicyModal, getActivePolicies } = useBottomSheet();
   const { userData } = useAuth();
   const userPoints =
     userData?.points[restaurant?.id as string | undefined] || 0;
@@ -128,9 +128,10 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
               return (
                 <LoyaltyRewardItem
                   restaurant={restaurant}
-                  itemId={policy.definition.action.items[0]}
+                  itemSpec={policy.definition.action.items[0]}
                   numPoints={policy.definition.action.amount}
                   onRedeem={() => openPolicyModal(policy, null)}
+                  isActive={getActivePolicies().includes(policy.policy_id)}
                 />
               );
             }
@@ -148,12 +149,7 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
           }
           className="mt-6 rounded-full flex items-center justify-left gap-2 text-white w-fit max-w-sm px-5 py-2.5 text-sm enhance-contrast"
           style={{
-            background: restaurant?.metadata.primaryColor
-              ? `linear-gradient(45deg, 
-        ${adjustColor(restaurant.metadata.primaryColor as string, -30)},
-        ${adjustColor(restaurant.metadata.primaryColor as string, 40)}
-      )`
-              : undefined,
+            backgroundColor: restaurant?.metadata.primaryColor,
           }}
         >
           View All Rewards

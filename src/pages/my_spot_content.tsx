@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/auth_context";
 import { Transaction } from "@/types";
 import { RESTAURANT_PATH } from "@/constants";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, GlassWater, Ticket, HandCoins, Info } from "lucide-react";
 import { ItemUtils } from "@/utils/item_utils";
 import { useRestaurant } from "@/context/restaurant_context";
 import { PreviousTransactionItem } from "@/components/menu_items";
@@ -11,6 +11,12 @@ import { adjustColor } from "@/utils/color";
 import ManageBundles from "@/components/manage_bundles";
 import { MySpotSkeleton } from "@/components/skeletons/my_spot_skeleton";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
+
+const tagMap: Record<string, { tag: string; icon: any }> = {
+  Passes: { tag: "Passes", icon: Ticket },
+  Orders: { tag: "Orders", icon: GlassWater },
+  "My Bundles": { tag: "My Bundles", icon: HandCoins },
+};
 const MySpotContent: React.FC = () => {
   const { transactions } = useAuth();
   const navigate = useNavigate();
@@ -126,7 +132,7 @@ const MySpotContent: React.FC = () => {
 
   return (
     <div className="p-3">
-      <div className="flex items-center p-4 sticky top-0 bg-white shadow-sm border-b -mx-3">
+      <div className="flex items-center p-4 sticky top-0 bg-white shadow-sm border-b -mx-3 z-10">
         {/* Back button - absolute positioning to keep it in left corner */}
         <div className="absolute left-4">
           <button
@@ -144,14 +150,16 @@ const MySpotContent: React.FC = () => {
       </div>
 
       <div className="flex gap-3 mb-2 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar ml-1 mt-6">
-        {["Passes", "Orders", "My Bundles"].map((filter) => (
+        {Object.keys(tagMap).map((filter) => (
           <button
-            key={filter}
+            key={tagMap[filter].tag}
             className={`px-4 py-1.5 rounded-full text-sm whitespace-nowrap font-medium ${
-              activeFilter === filter ? " border " : "border text-gray-500"
+              activeFilter === tagMap[filter].tag
+                ? " border "
+                : "border text-gray-500"
             }`}
             style={
-              activeFilter === filter
+              activeFilter === tagMap[filter].tag
                 ? {
                     color: restaurant?.metadata.primaryColor,
                     borderColor: restaurant?.metadata.primaryColor,
@@ -159,18 +167,24 @@ const MySpotContent: React.FC = () => {
                 : {}
             }
             onClick={() => {
-              setType(filter);
-              setActiveFilter(filter);
+              setType(tagMap[filter].tag);
+              setActiveFilter(tagMap[filter].tag);
             }}
           >
-            {filter}
+            {React.createElement(tagMap[filter].icon, {
+              className: "w-4 h-4 inline-block mr-1.5",
+            })}
+            {tagMap[filter].tag}
           </button>
         ))}
       </div>
 
-      <p className="text-gray-500 text-sm px-4">
-        Unredeemed transactions expire after 90 days.
-      </p>
+      <div className="flex items-center gap-2 bg-amber-50 rounded-lg p-3 mx-4">
+        <Info className="w-5 h-5 text-amber-600" />
+        <p className="text-gray-600 text-sm">
+          Unredeemed transactions expire after 90 days.
+        </p>
+      </div>
 
       {Object.keys(groupedTransactions).length === 0 ? (
         activeFilter === "My Bundles" ? (
@@ -186,17 +200,20 @@ const MySpotContent: React.FC = () => {
           <ul className="bg-white rounded-lg overflow-hidden space-y-6">
             {Object.entries(groupedTransactions).map(
               ([key, { transactions, maxQuantity, currentQuantity }]) => {
-                const item = ItemUtils.getMenuItemFromItemId(
+                const existingItem = ItemUtils.getMenuItemFromItemId(
                   transactions[0].item,
                   restaurant
                 );
 
-                if (!item) return null;
+                if (!existingItem) return null;
 
                 return (
                   <PreviousTransactionItem
                     key={key}
-                    itemId={transactions[0].item}
+                    item={{
+                      id: transactions[0].item,
+                      modifiers: transactions[0].metadata?.modifiers || [],
+                    }}
                     currentQuantity={currentQuantity}
                     maxQuantity={maxQuantity}
                     restaurant={restaurant}

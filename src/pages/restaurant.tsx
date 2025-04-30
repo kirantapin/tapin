@@ -23,7 +23,6 @@ import GoToCartButton from "@/components/go_to_cart_button.tsx";
 import AccessCardSlider from "../components/sliders/access_card_slider.tsx";
 import Rewards from "@/components/rewards.tsx";
 import { Sidebar } from "@/components/sidebar.tsx";
-import { useGlobalCartManager } from "@/hooks/useGlobalCartManager.tsx";
 import { useSearch } from "@/hooks/useSearch.tsx";
 import { Hero } from "@/utils/gradient.tsx";
 import { useBannerColor } from "@/hooks/useBannerColor.tsx";
@@ -37,14 +36,7 @@ import { useRestaurant } from "@/context/restaurant_context.tsx";
 import BundleSlider from "@/components/sliders/bundle_slider.tsx";
 import { useBottomSheet } from "@/context/bottom_sheet_context.tsx";
 export default function RestaurantPage() {
-  const {
-    userSession,
-    userData,
-    transactions,
-    setShowSignInModal,
-    setShowOrderHistoryModal,
-    setShowProfile,
-  } = useAuth();
+  const { userSession, userData, transactions } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const {
@@ -60,10 +52,7 @@ export default function RestaurantPage() {
   const orderDrinksRef = useRef<HTMLDivElement>(null);
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [qrTransactions, setQrTransactions] = useState<Transaction[]>([]);
-  const { state, addToCart, removeFromCart, addPolicy } = useGlobalCartManager(
-    restaurant as Restaurant,
-    userSession
-  );
+  const { state, addToCart, removeFromCart } = useBottomSheet();
   const { openPolicyModal, openBundleModal, openQrModal } = useBottomSheet();
 
   const { searchResults, searchQuery, setSearchQuery, clearSearch } = useSearch(
@@ -75,11 +64,10 @@ export default function RestaurantPage() {
 
   const handleLocation = () => {
     const qrFlag = location.state?.qr as boolean | undefined;
-
     if (qrFlag) {
-      setQrTransactions(location.state?.transactions as Transaction[]);
-      navigate(location.pathname, { replace: true, state: null });
+      const qrTransactions = location.state?.transactions as Transaction[];
       openQrModal(qrTransactions);
+      navigate(location.pathname, { replace: true, state: null });
     }
   };
 
@@ -122,40 +110,8 @@ export default function RestaurantPage() {
 
   return (
     <div className="min-h-screen bg-gray-25">
-      {/* Header Icons */}
-
-      <div className="absolute w-full top-0 z-10 flex justify-between items-center px-4 py-3">
-        <div
-          className="bg-white p-2 rounded-full"
-          onClick={() => {
-            setSidebarOpen(true);
-          }}
-        >
-          <Menu className="w-5 h-5 text-black" />
-        </div>
-
-        {/* Shopping Bag & User Icons */}
-        <div className="flex items-center gap-5">
-          <div
-            className="bg-white p-2 rounded-full"
-            onClick={() => {
-              setShowOrderHistoryModal(true);
-            }}
-          >
-            <ShoppingBag className="w-5 h-5 text-black" />
-          </div>
-          <div
-            className="bg-white p-2 rounded-full"
-            onClick={() => {
-              setShowProfile(true);
-            }}
-          >
-            <User className="w-5 h-5 text-black" />
-          </div>
-        </div>
-      </div>
       {/* Hero Image */}
-      <Hero restaurant_id={id as string} />
+      <Hero restaurant_id={id as string} setSidebarOpen={setSidebarOpen} />
 
       {/* Restaurant Info */}
       <div className="mt-10 px-5">
@@ -166,7 +122,6 @@ export default function RestaurantPage() {
           >
             {restaurant?.name}
           </h1>
-          <BadgeCheck className="w-5 h-5 text-blue-500" />
         </div>
         <div className="flex items-center gap-1 mt-1 mb-4">
           <MapPin className="w-4 h-4 text-gray-500" />
@@ -333,7 +288,7 @@ export default function RestaurantPage() {
                     restaurant={restaurant as Restaurant}
                     addToCart={addToCart}
                     removeFromCart={removeFromCart}
-                    itemId={searchResult}
+                    item={{ id: searchResult, modifiers: [] }}
                   />
                 ))}
               </pre>
@@ -370,10 +325,6 @@ export default function RestaurantPage() {
           isOpen={sidebarOpen}
           onClose={() => {
             setSidebarOpen(false);
-          }}
-          navigateToSignIn={() => {
-            setSidebarOpen(false);
-            setShowSignInModal(true);
           }}
         />
       </div>

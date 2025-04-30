@@ -99,7 +99,7 @@ export default function RestaurantDiscovery() {
                   <img
                     src={`${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`}
                     alt={restaurant.name}
-                    className="w-16 h-16 object-cover rounded-md border-2 border-black"
+                    className="w-16 h-16 object-cover rounded-md "
                   />
                 </div>
               </div>

@@ -74,10 +74,7 @@ export class ItemUtils {
     const menu = restaurant.menu;
     if (this.isPassItem(item.id, restaurant)) {
       const itemObject = menu[item.id].info as PassItem;
-      return (
-        titleCase(itemObject.name) +
-        (itemObject.for_date ? ` (${itemObject.for_date})` : "")
-      );
+      return titleCase(itemObject.name);
     } else if (this.isLiquorItem(item.id, restaurant)) {
       const path = menu[item.id].path;
       const liquorType = menu[path[path.length - 2]].info.name;

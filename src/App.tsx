@@ -32,29 +32,9 @@ const RestaurantPage = lazy(() => import("./pages/restaurant.tsx"));
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
-  const {
-    showSignInModal,
-    setShowSignInModal,
-    showOrderHistoryModal,
-    setShowOrderHistoryModal,
-    showProfile,
-    setShowProfile,
-  } = useAuth();
 
   return (
     <div>
-      <SignInModal
-        isOpen={showSignInModal}
-        onClose={() => setShowSignInModal(false)}
-      />
-      <OrderHistoryModal
-        isOpen={showOrderHistoryModal}
-        onClose={() => setShowOrderHistoryModal(false)}
-      />
-      <ProfileModal
-        isOpen={showProfile}
-        onClose={() => setShowProfile(false)}
-      />
       <ToastContainer stacked className="w-full" style={{ width: "100%" }} />
       <Routes>
         <Route

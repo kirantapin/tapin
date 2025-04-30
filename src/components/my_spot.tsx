@@ -5,6 +5,8 @@ import { GradientIcon } from "@/utils/gradient";
 import { PASS_MENU_TAG, MY_SPOT_PATH } from "@/constants";
 import { useRestaurant } from "@/context/restaurant_context";
 import { ItemUtils } from "@/utils/item_utils";
+import { useAuth } from "@/context/auth_context";
+import { useBottomSheet } from "@/context/bottom_sheet_context";
 
 interface MySpotProps {
   transactions: Transaction[];
@@ -16,6 +18,7 @@ export const MySpot: React.FC<MySpotProps> = ({
   transactions,
 }) => {
   const { userOwnershipMap, restaurant } = useRestaurant();
+  const { openSignInModal } = useBottomSheet();
   const navigate = useNavigate();
 
   const activePassesCount = transactions.filter(
@@ -35,7 +38,7 @@ export const MySpot: React.FC<MySpotProps> = ({
   const activeBundlesCount =
     Object.values(userOwnershipMap).filter(Boolean).length;
 
-  if (!restaurant || !userSession) {
+  if (!restaurant) {
     return null;
   }
 
@@ -48,6 +51,10 @@ export const MySpot: React.FC<MySpotProps> = ({
         <div
           className="relative w-full h-20 bg-gray-50 rounded-xl border p-4 mt-4 cursor-pointer"
           onClick={() => {
+            if (!userSession) {
+              openSignInModal();
+              return;
+            }
             navigate(MY_SPOT_PATH.replace(":id", restaurant?.id), {
               state: { type: "My Bundles" },
             });
@@ -75,6 +82,10 @@ export const MySpot: React.FC<MySpotProps> = ({
         <div
           className="relative w-1/2 aspect-[8/5] bg-gray-50 rounded-xl border p-4 cursor-pointer"
           onClick={() => {
+            if (!userSession) {
+              openSignInModal();
+              return;
+            }
             navigate(MY_SPOT_PATH.replace(":id", restaurant?.id), {
               state: { type: "Passes" },
             });
@@ -105,6 +116,10 @@ export const MySpot: React.FC<MySpotProps> = ({
         <div
           className="relative w-1/2 aspect-[8/5] bg-gray-50 rounded-xl border p-4 cursor-pointer"
           onClick={() => {
+            if (!userSession) {
+              openSignInModal();
+              return;
+            }
             navigate(MY_SPOT_PATH.replace(":id", restaurant?.id), {
               state: { type: "Orders" },
             });

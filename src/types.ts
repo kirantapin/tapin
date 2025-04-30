@@ -99,6 +99,7 @@ export interface Restaurant {
   stripe_account_id: string;
   active: boolean;
   metadata: Record<string, string | boolean>;
+  info: Record<string, any>;
 }
 
 export interface DrinkForm {
@@ -149,6 +150,7 @@ export interface PassItem {
   price: number;
   for_date: string;
   amount_remaining: number | null;
+  end_time: string;
 }
 export interface BundleItem {
   name: string;
@@ -196,7 +198,10 @@ export interface Transaction {
   user_id: string;
   item: string;
   order_id: string;
-  metadata: Record<string, string | string[]>;
+  metadata: {
+    modifiers?: string[];
+    [key: string]: string | string[] | undefined;
+  };
   tip_amount: number | null;
   price: number | null;
   points_awarded: number | null;

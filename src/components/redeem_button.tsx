@@ -3,6 +3,7 @@ import { useAuth } from "@/context/auth_context";
 import { submitPurchase } from "@/utils/purchase";
 import { useNavigate } from "react-router-dom";
 import { Transaction, User } from "@/types";
+import { toast } from "react-toastify";
 const RedeemButton = ({
   payload,
   sanityCheck,
@@ -46,6 +47,9 @@ const RedeemButton = ({
           console.log("potentialError", potentialError);
           if (potentialError) {
             //handle response error
+            toast(potentialError, {
+              type: "error",
+            });
             return;
           }
           const paymentData = {

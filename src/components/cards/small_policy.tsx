@@ -2,19 +2,15 @@ import type React from "react";
 import { BadgeCheck, Check, Plus, Tag, Ticket } from "lucide-react";
 import { Bundle, Cart, DealEffectPayload, Policy } from "@/types";
 import { Restaurant } from "@/types";
-import { truncate } from "fs/promises";
-import { getPolicyFlair, sentenceCase } from "@/utils/parse";
+import { sentenceCase } from "@/utils/parse";
 import { titleCase } from "title-case";
 import { getMissingItemsForPolicy } from "@/utils/item_recommender";
 import { GradientIcon } from "@/utils/gradient";
 import { PolicyManager } from "@/utils/policy_manager";
-import { BUNDLE_MENU_TAG, MY_SPOT_PATH } from "@/constants";
-import { useNavigate } from "react-router-dom";
-import { BundleUtils } from "@/utils/bundle_utils";
 import { useRestaurant } from "@/context/restaurant_context";
-import { toast } from "react-toastify";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { PolicyUtils } from "@/utils/policy_utils";
+import { adjustColor } from "@/utils/color";
 interface DealCardProps {
   cart: Cart;
   policy: Policy;
@@ -28,8 +24,9 @@ const DealCard: React.FC<DealCardProps> = ({
   restaurant,
   dealEffect,
 }) => {
+  const primaryColor = restaurant?.metadata.primaryColor as string;
   const { userOwnershipMap } = useRestaurant();
-  const { handlePolicyClick } = useBottomSheet();
+  const { handlePolicyClick, getActivePolicies } = useBottomSheet();
   const policyIsActive = PolicyManager.getActivePolicyIds(dealEffect).has(
     policy.policy_id
   );
@@ -110,12 +107,30 @@ const DealCard: React.FC<DealCardProps> = ({
               {sentenceCase(policy.header ?? "")}
             </p>
             <button
-              className="text-white p-1 rounded-full text-sm font-medium transition-colors ml-2 whitespace-nowrap"
-              style={{
-                backgroundColor: restaurant?.metadata.primaryColor || undefined,
-              }}
+              className={`px-4 py-1 rounded-full text-sm font-medium ${
+                policyIsActive
+                  ? "bg-white text-black border border-gray-200"
+                  : "text-white enhance-contrast"
+              }`}
+              style={
+                !policyIsActive
+                  ? {
+                      background: `linear-gradient(45deg, 
+                        ${adjustColor(primaryColor, -30)},
+                        ${adjustColor(primaryColor, 40)}
+                      )`,
+                    }
+                  : undefined
+              }
             >
-              <Plus size={16} />
+              {policyIsActive ? (
+                <div className="flex items-center gap-1">
+                  <Check className="w-4 h-4 text-green-500" />
+                  <span>Active</span>
+                </div>
+              ) : (
+                "Redeem"
+              )}
             </button>
           </div>
         </div>

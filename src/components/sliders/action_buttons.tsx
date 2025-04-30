@@ -1,4 +1,4 @@
-import { Beer, Info, Gift, Star } from "lucide-react";
+import { Beer, Info, Gift, Star, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { GradientIcon } from "@/utils/gradient";
 import { Restaurant } from "@/types";
@@ -40,21 +40,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
           Order
         </span>
       </button>
-      {/* <button
-        className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-300 bg-white shadow-md"
-        onClick={() => {
-          navigate(INFO_PAGE_PATH.replace(":id", restaurant.id));
-        }}
-      >
-        <GradientIcon
-          icon={Info}
-          primaryColor={restaurant?.metadata.primaryColor as string}
-          size={17}
-        />
-        <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
-          More Info
-        </span>
-      </button> */}
+
       <button
         className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-300 bg-white"
         onClick={() =>
@@ -87,6 +73,36 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
         />
         <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
           All Deals
+        </span>
+      </button>
+      <button
+        className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-300 bg-white"
+        onClick={() => {
+          navigate(INFO_PAGE_PATH.replace(":id", restaurant.id));
+        }}
+      >
+        <GradientIcon
+          icon={Info}
+          primaryColor={restaurant?.metadata.primaryColor as string}
+          size={17}
+        />
+        <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
+          More Info
+        </span>
+      </button>
+      <button
+        className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-300 bg-white"
+        onClick={() => {
+          navigate(INFO_PAGE_PATH.replace(":id", restaurant.id));
+        }}
+      >
+        <GradientIcon
+          icon={MapPin}
+          primaryColor={restaurant?.metadata.primaryColor as string}
+          size={17}
+        />
+        <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
+          Directions
         </span>
       </button>
     </div>

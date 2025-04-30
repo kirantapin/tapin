@@ -236,10 +236,7 @@ const LiquorForm = ({ type, restaurant, addToCart, primaryColor }) => {
         onClick={handleSubmit}
         className="w-full text-white py-2 rounded-full transition "
         style={{
-          background: `linear-gradient(45deg, 
-          ${adjustColor(restaurant.metadata.primaryColor as string, -30)},
-          ${adjustColor(restaurant.metadata.primaryColor as string, 40)}
-        )`,
+          background: restaurant?.metadata.primaryColor,
         }}
       >
         {loading ? (

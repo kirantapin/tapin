@@ -1,7 +1,18 @@
 import React, { RefObject, useEffect, useState } from "react";
 import { adjustColor } from "./color";
 import { project_url } from "./supabase_client";
-import { RESTAURANT_IMAGE_BUCKET } from "@/constants";
+import {
+  DRINK_CHECKOUT_PATH,
+  MY_SPOT_PATH,
+  RESTAURANT_IMAGE_BUCKET,
+} from "@/constants";
+import { User } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
+import { Menu } from "lucide-react";
+import { useRestaurant } from "@/context/restaurant_context";
+import { useAuth } from "@/context/auth_context";
+import { useBottomSheet } from "@/context/bottom_sheet_context";
+import { useNavigate } from "react-router-dom";
 
 export function GradientIcon({
   icon: Icon,
@@ -43,14 +54,52 @@ export function GradientIcon({
   );
 }
 
-export function Hero({ restaurant_id }: { restaurant_id: string }) {
+export function Hero({
+  restaurant_id,
+  setSidebarOpen,
+}: {
+  restaurant_id: string;
+  setSidebarOpen: (open: boolean) => void;
+}) {
+  const { openProfileModal } = useBottomSheet();
+  const navigate = useNavigate();
   return (
     <div
-      className="relative h-52 rounded-b-2xl  bg-cover bg-center"
+      className="relative h-52 rounded-b-2xl bg-cover bg-center"
       style={{
-        backgroundImage: `url(${project_url}/storage/v1/object/public/${RESTAURANT_IMAGE_BUCKET}/${restaurant_id}_hero.jpeg)`,
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url(${project_url}/storage/v1/object/public/${RESTAURANT_IMAGE_BUCKET}/${restaurant_id}_hero.jpeg)`,
       }}
     >
+      <div className="absolute w-full top-0 z-10 flex justify-between items-center px-4 py-3">
+        <div
+          className="bg-white p-2 rounded-full"
+          onClick={() => {
+            setSidebarOpen(true);
+          }}
+        >
+          <Menu className="w-5 h-5 text-black" />
+        </div>
+
+        {/* Shopping Bag & User Icons */}
+        <div className="flex items-center gap-5">
+          <div
+            className="bg-white p-2 rounded-full"
+            onClick={() => {
+              navigate(DRINK_CHECKOUT_PATH.replace(":id", restaurant_id));
+            }}
+          >
+            <ShoppingBag className="w-5 h-5 text-black" />
+          </div>
+          <div
+            className="bg-white p-2 rounded-full"
+            onClick={() => {
+              openProfileModal();
+            }}
+          >
+            <User className="w-5 h-5 text-black" />
+          </div>
+        </div>
+      </div>
       {/* Profile Image */}
       <div className="absolute -bottom-5" style={{ left: "18px" }}>
         {/* Moved further down */}

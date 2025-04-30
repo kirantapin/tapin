@@ -1,4 +1,4 @@
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Gift, HandCoins, Star } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
@@ -8,8 +8,6 @@ import {
 } from "@/constants";
 import { Policy, Restaurant } from "@/types";
 
-import DealCard from "@/components/cards/small_policy";
-import { useGlobalCartManager } from "@/hooks/useGlobalCartManager";
 import { useAuth } from "@/context/auth_context";
 import Rewards from "@/components/rewards.tsx";
 import { SignInButton } from "@/components/signin/signin_button";
@@ -17,9 +15,11 @@ import { setThemeColor } from "@/utils/color";
 import { OffersSkeleton } from "@/components/skeletons/offers_skeleton";
 import { useRestaurant } from "@/context/restaurant_context";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
-const tagMap: Record<string, string> = {
-  Deals: NORMAL_DEAL_TAG,
-  Rewards: LOYALTY_REWARD_TAG,
+import React from "react";
+import { PolicyCard } from "@/components/cards/policy_card";
+const tagMap: Record<string, { tag: string; icon: any }> = {
+  Deals: { tag: NORMAL_DEAL_TAG, icon: Star },
+  Rewards: { tag: LOYALTY_REWARD_TAG, icon: Gift },
 };
 
 export default function PoliciesPage() {
@@ -37,10 +37,7 @@ export default function PoliciesPage() {
   const [activePolicies, setActivePolicies] = useState<Policy[]>([]);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { state, addPolicy, addToCart, removeFromCart } = useGlobalCartManager(
-    restaurant as Restaurant,
-    userSession
-  );
+  const { state, addPolicy, addToCart, removeFromCart } = useBottomSheet();
   const [loading, setLoading] = useState<boolean>(false);
   const { openPolicyModal } = useBottomSheet();
 
@@ -68,7 +65,7 @@ export default function PoliciesPage() {
   return (
     <div className="max-w-md mx-auto bg-white min-h-screen">
       {/* Header */}
-      <div className="flex items-center p-4 sticky top-0 bg-white shadow-sm border-b relative">
+      <div className="flex items-center p-4 sticky top-0 bg-white shadow-sm border-b relative z-10">
         <button
           className="w-9 h-9 flex items-center justify-center rounded-full bg-black/10 absolute left-4"
           onClick={() => {
@@ -86,14 +83,14 @@ export default function PoliciesPage() {
       <div className="flex px-4 gap-4 mt-6 mb-8">
         {Object.keys(tagMap).map((tagLabel) => (
           <button
-            key={tagMap[tagLabel]}
+            key={tagMap[tagLabel].tag}
             className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full whitespace-nowrap border transition-all duration-150 font-medium ${
-              activeTag === tagMap[tagLabel]
+              activeTag === tagMap[tagLabel].tag
                 ? "text-sm"
                 : "text-sm text-gray-500"
             }`}
             style={
-              activeTag === tagMap[tagLabel]
+              activeTag === tagMap[tagLabel].tag
                 ? {
                     color: restaurant?.metadata.primaryColor,
                     borderColor: restaurant?.metadata.primaryColor,
@@ -104,9 +101,12 @@ export default function PoliciesPage() {
                   }
             }
             onClick={() => {
-              setActiveTag(tagMap[tagLabel]);
+              setActiveTag(tagMap[tagLabel].tag);
             }}
           >
+            {React.createElement(tagMap[tagLabel].icon, {
+              className: "w-4 h-4 inline-block mr-1.5",
+            })}
             {tagLabel}
           </button>
         ))}
@@ -118,7 +118,7 @@ export default function PoliciesPage() {
         <div className="px-12 space-y-8 flex flex-col items-center w-full">
           {activePolicies.length > 0 ? (
             activePolicies.map((policy) => (
-              <DealCard
+              <PolicyCard
                 key={policy.policy_id}
                 cart={state.cart}
                 policy={policy}
@@ -141,7 +141,9 @@ export default function PoliciesPage() {
             <Rewards viewAll={true} />
           </div>
         ) : (
-          <SignInButton onClose={() => {}} />
+          <div className="px-4">
+            <SignInButton onClose={() => {}} />
+          </div>
         ))}
     </div>
   );

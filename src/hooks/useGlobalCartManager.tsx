@@ -64,12 +64,6 @@ export function useGlobalCartManager(
     });
   };
 
-  useWatcher({
-    cart: state.cart,
-    restaurant: restaurant as Restaurant,
-    triggerToast,
-  });
-
   // Initialize CartManager
   useEffect(() => {
     if (!restaurant?.id) return;
@@ -128,6 +122,7 @@ export function useGlobalCartManager(
   const removeFromCart = async (itemId: number): Promise<void> => {
     if (!cartManagerRef.current) return;
     const result = await cartManagerRef.current.removeFromCart(itemId);
+    console.log("after removing ", cartManagerRef.current.getCartState());
 
     if (result) {
       triggerToast(result, "error");
@@ -191,6 +186,13 @@ export function useGlobalCartManager(
     if (!cartManagerRef.current) return [];
     return cartManagerRef.current.getActivePolicies();
   };
+
+  useWatcher({
+    cart: state.cart,
+    restaurant: restaurant as Restaurant,
+    triggerToast,
+    refreshCart,
+  });
 
   return {
     state,

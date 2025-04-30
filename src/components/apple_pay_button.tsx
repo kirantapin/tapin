@@ -14,6 +14,7 @@ import { Transaction, User } from "../types.ts";
 import { RESTAURANT_PATH } from "../constants.ts";
 import { submitPurchase } from "@/utils/purchase.ts";
 import RedeemButton from "./redeem_button.tsx";
+import { toast } from "react-toastify";
 
 const stripePublishableKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || "";
 const stripePromise = loadStripe(stripePublishableKey);
@@ -56,6 +57,9 @@ const PayButton = ({ payload, sanityCheck, clearCart }) => {
       const potentialError = await sanityCheck();
       if (potentialError) {
         //handle response error
+        toast(potentialError, {
+          type: "error",
+        });
         return;
       }
       const { error: submitError } = await elements.submit();

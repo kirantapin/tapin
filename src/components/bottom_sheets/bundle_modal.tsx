@@ -142,7 +142,6 @@ const BundleModal: React.FC<BundleModalProps> = ({
                 <div className="text-md font-bold text-gray-600 mt-1 mb-4">
                   Lasts {bundle.duration} {bundle.duration > 1 ? "Days" : "Day"}
                 </div>
-                <button onClick={() => console.log(state)}>test</button>
 
                 <div className="flex gap-4 overflow-x-auto mb-4 pb-2 px-2 no-scrollbar -mx-6 px-6">
                   {bundle.fixed_credit > 0 && (

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
-import { Plus, Trash2, Minus } from "lucide-react";
+import { Plus, Trash2, Minus, Check } from "lucide-react";
 import {
   HOUSE_MIXER_LABEL,
   MENU_DISPLAY_MAP,
@@ -8,31 +8,33 @@ import {
 } from "@/constants";
 import LiquorForm from "./liquor_form";
 import { titleCase } from "title-case";
-import { Cart, Item, Restaurant } from "@/types";
+import { Cart, Item, ItemSpecification, Restaurant } from "@/types";
 import { project_url } from "@/utils/supabase_client";
 import { ItemUtils } from "@/utils/item_utils";
 import { adjustColor } from "@/utils/color";
 import { useAuth } from "@/context/auth_context";
+
 export function DrinkItem({
   cart,
   restaurant,
   addToCart,
   removeFromCart,
-  itemId,
+  item,
 }: {
   cart: Cart;
   restaurant: Restaurant;
   addToCart: (item: Item) => Promise<void>;
-  removeFromCart: (item: Item) => Promise<void>;
-  itemId: string;
+  removeFromCart: (id: number) => Promise<void>;
+  item: Item;
 }) {
   const primaryColor = restaurant.metadata.primaryColor as string;
-  const menuItem = ItemUtils.getMenuItemFromItemId(itemId, restaurant);
-  const isPass = ItemUtils.isPassItem(itemId, restaurant);
+  const menuItem = ItemUtils.getMenuItemFromItemId(item.id, restaurant);
+  const isPass = ItemUtils.isPassItem(item.id, restaurant);
 
-  const cartItem = cart.find((item) => item.item.id === itemId);
+  const cartItem = cart.find((cartItem) => cartItem.item.id === item.id);
   const quantity = cart.reduce(
-    (total, item) => (item.item.id === itemId ? total + item.quantity : total),
+    (total, cartItem) =>
+      cartItem.item.id === item.id ? total + cartItem.quantity : total,
     0
   );
 
@@ -62,7 +64,9 @@ export function DrinkItem({
       <div className="flex flex-1 flex-col justify-between">
         <div>
           <div className="flex justify-between items-start">
-            <h3 className="font-bold text-base">{titleCase(menuItem?.name)}</h3>
+            <h3 className="font-bold text-base">
+              {titleCase(ItemUtils.getItemName(item, restaurant))}
+            </h3>
             {isPass && (
               <span className="text-xs text-gray-500 ml-2">
                 {menuItem?.for_date}
@@ -75,15 +79,19 @@ export function DrinkItem({
         </div>
 
         <div className="flex items-center justify-between mt-2">
-          <p className="font-bold text-base">${menuItem?.price?.toFixed(2)}</p>
+          <p className="font-bold text-base">
+            ${ItemUtils.priceItem(item, restaurant)?.toFixed(2)}
+          </p>
 
           {quantity > 0 ? (
             <div className="flex items-center bg-white rounded-full px-3 py-1 ">
               <button
                 onClick={async () => {
-                  setLoading(true);
-                  await removeFromCart(cartItem?.id);
-                  setLoading(false);
+                  if (cartItem?.id) {
+                    setLoading(true);
+                    await removeFromCart(cartItem?.id);
+                    setLoading(false);
+                  }
                 }}
                 className="w-6 h-6 flex items-center justify-center rounded-full"
                 style={{ backgroundColor: primaryColor }}
@@ -104,10 +112,7 @@ export function DrinkItem({
               <button
                 onClick={async () => {
                   setLoading(true);
-                  await addToCart({
-                    id: itemId,
-                    modifiers: [],
-                  });
+                  await addToCart(item);
                   setLoading(false);
                 }}
                 className="w-6 h-6 flex items-center justify-center bg-gray-100 rounded-full"
@@ -122,10 +127,7 @@ export function DrinkItem({
               style={{ backgroundColor: primaryColor }}
               onClick={async () => {
                 setLoading(true);
-                await addToCart({
-                  id: itemId,
-                  modifiers: [],
-                });
+                await addToCart(item);
                 setLoading(false);
               }}
             >
@@ -144,18 +146,25 @@ export function DrinkItem({
 
 export function LoyaltyRewardItem({
   restaurant,
-  itemId,
+  itemSpec,
   numPoints,
   onRedeem,
+  isActive,
 }: {
   restaurant: Restaurant;
-  itemId: string;
+  itemSpec: ItemSpecification;
   numPoints: number;
   onRedeem: () => void;
+  isActive: boolean;
 }) {
   const { userData } = useAuth();
   const hasEnoughPoints = (userData?.points[restaurant.id] || 0) >= numPoints;
   const primaryColor = restaurant.metadata.primaryColor as string;
+  const itemIds = ItemUtils.policyItemSpecificationsToItemIds(
+    [itemSpec],
+    restaurant
+  );
+  const itemId = itemIds[0];
   const menuItem = ItemUtils.getMenuItemFromItemId(itemId, restaurant);
   const isPass = ItemUtils.isPassItem(itemId, restaurant);
 
@@ -202,16 +211,31 @@ export function LoyaltyRewardItem({
           </div>
           {hasEnoughPoints && (
             <button
-              className="px-4 py-1 rounded-full text-sm text-white enhance-contrast font-medium"
-              style={{
-                background: `linear-gradient(45deg, 
-                ${adjustColor(primaryColor, -30)},
-                ${adjustColor(primaryColor, 40)}
-              )`,
-              }}
+              className={`px-4 py-1 rounded-full text-sm font-medium ${
+                isActive
+                  ? "bg-white text-black border border-gray-200"
+                  : "text-white enhance-contrast"
+              }`}
+              style={
+                !isActive
+                  ? {
+                      background: `linear-gradient(45deg, 
+                        ${adjustColor(primaryColor, -30)},
+                        ${adjustColor(primaryColor, 40)}
+                      )`,
+                    }
+                  : undefined
+              }
               onClick={onRedeem}
             >
-              Redeem
+              {isActive ? (
+                <div className="flex items-center gap-1">
+                  <Check className="w-4 h-4 text-green-500" />
+                  <span>Active</span>
+                </div>
+              ) : (
+                "Redeem"
+              )}
             </button>
           )}
         </div>
@@ -226,7 +250,7 @@ export function PreviousTransactionItem({
   restaurant,
   increment,
   decrement,
-  itemId,
+  item,
 }: {
   key: string;
   currentQuantity: number;
@@ -234,11 +258,11 @@ export function PreviousTransactionItem({
   restaurant: Restaurant;
   increment: () => void;
   decrement: () => void;
-  itemId: string;
+  item: Item;
 }) {
   const primaryColor = restaurant.metadata.primaryColor as string;
-  const menuItem = ItemUtils.getMenuItemFromItemId(itemId, restaurant);
-  const isPass = ItemUtils.isPassItem(itemId, restaurant);
+  const menuItem = ItemUtils.getMenuItemFromItemId(item.id, restaurant);
+  const isPass = ItemUtils.isPassItem(item.id, restaurant);
 
   const [loading, setLoading] = useState(false);
   return (
@@ -259,7 +283,9 @@ export function PreviousTransactionItem({
       <div className="flex flex-1 flex-col justify-between">
         <div>
           <div className="flex justify-between items-start">
-            <h3 className="font-bold text-base">{titleCase(menuItem?.name)}</h3>
+            <h3 className="font-bold text-base">
+              {titleCase(ItemUtils.getItemName(item, restaurant))}
+            </h3>
             {isPass && (
               <span className="text-xs text-gray-500 ml-2">
                 {menuItem?.for_date}
@@ -272,8 +298,6 @@ export function PreviousTransactionItem({
         </div>
 
         <div className="flex items-center justify-between mt-2">
-          <p className="font-bold text-base">${menuItem?.price?.toFixed(2)}</p>
-
           <div className="flex items-center">
             <button
               onClick={async () => {
@@ -318,8 +342,8 @@ export const DrinkList = ({
   cart: Cart;
   label: string;
   restaurant: Restaurant;
-  addToCart;
-  removeFromCart;
+  addToCart: (item: Item) => Promise<void>;
+  removeFromCart: (id: number) => Promise<void>;
   setActiveLabel: (label: string) => void;
 }) => {
   const labelRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -393,7 +417,7 @@ export const DrinkList = ({
                       restaurant={restaurant}
                       addToCart={addToCart}
                       removeFromCart={removeFromCart}
-                      itemId={id}
+                      item={{ id: id, modifiers: [] }}
                     />
                   ))
                 )}

@@ -11,6 +11,7 @@ type RestaurantContextType = {
   restaurant: Restaurant | null;
   loading: boolean;
   setCurrentRestaurantId: (id: string | null) => void;
+  setRestaurant: (restaurant: Restaurant | null) => void;
   policyManager: PolicyManager | null;
   userOwnershipMap: Record<string, boolean>;
 };
@@ -19,6 +20,7 @@ const RestaurantContext = createContext<RestaurantContextType>({
   restaurant: null,
   loading: true,
   setCurrentRestaurantId: () => {},
+  setRestaurant: () => {},
   policyManager: null,
   userOwnershipMap: {},
 });
@@ -37,9 +39,7 @@ export const RestaurantProvider = ({
   const [policyManager, setPolicyManager] = useState<PolicyManager | null>(
     null
   );
-  const [highlights, setHighlights] = useState<Highlight[] | undefined>(
-    undefined
-  );
+
   const [userOwnershipMap, setUserOwnershipMap] = useState<
     Record<string, boolean>
   >({});
@@ -104,6 +104,7 @@ export const RestaurantProvider = ({
       value={{
         restaurant,
         loading,
+        setRestaurant,
         setCurrentRestaurantId,
         policyManager,
         userOwnershipMap,

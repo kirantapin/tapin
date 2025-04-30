@@ -46,7 +46,6 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
       content_pointer,
       restaurant
     ) as BundleItem;
-    console.log(bundle.name);
     setTitle(bundle?.name);
     setDescription(
       `Receive amazing value at ${restaurant.name} with the ${bundle?.name}, exclusive on Tap In`

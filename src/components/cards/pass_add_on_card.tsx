@@ -1,4 +1,4 @@
-import { CartState, Policy, Restaurant } from "@/types";
+import { CartState, PassItem, Policy, Restaurant } from "@/types";
 import { ItemUtils } from "@/utils/item_utils";
 import { Check } from "lucide-react";
 
@@ -32,10 +32,14 @@ export const PassAddOnCard: React.FC<PassAddOnCardProps> = ({
     console.log("no pass item id");
     return null;
   }
-  const menuItem = ItemUtils.getMenuItemFromItemId(passItemId, restaurant);
-  const name = menuItem?.name;
-  const originalPrice = menuItem?.price;
+  const passItem = ItemUtils.getMenuItemFromItemId(
+    passItemId,
+    restaurant
+  ) as PassItem;
+  const name = passItem.name;
+  const originalPrice = passItem.price;
   const newPrice = Math.max(0, originalPrice - policy.definition.action.amount);
+  const for_date = passItem.for_date;
   // Get policy IDs from all deal effect sources
   const policyIds = [
     // From modified items
@@ -83,7 +87,12 @@ export const PassAddOnCard: React.FC<PassAddOnCardProps> = ({
 
         {/* Title / Price */}
         <h3 className="text-lg font-bold text-gray-900">
-          Add {name} (+${newPrice.toFixed(2)})
+          Add {name} (+${newPrice.toFixed(2)}){" "}
+          {for_date ? (
+            <span className="text-sm text-gray-500">({for_date})</span>
+          ) : (
+            ""
+          )}
         </h3>
 
         {/* Description */}

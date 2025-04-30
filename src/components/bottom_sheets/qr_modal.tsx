@@ -184,9 +184,9 @@ const QRModal: React.FC<QRModalProps> = ({
           <div className=" text-black p-6 pt-0 overflow-y-auto">
             <div className="flex justify-between items-center mb-8 sticky top-0 bg-white shadow-md py-4 -mx-6 px-6">
               <img
-                src="/tapin_icon_black.png"
+                src="/tapin_logo_black.png"
                 alt="TapIn Logo"
-                className="h-8 w-8"
+                className="max-h-8"
               />
               <button
                 onClick={async () => await modifiedOnClose()}

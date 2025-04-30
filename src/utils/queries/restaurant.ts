@@ -6,7 +6,6 @@ import {
   HISTORY_KEY,
   BUNDLE_MENU_TAG,
 } from "@/constants";
-import { fetchPasses } from "./items";
 import { BundleUtils } from "../bundle_utils";
 import { PassUtils } from "../pass_utils";
 const HistoryCacheTTL = 30000;
@@ -78,6 +77,7 @@ export const fetchRestaurantById = async (
       price: pass.price,
       description: pass.item_description,
       amount_remaining: pass.amount_remaining,
+      end_time: pass.end_time,
       imageUrl: pass.image_url,
       for_date: pass.for_date,
       isPass: true,
@@ -85,7 +85,6 @@ export const fetchRestaurantById = async (
   }
 
   for (const bundleObject of bundleObjects) {
-    console.log(bundleObject);
     const bundleMenu = data.menu[BUNDLE_MENU_TAG];
     bundleMenu[bundleObject.bundle.bundle_id] = {
       name: bundleObject.bundle.name,
@@ -96,8 +95,7 @@ export const fetchRestaurantById = async (
   }
 
   data.menu = indexMenu(data.menu);
-  console.log(data.menu);
-  console.log("here");
+
   return data;
 };
 

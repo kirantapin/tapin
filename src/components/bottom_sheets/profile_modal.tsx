@@ -6,6 +6,7 @@ import { SignInButton } from "../signin/signin_button";
 import { X } from "lucide-react";
 import { RESTAURANT_IMAGE_BUCKET } from "@/constants";
 import { project_url } from "@/utils/supabase_client";
+import OrderHistory from "./history_modal";
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -76,7 +77,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
       <Sheet.Container className="rounded-t-3xl">
         <Sheet.Content>
           <div className="relative h-full flex flex-col">
-            <div className="flex-1 overflow-y-auto p-6 pb-40">
+            <div className="p-4 border-b border-gray-200 mb-4">
               <button
                 onClick={onClose}
                 className="text-gray-500 bg-gray-200 rounded-full p-2 float-right"
@@ -92,7 +93,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
                   className="w-7 h-7"
                 />
               </div>
-
+            </div>
+            <div className="flex-1 overflow-y-auto p-6 pt-2 pb-40">
               {!userSession ? (
                 <div className="mt-4">
                   <p className="text-gray-600 mb-4 font-semibold">
@@ -104,7 +106,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
                   </div>
                 </div>
               ) : (
-                <div className="mt-8">
+                <div>
                   {loading ? (
                     <div className="text-center py-4">
                       <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-800 border-t-transparent mx-auto" />
@@ -133,7 +135,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
                                 <div className="flex flex-col gap-1 ml-auto text-right">
                                   {stats.points > 0 && (
                                     <p className="text-sm text-gray-600">
-                                      <span className="font-bold">
+                                      <span className="font-bold text-black">
                                         {stats.points}
                                       </span>{" "}
                                       Points
@@ -141,7 +143,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
                                   )}
                                   {stats.credit > 0 && (
                                     <p className="text-sm text-gray-600">
-                                      <span className="font-bold">
+                                      <span className="font-bold text-black">
                                         ${stats.credit.toFixed(2)}
                                       </span>{" "}
                                       Credit
@@ -149,7 +151,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
                                   )}
                                   {stats.numTransactions > 0 && (
                                     <p className="text-sm text-gray-600">
-                                      <span className="font-bold">
+                                      <span className="font-bold text-black">
                                         {stats.numTransactions}
                                       </span>{" "}
                                       Unredeemed{" "}
@@ -167,6 +169,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
                       })}
                     </div>
                   )}
+                  <OrderHistory />
                 </div>
               )}
             </div>
