@@ -151,7 +151,7 @@ const HighlightSlider = ({
 
   if (highlights.length > 0) {
     return (
-      <div className="mt-5">
+      <div className="mt-3">
         <div
           ref={scrollContainerRef}
           className="overflow-x-auto snap-x snap-mandatory no-scrollbar scrollbar-hide "

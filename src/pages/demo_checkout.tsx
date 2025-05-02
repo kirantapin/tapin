@@ -13,7 +13,6 @@ import { motion } from "framer-motion";
 import { titleCase } from "title-case";
 import AddOnCard from "@/components/cards/add_on_card.tsx";
 import { useTimer } from "@/hooks/useTimer.tsx";
-import DealCard from "@/components/cards/small_policy.tsx";
 import { PassAddOnCard } from "@/components/cards/pass_add_on_card.tsx";
 import { ItemUtils } from "@/utils/item_utils.ts";
 import { formatPoints } from "@/utils/parse.ts";
@@ -32,7 +31,6 @@ export default function CheckoutPage() {
   const { id } = useParams<{ id: string }>();
   const [tipPercent, setTipPercent] = useState<number>(0.2);
   const tipAmounts = [0.1, 0.15, 0.2];
-  const { openSignInModal } = useBottomSheet();
 
   const {
     timeRemaining: addOnTime,
@@ -47,7 +45,6 @@ export default function CheckoutPage() {
     addToCart,
     removeFromCart,
     refreshCart,
-    getActivePolicies,
     removePolicy,
     isPreEntry,
     clearCart,
@@ -270,13 +267,22 @@ export default function CheckoutPage() {
                 <span>+{formatPoints(state.cartResults.totalPoints)}</span>
               </div>
             )}
-            {state.cartResults.creditUsed > 0 && (
+            {state.cartResults.credit.creditUsed > 0 && (
               <div
                 className={checkoutStyles.summaryRow}
                 style={{ color: "#40C4AA" }}
               >
                 <span>Credit Applied</span>
-                <span>-${state.cartResults.creditUsed.toFixed(2)}</span>
+                <span>-${state.cartResults.credit.creditUsed.toFixed(2)}</span>
+              </div>
+            )}
+            {state.cartResults.credit.creditToAdd > 0 && (
+              <div
+                className={checkoutStyles.summaryRow}
+                style={{ color: "#40C4AA" }}
+              >
+                <span>Credit Earned</span>
+                <span>+${state.cartResults.credit.creditToAdd.toFixed(2)}</span>
               </div>
             )}
             <div className={checkoutStyles.summaryRow}>
@@ -285,7 +291,12 @@ export default function CheckoutPage() {
             </div>
             <div className={checkoutStyles.summaryRow}>
               <span>Fees & Tax</span>
-              <span>${state.cartResults.tax.toFixed(2)}</span>
+              <span>
+                $
+                {(
+                  state.cartResults.tax + state.cartResults.customerServiceFee
+                ).toFixed(2)}
+              </span>
             </div>
             <div className={checkoutStyles.summaryRow}>
               <span>Tip</span>
@@ -363,7 +374,10 @@ export default function CheckoutPage() {
                 />
               )
             ) : (
-              <SignInButton onClose={() => {}} />
+              <SignInButton
+                onClose={() => {}}
+                primaryColor={restaurant?.metadata.primaryColor as string}
+              />
             )}
           </div>
         )}

@@ -40,11 +40,14 @@ export interface JWTPayloadType extends Record<string, unknown> {
 
 export interface CartResultsPayload {
   discount: number;
-  creditUsed: number;
-  creditToAdd: number;
+  credit: {
+    creditUsed: number;
+    creditToAdd: number;
+  };
   subtotal: number;
   tax: number;
-  serviceFee: number;
+  customerServiceFee: number;
+  backCharge: number;
   totalPrice: number;
   totalPoints: number;
   totalPointCost: number;

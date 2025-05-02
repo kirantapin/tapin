@@ -11,7 +11,7 @@ import { useRestaurant } from "@/context/restaurant_context";
 import { PolicyUtils } from "@/utils/policy_utils";
 import { titleCase } from "title-case";
 import { sentenceCase } from "@/utils/parse";
-import { GradientIcon } from "@/utils/gradient";
+import CustomIcon from "../svg/custom_icon";
 interface PolicyCardProps {
   cart: Cart;
   policy: Policy;
@@ -52,7 +52,7 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({
       : "";
   return (
     <div
-      className="w-full bg-white rounded-3xl p-4  flex relative border border-gray-200 shadow-md"
+      className="w-full bg-white rounded-3xl p-4  flex relative border border-gray-200 shadow-sm"
       onClick={() => {
         handlePolicyClick(policy, userOwnershipMap);
       }}
@@ -60,7 +60,6 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({
       <div className="flex flex-col gap-1 flex-grow pr-12">
         {/* Title */}
         <div className="flex items-center gap-2">
-          {/* <GradientIcon icon={Tag} primaryColor={primaryColor} size={24} /> */}
           <h2 className="text-xl font-bold text-gray-900 custom-line-clamp-1">
             {titleCase(policy.name)}
           </h2>
@@ -91,11 +90,12 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({
           {policy.locked && (
             <span className="flex items-center gap-1">
               Requires Bundle
-              <img
+              {/* <img
                 src="/tapin_icon_black.png"
                 alt="Tap In Icon"
                 className="w-4 h-4 ml-1"
-              />
+              /> */}
+              <CustomIcon circleColor={primaryColor} size={14} />
             </span>
           )}
 

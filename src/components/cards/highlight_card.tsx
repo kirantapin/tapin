@@ -75,12 +75,7 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
       key={content_pointer}
       className="snap-center flex-shrink-0 w-full max-w-md rounded-3xl overflow-hidden flex text-white mr-4 enhance-contrast"
       style={{
-        background: restaurant?.metadata.primaryColor
-          ? `linear-gradient(45deg, 
-              ${adjustColor(primaryColor as string, -30)},
-              ${adjustColor(primaryColor as string, 40)}
-            )`
-          : undefined,
+        backgroundColor: restaurant?.metadata.primaryColor as string,
       }}
     >
       {/* Left: Text Content */}

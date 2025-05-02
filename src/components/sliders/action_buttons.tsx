@@ -1,24 +1,23 @@
 import { Beer, Info, Gift, Star, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { GradientIcon } from "@/utils/gradient";
-import { Restaurant } from "@/types";
 import {
   INFO_PAGE_PATH,
   OFFERS_PAGE_PATH,
   LOYALTY_REWARD_TAG,
   NORMAL_DEAL_TAG,
 } from "@/constants";
+import { useRestaurant } from "@/context/restaurant_context";
 
 interface ActionButtonsProps {
-  restaurant: Restaurant | null;
   scrollToOrderDrinks: () => void;
 }
 
 export const ActionButtons: React.FC<ActionButtonsProps> = ({
-  restaurant,
   scrollToOrderDrinks,
 }) => {
   const navigate = useNavigate();
+  const { restaurant } = useRestaurant();
 
   if (!restaurant) {
     return null;
@@ -90,21 +89,27 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
           More Info
         </span>
       </button>
-      <button
-        className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-300 bg-white"
-        onClick={() => {
-          navigate(INFO_PAGE_PATH.replace(":id", restaurant.id));
-        }}
-      >
-        <GradientIcon
-          icon={MapPin}
-          primaryColor={restaurant?.metadata.primaryColor as string}
-          size={17}
-        />
-        <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
-          Directions
-        </span>
-      </button>
+      {restaurant.info.address && (
+        <button
+          className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-300 bg-white"
+          onClick={() =>
+            window.open(
+              `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                restaurant.info.address
+              )}`
+            )
+          }
+        >
+          <GradientIcon
+            icon={MapPin}
+            primaryColor={restaurant?.metadata.primaryColor as string}
+            size={17}
+          />
+          <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
+            Directions
+          </span>
+        </button>
+      )}
     </div>
   );
 };

@@ -17,8 +17,7 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
   const { restaurant, policyManager } = useRestaurant();
   const { openPolicyModal, getActivePolicies } = useBottomSheet();
   const { userData } = useAuth();
-  const userPoints =
-    userData?.points[restaurant?.id as string | undefined] || 0;
+  const userPoints = userData?.points[restaurant?.id as string] || 0;
   const [loyaltyPolicies, setLoyaltyPolicies] = useState<Policy[]>([]);
   const navigate = useNavigate();
   const [intervals, setIntervals] = useState<number[]>([]);
@@ -71,7 +70,7 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
         <h1 className="text-xl font-bold">Rewards</h1>
       </div>
 
-      {userData && (
+      {
         <div className="mt-4 text-left">
           <h3
             className="text-4xl font-bold mb-1"
@@ -101,12 +100,8 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
                     className="h-full  rounded-full transition-all duration-300 enhance-contrast"
                     style={{
                       width: `${widthPercentage === 0 ? 2 : widthPercentage}%`,
-                      background: restaurant?.metadata.primaryColor
-                        ? `linear-gradient(90deg, 
-        ${adjustColor(restaurant.metadata.primaryColor as string, 40)},
-        ${adjustColor(restaurant.metadata.primaryColor as string, -30)}
-      )`
-                        : undefined,
+                      backgroundColor: restaurant.metadata
+                        .primaryColor as string,
                     }}
                   ></div>
                 </div>
@@ -119,7 +114,7 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
               </>
             )}
         </div>
-      )}
+      }
 
       {loyaltyPolicies.length > 0 && viewAll && (
         <div className="space-y-4 mt-8">

@@ -189,7 +189,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
 
                 {bundlePolicies.length > 0 && (
                   <h1 className="text-xl font-bold text-gray-800">
-                    Access to Exclusive Deals:
+                    Exclusive Access To:
                   </h1>
                 )}
                 <div className="mt-2">
@@ -312,13 +312,15 @@ const BundleModal: React.FC<BundleModalProps> = ({
                         </span>
                       </div>
                     )}
-                    {state.cartResults.creditUsed > 0 && (
+                    {state.cartResults.credit.creditUsed > 0 && (
                       <div
                         className={checkoutStyles.summaryRow}
                         style={{ color: "#40C4AA" }}
                       >
                         <span>Credit Applied</span>
-                        <span>-${state.cartResults.creditUsed.toFixed(2)}</span>
+                        <span>
+                          -${state.cartResults.credit.creditUsed.toFixed(2)}
+                        </span>
                       </div>
                     )}
                     <div className={checkoutStyles.summaryRow}>
@@ -346,7 +348,12 @@ const BundleModal: React.FC<BundleModalProps> = ({
                   {/* Payment button */}
                   <div>
                     {!userSession ? (
-                      <SignInButton onClose={onClose} />
+                      <SignInButton
+                        onClose={onClose}
+                        primaryColor={
+                          restaurant?.metadata.primaryColor as string
+                        }
+                      />
                     ) : (
                       state &&
                       state?.cartResults?.totalPrice &&

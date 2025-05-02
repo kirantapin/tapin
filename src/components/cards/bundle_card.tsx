@@ -28,6 +28,7 @@ const BundleCard = ({
   const [isOpen, setIsOpen] = useState(false);
   const { policyManager } = useRestaurant();
   const navigate = useNavigate();
+  const [isFallback, setIsFallback] = useState(false);
   const bundleMenuItem = ItemUtils.getMenuItemFromItemId(
     bundleId,
     restaurant
@@ -57,22 +58,29 @@ const BundleCard = ({
     restaurant,
     childPolicies
   );
+  const baseUrl = `${project_url}/storage/v1/object/public`;
 
   return (
     <div className="mt-3">
       <div className="flex justify-center items-center p-4">
-        <div className="w-full max-w-[380px] rounded-[24px] overflow-hidden bg-white shadow-lg border border-gray-400 ">
+        <div className="w-full max-w-[380px] rounded-[24px] overflow-hidden bg-white shadow-md border border-gray-400 ">
           <div className="p-4 pb-0">
             <div className="relative w-full h-[180px] rounded-2xl overflow-hidden border border-gray-400">
               <img
-                src={`${project_url}/storage/v1/object/public/${BUNDLE_IMAGE_BUCKET}/${bundle.bundle_id}.jpeg`}
+                src={`${baseUrl}/${BUNDLE_IMAGE_BUCKET}/${bundle.bundle_id}.jpeg`}
                 onError={(e) => {
-                  e.currentTarget.src = `${project_url}/storage/v1/object/public/${RESTAURANT_IMAGE_BUCKET}/${restaurant.id}_profile.png`;
-                  e.currentTarget.style.height = "180px"; // Match parent div height
-                  e.currentTarget.style.width = "100%";
+                  e.currentTarget.src = `${baseUrl}/${RESTAURANT_IMAGE_BUCKET}/${restaurant.id}_profile.png`;
+                  setIsFallback(true);
                 }}
-                alt="Event"
-                className="w-full h-[180px] object-cover" // Explicit height matching parent
+                alt="Bundle"
+                className={`w-full h-[180px] ${
+                  isFallback
+                    ? "object-contain bg-gray-100 py-2"
+                    : "object-cover"
+                }`}
+                style={{
+                  backgroundColor: isFallback ? "#f3f4f6" : undefined, // Tailwind gray-100
+                }}
               />
 
               <div className="absolute bottom-3 left-3 bg-black/80 border border-[#d4af37] rounded-[20px] p-[6px_12px] flex items-center gap-[6px]">

@@ -163,4 +163,28 @@ export class ItemUtils {
   static isItemRedeemable(itemId: string, restaurant: Restaurant): boolean {
     return !this.isBundleItem(itemId, restaurant);
   }
+  static isItemExpired(item: Item, restaurant: Restaurant): string | null {
+    const itemInfo = this.getMenuItemFromItemId(item.id, restaurant);
+    if (!itemInfo) {
+      return "This item is not available";
+    }
+    if (this.isBundleItem(item.id, restaurant)) {
+      const bundleItem = itemInfo as BundleItem;
+      if (bundleItem.object.deactivated_at) {
+        return "This item is no longer available";
+      }
+    }
+    if (this.isPassItem(item.id, restaurant)) {
+      const passItem = itemInfo as PassItem;
+      const now = new Date();
+      if (
+        passItem.amount_remaining !== null &&
+        passItem.amount_remaining <= 0 &&
+        now < new Date(passItem.end_time)
+      ) {
+        return "This pass is no longer available";
+      }
+    }
+    return null;
+  }
 }

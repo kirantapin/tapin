@@ -9,7 +9,7 @@ import { setThemeColor } from "../utils/color";
 export default function RestaurantDiscovery() {
   setThemeColor();
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState<Restaurant[]>([]);
+  const [searchResults, setSearchResults] = useState<[]>([]);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(false);
   const supabase = useSupabase();
@@ -22,7 +22,7 @@ export default function RestaurantDiscovery() {
         .from("restaurants")
         .select("name,id,metadata");
       if (error) console.error("Error fetching restaurants:", error.message);
-      else setRestaurants(data);
+      else setRestaurants(data as Restaurant[]);
       setLoading(false);
     };
     window.scrollTo(0, 0);

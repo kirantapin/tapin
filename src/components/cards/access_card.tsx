@@ -28,7 +28,9 @@ export default function Card({
   removeFromCart,
   modifiedFlair,
 }: CardProps) {
-  const colors = generateGradientColors(restaurant.metadata.primaryColor);
+  const colors = generateGradientColors(
+    restaurant.metadata.primaryColor as string
+  );
 
   const primaryColor = restaurant.metadata.primaryColor;
   let itemInfo = null;
@@ -56,13 +58,14 @@ export default function Card({
     <div className="w-full aspect-[9/5] rounded-3xl p-3 sm:p-4 relative overflow-hidden text-white my-4 enhance-contrast">
       <div
         style={{
-          background: `linear-gradient(to bottom right, ${colors.from}, ${colors.via}, ${colors.to})`,
+          background: `linear-gradient(to bottom right, ${colors.from}, ${colors.via})`,
+          // backgroundColor: restaurant?.metadata.primaryColor as string,
         }}
         className="absolute inset-0"
       />
 
       {/* Tap In icon overlay in bottom right */}
-      <div className="absolute bottom-0 right-0 w-40 h-40 opacity-20 transform translate-x-6 translate-y-6">
+      <div className="absolute bottom-0 right-0 w-40 h-40 opacity-10 transform translate-x-6 translate-y-6">
         <img
           src="/tapin_icon.svg"
           alt="Tap In"
@@ -76,7 +79,8 @@ export default function Card({
           {itemInfo?.for_date}
         </div>
         <div className="text-md text-white font-bold mt-1">
-          {itemInfo?.amount_remaining && `${itemInfo?.amount_remaining} Left`}
+          {itemInfo?.amount_remaining !== null &&
+            `${itemInfo?.amount_remaining} Left`}
         </div>
       </div>
 
@@ -89,7 +93,7 @@ export default function Card({
             <p className="text-xs sm:text-sm text-white/80">
               {restaurant.name}
             </p>
-            <h2 className="text-3xl sm:text-2xl font-semibold">
+            <h2 className="text-3xl sm:text-2xl font-bold">
               {titleCase(name)}
             </h2>
           </div>
@@ -167,7 +171,7 @@ export default function Card({
           </div>
         ) : (
           <button
-            className="h-6 w-6 rounded-full flex items-center justify-center text-black"
+            className="py-[5px] px-4 rounded-full flex items-center justify-center text-black text-sm font-semibold"
             style={{ backgroundColor: "white" }}
             onClick={async () => {
               setLoading(true);
@@ -178,7 +182,7 @@ export default function Card({
             {loading ? (
               <div className="animate-spin rounded-full h-4 w-4 border-2 border-black border-t-transparent" />
             ) : (
-              <Plus className="h-4 w-4" />
+              "Add to Cart"
             )}
           </button>
         )}

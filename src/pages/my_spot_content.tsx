@@ -7,7 +7,7 @@ import { ChevronLeft, GlassWater, Ticket, HandCoins, Info } from "lucide-react";
 import { ItemUtils } from "@/utils/item_utils";
 import { useRestaurant } from "@/context/restaurant_context";
 import { PreviousTransactionItem } from "@/components/menu_items";
-import { adjustColor } from "@/utils/color";
+import { adjustColor, setThemeColor } from "@/utils/color";
 import ManageBundles from "@/components/manage_bundles";
 import { MySpotSkeleton } from "@/components/skeletons/my_spot_skeleton";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
@@ -18,6 +18,7 @@ const tagMap: Record<string, { tag: string; icon: any }> = {
   "My Bundles": { tag: "My Bundles", icon: HandCoins },
 };
 const MySpotContent: React.FC = () => {
+  setThemeColor();
   const { transactions } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -197,7 +198,7 @@ const MySpotContent: React.FC = () => {
       ) : (
         <>
           {/* Transactions List */}
-          <ul className="bg-white rounded-lg overflow-hidden space-y-6">
+          <ul className="bg-white rounded-lg overflow-hidden space-y-6 pb-24">
             {Object.entries(groupedTransactions).map(
               ([key, { transactions, maxQuantity, currentQuantity }]) => {
                 const existingItem = ItemUtils.getMenuItemFromItemId(

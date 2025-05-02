@@ -14,6 +14,7 @@ import { ArrowLeft, UserRound } from "lucide-react";
 import { project_url } from "@/utils/supabase_client.ts";
 import { Restaurant } from "@/types.ts";
 import { SignInButton } from "./signin/signin_button.tsx";
+import CustomLogo from "./svg/custom_logo.tsx";
 
 interface SidebarProps {
   restaurant: Restaurant | null;
@@ -79,7 +80,11 @@ export const Sidebar = ({ restaurant, isOpen, onClose }: SidebarProps) => {
     >
       {/* Header with logo + close button */}
       <div className="flex items-center justify-between px-4 pt-4 pb-2">
-        <img src="/tapin_logo_black.png" alt="TapIn Logo" className="w-28" />
+        {/* <img src="/tapin_logo_black.png" alt="TapIn Logo" className="w-28" /> */}
+        <CustomLogo
+          primaryColor={restaurant?.metadata.primaryColor as string}
+          size={116}
+        />
         <IconButton onClick={onClose} aria-label="Close" sx={{ padding: 1 }}>
           <CloseIcon />
         </IconButton>
@@ -87,7 +92,10 @@ export const Sidebar = ({ restaurant, isOpen, onClose }: SidebarProps) => {
 
       <div className="px-4 py-2">
         <button
-          className="w-full bg-[linear-gradient(225deg,#CAA650,#F4E4A8)] text-white font-semibold py-3 px-4 rounded-full shadow-md flex items-center justify-center gap-2"
+          className="w-full  text-white font-semibold py-3 px-4 rounded-full shadow-md flex items-center justify-center gap-2"
+          style={{
+            backgroundColor: restaurant?.metadata.primaryColor as string,
+          }}
           onClick={() => {
             navigate(BASE_PATH);
             onClose();
@@ -123,7 +131,7 @@ export const Sidebar = ({ restaurant, isOpen, onClose }: SidebarProps) => {
           </div>
         </div>
       )}
-      <div className="px-4 py-2 mt-auto mb-4">
+      <div className="px-4 py-2 mt-auto">
         {isSignedIn ? (
           <button
             className="w-full bg-gray-200 text-black font-semibold py-2 px-4 rounded-full shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2"
@@ -136,11 +144,14 @@ export const Sidebar = ({ restaurant, isOpen, onClose }: SidebarProps) => {
             <span>Logout</span>
           </button>
         ) : (
-          <SignInButton
-            onClose={() => {
-              onClose();
-            }}
-          />
+          <div className="flex justify-center w-full">
+            <SignInButton
+              onClose={() => {
+                onClose();
+              }}
+              primaryColor={restaurant?.metadata.primaryColor as string}
+            />
+          </div>
         )}
       </div>
     </Drawer>

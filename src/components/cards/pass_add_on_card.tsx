@@ -1,6 +1,7 @@
 import { CartState, PassItem, Policy, Restaurant } from "@/types";
 import { ItemUtils } from "@/utils/item_utils";
 import { Check } from "lucide-react";
+import { useState } from "react";
 
 interface PassAddOnCardProps {
   addPolicy: (bundle_id: string | null, policy: Policy) => Promise<void>;
@@ -17,19 +18,18 @@ export const PassAddOnCard: React.FC<PassAddOnCardProps> = ({
   restaurant,
   policy,
 }) => {
+  const [loading, setLoading] = useState(false);
   if (policy.definition.action.type !== "apply_add_on") {
     return null;
   }
-  const item = {
-    id: policy.definition.action.items[0],
-    modifiers: [],
-  };
   const passItemId = ItemUtils.policyItemSpecificationsToItemIds(
-    [item.id],
+    policy.definition.action.items,
     restaurant
   )[0];
-  if (!passItemId) {
-    console.log("no pass item id");
+  if (
+    !passItemId ||
+    ItemUtils.isItemExpired({ id: passItemId, modifiers: [] }, restaurant)
+  ) {
     return null;
   }
   const passItem = ItemUtils.getMenuItemFromItemId(
@@ -50,14 +50,23 @@ export const PassAddOnCard: React.FC<PassAddOnCardProps> = ({
     state.dealEffect.wholeCartModification?.policy_id,
   ].filter((id): id is string => id !== undefined);
 
-  console.log("pass add on card", policy);
-
   return (
-    <div className="flex items-start gap-3 p-4 rounded-xl border border-gray-300 bg-white">
+    <div className="flex items-start gap-3 p-4 rounded-xl border border-gray-300 bg-white relative">
+      {/* Loading Spinner */}
+      {loading && (
+        <div className="absolute top-4 right-4">
+          <div className="animate-spin rounded-full h-5 w-5 border-2 border-gray-300 border-t-primary"></div>
+        </div>
+      )}
+
       {/* Checkbox */}
       {policyIds.includes(policy.policy_id) ? (
         <button
-          onClick={() => removePolicy(policy)}
+          onClick={async () => {
+            setLoading(true);
+            await removePolicy(policy);
+            setLoading(false);
+          }}
           className="mt-1 w-5 h-5 rounded border flex items-center justify-center"
           style={{
             backgroundColor: restaurant.metadata.primaryColor as string,
@@ -68,8 +77,12 @@ export const PassAddOnCard: React.FC<PassAddOnCardProps> = ({
         </button>
       ) : (
         <button
-          onClick={() => addPolicy(null, policy)}
-          className="mt-1 w-5 h-5 rounded border flex items-center justify-center transition-colors bg-white border-gray-300 hover:border-indigo-500"
+          onClick={async () => {
+            setLoading(true);
+            await addPolicy(null, policy);
+            setLoading(false);
+          }}
+          className="mt-1 w-5 h-5 rounded border flex items-center justify-center transition-colors bg-white border-gray-300 "
         />
       )}
 

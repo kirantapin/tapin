@@ -63,9 +63,9 @@ export default function PoliciesPage() {
     return <OffersSkeleton />;
   }
   return (
-    <div className="max-w-md mx-auto bg-white min-h-screen">
+    <div className=" mx-auto bg-white min-h-screen">
       {/* Header */}
-      <div className="flex items-center p-4 sticky top-0 bg-white shadow-sm border-b relative z-10">
+      <div className="flex items-center p-4 sticky top-0 bg-white shadow-sm border-b relative z-10 w-full">
         <button
           className="w-9 h-9 flex items-center justify-center rounded-full bg-black/10 absolute left-4"
           onClick={() => {
@@ -142,7 +142,10 @@ export default function PoliciesPage() {
           </div>
         ) : (
           <div className="px-4">
-            <SignInButton onClose={() => {}} />
+            <SignInButton
+              onClose={() => {}}
+              primaryColor={restaurant?.metadata.primaryColor as string}
+            />
           </div>
         ))}
     </div>

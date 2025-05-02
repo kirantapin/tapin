@@ -272,7 +272,10 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                   {policyIsActive ? "Go to Checkout" : "Add to Cart"}
                 </button>
               ) : (
-                <SignInButton onClose={onClose} />
+                <SignInButton
+                  onClose={onClose}
+                  primaryColor={restaurant?.metadata.primaryColor as string}
+                />
               )}
             </div>
           </div>

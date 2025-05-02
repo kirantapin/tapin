@@ -273,7 +273,13 @@ const RestaurantInfo: React.FC = () => {
           <ExternalLink
             size={18}
             className="text-gray-400"
-            onClick={() => window.open(website)}
+            onClick={() => {
+              // Add http:// if not present
+              const url = website.startsWith("http")
+                ? website
+                : `http://${website}`;
+              window.open(url, "_blank");
+            }}
           />
         </div>
       )}
@@ -318,7 +324,12 @@ const RestaurantInfo: React.FC = () => {
                     <ExternalLink
                       size={18}
                       className="text-gray-400"
-                      onClick={() => window.open(socials.facebookLink)}
+                      onClick={() => {
+                        const url = socials.facebookLink.startsWith("http")
+                          ? socials.facebookLink
+                          : `http://${socials.facebookLink}`;
+                        window.open(url, "_blank");
+                      }}
                     />
                   </div>
                 )}
@@ -338,7 +349,12 @@ const RestaurantInfo: React.FC = () => {
                     <ExternalLink
                       size={18}
                       className="text-gray-400"
-                      onClick={() => window.open(socials.twitterLink)}
+                      onClick={() => {
+                        const url = socials.twitterLink.startsWith("http")
+                          ? socials.twitterLink
+                          : `http://${socials.twitterLink}`;
+                        window.open(url, "_blank");
+                      }}
                     />
                   </div>
                 )}
@@ -358,7 +374,12 @@ const RestaurantInfo: React.FC = () => {
                     <ExternalLink
                       size={18}
                       className="text-gray-400"
-                      onClick={() => window.open(socials.instagramLink)}
+                      onClick={() => {
+                        const url = socials.instagramLink.startsWith("http")
+                          ? socials.instagramLink
+                          : `http://${socials.instagramLink}`;
+                        window.open(url, "_blank");
+                      }}
                     />
                   </div>
                 )}
@@ -378,7 +399,12 @@ const RestaurantInfo: React.FC = () => {
                     <ExternalLink
                       size={18}
                       className="text-gray-400"
-                      onClick={() => window.open(socials.tiktokLink)}
+                      onClick={() => {
+                        const url = socials.tiktokLink.startsWith("http")
+                          ? socials.tiktokLink
+                          : `http://${socials.tiktokLink}`;
+                        window.open(url, "_blank");
+                      }}
                     />
                   </div>
                 )}

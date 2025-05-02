@@ -167,7 +167,7 @@ export default function RestaurantPage() {
         />
         {/* Rewards Section */}
         <div className="mt-6">
-          {userData && <Rewards viewAll={false} />}
+          <Rewards viewAll={false} />
 
           <div className="mt-8">
             {state.cart && (

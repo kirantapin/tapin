@@ -77,7 +77,7 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
               <h1 className="text-xl font-bold mb-2">{bundle.name}</h1>
               <div className="grid grid-cols-2 gap-4 mt-4">
                 {/* Points Box */}
-                <div className="flex flex-col justify-between p-4 rounded-xl bg-gray-50 h-24">
+                <div className="flex flex-col justify-between p-4 rounded-xl bg-gray-100 h-24">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-500 font-medium">
                       Points
@@ -94,7 +94,7 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
                 </div>
 
                 {/* Credits Box */}
-                <div className="flex flex-col justify-between p-4 rounded-xl bg-gray-50 h-24">
+                <div className="flex flex-col justify-between p-4 rounded-xl bg-gray-100 h-24">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-500 font-medium">
                       Credits

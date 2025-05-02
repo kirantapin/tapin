@@ -7,6 +7,8 @@ import { X } from "lucide-react";
 import { RESTAURANT_IMAGE_BUCKET } from "@/constants";
 import { project_url } from "@/utils/supabase_client";
 import OrderHistory from "./history_modal";
+import { useRestaurant } from "@/context/restaurant_context";
+import CustomIcon from "../svg/custom_icon";
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -18,7 +20,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
   const [userInfo, setUserInfo] = useState(null);
 
   const [loading, setLoading] = useState(true);
-
+  const { restaurant } = useRestaurant();
   useEffect(() => {
     if (userSession && userData && transactions) {
       // Get unique restaurant IDs from transactions
@@ -87,10 +89,9 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
 
               <div className="flex items-center gap-2">
                 <h2 className="text-2xl font-bold break-words">Your Profile</h2>
-                <img
-                  src="/tapin_icon_black.png"
-                  alt="Tap In Icon"
-                  className="w-7 h-7"
+                <CustomIcon
+                  circleColor={restaurant?.metadata.primaryColor as string}
+                  size={26}
                 />
               </div>
             </div>
@@ -102,7 +103,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
                   </p>
 
                   <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <SignInButton onClose={onClose} />
+                    <SignInButton
+                      onClose={onClose}
+                      primaryColor={restaurant?.metadata.primaryColor as string}
+                    />
                   </div>
                 </div>
               ) : (

@@ -73,6 +73,7 @@ const PayButton = ({ payload, sanityCheck, clearCart }) => {
           amount: payload.totalWithTip,
           currency: "usd",
           connectedAccountId: payload.connectedAccountId, // Pass connected account ID
+          cartResults: payload.state.cartResults,
         },
       });
 

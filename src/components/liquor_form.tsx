@@ -214,7 +214,7 @@ const LiquorForm = ({ type, restaurant, addToCart, primaryColor }) => {
                 key={option}
                 type="button"
                 onClick={() => toggleModifier(option.toLowerCase())}
-                className={`px-4 py-2 text-black border bg-white rounded-full cursor-pointer transition font-medium`}
+                className={`px-4 py-2 text-black border bg-white rounded-full cursor-pointer transition font-medium text-sm`}
                 style={{
                   borderColor: modifiers.includes(option.toLowerCase())
                     ? primaryColor
