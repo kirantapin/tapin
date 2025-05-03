@@ -6,7 +6,7 @@ import React, {
   FC,
   ReactNode,
 } from "react";
-import { Transaction, User, DealUse } from "../types";
+import { Transaction, User } from "../types";
 import { useSupabase } from "./supabase_context";
 import { Session } from "@supabase/supabase-js";
 

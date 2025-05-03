@@ -1,21 +1,26 @@
-import { Cart, CartItem, Restaurant } from "@/types";
+import { Cart, CartItem, Item, Policy, Restaurant } from "@/types";
 import { ItemUtils } from "@/utils/item_utils";
-import { isEqual } from "lodash";
-import { Minus, Plus, Trash2 } from "lucide-react";
+import { Minus, Plus, Trash2, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { titleCase } from "title-case";
 import { generateGradientColors } from "@/utils/color";
+import { useBottomSheet } from "@/context/bottom_sheet_context";
 interface CardProps {
   cart: Cart;
   cartItem: CartItem | null;
   restaurant: Restaurant;
   itemId: string;
-  addToCart;
-  removeFromCart;
+  addToCart: (item: Item) => void;
+  removeFromCart: (itemId: number) => void;
   modifiedFlair: {
     oldPrice: number | null;
     currentPrice: number;
     discountDescription: string | null;
+  } | null;
+  inlineRecommendation: {
+    cartId: number;
+    flair: string;
+    policy: Policy;
   } | null;
 }
 
@@ -27,16 +32,18 @@ export default function Card({
   addToCart,
   removeFromCart,
   modifiedFlair,
+  inlineRecommendation = null,
 }: CardProps) {
   const colors = generateGradientColors(
     restaurant.metadata.primaryColor as string
   );
 
-  const primaryColor = restaurant.metadata.primaryColor;
+  const primaryColor = restaurant.metadata.primaryColor as string;
   let itemInfo = null;
   let quantity = 0;
   let name = null;
   const [loading, setLoading] = useState(false);
+  const { openPolicyModal } = useBottomSheet();
 
   if (cartItem) {
     quantity = cartItem.quantity || 0;
@@ -58,7 +65,7 @@ export default function Card({
     <div className="w-full aspect-[9/5] rounded-3xl p-3 sm:p-4 relative overflow-hidden text-white my-4 enhance-contrast">
       <div
         style={{
-          background: `linear-gradient(to bottom right, ${colors.from}, ${colors.via})`,
+          background: `linear-gradient(to right, ${colors.via}, ${colors.from})`,
           // backgroundColor: restaurant?.metadata.primaryColor as string,
         }}
         className="absolute inset-0"
@@ -75,7 +82,10 @@ export default function Card({
 
       {/* Date and Amount Remaining in top right corner */}
       <div className="absolute top-3 sm:top-4 right-4 sm:right-6 text-right">
-        <div className="text-sm text-white/150 font-[Gilroy]">
+        <div
+          className="text-sm text-white/150"
+          style={{ fontFamily: '"IBM Plex Mono", monospace' }}
+        >
           {itemInfo?.for_date}
         </div>
         <div className="text-md text-white font-bold mt-1">
@@ -90,7 +100,7 @@ export default function Card({
         {/* pb-20 ensures space for bottom content */}
         <div className="space-y-1 sm:space-y-2">
           <div className="space-y-0.5">
-            <p className="text-xs sm:text-sm text-white/80">
+            <p className="text-xs sm:text-sm text-white font-semibold">
               {restaurant.name}
             </p>
             <h2 className="text-3xl sm:text-2xl font-bold">
@@ -103,6 +113,23 @@ export default function Card({
       {/* Bottom pinned price + buttons */}
       <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end z-20">
         <div>
+          {inlineRecommendation &&
+            inlineRecommendation?.cartId === cartItem?.id && (
+              <div
+                className="mb-2 inline-block"
+                onClick={() => {
+                  openPolicyModal(inlineRecommendation.policy, null);
+                }}
+              >
+                <span
+                  className="text-sm font-medium text-white/90 flex items-center gap-1 bg-white rounded-md py-1 px-2 font-semibold"
+                  style={{ color: primaryColor }}
+                >
+                  {inlineRecommendation.flair}
+                  <ChevronRight className="w-4 h-4 -ml-1" />
+                </span>
+              </div>
+            )}
           <p className="text-base sm:text-sm text-white">
             Price:{" "}
             <span className="font-normal">
@@ -134,11 +161,10 @@ export default function Card({
           <div className="flex items-center bg-white rounded-full px-1 py-1">
             <button
               onClick={async () => {
+                if (!cartItem) return;
                 setLoading(true);
-                console.log("removing", cartItem?.id);
-                await removeFromCart(cartItem?.id, {
-                  quantity: quantity - 1,
-                });
+                console.log("removing", cartItem.id);
+                await removeFromCart(cartItem.id);
                 setLoading(false);
               }}
               className="w-6 h-6 flex items-center justify-center rounded-full"
@@ -171,8 +197,11 @@ export default function Card({
           </div>
         ) : (
           <button
-            className="py-[5px] px-4 rounded-full flex items-center justify-center text-black text-sm font-semibold"
-            style={{ backgroundColor: "white" }}
+            className="py-[5px] px-4 rounded-full flex items-center justify-center text-white text-sm font-semibold bg-white"
+            style={{
+              width: "110px",
+              color: primaryColor,
+            }} // adjust as needed
             onClick={async () => {
               setLoading(true);
               await addToCart({ id: itemId, modifiers: [] });

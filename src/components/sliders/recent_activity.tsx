@@ -39,6 +39,7 @@ const processTransactionItems = (
       const itemId = transactionItem.item;
       const metadata = transactionItem.metadata;
       const modifiers = metadata?.modifiers || [];
+      const purchaseDate = transactionItem.created_at;
       if (metadata?.path?.includes(PASS_MENU_TAG)) {
         // Get second to last item from path array
         const item = ItemUtils.getMenuItemFromItemId(itemId, restaurant);
@@ -46,6 +47,7 @@ const processTransactionItems = (
           return {
             id: itemId,
             modifiers: [],
+            purchaseDate: purchaseDate,
           };
         }
         const sameCurrentPassItems = ItemUtils.getAllItemsInCategory(
@@ -69,6 +71,7 @@ const processTransactionItems = (
                 : earliest;
             }, sameCurrentPassItems[0]),
             modifiers: [],
+            purchaseDate: purchaseDate,
           };
         } else {
           return null;
@@ -77,9 +80,10 @@ const processTransactionItems = (
       return {
         id: itemId,
         modifiers: modifiers,
+        purchaseDate: purchaseDate,
       };
     })
-    .filter((item) => item?.id !== null);
+    .filter((item) => item !== null);
   return processedTransactionItems;
 };
 
@@ -106,18 +110,21 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
         Recent Activity
       </h1>
 
-      <div className="overflow-x-auto no-scrollbar -mx-4 px-4">
-        <div className="grid grid-flow-col auto-cols-[minmax(22rem,max-content)] gap-2">
+      <div className="overflow-x-auto no-scrollbar -mx-4 pr-4">
+        <div className="flex gap-4">
           {[...processedTransactionItems].slice(0, 3).map((item) => {
             return (
-              <DrinkItem
-                key={item?.id}
-                restaurant={restaurant}
-                addToCart={addToCart}
-                removeFromCart={removeFromCart}
-                cart={state.cart}
-                item={item as Item}
-              />
+              <div className="w-[95%] flex-none">
+                <DrinkItem
+                  key={item?.id}
+                  restaurant={restaurant}
+                  addToCart={addToCart}
+                  removeFromCart={removeFromCart}
+                  cart={state.cart}
+                  item={item as Item}
+                  purchaseDate={item.purchaseDate}
+                />
+              </div>
             );
           })}
         </div>

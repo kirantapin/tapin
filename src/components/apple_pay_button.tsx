@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   Elements,
@@ -6,7 +5,7 @@ import {
   useElements,
   ExpressCheckoutElement,
 } from "@stripe/react-stripe-js";
-import { supabase, supabase_local } from "../utils/supabase_client";
+import { supabase_local } from "../utils/supabase_client";
 import { useAuth } from "../context/auth_context";
 import { useNavigate } from "react-router-dom";
 
@@ -78,7 +77,9 @@ const PayButton = ({ payload, sanityCheck, clearCart }) => {
       });
 
       if (response.error) {
-        //handle response error
+        toast("Something went wrong. Please refresh the page and try again.", {
+          type: "error",
+        });
         return;
       }
 

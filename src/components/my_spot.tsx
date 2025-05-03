@@ -61,7 +61,7 @@ export const MySpot: React.FC<MySpotProps> = ({
           }}
         >
           {/* Centered Arrow on Right */}
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 bg-gray-100 rounded-full p-1">
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 bg-gray-200 rounded-full p-1">
             <ChevronRight className="w-4 h-4 text-gray-400" />
           </div>
 
@@ -100,7 +100,7 @@ export const MySpot: React.FC<MySpotProps> = ({
               />
             </div>
           </div>
-          <div className="absolute top-3 right-3 bg-gray-100 rounded-full p-1">
+          <div className="absolute top-3 right-3 bg-gray-200 rounded-full p-1">
             <ChevronRight className="w-4 h-4 text-gray-400" />
           </div>
           <div className="absolute bottom-3 left-4">
@@ -134,7 +134,7 @@ export const MySpot: React.FC<MySpotProps> = ({
               />
             </div>
           </div>
-          <div className="absolute top-3 right-3 bg-gray-100 rounded-full p-1">
+          <div className="absolute top-3 right-3 bg-gray-200 rounded-full p-1">
             <ChevronRight className="w-4 h-4 text-gray-400" />
           </div>
           <div className="absolute bottom-3 left-4">

@@ -56,7 +56,7 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
           </div>
         ) : (
           <button
-            className="absolute bottom-2 right-2 px-3 h-7 rounded-full flex items-center justify-center text-white text-xs font-medium"
+            className="absolute bottom-2 right-2 px-3 h-7 rounded-full flex items-center justify-center text-white text-xs font-semibold"
             style={{ backgroundColor: primaryColor }}
             onClick={async () => {
               await addPolicy(policy);

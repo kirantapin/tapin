@@ -1,5 +1,4 @@
-import { Restaurant, CartItem, Item, Cart, DealEffectPayload } from "../types";
-import { KNOWN_MODIFIERS } from "@/constants";
+import { Restaurant, CartItem, Cart, DealEffectPayload } from "../types";
 import { formatPoints } from "./parse";
 import { ItemUtils } from "./item_utils";
 export function modifiedItemFlair(

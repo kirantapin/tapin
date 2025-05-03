@@ -1,8 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { Sheet } from "react-modal-sheet";
 import {
   X,
-  Moon,
   ShoppingCart,
   AlertCircle,
   CheckCircle,
@@ -11,9 +10,8 @@ import {
   Lock,
 } from "lucide-react";
 import { Policy, Restaurant, CartState, BundleItem } from "@/types";
-import { DrinkItem } from "@/components/menu_items";
+import { DrinkItem, SingleSelectionItem } from "@/components/menu_items";
 import { titleCase } from "title-case";
-import { formatPoints } from "@/utils/parse";
 import { PolicyDescriptionDisplay } from "@/components/display_utils/policy_description_display";
 import { getMissingItemsForPolicy } from "@/utils/item_recommender";
 import { PolicyManager } from "@/utils/policy_manager";
@@ -24,12 +22,17 @@ import { adjustColor } from "@/utils/color";
 import { useAuth } from "@/context/auth_context";
 import { SignInButton } from "../signin/signin_button";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
+import { PolicyUtils } from "@/utils/policy_utils";
 interface PolicyModalProps {
   isOpen: boolean;
   onClose: () => void;
   policy: Policy;
   restaurant: Restaurant;
-  addPolicy: (bundle_id: string | null, policy: Policy) => void;
+  addPolicy: (
+    bundle_id: string | null,
+    policy: Policy,
+    userPreference: string | null
+  ) => void;
   state: CartState;
   addToCart: (item: any) => void;
   removeFromCart: (itemId: number, updates: any) => void;
@@ -47,6 +50,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
 }) => {
   const { userSession } = useAuth();
   const { addToCart, removeFromCart } = useBottomSheet();
+  const [userPreference, setUserPreference] = useState<string | null>(null);
   const missingItemsResults = getMissingItemsForPolicy(
     policy,
     state.cart,
@@ -57,6 +61,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
   const policyIsActive = PolicyManager.getActivePolicyIds(state.dealEffect).has(
     policy.policy_id
   );
+  const userChoices = PolicyUtils.getUserChoicesForPolicy(policy, restaurant);
   const navigate = useNavigate();
   const bundleObject = bundle_id
     ? (ItemUtils.getMenuItemFromItemId(bundle_id, restaurant) as BundleItem)
@@ -86,16 +91,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
 
               <div>
                 <h2 className="text-2xl font-bold pr-14 break-words">
-                  {policy.definition.tag === LOYALTY_REWARD_TAG
-                    ? `${titleCase(
-                        ItemUtils.getMenuItemFromItemId(
-                          policy.definition.action.items[0],
-                          restaurant
-                        )?.name || ""
-                      )} for ${formatPoints(
-                        policy.definition.action.amount
-                      )} points!`
-                    : titleCase(policy.name || "")}
+                  {PolicyUtils.getPolicyName(policy, restaurant)}
                 </h2>
 
                 <div className="flex flex-wrap gap-2 mt-4 mb-4">
@@ -229,14 +225,35 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                     ))}
                   </div>
                 ) : (
-                  <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-4">
-                    <div className="flex items-center gap-2 text-green-700">
-                      <CheckCircle size={20} />
-                      <span className="font-medium">
-                        {policyIsActive
-                          ? "This deal is already active in your cart."
-                          : "You're ready to add this deal."}
-                      </span>
+                  <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-1">
+                    <div>
+                      <div className="flex items-center gap-2 text-green-700 p-3">
+                        <CheckCircle size={20} />
+                        <span className="font-medium">
+                          {policyIsActive
+                            ? "This deal is active in your cart."
+                            : `You're ready to add this deal.${
+                                userChoices.length > 1
+                                  ? " Select your preferred item."
+                                  : ""
+                              }`}
+                        </span>
+                      </div>
+                      {!policyIsActive &&
+                        userChoices.length > 1 &&
+                        userChoices.map((itemId) => {
+                          return (
+                            <SingleSelectionItem
+                              key={itemId}
+                              restaurant={restaurant}
+                              item={{ id: itemId, modifiers: [] }}
+                              selected={userPreference === itemId}
+                              onSelect={() => {
+                                setUserPreference(itemId);
+                              }}
+                            />
+                          );
+                        })}
                     </div>
                   </div>
                 )}
@@ -248,15 +265,11 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                 <button
                   className="w-full text-white py-3 rounded-full flex items-center justify-center gap-2"
                   style={{
-                    background:
-                      hasMissingItems && !policyIsActive
+                    backgroundColor:
+                      (hasMissingItems && !policyIsActive) ||
+                      (userChoices.length > 1 && !userPreference)
                         ? "#969292"
-                        : restaurant?.metadata.primaryColor
-                        ? `linear-gradient(45deg, 
-          ${adjustColor(restaurant.metadata.primaryColor as string, -30)},
-          ${adjustColor(restaurant.metadata.primaryColor as string, 40)}
-        )`
-                        : undefined,
+                        : (restaurant?.metadata.primaryColor as string),
                   }}
                   onClick={async () => {
                     if (policyIsActive) {
@@ -264,7 +277,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                         DRINK_CHECKOUT_PATH.replace(":id", restaurant.id)
                       );
                     } else if (!hasMissingItems) {
-                      addPolicy(bundle_id, policy);
+                      addPolicy(bundle_id, policy, userPreference);
                     }
                   }}
                 >

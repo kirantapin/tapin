@@ -6,6 +6,7 @@ import {
   NormalItem,
   BundleItem,
   Category,
+  Cart,
 } from "@/types";
 import {
   PASS_MENU_TAG,
@@ -186,5 +187,17 @@ export class ItemUtils {
       }
     }
     return null;
+  }
+  static normalItemTotalPrice(cart: Cart, restaurant: Restaurant): number {
+    let price = 0;
+    for (const cartItem of cart) {
+      if (
+        !this.isPassItem(cartItem.item.id, restaurant) &&
+        !this.isBundleItem(cartItem.item.id, restaurant)
+      ) {
+        price += cartItem.price * cartItem.quantity;
+      }
+    }
+    return price;
   }
 }

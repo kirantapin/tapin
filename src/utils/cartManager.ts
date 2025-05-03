@@ -2,7 +2,6 @@ import {
   ADD_ITEM,
   ADD_POLICY,
   emptyDealEffect,
-  MENU_DISPLAY_MAP,
   NEW_USER_SESSION,
   REFRESH,
   REMOVE_ITEM,
@@ -10,17 +9,13 @@ import {
 } from "@/constants";
 import {
   Cart,
-  CartItem,
   CartResultsPayload,
   DealEffectPayload,
   Item,
   Policy,
-  Restaurant,
   VerifyOrderPayload,
 } from "@/types";
 import { supabase_local } from "./supabase_client";
-import { isEqual } from "lodash";
-import { priceItem } from "./pricer";
 
 const localStorageCartTag = "_cart";
 const CART_EXPIRATION_MINUTES = 15;
@@ -109,7 +104,11 @@ export class CartManager {
       | Item
       | string
       | number
-      | { policy_id: string; bundle_id: string | null }
+      | {
+          policy_id: string;
+          bundle_id: string | null;
+          userPreference: string | null;
+        }
   ): Promise<void> {
     console.log("verifyOrder", type, content);
 
@@ -159,12 +158,14 @@ export class CartManager {
 
   public async addPolicy(
     bundle_id: string | null,
-    policy: Policy
+    policy: Policy,
+    userPreference: string | null = null
   ): Promise<string | null> {
     console.log("adding policy", policy);
     await this.verifyOrder(ADD_POLICY, {
       policy_id: policy.policy_id,
       bundle_id: bundle_id,
+      userPreference: userPreference,
     });
     if (this.errorDisplay) {
       return this.errorDisplay;

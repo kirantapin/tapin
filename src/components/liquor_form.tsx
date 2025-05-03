@@ -25,6 +25,24 @@ const LiquorForm = ({ type, restaurant, addToCart, primaryColor }) => {
   const [currentCustomModifier, setCurrentCustomModifier] =
     useState<string>("");
   const [loading, setLoading] = useState(false);
+  const modifierGroups = {
+    amount: ["double", "triple"],
+    mixer: [
+      "coca cola",
+      "diet coke",
+      "sprite",
+      "ginger ale",
+      "tonic",
+      "soda",
+      "cranberry",
+      "orange juice",
+      "pineapple juice",
+      "grapefruit juice",
+      "red bull",
+      "water",
+      "lemonade",
+    ],
+  };
 
   const menu = restaurant.menu;
   const liquorChildIds = menu[LIQUOR_MENU_TAG].children;
@@ -112,10 +130,16 @@ const LiquorForm = ({ type, restaurant, addToCart, primaryColor }) => {
     );
   };
 
-  const toggleModifier = (modifier: string) => {
+  const toggleModifier = (group: "amount" | "mixer", modifier: string) => {
     if (modifiers.includes(modifier)) {
       removeModifier(modifier);
     } else {
+      const allGroupModifiers = modifierGroups[group];
+      for (const mod of allGroupModifiers) {
+        if (modifiers.includes(mod)) {
+          removeModifier(mod);
+        }
+      }
       addModifier(modifier);
     }
   };
@@ -183,7 +207,7 @@ const LiquorForm = ({ type, restaurant, addToCart, primaryColor }) => {
             Select Mixer
           </label>
           <div className="grid grid-cols-2 gap-2">
-            {mixerOptions.map((mixer) => (
+            {modifierGroups.mixer.map((mixer) => (
               <button
                 key={mixer}
                 type="button"
@@ -195,7 +219,7 @@ const LiquorForm = ({ type, restaurant, addToCart, primaryColor }) => {
                   color: selectedMixer === mixer ? primaryColor : "#374151",
                 }}
               >
-                {mixer}
+                {titleCase(mixer)}
               </button>
             ))}
           </div>
@@ -209,22 +233,20 @@ const LiquorForm = ({ type, restaurant, addToCart, primaryColor }) => {
             Modifiers
           </label>
           <div className="flex gap-2 mt-2">
-            {["Double", "Triple"].map((option) => (
+            {modifierGroups.amount.map((option) => (
               <button
                 key={option}
                 type="button"
-                onClick={() => toggleModifier(option.toLowerCase())}
+                onClick={() => toggleModifier("amount", option)}
                 className={`px-4 py-2 text-black border bg-white rounded-full cursor-pointer transition font-medium text-sm`}
                 style={{
-                  borderColor: modifiers.includes(option.toLowerCase())
+                  borderColor: modifiers.includes(option)
                     ? primaryColor
                     : "#e5e7eb",
-                  color: modifiers.includes(option.toLowerCase())
-                    ? primaryColor
-                    : "#374151",
+                  color: modifiers.includes(option) ? primaryColor : "#374151",
                 }}
               >
-                {option}
+                {titleCase(option)}
               </button>
             ))}
           </div>

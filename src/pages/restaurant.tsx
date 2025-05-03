@@ -1,21 +1,9 @@
-import {
-  Menu,
-  ShoppingBag,
-  User,
-  Info,
-  Gift,
-  Search,
-  BadgeCheck,
-  Beer,
-  X,
-  Star,
-  MapPin,
-} from "lucide-react";
+import { Search, X } from "lucide-react";
 
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/auth_context.tsx";
-import { Restaurant, Policy, Transaction, Bundle } from "../types.ts";
+import { Restaurant, Transaction } from "../types.ts";
 import { MENU_DISPLAY_MAP, HOUSE_MIXER_LABEL } from "../constants.ts";
 
 import { DrinkItem, DrinkList } from "@/components/menu_items.tsx";
@@ -35,8 +23,11 @@ import { ActionButtons } from "@/components/sliders/action_buttons.tsx";
 import { useRestaurant } from "@/context/restaurant_context.tsx";
 import BundleSlider from "@/components/sliders/bundle_slider.tsx";
 import { useBottomSheet } from "@/context/bottom_sheet_context.tsx";
+import LocationMarkerIcon from "@/components/svg/location_tag.tsx";
+import { isOpenNow } from "@/utils/time.ts";
+
 export default function RestaurantPage() {
-  const { userSession, userData, transactions } = useAuth();
+  const { userSession, transactions } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const {
@@ -51,7 +42,6 @@ export default function RestaurantPage() {
   const [activeFilter, setActiveFilter] = useState(HOUSE_MIXER_LABEL);
   const orderDrinksRef = useRef<HTMLDivElement>(null);
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
-  const [qrTransactions, setQrTransactions] = useState<Transaction[]>([]);
   const { state, addToCart, removeFromCart } = useBottomSheet();
   const { openPolicyModal, openBundleModal, openQrModal } = useBottomSheet();
 
@@ -124,38 +114,38 @@ export default function RestaurantPage() {
           </h1>
         </div>
         <div className="flex items-center gap-1 mt-1 mb-4">
-          <MapPin className="w-4 h-4 text-gray-500" />
-          <span className="text-sm text-gray-500">
+          {/* <MapPin className="w-4 h-4 text-gray-500" /> */}
+          <LocationMarkerIcon fillColor="#6B7280" />
+          <span className="text-sm text-gray-500 ml-1">
             {restaurant?.metadata.locationTag}
           </span>
+          {isOpenNow(restaurant?.info.openingHours) !== undefined && (
+            <>
+              <span className="text-sm text-gray-500 ml-1">•</span>
+              <span
+                className="text-sm ml-1 font-semibold"
+                style={{ color: restaurant?.metadata.primaryColor as string }}
+              >
+                {isOpenNow(restaurant?.info.openingHours)
+                  ? "Open Now"
+                  : "Closed"}
+              </span>
+            </>
+          )}
         </div>
         {/* Action Buttons */}
-        <ActionButtons
-          restaurant={restaurant as Restaurant}
-          scrollToOrderDrinks={scrollToOrderDrinks}
-        />
+        <ActionButtons scrollToOrderDrinks={scrollToOrderDrinks} />
         {/* Highlight Slider */}
 
         <HighlightSlider
-          restaurant={restaurant as Restaurant}
           addToCart={(itemId: string) => {
             addToCart({ id: itemId, modifiers: [] });
-          }}
-          setPolicyModal={(policy_id: string) => {
-            const policy = policies.find((p) => p.policy_id === policy_id);
-            if (policy) {
-              openPolicyModal(policy, null);
-            }
           }}
           policies={policies || []}
         />
 
         {/* My Spot Section */}
-        <MySpot
-          userSession={userSession}
-          restaurant={restaurant}
-          transactions={transactions}
-        />
+        <MySpot userSession={userSession} transactions={transactions} />
 
         {/* Recent Activity Section*/}
         <RecentActivity
@@ -177,6 +167,7 @@ export default function RestaurantPage() {
                 addToCart={addToCart}
                 removeFromCart={removeFromCart}
                 displayCartPasses={false}
+                dealEffect={null}
               />
             )}
           </div>
@@ -249,8 +240,9 @@ export default function RestaurantPage() {
                   style={
                     activeFilter === filter
                       ? {
-                          color: restaurant?.metadata.primaryColor,
-                          borderColor: restaurant?.metadata.primaryColor,
+                          color: restaurant?.metadata.primaryColor as string,
+                          borderColor: restaurant?.metadata
+                            .primaryColor as string,
                         }
                       : {
                           backgroundColor: "#f6f8fa",

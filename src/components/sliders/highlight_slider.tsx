@@ -154,7 +154,7 @@ const HighlightSlider = ({
       <div className="mt-3">
         <div
           ref={scrollContainerRef}
-          className="overflow-x-auto snap-x snap-mandatory no-scrollbar scrollbar-hide "
+          className="overflow-x-auto snap-x snap-mandatory no-scrollbar scrollbar-hide -mx-4 px-4"
           onScroll={handleScroll}
           onWheel={() => {
             handleUserInteraction();

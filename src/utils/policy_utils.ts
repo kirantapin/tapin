@@ -3,6 +3,8 @@ import { Restaurant } from "@/types";
 import { supabase } from "./supabase_client";
 import { formatPoints, listItemsToStringDescription } from "./parse";
 import { ItemUtils } from "./item_utils";
+import { titleCase } from "title-case";
+import { LOYALTY_REWARD_TAG } from "@/constants";
 
 export class PolicyUtils {
   static async fetchPoliciesByRestaurantId(
@@ -222,6 +224,49 @@ export class PolicyUtils {
         return this.returnHighestCostItem(items, restaurant);
       default:
         return 0;
+    }
+  };
+
+  static getPolicyName = (policy: Policy, restaurant: Restaurant): string => {
+    if (policy.definition.tag === LOYALTY_REWARD_TAG) {
+      if (policy.definition.action.type === "apply_loyalty_reward") {
+        return `${titleCase(
+          ItemUtils.getMenuItemFromItemId(
+            policy.definition.action.items[0],
+            restaurant
+          )?.name || ""
+        )} for ${formatPoints(policy.definition.action.amount)} points!`;
+      }
+      if (policy.definition.action.type === "add_to_user_credit") {
+        return `Earn $${policy.definition.action.amount.toFixed(2)} of credit`;
+      }
+    }
+    return titleCase(policy.name || "");
+  };
+
+  static getUserChoicesForPolicy = (
+    policy: Policy,
+    restaurant: Restaurant
+  ): string[] => {
+    const action = policy.definition.action;
+    switch (action.type) {
+      case "add_free_item":
+        return ItemUtils.policyItemSpecificationsToItemIds(
+          [action.item],
+          restaurant
+        );
+      case "apply_loyalty_reward":
+        return ItemUtils.policyItemSpecificationsToItemIds(
+          action.items,
+          restaurant
+        );
+      case "apply_add_on":
+        return ItemUtils.policyItemSpecificationsToItemIds(
+          action.items,
+          restaurant
+        );
+      default:
+        return [];
     }
   };
 }

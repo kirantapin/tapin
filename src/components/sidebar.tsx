@@ -131,7 +131,7 @@ export const Sidebar = ({ restaurant, isOpen, onClose }: SidebarProps) => {
           </div>
         </div>
       )}
-      <div className="px-4 py-2 mt-auto">
+      <div className="px-4 py-2 mt-auto mb-4">
         {isSignedIn ? (
           <button
             className="w-full bg-gray-200 text-black font-semibold py-2 px-4 rounded-full shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2"

@@ -19,7 +19,7 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
   const [policyStatsMap, setPolicyStatsMap] = useState<
     Record<string, Record<string, string[]>> | undefined
   >(undefined);
-  const { state } = useBottomSheet();
+  const { state, openBundleModal } = useBottomSheet();
 
   useEffect(() => {
     const fetchPolicyStats = async () => {
@@ -177,7 +177,7 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
 
       <div className="mt-8 px-4">
         <h1 className="text-xl font-bold">Other Bundles You Might Like</h1>
-        <BundleSlider onCardClick={() => {}} />
+        <BundleSlider onCardClick={openBundleModal} />
       </div>
     </div>
   );

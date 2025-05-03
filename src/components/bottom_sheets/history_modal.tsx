@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Transaction, Order } from "@/types";
 import { useAuth } from "@/context/auth_context";
 import { project_url, supabase } from "@/utils/supabase_client";
-import { convertUtcToLocal } from "@/utils/parse";
+import { convertUtcToLocal } from "@/utils/time";
 import { RESTAURANT_IMAGE_BUCKET } from "@/constants";
 
 interface OrderWithTransactions extends Order {

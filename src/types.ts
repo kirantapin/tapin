@@ -15,6 +15,7 @@ export interface VerifyOrderPayload {
       | {
           bundle_id: string | null;
           policy_id: string;
+          userPreference: string | null;
         };
   };
   jwtToken: string | null;
@@ -63,12 +64,26 @@ export interface DealEffectPayload {
   wholeCartModification: WholeCartModification | null;
 }
 
-export interface WholeCartModification {
-  policy_id: string;
-  bundle_id: string | null;
-  modificationType: string;
-  amount: number;
-}
+export type WholeCartModification =
+  | {
+      policy_id: string;
+      bundle_id: string | null;
+      modificationType:
+        | "apply_fixed_order_discount"
+        | "apply_order_percent_discount"
+        | "apply_order_point_multiplier";
+      amount: number;
+      metadata: Record<string, any>;
+    }
+  | {
+      policy_id: string;
+      bundle_id: string | null;
+      modificationType: "add_to_user_credit";
+      amount: number;
+      metadata: {
+        point_cost: number;
+      };
+    };
 
 export interface ModifiedCartItem {
   id: number;
@@ -227,7 +242,6 @@ export interface Order {
 
 export interface User {
   id: string;
-  signed_up: string;
   points: Record<string, number>;
   next_purchase_credit: Record<string, number>;
 }
@@ -300,6 +314,17 @@ export type PolicyDefinitionAction =
       quantity: number;
     }
   | {
+      type: "apply_add_on";
+      items: ItemSpecification[];
+      amount: number;
+      frequency: number;
+    }
+  | {
+      type: "apply_loyalty_reward";
+      items: ItemSpecification[];
+      amount: number;
+    }
+  | {
       type: "apply_percent_discount";
       items: ItemSpecification[];
       amount: number;
@@ -331,14 +356,4 @@ export type PolicyDefinitionAction =
       items: { item: ItemSpecification; quantity: number }[];
     }
   | { type: "apply_order_percent_discount"; amount: number }
-  | {
-      type: "apply_add_on";
-      items: ItemSpecification[];
-      amount: number;
-      frequency: number;
-    }
-  | {
-      type: "apply_loyalty_reward";
-      items: ItemSpecification[];
-      amount: number;
-    };
+  | { type: "add_to_user_credit"; amount: number };

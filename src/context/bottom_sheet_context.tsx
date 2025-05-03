@@ -46,10 +46,14 @@ interface BottomSheetContextValue {
     userOwnershipMap: Record<string, boolean>
   ) => void;
   state: CartState;
-  addPolicy: (policy: Policy) => void;
+  addPolicy: (
+    bundle_id: string | null,
+    policy: Policy,
+    userPreference: string | null
+  ) => Promise<void>;
   addToCart: (item: Item) => Promise<void>;
   removeFromCart: (id: number) => Promise<void>;
-  removePolicy: (policy: Policy) => void;
+  removePolicy: (policy: Policy) => Promise<void>;
   refreshCart: () => void;
   clearCart: () => void;
   getActivePolicies: () => string[];
@@ -73,10 +77,10 @@ const BottomSheetContext = createContext<BottomSheetContextValue>({
     dealEffect: [],
     dealEffectMap: {},
   },
-  addPolicy: () => {},
+  addPolicy: () => Promise.resolve(),
   addToCart: () => Promise.resolve(),
   removeFromCart: () => Promise.resolve(),
-  removePolicy: () => {},
+  removePolicy: () => Promise.resolve(),
   openSignInModal: () => {},
   openProfileModal: () => {},
 });

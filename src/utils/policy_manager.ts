@@ -66,10 +66,6 @@ export class PolicyManager {
         return sumA - sumB;
       })
       .map(({ deal }) => deal);
-
-    if (sortedDeals.length > 3) {
-      return sortedDeals.slice(0, 3);
-    }
     return sortedDeals;
   }
 
@@ -180,5 +176,73 @@ export class PolicyManager {
       return null;
     }
     return policy;
+  }
+
+  public getInlineRecommendations(
+    cart: Cart,
+    dealEffect: DealEffectPayload,
+    restaurant: Restaurant
+  ): { cartId: number; flair: string; policy: Policy } | null {
+    const potentialPolicies = this.getRecommendedDeals(
+      cart,
+      dealEffect,
+      restaurant
+    ).filter((policy) => !policy.locked);
+    if (potentialPolicies.length === 0) {
+      return null;
+    }
+    const cartItemIds = cart.map((cartItem) => cartItem.item.id);
+    for (const policy of potentialPolicies) {
+      const missingItems = getMissingItemsForPolicy(
+        policy,
+        cart,
+        restaurant,
+        dealEffect
+      );
+      if (missingItems.length !== 1) {
+        continue;
+      }
+      const missingItem = missingItems[0];
+      const policyItemIds = ItemUtils.policyItemSpecificationsToItemIds(
+        missingItem.missingItems,
+        restaurant
+      );
+      const matchingIds = [];
+      for (const id of cartItemIds) {
+        if (policyItemIds.includes(id)) {
+          matchingIds.push(id);
+        }
+      }
+      if (matchingIds.length === 0) {
+        continue;
+      }
+      // Find the cart item with matching ID that has lowest price
+      let lowestPrice = Infinity;
+      let cartId = -1;
+      for (let i = 0; i < cart.length; i++) {
+        const cartItem = cart[i];
+        if (matchingIds.includes(cartItem.item.id)) {
+          if (cartItem.price < lowestPrice) {
+            lowestPrice = cartItem.price;
+            cartId = cartItem.id;
+          }
+        }
+      }
+      if (cartId === -1) {
+        continue;
+      }
+      const policyValue = PolicyUtils.getEstimatedPolicyValue(
+        policy,
+        restaurant
+      );
+      return {
+        cartId: cartId,
+        flair: `Add ${missingItem.quantityNeeded} more and save $${Math.round(
+          policyValue
+        ).toFixed(2)}`,
+        policy: policy,
+      };
+    }
+    return null;
   }
 }

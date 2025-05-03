@@ -1,5 +1,5 @@
 import { Policy, Restaurant } from "@/types";
-import { convertUtcToLocal } from "@/utils/parse";
+import { convertUtcToLocal } from "@/utils/time";
 import { PolicyUtils } from "@/utils/policy_utils";
 
 export function PolicyDescriptionDisplay({

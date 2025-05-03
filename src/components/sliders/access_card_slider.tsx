@@ -1,6 +1,13 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import AccessCard from "@/components/cards/access_card.tsx";
-import { Cart, CartItem, DealEffectPayload, Item, Restaurant } from "@/types";
+import {
+  Cart,
+  CartItem,
+  DealEffectPayload,
+  Item,
+  Policy,
+  Restaurant,
+} from "@/types";
 import { MENU_DISPLAY_MAP, PASS_LABEL } from "@/constants";
 import { modifiedItemFlair } from "@/utils/pricer";
 import { ItemUtils } from "@/utils/item_utils";
@@ -11,7 +18,8 @@ const AccessCardSlider = ({
   addToCart,
   removeFromCart,
   displayCartPasses = false,
-  dealEffect,
+  dealEffect = null,
+  inlineRecommendation = null,
 }: {
   cart: Cart;
   restaurant: Restaurant;
@@ -19,6 +27,11 @@ const AccessCardSlider = ({
   removeFromCart: (itemId: number) => Promise<void>;
   displayCartPasses: boolean;
   dealEffect: DealEffectPayload | null;
+  inlineRecommendation: {
+    cartId: number;
+    flair: string;
+    policy: Policy;
+  } | null;
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollContainerRef = useRef(null);
@@ -56,12 +69,21 @@ const AccessCardSlider = ({
       return flattened;
     }
 
-    const items = ItemUtils.getAllItemsInCategory(
+    const itemIds = ItemUtils.getAllItemsInCategory(
       MENU_DISPLAY_MAP[PASS_LABEL],
       restaurant
     );
 
-    flattened.push(...items);
+    // Sort items by for_date before pushing to flattened
+    const sortedItemIds = [...itemIds].sort((a, b) => {
+      const aDate =
+        ItemUtils.getMenuItemFromItemId(a, restaurant)?.for_date || "";
+      const bDate =
+        ItemUtils.getMenuItemFromItemId(b, restaurant)?.for_date || "";
+      return aDate.localeCompare(bDate);
+    });
+
+    flattened.push(...sortedItemIds);
 
     return flattened;
   }, [restaurant, cart]);
@@ -78,7 +100,7 @@ const AccessCardSlider = ({
         {flatAccessCards.length > 0 ? (
           <div
             ref={scrollContainerRef}
-            className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar"
+            className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar -mx-4 px-8 gap-4"
             onScroll={handleScroll}
           >
             {flatAccessCards.map((x, index) => {
@@ -94,7 +116,7 @@ const AccessCardSlider = ({
                   }
                 }
                 return (
-                  <div key={index} className="snap-center shrink-0 w-full px-4">
+                  <div key={index} className="snap-center shrink-0 w-full">
                     <AccessCard
                       cart={cart}
                       cartItem={x as CartItem | null}
@@ -103,12 +125,13 @@ const AccessCardSlider = ({
                       addToCart={addToCart}
                       removeFromCart={removeFromCart}
                       modifiedFlair={modifiedFlair}
+                      inlineRecommendation={inlineRecommendation}
                     />
                   </div>
                 );
               } else {
                 return (
-                  <div key={index} className="snap-center shrink-0 w-full px-4">
+                  <div key={index} className="snap-center shrink-0 w-full">
                     <AccessCard
                       cart={cart}
                       cartItemId={null}

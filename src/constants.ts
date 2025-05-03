@@ -71,3 +71,5 @@ export const HISTORY_KEY = "history";
 
 export const RESTAURANT_IMAGE_BUCKET = "restaurant_images";
 export const BUNDLE_IMAGE_BUCKET = "bundle-images";
+
+export const POINTS_PER_DOLLAR = 10;

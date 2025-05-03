@@ -1,6 +1,4 @@
-import { PASS_MENU_TAG } from "@/constants";
-import { Item, ItemSpecification, Policy, Restaurant } from "@/types";
-import { titleCase } from "title-case";
+import { ItemSpecification, Restaurant } from "@/types";
 import { ItemUtils } from "./item_utils";
 
 export const listItemsToStringDescription = (
@@ -30,34 +28,6 @@ export const listItemsToStringDescription = (
     return "";
   }
 };
-
-function getLocalTimeZone(): string {
-  return Intl.DateTimeFormat().resolvedOptions().timeZone;
-}
-
-export function convertUtcToLocal(utcTimestampz: string): string {
-  const timeZone = getLocalTimeZone();
-  const date = new Date(utcTimestampz);
-  return new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    year: undefined,
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    second: undefined,
-  }).format(date);
-}
-
-export function convertLocalToUtcTimestampz(localDateStr: string): string {
-  const timeZone = getLocalTimeZone();
-  const dateInLocal = new Date(
-    new Date(localDateStr).toLocaleString("en-US", { timeZone })
-  );
-  return new Date(
-    dateInLocal.getTime() - dateInLocal.getTimezoneOffset() * 60000
-  ).toISOString();
-}
 
 export function sentenceCase(text: string | null) {
   if (!text) return "";

@@ -133,11 +133,16 @@ export function useGlobalCartManager(
 
   const addPolicy = async (
     bundle_id: string | null,
-    policy: Policy
+    policy: Policy,
+    userPreference: string | null
   ): Promise<void> => {
     if (!cartManagerRef.current) return;
     console.log("adding policy", policy);
-    const result = await cartManagerRef.current.addPolicy(bundle_id, policy);
+    const result = await cartManagerRef.current.addPolicy(
+      bundle_id,
+      policy,
+      userPreference
+    );
 
     if (result) {
       if (global) {

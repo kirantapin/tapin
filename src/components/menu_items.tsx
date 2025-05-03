@@ -8,11 +8,12 @@ import {
 } from "@/constants";
 import LiquorForm from "./liquor_form";
 import { titleCase } from "title-case";
-import { Cart, Item, ItemSpecification, Restaurant } from "@/types";
+import { Cart, Item, ItemSpecification, Policy, Restaurant } from "@/types";
 import { project_url } from "@/utils/supabase_client";
 import { ItemUtils } from "@/utils/item_utils";
 import { adjustColor } from "@/utils/color";
 import { useAuth } from "@/context/auth_context";
+import { convertUtcToLocal } from "@/utils/time";
 
 export function DrinkItem({
   cart,
@@ -20,12 +21,14 @@ export function DrinkItem({
   addToCart,
   removeFromCart,
   item,
+  purchaseDate = null,
 }: {
   cart: Cart;
   restaurant: Restaurant;
   addToCart: (item: Item) => Promise<void>;
   removeFromCart: (id: number) => Promise<void>;
   item: Item;
+  purchaseDate: string | null;
 }) {
   const primaryColor = restaurant.metadata.primaryColor as string;
   const menuItem = ItemUtils.getMenuItemFromItemId(item.id, restaurant);
@@ -79,9 +82,16 @@ export function DrinkItem({
         </div>
 
         <div className="flex items-center justify-between mt-2">
-          <p className="font-bold text-base">
-            ${ItemUtils.priceItem(item, restaurant)?.toFixed(2)}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="font-bold text-base">
+              ${ItemUtils.priceItem(item, restaurant)?.toFixed(2)}
+            </p>
+            {purchaseDate && quantity === 0 && (
+              <span className="text-xs text-gray-500">
+                {convertUtcToLocal(purchaseDate)}
+              </span>
+            )}
+          </div>
 
           {quantity > 0 ? (
             <div className="flex items-center bg-white rounded-full px-3 py-1 ">
@@ -144,15 +154,85 @@ export function DrinkItem({
   );
 }
 
+export function SingleSelectionItem({
+  restaurant,
+  item,
+  selected,
+  onSelect,
+}: {
+  restaurant: Restaurant;
+  item: Item;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  const primaryColor = restaurant.metadata.primaryColor as string;
+  const menuItem = ItemUtils.getMenuItemFromItemId(item.id, restaurant);
+  if (!menuItem || !menuItem.price) {
+    return null;
+  }
+  const isPass = ItemUtils.isPassItem(item.id, restaurant);
+
+  return (
+    <div
+      className={`flex-none flex items-stretch m-3 border p-3 rounded-3xl bg-white transition-colors duration-300 ${
+        selected ? undefined : "border-gray-200"
+      }`}
+      style={{
+        borderColor: selected ? primaryColor : undefined,
+      }}
+      onClick={onSelect}
+    >
+      {/* Image */}
+      <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 p-3">
+        <img
+          src={
+            menuItem?.image_url ||
+            `${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`
+          }
+          alt={menuItem?.name}
+          className="h-full w-full object-cover"
+        />
+      </div>
+
+      {/* Text + Price + Button */}
+      <div className="flex flex-1 flex-col justify-between">
+        <div>
+          <div className="flex justify-between items-start">
+            <h3 className="font-bold text-base">
+              {titleCase(ItemUtils.getItemName(item, restaurant))}
+            </h3>
+            {isPass && (
+              <span className="text-xs text-gray-500 ml-2">
+                {menuItem?.for_date}
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-gray-500 custom-line-clamp">
+            {menuItem?.description}
+          </p>
+        </div>
+
+        <div className="flex items-center justify-between mt-2">
+          <div className="flex items-center gap-2">
+            <p className="font-bold text-base">
+              ${ItemUtils.priceItem(item, restaurant)?.toFixed(2)}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function LoyaltyRewardItem({
   restaurant,
-  itemSpec,
+  policy,
   numPoints,
   onRedeem,
   isActive,
 }: {
   restaurant: Restaurant;
-  itemSpec: ItemSpecification;
+  policy: Policy;
   numPoints: number;
   onRedeem: () => void;
   isActive: boolean;
@@ -160,13 +240,27 @@ export function LoyaltyRewardItem({
   const { userData } = useAuth();
   const hasEnoughPoints = (userData?.points[restaurant.id] || 0) >= numPoints;
   const primaryColor = restaurant.metadata.primaryColor as string;
-  const itemIds = ItemUtils.policyItemSpecificationsToItemIds(
-    [itemSpec],
-    restaurant
-  );
-  const itemId = itemIds[0];
-  const menuItem = ItemUtils.getMenuItemFromItemId(itemId, restaurant);
-  const isPass = ItemUtils.isPassItem(itemId, restaurant);
+  let itemId = null;
+  let menuItem = null;
+  if (policy.definition.action.type === "add_to_user_credit") {
+    menuItem = {
+      name: `Earn  $${policy.definition.action.amount.toFixed(2)} of credit`,
+      description: `Earn  $${policy.definition.action.amount.toFixed(
+        2
+      )} of credit`,
+      price: policy.definition.action.amount,
+      image_url: `${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`,
+    };
+  }
+  if (policy.definition.action.type === "apply_loyalty_reward") {
+    const itemIds = ItemUtils.policyItemSpecificationsToItemIds(
+      policy.definition.action.items,
+      restaurant
+    );
+    itemId = itemIds[0];
+    menuItem = ItemUtils.getMenuItemFromItemId(itemId, restaurant);
+  }
+  const isPass = itemId ? ItemUtils.isPassItem(itemId, restaurant) : false;
 
   return (
     <div

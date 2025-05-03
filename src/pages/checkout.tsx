@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useReducer } from "react";
 import { ArrowLeft, Check, ChevronLeft, Tag, X } from "lucide-react";
-import { checkoutStyles } from "../styles/checkout_styles";
+import { checkoutStyles } from "../styles/checkout_styles.ts";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/auth_context.tsx";
 import ApplePayButton from "../components/apple_pay_button.tsx";
@@ -23,6 +23,7 @@ import { useRestaurant } from "@/context/restaurant_context.tsx";
 import { CheckoutSkeleton } from "@/components/skeletons/checkout_skeleton.tsx";
 import { useBottomSheet } from "@/context/bottom_sheet_context.tsx";
 import { PolicyCard } from "@/components/cards/policy_card.tsx";
+import SpendGoalCard from "@/components/cards/spend_goal_card.tsx";
 export default function CheckoutPage() {
   setThemeColor();
   const { userSession } = useAuth();
@@ -30,7 +31,13 @@ export default function CheckoutPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [tipPercent, setTipPercent] = useState<number>(0.2);
+  const [tipAmount, setTipAmount] = useState<number>(0);
   const tipAmounts = [0.1, 0.15, 0.2];
+  const [inlineRecommendation, setInlineRecommendation] = useState<{
+    cartId: number;
+    flair: string;
+    policy: Policy;
+  } | null>(null);
 
   const {
     timeRemaining: addOnTime,
@@ -57,6 +64,37 @@ export default function CheckoutPage() {
     window.scrollTo(0, 0);
     // start();
   }, [id]);
+
+  useEffect(() => {
+    const activePolicy =
+      policyManager
+        ?.getActivePolicies(state.dealEffect)
+        .filter((p) => p.definition.tag === NORMAL_DEAL_TAG)[0] || null;
+    if (activePolicy) {
+      setInlineRecommendation(null);
+    } else {
+      if (state.cart.length > 0 && !inlineRecommendation) {
+        const inlineRec = policyManager?.getInlineRecommendations(
+          state.cart,
+          state.dealEffect,
+          restaurant as Restaurant
+        );
+        if (inlineRec) {
+          setInlineRecommendation(inlineRec);
+        }
+      }
+    }
+  }, [state.cart, policyManager, state.dealEffect]);
+
+  useEffect(() => {
+    if (state.cart.length > 0 && restaurant) {
+      const normalItemPrice = ItemUtils.normalItemTotalPrice(
+        state.cart,
+        restaurant as Restaurant
+      );
+      setTipAmount(normalItemPrice * tipPercent);
+    }
+  }, [state.cart, restaurant, tipPercent]);
 
   if (!restaurant || !policyManager || !state) {
     return <CheckoutSkeleton />;
@@ -87,6 +125,7 @@ export default function CheckoutPage() {
           removeFromCart={removeFromCart}
           displayCartPasses={true}
           dealEffect={state.dealEffect}
+          inlineRecommendation={inlineRecommendation}
         />
       )}
 
@@ -105,6 +144,7 @@ export default function CheckoutPage() {
                 dealEffect={state.dealEffect}
                 addToCart={addToCart}
                 removeFromCart={removeFromCart}
+                inlineRecommendation={inlineRecommendation}
               />
             ))}
         </div>
@@ -118,32 +158,30 @@ export default function CheckoutPage() {
 
       <div className="flex flex-wrap gap-2 mt-4">
         {policyManager &&
-          policyManager
-            .getActivePolicies(state.dealEffect, restaurant as Restaurant)
-            .map((policy) => {
-              if (policy.definition.tag !== NORMAL_DEAL_TAG) return null;
-              return (
-                <Alert
-                  trigger={
-                    <button
-                      key={policy.policy_id}
-                      onClick={() => console.log("intention to remove")}
-                      className="px-2 py-2 bg-gray-200 rounded-full text-xs flex items-center gap-1"
-                    >
-                      <Tag size={13} className="text-gray-800" />
-                      <span>{titleCase(policy.name)}</span>
-                      <X className="text-gray-800 h-3.5 w-3.5" />
-                    </button>
-                  }
-                  title="Are you absolutely sure?"
-                  description="You’re about to remove a deal from your cart. Are you sure you want to do this?"
-                  onConfirm={async () => {
-                    await removePolicy(policy);
-                    console.log("removed");
-                  }}
-                />
-              );
-            })}
+          policyManager.getActivePolicies(state.dealEffect).map((policy) => {
+            if (policy.definition.tag !== NORMAL_DEAL_TAG) return null;
+            return (
+              <Alert
+                trigger={
+                  <button
+                    key={policy.policy_id}
+                    onClick={() => console.log("intention to remove")}
+                    className="px-2 py-2 bg-gray-200 rounded-full text-xs flex items-center gap-1"
+                  >
+                    <Tag size={13} className="text-gray-800" />
+                    <span>{titleCase(policy.name)}</span>
+                    <X className="text-gray-800 h-3.5 w-3.5" />
+                  </button>
+                }
+                title="Are you absolutely sure?"
+                description="You're about to remove a deal from your cart. Are you sure you want to do this?"
+                onConfirm={async () => {
+                  await removePolicy(policy);
+                  console.log("removed");
+                }}
+              />
+            );
+          })}
       </div>
       {restaurant && policyManager && state.cart.length > 0 && (
         <div className="mt-4">
@@ -232,11 +270,13 @@ export default function CheckoutPage() {
             </div>
           )}
 
+        <SpendGoalCard />
+
         <h2 className="text-2xl font-bold  mt-6">Payment</h2>
         <DealPreOrderBar
           policy={
             policyManager
-              ?.getActivePolicies(state.dealEffect, restaurant as Restaurant)
+              ?.getActivePolicies(state.dealEffect)
               .filter((p) => p.definition.tag === NORMAL_DEAL_TAG)[0] || null
           }
           restaurant={restaurant as Restaurant}
@@ -298,49 +338,56 @@ export default function CheckoutPage() {
                 ).toFixed(2)}
               </span>
             </div>
-            <div className={checkoutStyles.summaryRow}>
-              <span>Tip</span>
-              <span>
-                ${(state.cartResults.totalPrice * tipPercent).toFixed(2)}
-              </span>
-            </div>
-            {restaurant && (
-              <div className={checkoutStyles.summaryRow}>
-                <div className="relative flex w-full bg-gray-100 rounded-full border border-gray-300">
-                  {/* Animated highlight */}
-                  <motion.div
-                    layout
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    className="absolute inset-0 rounded-full z-0"
-                    style={{
-                      left: `${
-                        (tipAmounts.indexOf(tipPercent) / tipAmounts.length) *
-                        100
-                      }%`,
-                      width: `${100 / tipAmounts.length}%`,
-                      background: restaurant?.metadata.primaryColor
-                        ? `linear-gradient(45deg, 
+            {tipAmount > 0 && (
+              <>
+                <div className={checkoutStyles.summaryRow}>
+                  <span>Tip</span>
+                  <span>${tipAmount.toFixed(2)}</span>
+                </div>
+                {restaurant && (
+                  <div className={checkoutStyles.summaryRow}>
+                    <div className="relative flex w-full bg-gray-100 rounded-full border border-gray-200">
+                      {/* Animated highlight */}
+                      <motion.div
+                        layout
+                        transition={{
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 30,
+                        }}
+                        className="absolute inset-0 rounded-full z-0"
+                        style={{
+                          left: `${
+                            (tipAmounts.indexOf(tipPercent) /
+                              tipAmounts.length) *
+                            100
+                          }%`,
+                          width: `${100 / tipAmounts.length}%`,
+                          background: restaurant?.metadata.primaryColor
+                            ? `linear-gradient(45deg, 
         ${adjustColor(restaurant.metadata.primaryColor as string, -30)},
         ${adjustColor(restaurant.metadata.primaryColor as string, 40)}
       )`
-                        : undefined,
-                    }}
-                  />
+                            : undefined,
+                        }}
+                      />
 
-                  {tipAmounts.map((tip) => (
-                    <button
-                      key={tip}
-                      onClick={() => {
-                        setTipPercent(tip);
-                      }}
-                      className={`relative z-10 flex-1 py-2 text-sm font-medium transition-colors 
+                      {tipAmounts.map((tip) => (
+                        <button
+                          key={tip}
+                          onClick={() => {
+                            setTipPercent(tip);
+                          }}
+                          className={`relative z-10 flex-1 py-2 text-sm font-medium transition-colors 
                       ${tipPercent === tip ? "text-white" : "text-gray-600"}`}
-                    >
-                      {tip * 100}%
-                    </button>
-                  ))}
-                </div>
-              </div>
+                        >
+                          {tip * 100}%
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
             <div
               className={checkoutStyles.summaryTotal}
@@ -348,7 +395,7 @@ export default function CheckoutPage() {
             >
               <span className="font-bold">Total</span>
               <span className="font-bold">
-                ${(state.cartResults.totalPrice * (1 + tipPercent)).toFixed(2)}
+                ${(state.cartResults.totalPrice + tipAmount).toFixed(2)}
               </span>
             </div>
           </div>
@@ -365,7 +412,7 @@ export default function CheckoutPage() {
                     restaurant_id: restaurant?.id,
                     state: state,
                     totalWithTip: Math.round(
-                      state.cartResults.totalPrice * (1 + tipPercent) * 100
+                      (state.cartResults.totalPrice + tipAmount) * 100
                     ),
                     connectedAccountId: restaurant?.stripe_account_id,
                   }}

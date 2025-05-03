@@ -1,24 +1,33 @@
-import { CartItem, DealEffectPayload, Item, Restaurant } from "@/types";
+import { CartItem, DealEffectPayload, Item, Policy, Restaurant } from "@/types";
 import { modifiedItemFlair } from "@/utils/pricer";
 import { project_url } from "@/utils/supabase_client";
-import { Minus, Plus, Trash2 } from "lucide-react";
+import { ChevronRight, Minus, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { ItemUtils } from "@/utils/item_utils";
 import { adjustColor } from "@/utils/color";
+import { useBottomSheet } from "@/context/bottom_sheet_context";
+
 export function CheckoutItemCard({
   item,
   restaurant,
   dealEffect,
   addToCart,
   removeFromCart,
+  inlineRecommendation = null,
 }: {
   item: CartItem;
   restaurant: Restaurant;
   dealEffect: DealEffectPayload;
   addToCart: (item: Item) => void;
   removeFromCart: (itemId: number) => void;
+  inlineRecommendation: {
+    cartId: number;
+    flair: string;
+    policy: Policy;
+  } | null;
 }) {
   const itemInfo = ItemUtils.getMenuItemFromItemId(item.item.id, restaurant);
+  const { openPolicyModal } = useBottomSheet();
 
   const { oldPrice, currentPrice, discountDescription } = modifiedItemFlair(
     item,
@@ -71,9 +80,24 @@ export function CheckoutItemCard({
               </span>
             )}
           </div>
+          {inlineRecommendation && inlineRecommendation.cartId === item.id && (
+            <div
+              className="mt-2"
+              onClick={() => {
+                openPolicyModal(inlineRecommendation.policy, null);
+              }}
+            >
+              <span
+                className="text-sm font-medium text-gray-900 rounded-full py-1 flex items-center gap-1"
+                style={{ color: restaurant?.metadata.primaryColor as string }}
+              >
+                {inlineRecommendation.flair}
+                <ChevronRight className="w-4 h-4 -ml-1" />
+              </span>
+            </div>
+          )}
         </div>
       </div>
-
       {/* Right: Quantity stepper */}
       <div className="flex items-center gap-3 bg-gray-100 rounded-full px-1 py-1">
         <button

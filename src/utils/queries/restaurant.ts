@@ -1,11 +1,6 @@
 import { supabase } from "../supabase_client";
-import { Restaurant, Pass } from "../../types";
-import {
-  PASS_MENU_TAG,
-  DRINK_MENU_TAG,
-  HISTORY_KEY,
-  BUNDLE_MENU_TAG,
-} from "@/constants";
+import { Restaurant } from "../../types";
+import { PASS_MENU_TAG, HISTORY_KEY, BUNDLE_MENU_TAG } from "@/constants";
 import { BundleUtils } from "../bundle_utils";
 import { PassUtils } from "../pass_utils";
 const HistoryCacheTTL = 30000;

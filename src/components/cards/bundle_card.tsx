@@ -10,7 +10,6 @@ import {
   MY_SPOT_PATH,
   RESTAURANT_IMAGE_BUCKET,
 } from "@/constants";
-import { convertUtcToLocal } from "@/utils/parse";
 import { ItemUtils } from "@/utils/item_utils";
 import { useRestaurant } from "@/context/restaurant_context";
 import { BundleUtils } from "@/utils/bundle_utils";
@@ -61,7 +60,7 @@ const BundleCard = ({
   const baseUrl = `${project_url}/storage/v1/object/public`;
 
   return (
-    <div className="mt-3">
+    <div className="mt-1">
       <div className="flex justify-center items-center p-4">
         <div className="w-full max-w-[380px] rounded-[24px] overflow-hidden bg-white shadow-md border border-gray-400 ">
           <div className="p-4 pb-0">
