@@ -19,7 +19,7 @@ export const SignInButton: React.FC<SignInButtonProps> = ({
         openSignInModal();
       }}
       className={
-        "w-full mx-1  text-white py-3 rounded-full mt-auto mb-2 flex items-center justify-center gap-2"
+        "w-full text-white py-3 rounded-full mt-auto mb-2 flex items-center justify-center gap-2"
       }
       style={{
         backgroundColor: primaryColor,

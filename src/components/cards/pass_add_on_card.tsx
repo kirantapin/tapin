@@ -4,17 +4,23 @@ import { Check } from "lucide-react";
 import { useState } from "react";
 
 interface PassAddOnCardProps {
-  addPolicy: (bundle_id: string | null, policy: Policy) => Promise<void>;
-  removePolicy: (policy: Policy) => void;
+  addPolicy: (
+    bundle_id: string | null,
+    policy_id: string,
+    userPreference: string | null
+  ) => Promise<void>;
+  removePolicy: (policy_id: string) => void;
   restaurant: Restaurant;
   policy: Policy;
   state: CartState;
+  itemId: string;
 }
 
 export const PassAddOnCard: React.FC<PassAddOnCardProps> = ({
   state,
   addPolicy,
   removePolicy,
+  itemId,
   restaurant,
   policy,
 }) => {
@@ -22,18 +28,18 @@ export const PassAddOnCard: React.FC<PassAddOnCardProps> = ({
   if (policy.definition.action.type !== "apply_add_on") {
     return null;
   }
-  const passItemId = ItemUtils.policyItemSpecificationsToItemIds(
-    policy.definition.action.items,
-    restaurant
-  )[0];
   if (
-    !passItemId ||
-    ItemUtils.isItemExpired({ id: passItemId, modifiers: [] }, restaurant)
+    ItemUtils.isItemAvailable(
+      { id: itemId, modifiers: [] },
+      restaurant,
+      state.cart,
+      1
+    )
   ) {
     return null;
   }
   const passItem = ItemUtils.getMenuItemFromItemId(
-    passItemId,
+    itemId,
     restaurant
   ) as PassItem;
   const name = passItem.name;
@@ -41,17 +47,30 @@ export const PassAddOnCard: React.FC<PassAddOnCardProps> = ({
   const newPrice = Math.max(0, originalPrice - policy.definition.action.amount);
   const for_date = passItem.for_date;
   // Get policy IDs from all deal effect sources
-  const policyIds = [
-    // From modified items
-    ...state.dealEffect.modifiedItems.map((item) => item.policy_id),
-    // From added items
-    ...state.dealEffect.addedItems.map((item) => item.policy_id),
-    // From whole cart modifications
-    state.dealEffect.wholeCartModification?.policy_id,
-  ].filter((id): id is string => id !== undefined);
+  const policyAndItemIds: {
+    policy_id: string;
+    userPreference: string | null;
+  }[] = state.dealEffect.addedItems.map((item) => {
+    return { policy_id: item.policy_id, userPreference: item.userPreference };
+  });
+  const addOnIsActive = policyAndItemIds.some(
+    (item) =>
+      item.policy_id === policy.policy_id && item.userPreference === itemId
+  );
 
   return (
-    <div className="flex items-start gap-3 p-4 rounded-xl border border-gray-300 bg-white relative">
+    <div
+      className="flex items-start gap-3 p-4 rounded-xl border border-gray-300 bg-white relative"
+      onClick={async () => {
+        setLoading(true);
+        if (addOnIsActive) {
+          await removePolicy(policy.policy_id);
+        } else {
+          await addPolicy(null, policy.policy_id, null);
+        }
+        setLoading(false);
+      }}
+    >
       {/* Loading Spinner */}
       {loading && (
         <div className="absolute top-4 right-4">
@@ -60,13 +79,8 @@ export const PassAddOnCard: React.FC<PassAddOnCardProps> = ({
       )}
 
       {/* Checkbox */}
-      {policyIds.includes(policy.policy_id) ? (
+      {addOnIsActive ? (
         <button
-          onClick={async () => {
-            setLoading(true);
-            await removePolicy(policy);
-            setLoading(false);
-          }}
           className="mt-1 w-5 h-5 rounded border flex items-center justify-center"
           style={{
             backgroundColor: restaurant.metadata.primaryColor as string,
@@ -76,14 +90,7 @@ export const PassAddOnCard: React.FC<PassAddOnCardProps> = ({
           <Check className="w-3 h-3 text-white" />
         </button>
       ) : (
-        <button
-          onClick={async () => {
-            setLoading(true);
-            await addPolicy(null, policy);
-            setLoading(false);
-          }}
-          className="mt-1 w-5 h-5 rounded border flex items-center justify-center transition-colors bg-white border-gray-300 "
-        />
+        <button className="mt-1 w-5 h-5 rounded border flex items-center justify-center transition-colors bg-white border-gray-300 " />
       )}
 
       {/* Content */}

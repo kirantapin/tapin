@@ -54,10 +54,9 @@ export const RestaurantProvider = ({
 
     const ownershipPromises = activeBundles.map((bundleId: string) => {
       const bundle = restaurantData.menu[bundleId].info.object;
-      return BundleUtils.doesUserOwnBundle(
-        userSession?.user?.phone,
-        bundle
-      ).then((ownership) => ({ bundleId, ownership }));
+      return BundleUtils.doesUserOwnBundle(userSession?.user?.id, bundle).then(
+        (ownership) => ({ bundleId, ownership })
+      );
     });
 
     const ownershipResults = await Promise.all(ownershipPromises);
@@ -69,6 +68,12 @@ export const RestaurantProvider = ({
 
     setUserOwnershipMap(userOwnershipMap);
   };
+
+  useEffect(() => {
+    if (restaurant) {
+      fetchUserOwnership(restaurant);
+    }
+  }, [userSession, restaurant]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -83,10 +88,7 @@ export const RestaurantProvider = ({
           navigate("/not_found");
           return;
         }
-
-        return fetchUserOwnership(restaurantData).then(() => {
-          setRestaurant(restaurantData);
-        });
+        setRestaurant(restaurantData);
       });
       const policyManager = new PolicyManager(currentRestaurantId);
       policyManager.init().then(() => {

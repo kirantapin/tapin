@@ -27,7 +27,7 @@ const AccessCardSlider = ({
   removeFromCart: (itemId: number) => Promise<void>;
   displayCartPasses: boolean;
   dealEffect: DealEffectPayload | null;
-  inlineRecommendation: {
+  inlineRecommendation?: {
     cartId: number;
     flair: string;
     policy: Policy;

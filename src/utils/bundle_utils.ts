@@ -10,21 +10,21 @@ import { PolicyUtils } from "./policy_utils";
 export class BundleUtils {
   static fetchBundles = async (
     restaurantId: string | null
-  ): Promise<{ bundle: Bundle | null; bundlePolicies: string[] }[]> => {
-    if (!restaurantId) return { bundle: null, bundlePolicies: [] };
+  ): Promise<{ bundle: Bundle; bundlePolicies: string[] }[]> => {
+    if (!restaurantId) return [];
     const { data, error } = await supabase
       .from("bundles")
       .select("*")
       .eq("restaurant_id", restaurantId)
       .or(
         `deactivated_at.is.null,deactivated_at.gt.${new Date(
-          Date.now() - 90 * 24 * 60 * 60 * 1000
+          Date.now() - 90 * 24 * 60 * 60 * 1000 // 90 days
         ).toISOString()}`
       );
 
     if (error) {
       console.error("Error fetching bundles:", error);
-      return { bundle: null, bundlePolicies: [] };
+      return [];
     }
 
     // Filter out bundles that have been deactivated for longer than their duration

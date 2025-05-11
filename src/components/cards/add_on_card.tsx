@@ -1,7 +1,8 @@
-import { Policy, Restaurant } from "@/types";
+import { useRestaurant } from "@/context/restaurant_context";
+import { NormalItem, Policy, Restaurant } from "@/types";
 import { ItemUtils } from "@/utils/item_utils";
 import { project_url } from "@/utils/supabase_client";
-import { Check, Plus } from "lucide-react";
+import { Check } from "lucide-react";
 import React from "react";
 import { titleCase } from "title-case";
 interface AddOnCardProps {
@@ -9,34 +10,35 @@ interface AddOnCardProps {
   policy: Policy;
   restaurant: Restaurant;
   addPolicy: (policy: Policy) => Promise<void>;
+  itemId: string;
 }
 
 const AddOnCard: React.FC<AddOnCardProps> = ({
   state,
   policy,
-  restaurant,
+  itemId,
   addPolicy,
+  restaurant,
 }) => {
+  const { policyManager } = useRestaurant();
   if (policy.definition.action.type !== "apply_add_on") {
     return null;
   }
-  const item = {
-    id: policy.definition.action.items[0],
-    modifiers: [],
-  };
-  const menuItem = ItemUtils.getMenuItemFromItemId(item.id, restaurant);
-  const name = menuItem?.name;
-  const originalPrice = menuItem?.price;
+  const menuItem = ItemUtils.getMenuItemFromItemId(
+    itemId,
+    restaurant
+  ) as NormalItem;
+  if (!menuItem) {
+    return null;
+  }
+  const name = menuItem.name;
+  const originalPrice = menuItem.price;
   const newPrice = Math.max(0, originalPrice - policy.definition.action.amount);
 
-  const primaryColor = restaurant.metadata.primaryColor;
-  const policyIds = state.dealEffect.modifiedItems
-    .map((item) => item.policy_id)
-    .concat(state.dealEffect.addedItems.map((item) => item.policy_id));
-  if (state.dealEffect.wholeCartModification?.policy_id) {
-    policyIds.push(state.dealEffect.wholeCartModification.policy_id);
-  }
-  const active = policyIds.some((id) => id === policy.policy_id);
+  const policies = policyManager
+    ? policyManager.getActivePolicies(state.dealEffect)
+    : [];
+  const active = policies.some((p) => p.policy_id === policy.policy_id);
 
   return (
     <div className="w-32">
@@ -56,13 +58,13 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
           </div>
         ) : (
           <button
-            className="absolute bottom-2 right-2 px-3 h-7 rounded-full flex items-center justify-center text-white text-xs font-semibold"
-            style={{ backgroundColor: primaryColor }}
+            className="absolute bottom-2 right-2 px-3 h-7 rounded-full flex items-center justify-center text-white text-xs font-semibold bg-white"
+            style={{ color: "black" }}
             onClick={async () => {
               await addPolicy(policy);
             }}
           >
-            Add to Cart
+            Add
           </button>
         )}
       </div>

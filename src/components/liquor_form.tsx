@@ -9,8 +9,10 @@ import { titleCase } from "title-case";
 import { ItemUtils } from "@/utils/item_utils";
 import { adjustColor } from "@/utils/color";
 import { toast } from "react-toastify";
+import { useBottomSheet } from "@/context/bottom_sheet_context";
 
 const LiquorForm = ({ type, restaurant, addToCart, primaryColor }) => {
+  const { triggerToast } = useBottomSheet();
   const [liquorType, setLiquorType] = useState<{
     id: string;
     name: string;
@@ -46,15 +48,19 @@ const LiquorForm = ({ type, restaurant, addToCart, primaryColor }) => {
 
   const menu = restaurant.menu;
   const liquorChildIds = menu[LIQUOR_MENU_TAG].children;
-  const liquors = liquorChildIds.map((id: string) => {
-    return { id: id, name: menu[id].info.name };
-  });
+  const liquors: { id: string; name: string }[] = liquorChildIds.map(
+    (id: string) => {
+      return { id: id, name: menu[id].info.name };
+    }
+  );
   const liquorBrandIds = liquorType
     ? restaurant.menu[liquorType.id].children
     : [];
-  const liquorBrands = liquorBrandIds.map((id: string) => {
-    return { id: id, name: menu[id].info.name };
-  });
+  const liquorBrands: { id: string; name: string }[] = liquorBrandIds.map(
+    (id: string) => {
+      return { id: id, name: menu[id].info.name };
+    }
+  );
 
   useEffect(() => {
     if (liquorType) {
@@ -89,11 +95,11 @@ const LiquorForm = ({ type, restaurant, addToCart, primaryColor }) => {
     e.preventDefault();
 
     if (!liquorType) {
-      toast.error("Please select a Liquor");
+      triggerToast("Please select a Liquor", "error");
       return;
     }
     if (!liquorBrand) {
-      toast.error(`Please select a specific ${liquorType.name}`);
+      triggerToast(`Please select a specific ${liquorType.name}`, "error");
       return;
     }
     const itemToAdd = {
@@ -103,7 +109,7 @@ const LiquorForm = ({ type, restaurant, addToCart, primaryColor }) => {
 
     if (type === HOUSE_MIXER_LABEL) {
       if (!selectedMixer) {
-        toast.error("Please select a Mixer");
+        triggerToast("Please select a Mixer", "error");
         return;
       }
       itemToAdd.modifiers.push(`with ${titleCase(selectedMixer)}`);

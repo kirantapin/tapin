@@ -13,6 +13,7 @@ import {
 import { ItemUtils } from "@/utils/item_utils";
 import { useRestaurant } from "@/context/restaurant_context";
 import { BundleUtils } from "@/utils/bundle_utils";
+import CustomIcon from "../svg/custom_icon";
 const BundleCard = ({
   restaurant,
   bundleId,
@@ -82,11 +83,16 @@ const BundleCard = ({
                 }}
               />
 
-              <div className="absolute bottom-3 left-3 bg-black/80 border border-[#d4af37] rounded-[20px] p-[6px_12px] flex items-center gap-[6px]">
-                <img
-                  src="/tapin_icon_white.png"
-                  alt="Tap In Icon"
-                  className="w-4 h-4"
+              <div
+                className="absolute bottom-3 left-3 bg-black/80 border  rounded-[20px] p-[6px_12px] flex items-center gap-[6px]"
+                style={{
+                  borderColor: restaurant?.metadata.primaryColor as string,
+                }}
+              >
+                <CustomIcon
+                  circleColor={restaurant?.metadata.primaryColor as string}
+                  baseColor="white"
+                  size={16}
                 />
                 <span className="text-white text-sm font-medium">
                   Tap In Exclusive
@@ -166,7 +172,7 @@ const BundleCard = ({
               <button
                 className="w-full bg-[linear-gradient(225deg,#CAA650,#F4E4A8)] text-white border-none rounded-full py-[14px] text-base font-medium enhance-contrast"
                 style={{
-                  background: restaurant?.metadata.primaryColor,
+                  background: restaurant?.metadata.primaryColor as string,
                 }}
                 onClick={() => {
                   onCardClick(bundle);

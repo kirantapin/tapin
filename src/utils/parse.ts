@@ -13,9 +13,9 @@ export const listItemsToStringDescription = (
         ItemUtils.getItemName({ id: item, modifiers: [] }, restaurant)
       )
       .join(" or ");
-    return `${quantity} ${
-      injectWord ? injectWord + " " : ""
-    }orders of either ${itemNames}`;
+    return `${quantity} ${injectWord ? injectWord + " " : ""}${
+      quantity > 1 ? "orders" : "order"
+    } of either ${itemNames}`;
   } else if (items.length === 1) {
     const itemName = ItemUtils.getItemName(
       { id: items[0], modifiers: [] },
@@ -47,7 +47,7 @@ export function keywordExtraction(
   for (const segment of path) {
     const name = restaurant.menu[segment].info.name;
     keywords.push(
-      name
+      ...name
         .toLowerCase()
         .split(/[\s\-_]+/) // Split on spaces, hyphens and underscores
         .filter((word) => word.length > 2) // Filter out very short words

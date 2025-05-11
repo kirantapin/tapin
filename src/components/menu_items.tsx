@@ -28,7 +28,7 @@ export function DrinkItem({
   addToCart: (item: Item) => Promise<void>;
   removeFromCart: (id: number) => Promise<void>;
   item: Item;
-  purchaseDate: string | null;
+  purchaseDate?: string | null;
 }) {
   const primaryColor = restaurant.metadata.primaryColor as string;
   const menuItem = ItemUtils.getMenuItemFromItemId(item.id, restaurant);
@@ -252,7 +252,7 @@ export function LoyaltyRewardItem({
       image_url: `${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`,
     };
   }
-  if (policy.definition.action.type === "apply_loyalty_reward") {
+  if (policy.definition.action.type === "add_free_item") {
     const itemIds = ItemUtils.policyItemSpecificationsToItemIds(
       policy.definition.action.items,
       restaurant
@@ -313,10 +313,7 @@ export function LoyaltyRewardItem({
               style={
                 !isActive
                   ? {
-                      background: `linear-gradient(45deg, 
-                        ${adjustColor(primaryColor, -30)},
-                        ${adjustColor(primaryColor, 40)}
-                      )`,
+                      backgroundColor: primaryColor,
                     }
                   : undefined
               }
@@ -476,7 +473,7 @@ export const DrinkList = ({
 
   return (
     <div className="space-y-4  overflow-y-auto scroll-smooth no-scrollbar">
-      <div>
+      <div className="pb-20">
         {Object.keys(MENU_DISPLAY_MAP).map((menuLabel) => {
           const drinksForLabel = drinks.filter(
             (drink) => drink.label === menuLabel

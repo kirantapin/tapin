@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ArrowLeft } from "lucide-react";
-
+import { supabase } from "@/utils/supabase_client";
+import { useBottomSheet } from "@/context/bottom_sheet_context";
 interface VerificationProps {
   phoneNumber: string;
   onBack: () => void;
@@ -15,7 +15,7 @@ export function Verification({
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [timeLeft, setTimeLeft] = useState(60);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-
+  const { triggerToast } = useBottomSheet();
   useEffect(() => {
     // Focus first input on mount
     inputRefs.current[0]?.focus();
@@ -82,16 +82,32 @@ export function Verification({
     }
   };
 
-  return (
-    <div className="min-h-screen bg-white text-black p-6">
-      <h1 className="text-4xl font-bold mb-4">Verify it's you</h1>
-      <p className="text-xl text-gray-600 mb-2">
-        Please enter 6 digit verification code that have been sent to your
-        mobile phone
-      </p>
-      <p className="text-xl text-gray-600 mb-8">{phoneNumber}</p>
+  const handleResend = async () => {
+    const { data, error } = await supabase.auth.signInWithOtp({
+      phone: phoneNumber,
+    });
+    if (error) {
+      triggerToast(
+        "Sorry, we couldn't resend the code. Please try again shortly.",
+        "error"
+      );
+      console.error("Error resending code", error);
+    }
+    setTimeLeft(60);
+  };
 
-      <div className="flex gap-3 mb-8 justify-center">
+  return (
+    <div className="min-h-screen bg-white text-black">
+      <div className="p-6">
+        <h1 className="text-4xl font-bold mb-4">Verify it's you</h1>
+        <p className="text-xl text-gray-600 mb-2">
+          Please enter 6 digit verification code that have been sent to your
+          mobile phone
+        </p>
+        <p className="text-xl text-gray-600 mb-8">{phoneNumber}</p>
+      </div>
+
+      <div className="flex gap-3 mb-8 justify-center px-6">
         {code.map((digit, index) => (
           <div key={index} className="relative">
             <input
@@ -112,25 +128,22 @@ export function Verification({
         ))}
       </div>
 
-      <div className="text-gray-600 mb-4 text-center">
-        You can resend the code in {timeLeft} seconds
+      <div className="px-6">
+        <div className="text-gray-600 mb-4 text-center">
+          {timeLeft > 0
+            ? `You can resend the code in ${timeLeft} seconds`
+            : "You can resend the code now"}
+        </div>
+        <div className="text-center">
+          <button
+            className={`mb-8 ${timeLeft > 0 ? "text-gray-400" : "text-black"}`}
+            disabled={timeLeft > 0}
+            onClick={handleResend}
+          >
+            Resend Code
+          </button>
+        </div>
       </div>
-      <div className="text-center">
-        <button
-          className="text-black mb-8"
-          disabled={timeLeft > 0}
-          onClick={() => setTimeLeft(60)}
-        >
-          Resend Code
-        </button>
-      </div>
-
-      {/* <button
-        className="w-full bg-[#8B7355] text-black py-4 rounded-full text-lg font-medium"
-        onClick={() => onVerify(code.join(""))}
-      >
-        Submit
-      </button> */}
     </div>
   );
 }

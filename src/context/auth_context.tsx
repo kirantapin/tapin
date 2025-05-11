@@ -7,7 +7,7 @@ import React, {
   ReactNode,
 } from "react";
 import { Transaction, User } from "../types";
-import { useSupabase } from "./supabase_context";
+import { supabase } from "../utils/supabase_client";
 import { Session } from "@supabase/supabase-js";
 
 // Create a context with default values (optional)
@@ -19,7 +19,6 @@ interface AuthContextProps {
   setUserData: React.Dispatch<React.SetStateAction<User | null>>;
   transactions: Transaction[];
   setTransactions: React.Dispatch<React.SetStateAction<Transaction[] | []>>;
-  loadingUser: boolean;
 }
 
 export const AuthContext = createContext<AuthContextProps | undefined>(
@@ -31,44 +30,34 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
-  const [userSession, setUserSession] = useState<any>(null);
-  const supabase = useSupabase();
+  const [userSession, setUserSession] = useState<Session | null>(null);
   const [userData, setUserData] = useState<User | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loadingUser, setLoadingUser] = useState(true);
-
-  const setData = async (session: Session | null) => {
-    if (!session) {
-      return;
-    }
-    const phone = session.user.phone;
-    if (!phone) {
-      return;
-    }
-    setUserSession(session);
-    fetchUserData(phone);
-    fetchTransactionData(phone);
-  };
 
   useEffect(() => {
-    setLoadingUser(true);
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setData(session);
+      setUserSession(session);
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setLoadingUser(true);
-      setData(session);
-      setLoadingUser(false);
+      setUserSession(session);
     });
-    setLoadingUser(false);
     return () => subscription.unsubscribe();
   }, []);
 
+  useEffect(() => {
+    fetchUserData(userSession?.user?.id ?? null);
+    fetchTransactionData(userSession?.user?.id ?? null);
+  }, [userSession]);
+
   // Fetch user data
-  const fetchUserData = async (userId: string) => {
+  const fetchUserData = async (userId: string | null) => {
+    if (!userId) {
+      setUserData(null);
+      return;
+    }
     try {
       const { data, error } = await supabase
         .from("users")
@@ -85,7 +74,11 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   };
 
   // Fetch transaction data
-  const fetchTransactionData = async (userId: string) => {
+  const fetchTransactionData = async (userId: string | null) => {
+    if (!userId) {
+      setTransactions([]);
+      return;
+    }
     try {
       const ninetyDaysAgo = new Date();
       ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
@@ -106,25 +99,20 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Logout function
   const logout = async () => {
     await supabase.auth.signOut();
-    setUserSession(null);
-    setUserData(null);
-    setTransactions([]);
   };
 
   return (
     <AuthContext.Provider
       value={{
         userSession,
-        login: () => {}, // Login is handled automatically by Supabase
+        login: () => {},
         logout,
         userData,
         setUserData,
         transactions,
         setTransactions,
-        loadingUser,
       }}
     >
       {children}

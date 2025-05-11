@@ -1,7 +1,6 @@
 import React from "react";
 import { Item, PassItem, Restaurant, Transaction } from "@/types";
 import { DrinkItem } from "../menu_items";
-import { rest } from "lodash";
 import { ItemUtils } from "@/utils/item_utils";
 import { PASS_MENU_TAG } from "@/constants";
 
@@ -111,7 +110,7 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
       </h1>
 
       <div className="overflow-x-auto no-scrollbar -mx-4 pr-4">
-        <div className="flex gap-4">
+        <div className="flex">
           {[...processedTransactionItems].slice(0, 3).map((item) => {
             return (
               <div className="w-[95%] flex-none">

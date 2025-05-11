@@ -75,7 +75,6 @@ export function useGlobalCartManager(
         cartManagerRef.current.restaurant_id !== restaurant.id
       ) {
         //reset cart managers state
-
         cartManagerRef.current = new CartManager(
           restaurant.id,
           userSession,
@@ -86,8 +85,7 @@ export function useGlobalCartManager(
       if (!isEqual(cartManagerRef.current.userSession, userSession)) {
         if (userSession) {
           if (
-            userSession.user.phone ===
-            cartManagerRef.current.userSession?.user?.phone
+            userSession.user.id === cartManagerRef.current.userSession?.user?.id
           ) {
             //this is a refresh of the tokens
             cartManagerRef.current.userSession = userSession;
@@ -98,7 +96,11 @@ export function useGlobalCartManager(
         } else {
           //logout, first wipe the cart, then create a new Cart Manager so it reflects the new session
           cartManagerRef.current.clearCart();
-          cartManagerRef.current = new CartManager(restaurant.id, userSession);
+          cartManagerRef.current = new CartManager(
+            restaurant.id,
+            userSession,
+            global
+          );
         }
       }
       dispatch(cartManagerRef.current.getCartState());
@@ -112,6 +114,7 @@ export function useGlobalCartManager(
     console.log(cartManagerRef.current);
     if (!cartManagerRef.current || !restaurant) return;
     const result = await cartManagerRef.current.addToCart(item);
+    console.log(result);
     if (result) {
       triggerToast(result, "error");
     } else {
@@ -133,14 +136,14 @@ export function useGlobalCartManager(
 
   const addPolicy = async (
     bundle_id: string | null,
-    policy: Policy,
+    policy_id: string,
     userPreference: string | null
   ): Promise<void> => {
     if (!cartManagerRef.current) return;
-    console.log("adding policy", policy);
+    console.log("adding policy", policy_id);
     const result = await cartManagerRef.current.addPolicy(
       bundle_id,
-      policy,
+      policy_id,
       userPreference
     );
 
@@ -156,9 +159,9 @@ export function useGlobalCartManager(
     }
   };
 
-  const removePolicy = async (policy: Policy): Promise<void> => {
+  const removePolicy = async (policy_id: string): Promise<void> => {
     if (!cartManagerRef.current) return;
-    const result = await cartManagerRef.current.removePolicy(policy);
+    const result = await cartManagerRef.current.removePolicy(policy_id);
 
     if (result) {
       if (global) {
@@ -210,8 +213,6 @@ export function useGlobalCartManager(
     clearCart,
     getActivePolicies,
     cartManager: cartManagerRef.current,
-    isPreEntry: state.cart.some((item) =>
-      ItemUtils.isPassItem(item.item.id, restaurant as Restaurant)
-    ),
+    triggerToast,
   };
 }

@@ -10,10 +10,10 @@ import { useAuth } from "../context/auth_context";
 import { useNavigate } from "react-router-dom";
 
 import { Transaction, User } from "../types.ts";
-import { RESTAURANT_PATH } from "../constants.ts";
+import { RESTAURANT_PATH, STRIPE_MIN_AMOUNT } from "../constants.ts";
 import { submitPurchase } from "@/utils/purchase.ts";
 import RedeemButton from "./redeem_button.tsx";
-import { toast } from "react-toastify";
+import { useBottomSheet } from "@/context/bottom_sheet_context";
 
 const stripePublishableKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || "";
 const stripePromise = loadStripe(stripePublishableKey);
@@ -23,7 +23,7 @@ const PayButton = ({ payload, sanityCheck, clearCart }) => {
   const elements = useElements();
   const { setTransactions, setUserData } = useAuth();
   const navigate = useNavigate();
-
+  const { triggerToast } = useBottomSheet();
   const handleTapInResponse = async (
     transactions: Transaction[],
     modifiedUserData: User
@@ -36,11 +36,12 @@ const PayButton = ({ payload, sanityCheck, clearCart }) => {
       ...prevTransactions,
       ...transactions,
     ]);
-    clearCart();
+    await clearCart();
     navigate(RESTAURANT_PATH.replace(":id", payload.restaurant_id), {
       state: {
         transactions: transactions,
         qr: true,
+        message: { type: "success", message: "Purchase successful" },
       },
     });
   };
@@ -56,9 +57,7 @@ const PayButton = ({ payload, sanityCheck, clearCart }) => {
       const potentialError = await sanityCheck();
       if (potentialError) {
         //handle response error
-        toast(potentialError, {
-          type: "error",
-        });
+        triggerToast(potentialError, "error");
         return;
       }
       const { error: submitError } = await elements.submit();
@@ -77,9 +76,10 @@ const PayButton = ({ payload, sanityCheck, clearCart }) => {
       });
 
       if (response.error) {
-        toast("Something went wrong. Please refresh the page and try again.", {
-          type: "error",
-        });
+        triggerToast(
+          "Something went wrong. Please refresh the page and try again.",
+          "error"
+        );
         return;
       }
 
@@ -155,38 +155,48 @@ const PayButton = ({ payload, sanityCheck, clearCart }) => {
 };
 
 function ApplePayButton({ payload, sanityCheck, clearCart }) {
-  return payload.state.token ? (
-    payload.totalWithTip > 0 ? (
-      <Elements
-        stripe={stripePromise}
-        options={{
-          mode: "payment",
-          amount: payload.totalWithTip,
-          currency: "usd",
-          // Customizable with appearance API.
-          appearance: {
-            /*...*/
-          },
-        }}
-      >
-        <PayButton
-          payload={payload}
-          sanityCheck={sanityCheck}
-          clearCart={clearCart}
-        />
-      </Elements>
-    ) : (
+  if (payload.totalWithTip <= 0) {
+    return (
       <RedeemButton
         payload={payload}
         sanityCheck={sanityCheck}
         clearCart={clearCart}
       />
-    )
-  ) : (
-    <div className="flex justify-center items-center py-3">
-      <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-gray-600"></div>
-      <span className="ml-2 text-gray-600">Loading payment details...</span>
-    </div>
+    );
+  }
+
+  if (payload.totalWithTip <= STRIPE_MIN_AMOUNT) {
+    return (
+      <div>
+        <p
+          className=" text-md font-semibold text-center"
+          style={{ color: "red" }}
+        >
+          Tap In can't process payments under $0.50. Please add another item to
+          your cart. We apologize for the inconvenience.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <Elements
+      stripe={stripePromise}
+      options={{
+        mode: "payment",
+        amount: payload.totalWithTip,
+        currency: "usd",
+        appearance: {
+          // Customize with Stripe's Appearance API
+        },
+      }}
+    >
+      <PayButton
+        payload={payload}
+        sanityCheck={sanityCheck}
+        clearCart={clearCart}
+      />
+    </Elements>
   );
 }
 

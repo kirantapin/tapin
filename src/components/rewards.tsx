@@ -9,7 +9,7 @@ import { LoyaltyRewardItem } from "./menu_items";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { useAuth } from "@/context/auth_context";
 import { Gift } from "lucide-react";
-
+import { PolicyUtils } from "@/utils/policy_utils";
 interface RewardsProps {
   viewAll: boolean;
 }
@@ -27,16 +27,21 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
 
   const computeRange = (policies: Policy[]) => {
     if (policies.length === 0) return;
-    const maxValue =
-      policies[policies.length - 1].definition.conditions[0].amount;
+    const maxValue = PolicyUtils.getLoyaltyRewardPoints(
+      policies[policies.length - 1]
+    );
     const fourth = maxValue / 4;
     const intervals = [0, fourth, 2 * fourth, 3 * fourth, 4 * fourth];
     const roundedNumbers = intervals.map((num) => Math.round(num / 100) * 100);
     const progress = Math.round((userPoints / maxValue) * 100);
     const nextLargest = policies.find(
-      (policy) => policy.definition.conditions[0].amount > userPoints
+      (policy) => PolicyUtils.getLoyaltyRewardPoints(policy) > userPoints
     );
-    setPointsToGo(nextLargest?.definition.conditions[0].amount - userPoints);
+    setPointsToGo(
+      nextLargest
+        ? PolicyUtils.getLoyaltyRewardPoints(nextLargest) - userPoints
+        : null
+    );
     setIntervals(roundedNumbers);
     setWidthPercentage(progress > 100 ? 100 : progress);
   };
@@ -51,7 +56,8 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
       );
       const sortedByValueAsc = [...filteredPolicies].sort(
         (a, b) =>
-          a.definition.conditions[0].amount - b.definition.conditions[0].amount
+          PolicyUtils.getLoyaltyRewardPoints(a) -
+          PolicyUtils.getLoyaltyRewardPoints(b)
       );
       setLoyaltyPolicies(sortedByValueAsc);
       computeRange(sortedByValueAsc);
@@ -78,7 +84,7 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
                 state: { tag: LOYALTY_REWARD_TAG },
               })
             }
-            className="flex items-center justify-left gap-2 text-white w-fit max-w-sm py-2.5 text-sm font-semibold"
+            className="flex items-center justify-left gap-2 text-white w-fit max-w-sm py-2.5 text-md font-semibold"
             style={{
               color: restaurant?.metadata.primaryColor as string,
             }}
@@ -187,14 +193,14 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
         <div className="space-y-4 mt-8">
           {loyaltyPolicies.map((policy) => {
             if (
-              policy.definition.action.type === "apply_loyalty_reward" ||
+              policy.definition.action.type === "add_free_item" ||
               policy.definition.action.type === "add_to_user_credit"
             ) {
               return (
                 <LoyaltyRewardItem
                   restaurant={restaurant}
                   policy={policy}
-                  numPoints={policy.definition.conditions[0].amount}
+                  numPoints={PolicyUtils.getLoyaltyRewardPoints(policy)}
                   onRedeem={() => openPolicyModal(policy, null)}
                   isActive={getActivePolicies().includes(policy.policy_id)}
                 />

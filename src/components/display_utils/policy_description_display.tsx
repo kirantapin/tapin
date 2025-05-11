@@ -30,11 +30,8 @@ export function PolicyDescriptionDisplay({
         )}
       </ul>
       <span className="text-xs">
-        {policy.begin_time &&
-          policy.end_time &&
-          "This Offer is valid from " +
-            convertUtcToLocal(policy.begin_time) +
-            " to " +
+        {policy.end_time &&
+          "This Offer is valid until " +
             convertUtcToLocal(policy.end_time) +
             "."}{" "}
         Items must be unmodified to be counted towards a deal.

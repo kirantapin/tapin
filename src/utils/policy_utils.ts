@@ -25,9 +25,8 @@ export class PolicyUtils {
       .from("policies")
       .select("*")
       .eq("restaurant_id", restaurant_id)
-      .or(
-        `and(begin_time.lte.${currentTime},end_time.gte.${currentTime}),and(begin_time.is.null,end_time.is.null)`
-      );
+      .eq("active", true)
+      .or(`end_time.gte.${currentTime},end_time.is.null`);
     if (error) {
       console.error("Error fetching data:", error);
       return [];
@@ -38,37 +37,49 @@ export class PolicyUtils {
   static policyToStringDescription = (
     policy: Policy,
     restaurant: Restaurant
-  ) => {
+  ): { actionDescription: string | null; conditionDescriptions: string[] } => {
     const conditions = policy.definition.conditions;
     const action = policy.definition.action;
-    const conditionDescriptions = conditions.map((condition) => {
-      switch (condition.type) {
-        case "minimum_cart_total":
-          return `Minimum cart total of $${condition.amount}`;
-        case "minimum_quantity":
-          return `At least ${listItemsToStringDescription(
-            condition.quantity,
-            condition.items,
-            null,
-            restaurant
-          )} in cart`;
-        case "minimum_user_points":
-          return `User has at least ${condition.amount} points`;
-        case "time_range":
-          return `Available from ${condition.begin_time} to ${
-            condition.end_time
-          } on ${condition.allowed_days.join(", ")}`;
-        default:
-          return [];
+    const conditionDescriptions: string[] = (() => {
+      const descriptions: string[] = [];
+      for (const condition of conditions) {
+        switch (condition.type) {
+          case "minimum_cart_total":
+            descriptions.push(`Minimum cart total of $${condition.amount}`);
+            break;
+          case "minimum_quantity":
+            descriptions.push(
+              `At least ${listItemsToStringDescription(
+                condition.quantity,
+                condition.items,
+                null,
+                restaurant
+              )} in cart`
+            );
+            break;
+          case "minimum_user_points":
+            descriptions.push(`User has at least ${condition.amount} points`);
+            break;
+          case "time_range":
+            descriptions.push(
+              `Available from ${condition.begin_time} to ${
+                condition.end_time
+              } on ${condition.allowed_days.join(", ")}`
+            );
+            break;
+          default:
+            break;
+        }
       }
-    });
+      return descriptions;
+    })();
 
-    const actionDescription = (() => {
+    const actionDescription: string | null = (() => {
       switch (action.type) {
         case "add_free_item":
           return `Receive ${listItemsToStringDescription(
             action.quantity,
-            [action.item],
+            action.items,
             "free",
             restaurant
           )}`;
@@ -119,6 +130,10 @@ export class PolicyUtils {
           return `Get a ${(action.amount * 100).toFixed(
             0
           )}% discount on your entire order`;
+        case "add_to_user_credit":
+          return `Earn $${policy.definition.action.amount.toFixed(
+            2
+          )} of credit`;
         default:
           return null;
       }
@@ -147,8 +162,8 @@ export class PolicyUtils {
         return `$${action.amount} Total on Select Items`;
       case "apply_order_percent_discount":
         return `${(action.amount * 100).toFixed(0)}% Off Whole Order`;
-      case "apply_loyalty_reward":
-        return `Redeem for ${formatPoints(action.amount)} Points`;
+      case "add_to_user_credit":
+        return `Earn $${action.amount.toFixed(2)} of credit`;
       default:
         return "";
     }
@@ -181,9 +196,8 @@ export class PolicyUtils {
     restaurant: Restaurant
   ): number => {
     const action = policy.definition.action;
-    const items: ItemSpecification[] = policy.definition.action.items || [
-      policy.definition.action.item,
-    ];
+    const items: ItemSpecification[] = policy.definition.action.items || [];
+
     switch (action.type) {
       case "add_free_item":
         return this.returnHighestCostItem(items, restaurant) * action.quantity;
@@ -220,8 +234,8 @@ export class PolicyUtils {
 
       case "apply_order_percent_discount":
         return 0;
-      case "apply_loyalty_reward":
-        return this.returnHighestCostItem(items, restaurant);
+      case "add_to_user_credit":
+        return action.amount;
       default:
         return 0;
     }
@@ -229,13 +243,13 @@ export class PolicyUtils {
 
   static getPolicyName = (policy: Policy, restaurant: Restaurant): string => {
     if (policy.definition.tag === LOYALTY_REWARD_TAG) {
-      if (policy.definition.action.type === "apply_loyalty_reward") {
+      if (policy.definition.action.type === "add_free_item") {
         return `${titleCase(
           ItemUtils.getMenuItemFromItemId(
             policy.definition.action.items[0],
             restaurant
           )?.name || ""
-        )} for ${formatPoints(policy.definition.action.amount)} points!`;
+        )} for ${formatPoints(this.getLoyaltyRewardPoints(policy))} points!`;
       }
       if (policy.definition.action.type === "add_to_user_credit") {
         return `Earn $${policy.definition.action.amount.toFixed(2)} of credit`;
@@ -252,11 +266,6 @@ export class PolicyUtils {
     switch (action.type) {
       case "add_free_item":
         return ItemUtils.policyItemSpecificationsToItemIds(
-          [action.item],
-          restaurant
-        );
-      case "apply_loyalty_reward":
-        return ItemUtils.policyItemSpecificationsToItemIds(
           action.items,
           restaurant
         );
@@ -268,5 +277,14 @@ export class PolicyUtils {
       default:
         return [];
     }
+  };
+
+  static getLoyaltyRewardPoints = (policy: Policy): number => {
+    for (const condition of policy.definition.conditions) {
+      if (condition.type === "minimum_user_points") {
+        return condition.amount;
+      }
+    }
+    return 0;
   };
 }

@@ -1,4 +1,3 @@
-import { Policy } from "@/types";
 import { supabase } from "../supabase_client";
 
 export const fetch_highlights = async (restaurant_id: string | undefined) => {

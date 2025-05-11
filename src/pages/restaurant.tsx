@@ -17,7 +17,7 @@ import { useBannerColor } from "@/hooks/useBannerColor.tsx";
 import HighlightSlider from "@/components/sliders/highlight_slider.tsx";
 import { RecentActivity } from "@/components/sliders/recent_activity.tsx";
 import { MySpot } from "@/components/my_spot.tsx";
-import { RestaurantSkeleton } from "@/components/skeletons/restaurant_skeleton.tsx";
+// import { RestaurantSkeleton } from "@/components/skeletons/restaurant_skeleton.tsx";
 import { PolicySlider } from "@/components/sliders/policy_slider.tsx";
 import { ActionButtons } from "@/components/sliders/action_buttons.tsx";
 import { useRestaurant } from "@/context/restaurant_context.tsx";
@@ -25,6 +25,7 @@ import BundleSlider from "@/components/sliders/bundle_slider.tsx";
 import { useBottomSheet } from "@/context/bottom_sheet_context.tsx";
 import LocationMarkerIcon from "@/components/svg/location_tag.tsx";
 import { isOpenNow } from "@/utils/time.ts";
+import LoadingPage from "@/components/skeletons/loading_page.tsx";
 
 export default function RestaurantPage() {
   const { userSession, transactions } = useAuth();
@@ -42,8 +43,9 @@ export default function RestaurantPage() {
   const [activeFilter, setActiveFilter] = useState(HOUSE_MIXER_LABEL);
   const orderDrinksRef = useRef<HTMLDivElement>(null);
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
-  const { state, addToCart, removeFromCart } = useBottomSheet();
+  const { state, addToCart, removeFromCart, triggerToast } = useBottomSheet();
   const { openPolicyModal, openBundleModal, openQrModal } = useBottomSheet();
+  const [isRandomSheetOpen, setIsRandomSheetOpen] = useState(false);
 
   const { searchResults, searchQuery, setSearchQuery, clearSearch } = useSearch(
     {
@@ -53,12 +55,22 @@ export default function RestaurantPage() {
   );
 
   const handleLocation = () => {
+    console.log(location.state);
     const qrFlag = location.state?.qr as boolean | undefined;
+    const message = location.state?.message as
+      | {
+          type: "success" | "error" | "info";
+          message: string;
+        }
+      | undefined;
     if (qrFlag) {
       const qrTransactions = location.state?.transactions as Transaction[];
       openQrModal(qrTransactions);
-      navigate(location.pathname, { replace: true, state: null });
     }
+    if (message) {
+      triggerToast(message.message, message.type);
+    }
+    navigate(location.pathname, { replace: true, state: null });
   };
 
   const scrollToOrderDrinks = () => {
@@ -96,7 +108,7 @@ export default function RestaurantPage() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
-  if (loading || !restaurant) return <RestaurantSkeleton />;
+  if (loading || !restaurant) return <LoadingPage />;
 
   return (
     <div className="min-h-screen bg-gray-25">

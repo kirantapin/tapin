@@ -40,7 +40,6 @@ export const fetchRestaurantById = async (
     }
   }
 
-  // Always fetch from Supabase to ensure data is fresh
   if (!data) {
     const response = await supabase
       .from("restaurants")
@@ -73,7 +72,6 @@ export const fetchRestaurantById = async (
       description: pass.item_description,
       amount_remaining: pass.amount_remaining,
       end_time: pass.end_time,
-      imageUrl: pass.image_url,
       for_date: pass.for_date,
       isPass: true,
     };
@@ -94,11 +92,15 @@ export const fetchRestaurantById = async (
   return data;
 };
 
-export function indexMenu(menu: Record<string, any>): FlatIndex {
-  const index = {};
+export function indexMenu(menu: Record<string, any>): Record<string, any> {
+  const index: Record<string, any> = {};
 
   /** Depth‑first walk */
-  function dfs(nodeObj, nodeId: string, pathSoFar: string[]): void {
+  function dfs(
+    nodeObj: Record<string, any>,
+    nodeId: string,
+    pathSoFar: string[]
+  ): void {
     const path = [...pathSoFar, nodeId];
     const children: string[] = [];
     const info: Record<string, any> = {};

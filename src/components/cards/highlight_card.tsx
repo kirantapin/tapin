@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { BundleItem, Restaurant } from "@/types";
+import { BundleItem, NormalItem, PassItem, Restaurant } from "@/types";
 import { ItemUtils } from "@/utils/item_utils";
 import { project_url } from "@/utils/supabase_client";
 import { titleCase } from "title-case";
@@ -7,6 +7,8 @@ import { sentenceCase } from "@/utils/parse";
 import { adjustColor } from "@/utils/color";
 import { useRestaurant } from "@/context/restaurant_context";
 import { BundleUtils } from "@/utils/bundle_utils";
+import { BUNDLE_IMAGE_BUCKET } from "@/constants";
+import { rest } from "lodash";
 
 interface HighlightCardProps {
   content_type: "item" | "policy" | "bundle";
@@ -53,15 +55,23 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
   };
   useEffect(() => {
     if (content_type === "item") {
-      const item = ItemUtils.getMenuItemFromItemId(content_pointer, restaurant);
+      const item = ItemUtils.getMenuItemFromItemId(
+        content_pointer,
+        restaurant
+      ) as NormalItem | PassItem;
       // if (!item) {
       //   return null;
       // }
       setTitle(`Grab a ${item?.name} for $${item?.price}`);
-      setDescription(
-        item?.description || "Currently in stock. Purchase while supplies last."
-      );
-      setImageUrl(item?.image_url);
+      if (ItemUtils.isPassItem(content_pointer, restaurant)) {
+        setDescription("Limited amount remaining. Grab while supplies last.");
+      } else {
+        setDescription(
+          (item as NormalItem).description ||
+            "Currently in stock. Purchase while supplies last."
+        );
+        setImageUrl((item as NormalItem).image_url || null);
+      }
     }
     if (content_type === "policy") {
       setPolicyInfo();
@@ -73,26 +83,26 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
   return (
     <div
       key={content_pointer}
-      className="snap-center flex-shrink-0 w-full max-w-md rounded-3xl overflow-hidden flex text-white mr-4 enhance-contrast"
+      className="snap-center flex-shrink-0 w-full max-w-md h-32 rounded-3xl overflow-hidden flex items-stretch mr-4 enhance-contrast"
       style={{
         backgroundColor: restaurant?.metadata.primaryColor as string,
+        color: "white",
       }}
     >
       {/* Left: Text Content */}
-      <div className="flex-1 flex flex-col p-4">
-        {/* Title always shows */}
-        <h3 className="text-lg font-bold mb-1 line-clamp-1">
-          {titleCase(title_override || title || "")}
-        </h3>
+      <div className="flex-1 flex flex-col justify-between p-4">
+        <div>
+          <h3 className="text-lg font-bold line-clamp-1">
+            {titleCase(title_override || title || "")}
+          </h3>
 
-        {/* Description takes remaining space, but doesn't push content down */}
-        <p className="text-xs flex-1 overflow-hidden line-clamp-2">
-          {sentenceCase(description_override) || description || ""}
-        </p>
+          <p className="text-xs line-clamp-2 overflow-hidden">
+            {sentenceCase(description_override) || description || ""}
+          </p>
+        </div>
 
-        {/* Button always at bottom */}
         <button
-          className="bg-white px-5 py-1 rounded-full mt-2 text-sm self-start font-bold"
+          className="bg-white px-5 py-1 rounded-full text-sm self-start font-bold"
           style={{ color: primaryColor }}
           onClick={onClick}
         >
@@ -104,13 +114,12 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
         </button>
       </div>
 
-      {/* Right: Image determines card height */}
       {imageUrl && (
-        <div className="h-32 w-32 flex-shrink-0 p-3">
+        <div className="flex-shrink-0 p-3 bg-gray-200 h-full w-32">
           <img
             src={image_url_override || imageUrl || ""}
             alt="name"
-            className="h-full w-full object-cover rounded-2xl"
+            className="w-full h-full object-contain"
           />
         </div>
       )}

@@ -1,5 +1,11 @@
 import { ADD_ON_TAG, BUNDLE_MENU_TAG, NORMAL_DEAL_TAG } from "@/constants";
-import { Cart, DealEffectPayload, Policy, Restaurant } from "@/types";
+import {
+  BundleItem,
+  Cart,
+  DealEffectPayload,
+  Policy,
+  Restaurant,
+} from "@/types";
 import { getMissingItemsForPolicy } from "./item_recommender";
 import { ItemUtils } from "./item_utils";
 import { PolicyUtils } from "./policy_utils";
@@ -73,63 +79,39 @@ export class PolicyManager {
     cart: Cart,
     dealEffect: DealEffectPayload,
     restaurant: Restaurant
-  ): {
-    allAddOns: Policy[];
-    passAddOns: Policy[];
-    normalAddOns: Policy[];
-  } {
+  ): Policy[] {
     const validPolicies: Policy[] = [];
-    const seenItems = new Set<string>();
-
-    const passAddOns: Policy[] = [];
-    const normalAddOns: Policy[] = [];
 
     for (let i = 0; i < this.policies.length; i++) {
       const policy = this.policies[i];
       if (policy.definition.tag !== ADD_ON_TAG) continue;
 
-      const actionItem = JSON.stringify(policy.definition.action.items[0]);
-      if (seenItems.has(actionItem)) continue;
       if (
         getMissingItemsForPolicy(policy, cart, restaurant, dealEffect)
           .length === 0
       ) {
-        seenItems.add(actionItem);
         validPolicies.push(policy);
-        const item = policy.definition.action.items[0];
-        if (ItemUtils.isPassItem(item, restaurant)) {
-          console.log("in here");
-          passAddOns.push(policy);
-        } else {
-          normalAddOns.push(policy);
-        }
       }
     }
 
-    return {
-      allAddOns: validPolicies,
-      passAddOns,
-      normalAddOns,
-    };
+    return validPolicies;
   }
 
   getAllPolicies(restaurant: Restaurant): Policy[] {
     const unlockedPolicies = this.getUnlockedPolicies();
-    const bundlePolicyIds = restaurant.menu[BUNDLE_MENU_TAG]
-      .children as string[];
+    const allBundleIds = restaurant.menu[BUNDLE_MENU_TAG].children as string[];
     const allPolicies = [...unlockedPolicies];
-    bundlePolicyIds.forEach((bundlePolicyId) => {
-      restaurant.menu[bundlePolicyId].info.bundle_policies.forEach(
-        (policyId: string) => {
-          const policy = this.getPolicyFromId(policyId);
-          if (
-            policy &&
-            !allPolicies.some((p) => p.policy_id === policy.policy_id)
-          ) {
-            allPolicies.push(policy);
-          }
+    allBundleIds.forEach((bundleId) => {
+      const bundleItem = restaurant.menu[bundleId].info as BundleItem;
+      bundleItem.bundle_policies.forEach((policyId: string) => {
+        const policy = this.getPolicyFromId(policyId);
+        if (
+          policy &&
+          !allPolicies.some((p) => p.policy_id === policy.policy_id)
+        ) {
+          allPolicies.push(policy);
         }
-      );
+      });
     });
     return allPolicies;
   }

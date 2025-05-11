@@ -163,15 +163,29 @@ button {
   white-space: normal; /* Allows wrapping */
   word-wrap: break-word; /* Prevents words from overflowing */
 }
+
+.highlight-card-line-clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Show 2 full lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Adds "..." only after two lines */
+  max-height: 2rem; /* Adjust based on font-size to fit exactly 2 lines */
+  line-height: 1rem; /* Ensures consistent line spacing */
+  white-space: normal; /* Allows wrapping */
+  word-wrap: break-word; /* Prevents words from overflowing */
+}
+
 .custom-line-clamp-1 {
   display: -webkit-box;
   -webkit-line-clamp: 1; /* Show 2 full lines */
   -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
+  text-overflow: ellipsis; /* Adds "..." only after two lines */
   max-height: 3rem; /* Adjust based on font-size to fit exactly 2 lines */
   line-height: 1.5rem; /* Ensures consistent line spacing */
   white-space: normal; /* Allows wrapping */
+  word-wrap: break-word; /* Prevents words from overflowing */
 }
 
 .enhance-contrast {

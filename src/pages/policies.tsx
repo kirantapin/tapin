@@ -37,9 +37,8 @@ export default function PoliciesPage() {
   const [activePolicies, setActivePolicies] = useState<Policy[]>([]);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { state, addPolicy, addToCart, removeFromCart } = useBottomSheet();
-  const [loading, setLoading] = useState<boolean>(false);
-  const { openPolicyModal } = useBottomSheet();
+  const { state } = useBottomSheet();
+  const [loading] = useState<boolean>(false);
 
   useEffect(() => {
     if (activeTag === NORMAL_DEAL_TAG && policies) {
@@ -69,7 +68,7 @@ export default function PoliciesPage() {
         <button
           className="w-9 h-9 flex items-center justify-center rounded-full bg-black/10 absolute left-4"
           onClick={() => {
-            navigate(RESTAURANT_PATH.replace(":id", id));
+            navigate(-1);
           }}
         >
           <ChevronLeft className="w-6 h-6" />
@@ -92,8 +91,8 @@ export default function PoliciesPage() {
             style={
               activeTag === tagMap[tagLabel].tag
                 ? {
-                    color: restaurant?.metadata.primaryColor,
-                    borderColor: restaurant?.metadata.primaryColor,
+                    color: restaurant?.metadata.primaryColor as string,
+                    borderColor: restaurant?.metadata.primaryColor as string,
                   }
                 : {
                     backgroundColor: "#f6f8fa",
@@ -115,7 +114,7 @@ export default function PoliciesPage() {
       {/* Deals */}
 
       {activeTag === NORMAL_DEAL_TAG && (
-        <div className="px-12 space-y-8 flex flex-col items-center w-full">
+        <div className="px-5 space-y-6 flex flex-col items-center w-full">
           {activePolicies.length > 0 ? (
             activePolicies.map((policy) => (
               <PolicyCard
@@ -136,7 +135,7 @@ export default function PoliciesPage() {
 
       {activeTag === LOYALTY_REWARD_TAG &&
         restaurant &&
-        (userData ? (
+        (userSession ? (
           <div className="px-4">
             <Rewards viewAll={true} />
           </div>

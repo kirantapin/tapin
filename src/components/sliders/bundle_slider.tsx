@@ -131,7 +131,7 @@ const BundleSlider = ({
           </div>
         </div>
 
-        <div className="flex justify-center mt-4">
+        <div className="flex justify-center mt-2">
           {bundlesToDisplay.map((bundleId, index) => {
             return (
               <button

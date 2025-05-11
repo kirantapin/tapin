@@ -9,11 +9,12 @@ import {
   INFO_PAGE_PATH,
   DEVICE_NOT_SUPPORTED_PATH,
 } from "./constants.ts";
-import { ToastContainer } from "react-toastify";
+import { Slide, ToastContainer } from "react-toastify";
 import { RestaurantSkeleton } from "./components/skeletons/restaurant_skeleton.tsx";
 import { CheckoutSkeleton } from "./components/skeletons/checkout_skeleton.tsx";
 import { MySpotSkeleton } from "./components/skeletons/my_spot_skeleton.tsx";
 import { OffersSkeleton } from "./components/skeletons/offers_skeleton.tsx";
+import LoadingPage from "./components/skeletons/loading_page.tsx";
 // Lazy imports
 const Discovery = lazy(() => import("./pages/discovery.tsx"));
 const CheckoutPage = lazy(() => import("./pages/checkout.tsx"));
@@ -29,7 +30,16 @@ const RestaurantPage = lazy(() => import("./pages/restaurant.tsx"));
 const App: React.FC = () => {
   return (
     <div>
-      <ToastContainer stacked className="w-full" style={{ width: "100%" }} />
+      <ToastContainer
+        transition={Slide}
+        position="top-center"
+        closeOnClick
+        draggable={false}
+        pauseOnHover={false}
+        stacked
+        className="w-full"
+        style={{ width: "100%" }}
+      />
       <Routes>
         <Route
           path={BASE_PATH}
@@ -42,7 +52,7 @@ const App: React.FC = () => {
         <Route
           path={RESTAURANT_PATH}
           element={
-            <Suspense fallback={<RestaurantSkeleton />}>
+            <Suspense fallback={<LoadingPage />}>
               <RestaurantPage />
             </Suspense>
           }

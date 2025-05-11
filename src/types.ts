@@ -5,7 +5,7 @@ export interface VerifyOrderPayload {
   userDealEffect: DealEffectPayload;
   restaurant_id: string;
   userAccessToken: string | null;
-  cartResults: CartResultsPayload | null;
+  cartResults: CartResultsPayload;
   request: {
     type: string;
     content:
@@ -34,16 +34,20 @@ export interface JWTPayloadType extends Record<string, unknown> {
   cart: Cart;
   dealEffectPayload: DealEffectPayload;
   cartResultsPayload: CartResultsPayload;
-  policy: Policy | null;
   user_id: string | null;
   restaurant_id: string;
 }
 
-export interface CartResultsPayload {
+export type CartResultsPayload = {
   discount: number;
   credit: {
     creditUsed: number;
     creditToAdd: number;
+  };
+  breakdown: {
+    itemTotal: number;
+    passTotal: number;
+    bundleTotal: number;
   };
   subtotal: number;
   tax: number;
@@ -52,12 +56,13 @@ export interface CartResultsPayload {
   totalPrice: number;
   totalPoints: number;
   totalPointCost: number;
-}
+} | null;
 
 export interface DealEffectPayload {
   addedItems: {
-    policy_id: string;
     bundle_id: string | null;
+    policy_id: string;
+    userPreference: string | null;
     cartItem: CartItem;
   }[];
   modifiedItems: ModifiedCartItem[];
@@ -125,14 +130,6 @@ export interface DrinkForm {
   onUpdate: (values: Record<string, string>) => void;
   transaction: Transaction;
 }
-export interface DealUse {
-  deal_use_id: string;
-  created_at: string;
-  user_id: string;
-  restaurant_id: string;
-  policy_id: string;
-  count_as_deal: boolean;
-}
 
 export interface CreateTransactionsPayload {
   order: Order;
@@ -142,7 +139,6 @@ export interface CreateTransactionsPayload {
 }
 
 export interface ReturnTransactionsPayload {
-  deal_use: DealUse | null;
   transactions: Transaction[];
   modifiedUserData: User | null;
 }
@@ -162,6 +158,7 @@ export interface NormalItem {
   name: string;
   price: number;
   description?: string;
+  image_url?: string;
 }
 export interface PassItem {
   name: string;
@@ -189,7 +186,7 @@ export interface Pass {
   pass_id: string;
   restaurant_id: string;
   itemId: string;
-  item_description: string;
+  item_description: string | null;
   price: number;
   for_date: string;
   end_time: string;
@@ -248,10 +245,10 @@ export interface User {
 
 export interface UserSession {
   user: {
-    phone: string;
+    id: string;
   };
-  accessToken: string;
-  refreshToken: string;
+  access_token: string;
+  refresh_token: string;
 }
 
 export interface Policy {
@@ -260,11 +257,11 @@ export interface Policy {
   header: string | null;
   restaurant_id: string;
   count_as_deal: boolean;
-  begin_time: string | null;
   end_time: string | null;
   total_usages: number | null;
   days_since_last_use: number | null;
   locked: boolean;
+  active: boolean;
   definition: PolicyDefinition;
 }
 
@@ -310,7 +307,7 @@ export type PolicyDefinitionCondition =
 export type PolicyDefinitionAction =
   | {
       type: "add_free_item";
-      item: ItemSpecification;
+      items: ItemSpecification[];
       quantity: number;
     }
   | {
@@ -318,11 +315,6 @@ export type PolicyDefinitionAction =
       items: ItemSpecification[];
       amount: number;
       frequency: number;
-    }
-  | {
-      type: "apply_loyalty_reward";
-      items: ItemSpecification[];
-      amount: number;
     }
   | {
       type: "apply_percent_discount";
@@ -356,4 +348,8 @@ export type PolicyDefinitionAction =
       items: { item: ItemSpecification; quantity: number }[];
     }
   | { type: "apply_order_percent_discount"; amount: number }
-  | { type: "add_to_user_credit"; amount: number };
+  | { type: "add_to_user_credit"; amount: number }
+  | {
+      type: "apply_loyalty_reward";
+      items: ItemSpecification[];
+    };

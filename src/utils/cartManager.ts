@@ -13,6 +13,7 @@ import {
   DealEffectPayload,
   Item,
   Policy,
+  UserSession,
   VerifyOrderPayload,
 } from "@/types";
 import { supabase_local } from "./supabase_client";
@@ -26,15 +27,11 @@ export class CartManager {
   cartResults: CartResultsPayload | null;
   errorDisplay: string | null;
   restaurant_id: string;
-  userSession: any | null;
+  userSession: UserSession | null;
   private token: string | null = null;
   private localStorageKey: string;
   global: boolean;
-  constructor(
-    restaurant_id: string,
-    userSession: any | null,
-    global: boolean = false
-  ) {
+  constructor(restaurant_id: string, userSession: any | null, global: boolean) {
     this.restaurant_id = restaurant_id;
     this.userSession = userSession;
     this.global = global;
@@ -117,7 +114,7 @@ export class CartManager {
       userDealEffect: this.dealEffect,
       restaurant_id: this.restaurant_id,
       cartResults: this.cartResults,
-      userAccessToken: this.userSession?.access_token,
+      userAccessToken: this.userSession?.access_token || null,
       request: { type: type, content: content },
       jwtToken: this.token,
     };
@@ -158,12 +155,12 @@ export class CartManager {
 
   public async addPolicy(
     bundle_id: string | null,
-    policy: Policy,
+    policy_id: string,
     userPreference: string | null = null
   ): Promise<string | null> {
-    console.log("adding policy", policy);
+    console.log("adding policy", policy_id);
     await this.verifyOrder(ADD_POLICY, {
-      policy_id: policy.policy_id,
+      policy_id: policy_id,
       bundle_id: bundle_id,
       userPreference: userPreference,
     });
@@ -173,8 +170,8 @@ export class CartManager {
     return null;
   }
 
-  public async removePolicy(policy: Policy): Promise<string | null> {
-    await this.verifyOrder(REMOVE_POLICY, policy.policy_id);
+  public async removePolicy(policy_id: string): Promise<string | null> {
+    await this.verifyOrder(REMOVE_POLICY, policy_id);
     console.log("inside remove policy", this.getCartState());
     if (this.errorDisplay) {
       return this.errorDisplay;
@@ -219,10 +216,13 @@ export class CartManager {
   }
 
   public async refresh(): Promise<string | null> {
+    console.log("refreshing cart");
     await this.verifyOrder(REFRESH, "");
     if (this.errorDisplay) {
+      console.log("error refreshing cart", this.errorDisplay);
       return this.errorDisplay;
     }
+    console.log("refreshed cart", this.getCartState());
     return null;
   }
 

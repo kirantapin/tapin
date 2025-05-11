@@ -2,10 +2,15 @@ import React from "react";
 
 interface CustomIconProps {
   circleColor: string;
+  baseColor?: string;
   size?: number;
 }
 
-const CustomIcon: React.FC<CustomIconProps> = ({ circleColor, size = 84 }) => {
+const CustomIcon: React.FC<CustomIconProps> = ({
+  circleColor,
+  baseColor = "black",
+  size = 84,
+}) => {
   return (
     <svg
       width={size}
@@ -20,10 +25,10 @@ const CustomIcon: React.FC<CustomIconProps> = ({ circleColor, size = 84 }) => {
         fill={circleColor}
       />
       {/* Other paths – solid black */}
-      <path d="M48.32 36.2534V11.9067H0V36.2534H48.32Z" fill="black" />
+      <path d="M48.32 36.2534V11.9067H0V36.2534H48.32Z" fill={baseColor} />
       <path
         d="M48.32 60.6C34.9761 60.6 24.16 71.4997 24.16 84.9466H0V84.295C0.352701 57.8158 21.6323 36.4311 47.9673 36.2534H72.4212V84.9466H48.32V60.6Z"
-        fill="black"
+        fill={baseColor}
       />
     </svg>
   );

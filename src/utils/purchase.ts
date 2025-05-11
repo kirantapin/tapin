@@ -1,6 +1,6 @@
 import { supabase_local } from "./supabase_client";
 
-export const submitPurchase = async (payload) => {
+export const submitPurchase = async (payload: any) => {
   try {
     const { data, error } = await supabase_local.functions.invoke(
       "submit_order",

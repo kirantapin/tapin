@@ -12,6 +12,7 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils"; // or use `clsx` / `classnames`
+import { useRestaurant } from "@/context/restaurant_context";
 
 export function Alert({
   trigger,
@@ -25,6 +26,7 @@ export function Alert({
   cancelClassName,
   contentClassName,
 }) {
+  const { restaurant } = useRestaurant();
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
@@ -58,10 +60,12 @@ export function Alert({
           <AlertDialogAction
             onClick={onConfirm}
             className={cn(
-              "w-full rounded-full px-3 py-2 text-sm text-white font-gilroy " +
-                "bg-[linear-gradient(45deg,#CAA650,#F4E4A8)]",
+              "w-full rounded-full px-3 py-2 text-sm text-white font-gilroy ",
               confirmClassName
             )}
+            style={{
+              backgroundColor: restaurant?.metadata.primaryColor as string,
+            }}
           >
             {confirmLabel}
           </AlertDialogAction>

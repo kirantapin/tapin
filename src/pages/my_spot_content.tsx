@@ -48,6 +48,7 @@ const MySpotContent: React.FC = () => {
   }, [id]);
 
   const filterTransactions = () => {
+    if (!restaurant) return;
     const filtered = transactions.filter(
       (transaction) =>
         transaction.restaurant_id === restaurant.id &&
@@ -162,8 +163,8 @@ const MySpotContent: React.FC = () => {
             style={
               activeFilter === tagMap[filter].tag
                 ? {
-                    color: restaurant?.metadata.primaryColor,
-                    borderColor: restaurant?.metadata.primaryColor,
+                    color: restaurant.metadata.primaryColor as string,
+                    borderColor: restaurant.metadata.primaryColor as string,
                   }
                 : {}
             }
@@ -235,12 +236,10 @@ const MySpotContent: React.FC = () => {
               style={
                 selectedTransactions.length > 0
                   ? {
-                      background: `linear-gradient(45deg, 
-          ${adjustColor(restaurant?.metadata.primaryColor as string, -30)},
-          ${adjustColor(restaurant?.metadata.primaryColor as string, 40)}
-        )`,
+                      backgroundColor: restaurant.metadata
+                        .primaryColor as string,
                     }
-                  : { background: "#969292" }
+                  : { backgroundColor: "#969292" }
               }
               onClick={() => openQrModal(selectedTransactions)}
               disabled={selectedTransactions.length === 0}

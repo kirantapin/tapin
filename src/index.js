@@ -5,7 +5,6 @@ import App from "./App.tsx";
 import reportWebVitals from "./reportWebVitals";
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 import { AuthProvider } from "./context/auth_context.tsx";
-import { SupabaseProvider } from "./context/supabase_context.tsx";
 import { DeviceProvider } from "./context/device_context.tsx";
 import { BrowserRouter as Router } from "react-router-dom";
 import { RestaurantProvider } from "./context/restaurant_context.tsx";
@@ -17,15 +16,13 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <Router>
     <DeviceProvider>
-      <SupabaseProvider>
-        <AuthProvider>
-          <RestaurantProvider>
-            <BottomSheetProvider>
-              <App />
-            </BottomSheetProvider>
-          </RestaurantProvider>
-        </AuthProvider>
-      </SupabaseProvider>
+      <AuthProvider>
+        <RestaurantProvider>
+          <BottomSheetProvider>
+            <App />
+          </BottomSheetProvider>
+        </RestaurantProvider>
+      </AuthProvider>
     </DeviceProvider>
   </Router>
 );

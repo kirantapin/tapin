@@ -3,7 +3,9 @@ import { useAuth } from "@/context/auth_context";
 import { submitPurchase } from "@/utils/purchase";
 import { useNavigate } from "react-router-dom";
 import { Transaction, User } from "@/types";
-import { toast } from "react-toastify";
+import { useRestaurant } from "@/context/restaurant_context";
+import { useBottomSheet } from "@/context/bottom_sheet_context";
+import { useState } from "react";
 const RedeemButton = ({
   payload,
   sanityCheck,
@@ -14,7 +16,10 @@ const RedeemButton = ({
   clearCart: () => void;
 }) => {
   const { setTransactions, setUserData } = useAuth();
+  const { restaurant } = useRestaurant();
   const navigate = useNavigate();
+  const { triggerToast } = useBottomSheet();
+  const [loading, setLoading] = useState(false);
   const handleTapInResponse = async (
     transactions: Transaction[],
     modifiedUserData: User
@@ -29,48 +34,64 @@ const RedeemButton = ({
         ...prevTransactions,
         ...transactions,
       ]);
-      clearCart();
+      await clearCart();
       navigate(RESTAURANT_PATH.replace(":id", payload.restaurant_id), {
         state: {
           transactions: transactions,
           qr: true,
+          message: { type: "success", message: "Purchase successful" },
         },
       });
     }
   };
   return (
     <button
-      className=" bg-[linear-gradient(90deg,#CAA650,#F4E4A8)] w-full py-3 px-4 rounded-full font-medium text-white"
+      className="w-full py-3 px-4 rounded-full font-medium text-white"
+      style={{
+        background: restaurant?.metadata.primaryColor as string,
+      }}
       onClick={async () => {
         try {
           const potentialError = await sanityCheck();
-          console.log("potentialError", potentialError);
           if (potentialError) {
             //handle response error
-            toast(potentialError, {
-              type: "error",
-            });
+            triggerToast(potentialError, "error");
             return;
           }
+          setLoading(true);
           const paymentData = {
             connectedAccountId: payload.connectedAccountId,
             paymentIntentId: null,
             additionalOrderData: {},
           };
           payload["paymentData"] = paymentData;
-          console.log("payload", payload);
           const tapInResponse = await submitPurchase(payload);
           console.log("tapInResponse", tapInResponse);
           if (tapInResponse) {
             const { transactions, modifiedUserData } = tapInResponse;
-            handleTapInResponse(transactions, modifiedUserData);
+            await handleTapInResponse(transactions, modifiedUserData);
           }
         } catch (err) {
           console.error("Unexpected Error:", err);
+        } finally {
+          setLoading(false);
         }
       }}
     >
-      Redeem
+      <div className="flex items-center justify-center gap-2 w-full">
+        {loading ? (
+          <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+        ) : (
+          <>
+            <span className="font-semibold">Redeem</span>
+            <img
+              src="/tapin_icon_full_white.png"
+              alt="Tap In Icon"
+              className="h-5"
+            />
+          </>
+        )}
+      </div>
     </button>
   );
 };

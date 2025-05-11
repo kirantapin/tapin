@@ -3,7 +3,7 @@ import { Restaurant, BundleItem } from "@/types";
 import { useRestaurant } from "@/context/restaurant_context";
 import { ItemUtils } from "@/utils/item_utils";
 import { useAuth } from "@/context/auth_context";
-import { DollarSign, Wallet } from "lucide-react";
+import { CircleX, DollarSign, Wallet } from "lucide-react";
 import { BundleUtils } from "@/utils/bundle_utils";
 import BundleSlider from "./sliders/bundle_slider";
 import { PolicyCard } from "./cards/policy_card";
@@ -34,7 +34,7 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
           if (bundleMenuItem && bundleMenuItem.price) {
             const bundle = bundleMenuItem.object;
             const stats = await BundleUtils.getUsersBundleUsageStats(
-              userSession.user.phone,
+              userSession.user.id,
               bundle
             );
             results[bundleId] = stats;
@@ -63,13 +63,13 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
         const bundleMenuItem = ItemUtils.getMenuItemFromItemId(
           bundleId,
           restaurant
-        );
+        ) as BundleItem;
         if (!bundleMenuItem || !bundleMenuItem.price) {
           return null;
         }
 
         const bundle = bundleMenuItem.object;
-        const childPolicies = restaurant.menu[bundleId].info.bundle_policies;
+        const childPolicies = bundleMenuItem.bundle_policies;
 
         return (
           <div key={bundleId}>
@@ -83,7 +83,7 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
                       Points
                     </span>
                     <GradientIcon
-                      icon={DollarSign}
+                      icon={CircleX}
                       primaryColor={restaurant?.metadata.primaryColor as string}
                       size={24}
                     />
@@ -97,7 +97,7 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
                 <div className="flex flex-col justify-between p-4 rounded-xl bg-gray-100 h-24">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-500 font-medium">
-                      Credits
+                      Credit Earned
                     </span>
                     <GradientIcon
                       icon={Wallet}
@@ -175,10 +175,12 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
         );
       })}
 
-      <div className="mt-8 px-4">
-        <h1 className="text-xl font-bold">Other Bundles You Might Like</h1>
-        <BundleSlider onCardClick={openBundleModal} />
-      </div>
+      {Object.values(userOwnershipMap).some((value) => value === false) && (
+        <div className="mt-8 px-4">
+          <h1 className="text-xl font-bold">Other Bundles You Might Like</h1>
+          <BundleSlider onCardClick={openBundleModal} />
+        </div>
+      )}
     </div>
   );
 };

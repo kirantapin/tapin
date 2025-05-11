@@ -95,6 +95,20 @@ export function convertLocalToUtcTimestampz(localDateStr: string): string {
   ).toISOString();
 }
 
+function getPreviousDay(day: string): string {
+  const days = [
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+  ];
+  const currentIndex = days.indexOf(day);
+  return days[(currentIndex - 1 + 7) % 7];
+}
+
 export function isAvailableNow(
   constraint: AvailabilityConstraint,
   now: Date = new Date()
@@ -122,11 +136,28 @@ export function isAvailableNow(
   const minute = parts.find((p) => p.type === "minute")?.value;
   const timeStr = `${hour}:${minute}`; // "HH:mm" in UTC
 
-  // Check if current day is in allowed days
-  if (!constraint.allowed_days.includes(currentDay)) {
-    return false;
-  }
+  // Convert times to minutes since midnight for proper comparison
+  const currentMinutes = timeToMinutes(timeStr);
+  const beginMinutes = timeToMinutes(constraint.begin_time);
+  const endMinutes = timeToMinutes(constraint.end_time);
 
-  // Check if current time is within the time range
-  return constraint.begin_time <= timeStr && timeStr < constraint.end_time;
+  // Handle time ranges that cross midnight
+  if (beginMinutes > endMinutes) {
+    // Time range crosses midnight
+    if (currentMinutes < endMinutes) {
+      // We're in the early morning hours, check if previous day is allowed
+      const previousDay = getPreviousDay(currentDay);
+      return constraint.allowed_days.includes(previousDay);
+    } else {
+      // We're in the evening hours, check if current day is allowed
+      return constraint.allowed_days.includes(currentDay);
+    }
+  } else {
+    // Normal time range within same day
+    return (
+      constraint.allowed_days.includes(currentDay) &&
+      currentMinutes >= beginMinutes &&
+      currentMinutes < endMinutes
+    );
+  }
 }

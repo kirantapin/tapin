@@ -24,15 +24,17 @@ import { CheckoutSkeleton } from "@/components/skeletons/checkout_skeleton.tsx";
 import { useBottomSheet } from "@/context/bottom_sheet_context.tsx";
 import { PolicyCard } from "@/components/cards/policy_card.tsx";
 import SpendGoalCard from "@/components/cards/spend_goal_card.tsx";
+import AddOnManager from "@/components/sliders/add_on_manager.tsx";
+import CheckoutSummary from "@/components/checkout/checkout_summary.tsx";
+import BundleCTA from "@/components/checkout/bundle_cta.tsx";
 export default function CheckoutPage() {
   setThemeColor();
   const { userSession } = useAuth();
   const { restaurant, policyManager, setCurrentRestaurantId } = useRestaurant();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const [tipPercent, setTipPercent] = useState<number>(0.2);
   const [tipAmount, setTipAmount] = useState<number>(0);
-  const tipAmounts = [0.1, 0.15, 0.2];
+
   const [inlineRecommendation, setInlineRecommendation] = useState<{
     cartId: number;
     flair: string;
@@ -53,7 +55,6 @@ export default function CheckoutPage() {
     removeFromCart,
     refreshCart,
     removePolicy,
-    isPreEntry,
     clearCart,
   } = useBottomSheet();
 
@@ -86,19 +87,13 @@ export default function CheckoutPage() {
     }
   }, [state.cart, policyManager, state.dealEffect]);
 
-  useEffect(() => {
-    if (state.cart.length > 0 && restaurant) {
-      const normalItemPrice = ItemUtils.normalItemTotalPrice(
-        state.cart,
-        restaurant as Restaurant
-      );
-      setTipAmount(normalItemPrice * tipPercent);
-    }
-  }, [state.cart, restaurant, tipPercent]);
-
   if (!restaurant || !policyManager || !state) {
     return <CheckoutSkeleton />;
   }
+
+  const isPreEntry = state.cart.some((item) =>
+    ItemUtils.isPassItem(item.item.id, restaurant as Restaurant)
+  );
 
   return (
     <div className={checkoutStyles.pageContainer}>
@@ -173,70 +168,21 @@ export default function CheckoutPage() {
                     <X className="text-gray-800 h-3.5 w-3.5" />
                   </button>
                 }
-                title="Are you absolutely sure?"
+                title="Are you sure?"
                 description="You're about to remove a deal from your cart. Are you sure you want to do this?"
                 onConfirm={async () => {
-                  await removePolicy(policy);
-                  console.log("removed");
+                  await removePolicy(policy.policy_id);
                 }}
               />
             );
           })}
       </div>
-      {restaurant && policyManager && state.cart.length > 0 && (
-        <div className="mt-4">
-          {policyManager.getAddOns(state.cart, state.dealEffect, restaurant)
-            .allAddOns.length > 0 && (
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold mb-4">
-                {isPreEntry ? "Exclusive Pre-entry Deals" : "Exclusive Deals"}
-              </h2>
-              <div className="text-md text-red-600 mb-4">
-                {addOnTime > 0 ? (
-                  <span>
-                    {Math.floor(addOnTime / 60)}:
-                    {(addOnTime % 60).toString().padStart(2, "0")} left to claim
-                  </span>
-                ) : (
-                  <span className="text-red-500">Expired</span>
-                )}
-              </div>
-            </div>
-          )}
-          <div className="overflow-x-auto pb-2 mb-2 no-scrollbar">
-            <div className="flex gap-2" style={{ minWidth: "max-content" }}>
-              {addOnTime > 0 &&
-                policyManager
-                  .getAddOns(state.cart, state.dealEffect, restaurant)
-                  .normalAddOns.map((policy) => (
-                    <AddOnCard
-                      state={state}
-                      policy={policy}
-                      restaurant={restaurant}
-                      key={policy.policy_id}
-                      addPolicy={async () => {
-                        await addPolicy(null, policy);
-                        pause();
-                      }}
-                    />
-                  ))}
-            </div>
-          </div>
-          <div className="mt-2">
-            {policyManager
-              .getAddOns(state.cart, state.dealEffect, restaurant)
-              .passAddOns.map((policy) => (
-                <PassAddOnCard
-                  state={state}
-                  addPolicy={addPolicy}
-                  removePolicy={removePolicy}
-                  restaurant={restaurant as Restaurant}
-                  policy={policy as Policy}
-                />
-              ))}
-          </div>
-        </div>
-      )}
+      <AddOnManager
+        state={state}
+        isPreEntry={isPreEntry}
+        addPolicy={addPolicy}
+        removePolicy={removePolicy}
+      />
       <div className="flex flex-col justify-end h-full">
         {policyManager &&
           policyManager.getRecommendedDeals(
@@ -254,6 +200,7 @@ export default function CheckoutPage() {
                       state.dealEffect,
                       restaurant as Restaurant
                     )
+                    .slice(0, 3)
                     .map((policy) => (
                       <div className="w-[90%] flex-shrink-0 snap-center">
                         <PolicyCard
@@ -272,6 +219,8 @@ export default function CheckoutPage() {
 
         <SpendGoalCard />
 
+        {/* <BundleCTA /> */}
+
         <h2 className="text-2xl font-bold  mt-6">Payment</h2>
         <DealPreOrderBar
           policy={
@@ -281,125 +230,14 @@ export default function CheckoutPage() {
           }
           restaurant={restaurant as Restaurant}
         />
-        {state.cart.length > 0 && state.cartResults && (
-          <div className={checkoutStyles.summaryContainer}>
-            {state.cartResults.discount > 0 && (
-              <div
-                className={checkoutStyles.summaryRow}
-                style={{ color: "#40C4AA" }}
-              >
-                <span>Discounts</span>
-                <span>-${state.cartResults.discount.toFixed(2)}</span>
-              </div>
-            )}
-            {state.cartResults.totalPointCost > 0 && (
-              <div className={checkoutStyles.summaryRow}>
-                <span>Point Cost</span>
-                <span>-{formatPoints(state.cartResults.totalPointCost)}</span>
-              </div>
-            )}
-            {state.cartResults.totalPoints > 0 && (
-              <div
-                className={checkoutStyles.summaryRow}
-                style={{ color: "#40C4AA" }}
-              >
-                <span>Points Earned</span>
-                <span>+{formatPoints(state.cartResults.totalPoints)}</span>
-              </div>
-            )}
-            {state.cartResults.credit.creditUsed > 0 && (
-              <div
-                className={checkoutStyles.summaryRow}
-                style={{ color: "#40C4AA" }}
-              >
-                <span>Credit Applied</span>
-                <span>-${state.cartResults.credit.creditUsed.toFixed(2)}</span>
-              </div>
-            )}
-            {state.cartResults.credit.creditToAdd > 0 && (
-              <div
-                className={checkoutStyles.summaryRow}
-                style={{ color: "#40C4AA" }}
-              >
-                <span>Credit Earned</span>
-                <span>+${state.cartResults.credit.creditToAdd.toFixed(2)}</span>
-              </div>
-            )}
-            <div className={checkoutStyles.summaryRow}>
-              <span>Subtotal</span>
-              <span>${state.cartResults.subtotal.toFixed(2)}</span>
-            </div>
-            <div className={checkoutStyles.summaryRow}>
-              <span>Fees & Tax</span>
-              <span>
-                $
-                {(
-                  state.cartResults.tax + state.cartResults.customerServiceFee
-                ).toFixed(2)}
-              </span>
-            </div>
-            {tipAmount > 0 && (
-              <>
-                <div className={checkoutStyles.summaryRow}>
-                  <span>Tip</span>
-                  <span>${tipAmount.toFixed(2)}</span>
-                </div>
-                {restaurant && (
-                  <div className={checkoutStyles.summaryRow}>
-                    <div className="relative flex w-full bg-gray-100 rounded-full border border-gray-200">
-                      {/* Animated highlight */}
-                      <motion.div
-                        layout
-                        transition={{
-                          type: "spring",
-                          stiffness: 400,
-                          damping: 30,
-                        }}
-                        className="absolute inset-0 rounded-full z-0"
-                        style={{
-                          left: `${
-                            (tipAmounts.indexOf(tipPercent) /
-                              tipAmounts.length) *
-                            100
-                          }%`,
-                          width: `${100 / tipAmounts.length}%`,
-                          background: restaurant?.metadata.primaryColor
-                            ? `linear-gradient(45deg, 
-        ${adjustColor(restaurant.metadata.primaryColor as string, -30)},
-        ${adjustColor(restaurant.metadata.primaryColor as string, 40)}
-      )`
-                            : undefined,
-                        }}
-                      />
+        <CheckoutSummary
+          state={state}
+          restaurant={restaurant as Restaurant}
+          setTipAmount={setTipAmount}
+          tipAmount={tipAmount}
+        />
 
-                      {tipAmounts.map((tip) => (
-                        <button
-                          key={tip}
-                          onClick={() => {
-                            setTipPercent(tip);
-                          }}
-                          className={`relative z-10 flex-1 py-2 text-sm font-medium transition-colors 
-                      ${tipPercent === tip ? "text-white" : "text-gray-600"}`}
-                        >
-                          {tip * 100}%
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-            <div
-              className={checkoutStyles.summaryTotal}
-              style={{ marginTop: 20 }}
-            >
-              <span className="font-bold">Total</span>
-              <span className="font-bold">
-                ${(state.cartResults.totalPrice + tipAmount).toFixed(2)}
-              </span>
-            </div>
-          </div>
-        )}
+        <BundleCTA />
 
         {state.cart.length > 0 && (
           <div className={checkoutStyles.paymentContainer}>

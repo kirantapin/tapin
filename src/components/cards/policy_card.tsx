@@ -60,18 +60,18 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({
       <div className="flex flex-col gap-1 flex-grow pr-12">
         {/* Title */}
         <div className="flex items-center gap-2">
-          <h2 className="text-xl font-bold text-gray-900 custom-line-clamp-1">
+          <h2 className="text-xl font-bold text-gray-900 line-clamp-2 leading-tight min-h-[3rem]">
             {titleCase(policy.name)}
           </h2>
         </div>
 
         {/* Description */}
-        <p className="text-lg text-gray-500 line-clamp-2 whitespace-normal min-h-[3em]">
+        <p className="text-lg text-gray-500 custom-line-clamp-1 -mr-10">
           {sentenceCase(policy.header)}
         </p>
 
         <p
-          className={`text-sm ${
+          className={`text-lg custom-line-clamp-1 -mr-10 ${
             !policyIsActive && totalMissingQuantity > 0
               ? "text-red-500"
               : "text-green-500"
@@ -90,11 +90,6 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({
           {policy.locked && (
             <span className="flex items-center gap-1">
               Requires Bundle
-              {/* <img
-                src="/tapin_icon_black.png"
-                alt="Tap In Icon"
-                className="w-4 h-4 ml-1"
-              /> */}
               <CustomIcon circleColor={primaryColor} size={14} />
             </span>
           )}

@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Sheet } from "react-modal-sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { PhoneInput } from "../signin/phone_input";
 import { Verification } from "../signin/verification";
 import { supabase } from "../../utils/supabase_client";
 import { X } from "lucide-react";
+import { useBottomSheet } from "@/context/bottom_sheet_context";
 
 interface SignInModalProps {
   isOpen: boolean;
@@ -13,12 +19,9 @@ interface SignInModalProps {
 const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
   const [step, setStep] = useState<"phone" | "verify">("phone");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
-
+  const { triggerToast } = useBottomSheet();
   // Handle phone number submission
   const handlePhoneSubmit = async (phone: string) => {
-    setErrorMessage(""); // clear any previous errors
-
     // Optional: format phone number, e.g. +1
     const formattedPhoneNumber = `+1${phone}`;
     setPhoneNumber(formattedPhoneNumber);
@@ -29,17 +32,14 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
 
     if (error) {
       console.error("Error sending OTP:", error.message);
-      setErrorMessage("Failed to send OTP. Please try again.");
+      triggerToast("Failed to send OTP. Please try again.", "error");
     } else {
-      console.log("OTP sent successfully.");
       setStep("verify");
     }
   };
 
   // Handle OTP verification
   const handleVerify = async (code: string) => {
-    setErrorMessage(""); // clear any previous errors
-
     const { data: session, error } = await supabase.auth.verifyOtp({
       phone: phoneNumber,
       token: code,
@@ -48,40 +48,35 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
 
     if (error) {
       console.error("Error verifying OTP:", error.message);
-      setErrorMessage("We couldn't verify your code. Please try again.");
+      triggerToast("We couldn't verify your code. Please try again.", "error");
     } else if (session) {
-      console.log("User authenticated:", session.user);
-      // When the user is authenticated, just close the modal
       onClose();
     }
   };
 
   return (
-    <Sheet
-      isOpen={isOpen}
-      onClose={onClose}
-      snapPoints={[0.8, 0]} // 60% of screen height at top, 0% closed
-      initialSnap={0} // Start at the first snapPoint (60%)
-    >
-      {/* Use a custom border radius and max-height on the container */}
-      <Sheet.Container className="rounded-t-3xl h-fit overflow-hidden">
-        {/* Remove <Sheet.Header /> to get rid of the default header */}
-        <Sheet.Content>
-          {/* Your sign-in logic goes inside the content */}
-          <div className="p-6 relative">
-            {/* Close button at the top right */}
-            <button
-              onClick={onClose}
-              className="absolute top-5 right-5 text-gray-500 hover:text-black bg-gray-100 rounded-full p-2"
-            >
-              <X size={20} />
-            </button>
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent
+        side="bottom"
+        className="h-[85vh] rounded-t-3xl [&>button]:hidden p-0"
+      >
+        <div className="flex flex-col h-full">
+          <SheetHeader className="flex-none px-6 pt-6 pb-4">
+            <div className="flex justify-between items-start">
+              <SheetTitle className="text-2xl font-bold">Sign In</SheetTitle>
+              <button
+                onClick={() => {
+                  onClose();
+                  setStep("phone");
+                }}
+                className="text-gray-500 bg-gray-200 rounded-full p-2"
+              >
+                <X size={20} />
+              </button>
+            </div>
+          </SheetHeader>
 
-            <h2 className="text-xl font-bold mb-4">Sign In</h2>
-            {errorMessage && (
-              <p className="text-red-500 mb-2">{errorMessage}</p>
-            )}
-
+          <div className="flex-1 overflow-y-auto">
             {step === "phone" ? (
               <PhoneInput onClose={onClose} onSubmit={handlePhoneSubmit} />
             ) : (
@@ -92,11 +87,8 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
               />
             )}
           </div>
-        </Sheet.Content>
-      </Sheet.Container>
-
-      {/* The translucent backdrop */}
-      <Sheet.Backdrop />
+        </div>
+      </SheetContent>
     </Sheet>
   );
 };

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
-import { useSupabase } from "../context/supabase_context.tsx";
+import { supabase } from "../utils/supabase_client";
 import { Restaurant } from "../types";
 import { useNavigate } from "react-router-dom";
 import { RESTAURANT_PATH } from "../constants.ts";
@@ -9,10 +9,21 @@ import { setThemeColor } from "../utils/color";
 export default function RestaurantDiscovery() {
   setThemeColor();
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState<[]>([]);
-  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [searchResults, setSearchResults] = useState<
+    {
+      name: string;
+      id: string;
+      metadata: Record<string, any>;
+    }[]
+  >([]);
+  const [restaurants, setRestaurants] = useState<
+    {
+      name: string;
+      id: string;
+      metadata: Record<string, any>;
+    }[]
+  >([]);
   const [loading, setLoading] = useState(false);
-  const supabase = useSupabase();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -74,37 +85,51 @@ export default function RestaurantDiscovery() {
         </div>
       </div>
 
-      <div className="w-full max-w-md space-y-4 mr-4 ml-8">
+      <div className="w-full max-w-md space-y-4 mr-4 ml-4">
         {loading ? (
           <div className="flex justify-center items-center">
             <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-800 border-t-transparent"></div>
           </div>
         ) : (
-          <>
+          <div className="flex flex-col gap-6">
             {restaurants.map((restaurant) => (
               <div
                 key={restaurant.id}
-                className="p-4 rounded-xl bg-white shadow-md transition-shadow  border-l-8 flex justify-between items-center mr-4"
-                style={{
-                  borderLeftColor: restaurant.metadata.primaryColor,
-                }}
+                className="w-full max-w-md bg-white rounded-2xl shadow-md overflow-hidden cursor-pointer transition hover:shadow-lg mr-4"
                 onClick={() =>
                   navigate(RESTAURANT_PATH.replace(":id", restaurant.id))
                 }
               >
-                <h2 className="text-lg font-semibold text-gray-900">
-                  {restaurant.name}
-                </h2>
-                <div>
+                {/* Hero Image */}
+                <div className="h-32 relative">
                   <img
-                    src={`${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`}
-                    alt={restaurant.name}
-                    className="w-16 h-16 object-cover rounded-md "
+                    src={`${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_hero.jpeg`}
+                    alt={`${restaurant.name} Hero`}
+                    className="w-full h-full object-cover"
                   />
+
+                  {/* Profile Avatar */}
+                  <div className="absolute -bottom-6 left-4">
+                    <img
+                      src={`${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`}
+                      alt={restaurant.name}
+                      className="w-16 h-16 object-cover rounded-full border-3 border-white shadow-sm"
+                    />
+                  </div>
+                </div>
+
+                {/* Card Content */}
+                <div className="pt-8 px-4 pb-4">
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    {restaurant.name}
+                  </h2>
+                  <p className="text-sm text-gray-500">
+                    {restaurant.metadata.locationTag}
+                  </p>
                 </div>
               </div>
             ))}
-          </>
+          </div>
         )}
       </div>
     </div>

@@ -16,6 +16,7 @@ import {
   HOUSE_MIXER_LABEL,
 } from "@/constants";
 import { titleCase } from "title-case";
+import { PassUtils } from "./pass_utils";
 
 export class ItemUtils {
   static getAllItemsInCategory(
@@ -44,6 +45,7 @@ export class ItemUtils {
     itemSpecifications: ItemSpecification[],
     restaurant: Restaurant
   ): string[] {
+    console.log(itemSpecifications);
     const itemIds: string[] = [];
     for (const itemSpecification of itemSpecifications) {
       const items = this.getAllItemsInCategory(itemSpecification, restaurant);
@@ -113,13 +115,13 @@ export class ItemUtils {
     }
   }
   static isPassItem(itemId: string, restaurant: Restaurant): boolean {
-    return restaurant.menu[itemId].path.includes(PASS_MENU_TAG);
+    return restaurant.menu[itemId]?.path?.includes(PASS_MENU_TAG) || false;
   }
   static isBundleItem(itemId: string, restaurant: Restaurant): boolean {
-    return restaurant.menu[itemId].path.includes(BUNDLE_MENU_TAG);
+    return restaurant.menu[itemId]?.path?.includes(BUNDLE_MENU_TAG) || false;
   }
   static isLiquorItem(itemId: string, restaurant: Restaurant): boolean {
-    return restaurant.menu[itemId].path.includes(LIQUOR_MENU_TAG);
+    return restaurant.menu[itemId]?.path?.includes(LIQUOR_MENU_TAG) || false;
   }
   static getMenuItemFromItemId(
     itemId: string,
@@ -164,7 +166,12 @@ export class ItemUtils {
   static isItemRedeemable(itemId: string, restaurant: Restaurant): boolean {
     return !this.isBundleItem(itemId, restaurant);
   }
-  static isItemExpired(item: Item, restaurant: Restaurant): string | null {
+  static isItemAvailable(
+    item: Item,
+    restaurant: Restaurant,
+    cart: Cart,
+    offset: number = 0
+  ): string | null {
     const itemInfo = this.getMenuItemFromItemId(item.id, restaurant);
     if (!itemInfo) {
       return "This item is not available";
@@ -174,30 +181,20 @@ export class ItemUtils {
       if (bundleItem.object.deactivated_at) {
         return "This item is no longer available";
       }
+      return null;
     }
     if (this.isPassItem(item.id, restaurant)) {
-      const passItem = itemInfo as PassItem;
-      const now = new Date();
-      if (
-        passItem.amount_remaining !== null &&
-        passItem.amount_remaining <= 0 &&
-        now < new Date(passItem.end_time)
-      ) {
-        return "This pass is no longer available";
+      //call isPassInCartAvailable here instead of checking cart uninformed amounts
+      const passInCart = PassUtils.isPassInCartAvailable(
+        item.id,
+        restaurant,
+        cart,
+        offset
+      );
+      if (!passInCart.available) {
+        return "This pass is not available";
       }
     }
     return null;
-  }
-  static normalItemTotalPrice(cart: Cart, restaurant: Restaurant): number {
-    let price = 0;
-    for (const cartItem of cart) {
-      if (
-        !this.isPassItem(cartItem.item.id, restaurant) &&
-        !this.isBundleItem(cartItem.item.id, restaurant)
-      ) {
-        price += cartItem.price * cartItem.quantity;
-      }
-    }
-    return price;
   }
 }

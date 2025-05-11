@@ -1,18 +1,11 @@
-import { useState, useRef, useEffect, useMemo } from "react";
-import AccessCard from "@/components/cards/access_card.tsx";
-import { BundleItem, Highlight, Policy, Restaurant } from "@/types";
-import { modifiedItemFlair } from "@/utils/pricer";
+import { useState, useRef, useEffect } from "react";
+import { BundleItem, Highlight, Policy } from "@/types";
 import { fetch_highlights } from "@/utils/queries/highlights";
 import HighlightCard from "../cards/highlight_card";
-import { adjustColor } from "@/utils/color";
 import { ItemUtils } from "@/utils/item_utils";
-import { MY_SPOT_PATH, NORMAL_DEAL_TAG } from "@/constants";
-import { BundleUtils } from "@/utils/bundle_utils";
+import { NORMAL_DEAL_TAG } from "@/constants";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { useRestaurant } from "@/context/restaurant_context";
-import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/context/auth_context";
 const HighlightSlider = ({
   addToCart,
   policies,
@@ -25,14 +18,12 @@ const HighlightSlider = ({
   const [activePromo, setActivePromo] = useState(0);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
   const autoScrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const { openBundleModal, openPolicyModal, handlePolicyClick } =
-    useBottomSheet();
+  const { openBundleModal, handlePolicyClick } = useBottomSheet();
   const { restaurant, policyManager, userOwnershipMap } = useRestaurant();
-  const navigate = useNavigate();
+  const { triggerToast } = useBottomSheet();
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        console.log("entry", entry);
         if (!entry.isIntersecting) {
           setAutoScrollEnabled(true);
         }
@@ -144,7 +135,7 @@ const HighlightSlider = ({
       if (policy) {
         handlePolicyClick(policy, userOwnershipMap);
       } else {
-        toast.error("This offering no longer exists");
+        triggerToast("This offering no longer exists", "error");
       }
     }
   };
@@ -192,7 +183,7 @@ const HighlightSlider = ({
               style={{
                 backgroundColor:
                   activePromo === index
-                    ? restaurant.metadata.primaryColor
+                    ? (restaurant.metadata.primaryColor as string)
                     : undefined,
               }}
             ></button>

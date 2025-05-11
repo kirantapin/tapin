@@ -1,4 +1,4 @@
-import { Cart, CartItem, Item, Policy, Restaurant } from "@/types";
+import { Cart, CartItem, Item, PassItem, Policy, Restaurant } from "@/types";
 import { ItemUtils } from "@/utils/item_utils";
 import { Minus, Plus, Trash2, ChevronRight } from "lucide-react";
 import { useState } from "react";
@@ -47,11 +47,14 @@ export default function Card({
 
   if (cartItem) {
     quantity = cartItem.quantity || 0;
-    itemInfo = ItemUtils.getMenuItemFromItemId(cartItem.item.id, restaurant);
+    itemInfo = ItemUtils.getMenuItemFromItemId(
+      cartItem.item.id,
+      restaurant
+    ) as PassItem;
     name = itemInfo?.name;
     itemId = cartItem.item.id;
   } else {
-    itemInfo = ItemUtils.getMenuItemFromItemId(itemId, restaurant);
+    itemInfo = ItemUtils.getMenuItemFromItemId(itemId, restaurant) as PassItem;
     cartItem = cart.find((cartItem) => cartItem.item.id === itemId) || null;
     quantity = cart.reduce(
       (total, cartItem) =>

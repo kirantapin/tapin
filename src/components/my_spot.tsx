@@ -17,6 +17,7 @@ export const MySpot: React.FC<MySpotProps> = ({
   userSession,
   transactions,
 }) => {
+  const { userData } = useAuth();
   const { userOwnershipMap, restaurant } = useRestaurant();
   const { openSignInModal } = useBottomSheet();
   const navigate = useNavigate();
@@ -48,31 +49,54 @@ export const MySpot: React.FC<MySpotProps> = ({
 
       {/* My Bundles - full width */}
       {Object.keys(userOwnershipMap).length > 0 && (
-        <div
-          className="relative w-full h-20 bg-gray-50 rounded-xl border p-4 mt-4 cursor-pointer"
-          onClick={() => {
-            if (!userSession) {
-              openSignInModal();
-              return;
-            }
-            navigate(MY_SPOT_PATH.replace(":id", restaurant?.id), {
-              state: { type: "My Bundles" },
-            });
-          }}
-        >
-          {/* Centered Arrow on Right */}
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 bg-gray-200 rounded-full p-1">
-            <ChevronRight className="w-4 h-4 text-gray-400" />
+        <div className="flex gap-4 mt-4">
+          <div
+            className={`relative ${
+              (userData?.next_purchase_credit[restaurant?.id] ?? 0) > 0
+                ? "w-2/3"
+                : "w-full"
+            } h-20 bg-gray-50 rounded-xl border p-4 cursor-pointer`}
+            onClick={() => {
+              if (!userSession) {
+                openSignInModal();
+                return;
+              }
+              navigate(MY_SPOT_PATH.replace(":id", restaurant?.id), {
+                state: { type: "My Bundles" },
+              });
+            }}
+          >
+            {/* Centered Arrow on Right */}
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 bg-gray-200 rounded-full p-1">
+              <ChevronRight className="w-4 h-4 text-gray-400" />
+            </div>
+
+            {/* Text content (vertically centered by default due to h-20 + p-4) */}
+            <div className="flex flex-col justify-center h-full">
+              <p className="font-14 text-gray-500 font-medium">My Bundles</p>
+              <p className="font-16 font-semibold text-gray-900">
+                {activeBundlesCount} Active Bundle
+                {activeBundlesCount !== 1 && "s"}
+              </p>
+            </div>
           </div>
 
-          {/* Text content (vertically centered by default due to h-20 + p-4) */}
-          <div className="flex flex-col justify-center h-full">
-            <p className="font-14 text-gray-500 font-medium">My Bundles</p>
-            <p className="font-16 font-semibold text-gray-900">
-              {activeBundlesCount} Active Bundle
-              {activeBundlesCount !== 1 && "s"}
-            </p>
-          </div>
+          {/* Credit Display */}
+          {(userData?.next_purchase_credit[restaurant?.id] ?? 0) > 0 && (
+            <div className="w-1/3 h-20 bg-gray-50 rounded-xl border p-4">
+              <div className="flex flex-col justify-center items-center h-full">
+                <p className="font-14 text-gray-500 font-medium">Credit</p>
+                <p
+                  className="font-18 font-semibold text-gray-900"
+                  style={{
+                    color: restaurant?.metadata.primaryColor as string,
+                  }}
+                >
+                  ${userData?.next_purchase_credit[restaurant?.id].toFixed(2)}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

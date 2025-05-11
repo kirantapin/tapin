@@ -83,7 +83,7 @@ export const Sidebar = ({ restaurant, isOpen, onClose }: SidebarProps) => {
         {/* <img src="/tapin_logo_black.png" alt="TapIn Logo" className="w-28" /> */}
         <CustomLogo
           primaryColor={restaurant?.metadata.primaryColor as string}
-          size={116}
+          size={124}
         />
         <IconButton onClick={onClose} aria-label="Close" sx={{ padding: 1 }}>
           <CloseIcon />
@@ -134,7 +134,7 @@ export const Sidebar = ({ restaurant, isOpen, onClose }: SidebarProps) => {
       <div className="px-4 py-2 mt-auto mb-4">
         {isSignedIn ? (
           <button
-            className="w-full bg-gray-200 text-black font-semibold py-2 px-4 rounded-full shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2"
+            className="w-full bg-gray-200 text-black font-semibold py-3 px-4 rounded-full shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2"
             onClick={() => {
               logout();
               onClose();
