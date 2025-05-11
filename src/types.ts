@@ -67,28 +67,21 @@ export interface DealEffectPayload {
   }[];
   modifiedItems: ModifiedCartItem[];
   wholeCartModification: WholeCartModification | null;
+  metadata: {
+    wholeCartPointCost: number;
+  };
 }
 
-export type WholeCartModification =
-  | {
-      policy_id: string;
-      bundle_id: string | null;
-      modificationType:
-        | "apply_fixed_order_discount"
-        | "apply_order_percent_discount"
-        | "apply_order_point_multiplier";
-      amount: number;
-      metadata: Record<string, any>;
-    }
-  | {
-      policy_id: string;
-      bundle_id: string | null;
-      modificationType: "add_to_user_credit";
-      amount: number;
-      metadata: {
-        point_cost: number;
-      };
-    };
+export type WholeCartModification = {
+  policy_id: string;
+  bundle_id: string | null;
+  modificationType:
+    | "apply_fixed_order_discount"
+    | "apply_order_percent_discount"
+    | "apply_order_point_multiplier"
+    | "add_to_user_credit";
+  amount: number;
+};
 
 export interface ModifiedCartItem {
   id: number;
@@ -330,12 +323,6 @@ export type PolicyDefinitionAction =
     }
   | {
       type: "apply_point_multiplier";
-      items: ItemSpecification[];
-      amount: number;
-      maxEffectedItems: number;
-    }
-  | {
-      type: "apply_point_cost";
       items: ItemSpecification[];
       amount: number;
       maxEffectedItems: number;

@@ -57,6 +57,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
   const { userSession } = useAuth();
   const { addToCart, removeFromCart } = useBottomSheet();
   const [userPreference, setUserPreference] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const missingItemsResults = getMissingItemsForPolicy(
     policy,
     state.cart,
@@ -78,7 +79,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent
         side="bottom"
-        className="h-[85vh] rounded-t-3xl [&>button]:hidden p-0 flex flex-col"
+        className="w-full max-w-full h-[85vh] rounded-t-3xl [&>button]:hidden p-0 flex flex-col border-none outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0"
       >
         <SheetHeader className="flex-none px-6 pt-6 pb-4 border-b">
           <div className="flex justify-between items-start">
@@ -261,7 +262,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
           </div>
         </div>
 
-        <div className="mt-4 pt-4 border-t fixed bottom-0 left-0 right-0 px-6 pb-4 bg-white">
+        <div className="mt-4 mb-2 pt-4 fixed bottom-0 left-0 right-0 px-6 pb-4 bg-white border-t-0">
           {userSession ? (
             <button
               className="w-full text-white py-3 rounded-full flex items-center justify-center gap-2"
@@ -273,11 +274,13 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                     : (restaurant?.metadata.primaryColor as string),
               }}
               onClick={async () => {
+                setLoading(true);
                 if (policyIsActive) {
                   navigate(DRINK_CHECKOUT_PATH.replace(":id", restaurant.id));
                 } else if (!hasMissingItems) {
                   await addPolicy(bundle_id, policy.policy_id, userPreference);
                 }
+                setLoading(false);
                 onClose();
               }}
               disabled={
@@ -285,8 +288,14 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                 (hasMissingItems && !policyIsActive)
               }
             >
-              <ShoppingCart size={18} />
-              {policyIsActive ? "Go to Checkout" : "Add to Cart"}
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  <ShoppingCart size={18} />
+                  {policyIsActive ? "Go to Checkout" : "Add to Cart"}
+                </>
+              )}
             </button>
           ) : (
             <SignInButton

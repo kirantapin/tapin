@@ -97,7 +97,7 @@ export default function CheckoutPage() {
 
   return (
     <div className={checkoutStyles.pageContainer}>
-      <div className="relative flex items-center justify-center mb-6 sticky top-0 bg-white border-b shadow-sm -mx-4 pb-5 pr-4 pl-4 z-20">
+      <div className="relative flex items-center justify-center mb-6 sticky top-0 bg-white border-b shadow-sm -mx-4 p-4 z-20">
         {/* Back Button */}
         <button
           className="absolute left-0 w-9 h-9 bg-black/10 rounded-full flex items-center justify-center ml-4"

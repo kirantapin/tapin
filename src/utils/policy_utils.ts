@@ -111,13 +111,6 @@ export class PolicyUtils {
             null,
             restaurant
           )}`;
-        case "apply_point_cost":
-          return `Up to ${listItemsToStringDescription(
-            action.maxEffectedItems,
-            action.items,
-            null,
-            restaurant
-          )} can be redeemed for ${action.amount} points each`;
         case "apply_order_point_multiplier":
           return `Earn ${action.amount}x points on your entire order`;
         case "apply_fixed_order_discount":
@@ -152,8 +145,6 @@ export class PolicyUtils {
         return `$${action.amount.toFixed(2)} Off`;
       case "apply_point_multiplier":
         return `${action.amount}x Points`;
-      case "apply_point_cost":
-        return `Redeem for ${formatPoints(action.amount)} Points`;
       case "apply_order_point_multiplier":
         return `${action.amount}x Points on Whole Order`;
       case "apply_fixed_order_discount":
@@ -212,12 +203,6 @@ export class PolicyUtils {
         return action.amount * action.maxEffectedItems;
       case "apply_point_multiplier":
         return this.returnHighestCostItem(items, restaurant) * action.amount;
-      case "apply_point_cost":
-        return (
-          this.returnHighestCostItem(items, restaurant) *
-          action.amount *
-          action.maxEffectedItems
-        );
       case "apply_order_point_multiplier":
         return 0;
       case "apply_fixed_order_discount":

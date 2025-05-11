@@ -170,6 +170,7 @@ const HighlightSlider = ({
                 />
               </div>
             ))}
+            <div className="shrink-0 w-10" />
           </div>
         </div>
 

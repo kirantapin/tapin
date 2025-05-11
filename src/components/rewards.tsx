@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Policy, Restaurant, User } from "@/types";
-import { LOYALTY_REWARD_TAG, OFFERS_PAGE_PATH } from "@/constants";
+import {
+  LOYALTY_REWARD_TAG,
+  OFFERS_PAGE_PATH,
+  POINTS_PER_DOLLAR,
+} from "@/constants";
 import { formatPoints } from "@/utils/parse";
 import { adjustColor } from "@/utils/color";
 import { useRestaurant } from "@/context/restaurant_context";
 import { LoyaltyRewardItem } from "./menu_items";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { useAuth } from "@/context/auth_context";
-import { Gift } from "lucide-react";
+import { ChevronRight, Gift, ShoppingBag } from "lucide-react";
 import { PolicyUtils } from "@/utils/policy_utils";
+import { GradientIcon } from "@/utils/gradient";
 interface RewardsProps {
   viewAll: boolean;
 }
@@ -189,6 +194,33 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
         </div>
       }
 
+      {viewAll && (
+        <div className="flex flex-col gap-4 mt-4">
+          <h3 className="text-lg font-bold">Ways to earn rewards</h3>
+          <div className="bg-gray-50 rounded-xl p-4 w-48 h-40 relative border border-gray-200">
+            <div className="flex justify-between">
+              <div className="bg-gray-200 rounded-full p-2">
+                <GradientIcon
+                  icon={ShoppingBag}
+                  primaryColor={restaurant.metadata.primaryColor as string}
+                  size={20}
+                />
+              </div>
+              <div className="flex items-center">
+                <span className="text-xs text-gray-600 mr-1">
+                  {POINTS_PER_DOLLAR} points per $1
+                </span>
+              </div>
+            </div>
+            <div className="absolute bottom-4 mr-4">
+              <h3 className="font-semibold text-md">Purchase Items</h3>
+              <p className="font-normal text-sm text-gray-600 mt-2">
+                For every $1 you spend, get {POINTS_PER_DOLLAR} points.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       {loyaltyPolicies.length > 0 && viewAll && (
         <div className="space-y-4 mt-8">
           {loyaltyPolicies.map((policy) => {

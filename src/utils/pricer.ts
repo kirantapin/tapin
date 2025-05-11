@@ -61,12 +61,6 @@ export function modifiedItemFlair(
       // Add logic for point multiplier
       temp["discountDescription"] = `x${modifiedItem.amount} points`;
       break;
-    case "apply_point_cost":
-      // Add logic for point cost
-      temp["discountDescription"] = `-${formatPoints(
-        modifiedItem.amount
-      )} points`;
-      break;
     case "apply_percent_discount":
       temp["discountDescription"] = `%${(modifiedItem.amount * 100).toFixed(
         0

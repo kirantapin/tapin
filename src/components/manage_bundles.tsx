@@ -113,7 +113,7 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
             </div>
             <div className="mt-6">
               <div className="px-4">
-                <h1 className="text-xl font-bold mb-2">Unredeemed Benefits</h1>
+                <h1 className="text-xl font-bold mb-4">Benefits</h1>
               </div>
               <div className="space-y-8 px-4">
                 {childPolicies.map((policyId: string, index: number) => {
