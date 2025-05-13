@@ -44,8 +44,7 @@ export default function RestaurantPage() {
   const orderDrinksRef = useRef<HTMLDivElement>(null);
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const { state, addToCart, removeFromCart, triggerToast } = useBottomSheet();
-  const { openPolicyModal, openBundleModal, openQrModal } = useBottomSheet();
-  const [isRandomSheetOpen, setIsRandomSheetOpen] = useState(false);
+  const { openQrModal } = useBottomSheet();
 
   const { searchResults, searchQuery, setSearchQuery, clearSearch } = useSearch(
     {
@@ -55,7 +54,6 @@ export default function RestaurantPage() {
   );
 
   const handleLocation = () => {
-    console.log(location.state);
     const qrFlag = location.state?.qr as boolean | undefined;
     const message = location.state?.message as
       | {
@@ -76,14 +74,9 @@ export default function RestaurantPage() {
   const scrollToOrderDrinks = () => {
     if (!orderDrinksRef.current) return;
 
-    // Get position relative to viewport
-    const elementPosition = orderDrinksRef.current.getBoundingClientRect().top;
-    // Add current scroll position to get absolute position
-    const offsetPosition = elementPosition + window.pageYOffset;
-
-    window.scrollTo({
-      top: offsetPosition,
+    orderDrinksRef.current.scrollIntoView({
       behavior: "smooth",
+      block: "start",
     });
   };
 
@@ -194,7 +187,7 @@ export default function RestaurantPage() {
             Object.values(userOwnershipMap).some((isOwned) => !isOwned) && (
               <div className="mt-8">
                 <h1 className="text-xl font-bold">Great Value</h1>
-                <BundleSlider onCardClick={openBundleModal} />
+                <BundleSlider />
               </div>
             )}
 
@@ -283,7 +276,13 @@ export default function RestaurantPage() {
 
           {/* Filters */}
           {searchResults.length > 0 ? (
-            <div className="mb-4">
+            <div
+              style={{
+                height: `calc(100vh - ${
+                  (orderDrinksRef.current?.offsetHeight || 0) + 10
+                }px)`,
+              }}
+            >
               <pre className="whitespace-pre-wrap break-words">
                 {searchResults.map((searchResult, index) => (
                   <DrinkItem
@@ -317,13 +316,6 @@ export default function RestaurantPage() {
             state.cart.reduce((total, item) => total + item.quantity, 0) || 0
           }
         />
-        {searchQuery && (
-          <>
-            <div className="h-64" />
-            <div className="h-64" />
-            <div className="h-64" />
-          </>
-        )}
         <Sidebar
           restaurant={restaurant as Restaurant}
           isOpen={sidebarOpen}

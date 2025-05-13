@@ -10,7 +10,7 @@ import {
   DEVICE_NOT_SUPPORTED_PATH,
 } from "./constants.ts";
 import { Slide, ToastContainer } from "react-toastify";
-import { RestaurantSkeleton } from "./components/skeletons/restaurant_skeleton.tsx";
+// import { RestaurantSkeleton } from "./components/skeletons/restaurant_skeleton.tsx";
 import { CheckoutSkeleton } from "./components/skeletons/checkout_skeleton.tsx";
 import { MySpotSkeleton } from "./components/skeletons/my_spot_skeleton.tsx";
 import { OffersSkeleton } from "./components/skeletons/offers_skeleton.tsx";

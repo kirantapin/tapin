@@ -5,7 +5,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { PhoneInput } from "../signin/phone_input";
+import { PhoneInputComponent } from "../signin/phone_input";
 import { Verification } from "../signin/verification";
 import { supabase } from "../../utils/supabase_client";
 import { X } from "lucide-react";
@@ -23,11 +23,10 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
   // Handle phone number submission
   const handlePhoneSubmit = async (phone: string) => {
     // Optional: format phone number, e.g. +1
-    const formattedPhoneNumber = `+1${phone}`;
-    setPhoneNumber(formattedPhoneNumber);
+    setPhoneNumber(phone);
 
     const { error } = await supabase.auth.signInWithOtp({
-      phone: formattedPhoneNumber,
+      phone: phone,
     });
 
     if (error) {
@@ -60,7 +59,7 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
         side="bottom"
         className="h-[85vh] rounded-t-3xl [&>button]:hidden p-0"
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col">
           <SheetHeader className="flex-none px-6 pt-6 pb-4">
             <div className="flex justify-between items-start">
               <SheetTitle className="text-2xl font-bold">Sign In</SheetTitle>
@@ -78,7 +77,10 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
 
           <div className="flex-1 overflow-y-auto">
             {step === "phone" ? (
-              <PhoneInput onClose={onClose} onSubmit={handlePhoneSubmit} />
+              <PhoneInputComponent
+                onClose={onClose}
+                onSubmit={handlePhoneSubmit}
+              />
             ) : (
               <Verification
                 phoneNumber={phoneNumber}

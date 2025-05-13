@@ -63,6 +63,9 @@ export function Hero({
 }) {
   const { openProfileModal } = useBottomSheet();
   const navigate = useNavigate();
+
+  const buttonBackgroundColor = "white";
+  const buttonColor = "black";
   return (
     <div
       className="relative h-52 rounded-b-2xl bg-cover bg-center"
@@ -72,31 +75,40 @@ export function Hero({
     >
       <div className="absolute w-full top-0 z-10 flex justify-between items-center px-4 py-3">
         <div
-          className="bg-white p-2 rounded-full"
+          className=" p-2 rounded-full"
+          style={{ backgroundColor: buttonColor }}
           onClick={() => {
             setSidebarOpen(true);
           }}
         >
-          <Menu className="w-5 h-5 text-black" />
+          <Menu className="w-5 h-5" style={{ color: buttonBackgroundColor }} />
         </div>
 
         {/* Shopping Bag & User Icons */}
         <div className="flex items-center gap-5">
           <div
-            className="bg-white p-2 rounded-full"
+            className=" p-2 rounded-full"
+            style={{ backgroundColor: buttonColor }}
             onClick={() => {
               navigate(DRINK_CHECKOUT_PATH.replace(":id", restaurant_id));
             }}
           >
-            <ShoppingBag className="w-5 h-5 text-black" />
+            <ShoppingBag
+              className="w-5 h-5"
+              style={{ color: buttonBackgroundColor }}
+            />
           </div>
           <div
-            className="bg-white p-2 rounded-full"
+            className=" p-2 rounded-full"
+            style={{ backgroundColor: buttonColor }}
             onClick={() => {
               openProfileModal();
             }}
           >
-            <User className="w-5 h-5 text-black" />
+            <User
+              className="w-5 h-5"
+              style={{ color: buttonBackgroundColor }}
+            />
           </div>
         </div>
       </div>

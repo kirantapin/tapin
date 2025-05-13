@@ -282,15 +282,9 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
         />
       )}
 
-      <SignInModal
-        isOpen={showSignInModal}
-        onClose={() => setShowSignInModal(false)}
-      />
+      <SignInModal isOpen={showSignInModal} onClose={closeSheet} />
 
-      <ProfileModal
-        isOpen={showProfile}
-        onClose={() => setShowProfile(false)}
-      />
+      <ProfileModal isOpen={showProfile} onClose={closeSheet} />
     </BottomSheetContext.Provider>
   );
 };

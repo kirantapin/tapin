@@ -4,14 +4,11 @@ import { Bundle, Restaurant } from "@/types";
 
 import BundleCard from "../cards/bundle_card";
 import { useRestaurant } from "@/context/restaurant_context";
-
-const BundleSlider = ({
-  onCardClick,
-}: {
-  onCardClick: (bundle: Bundle) => void;
-}) => {
-  const scrollContainerRef = useRef(null);
+import { useBottomSheet } from "@/context/bottom_sheet_context";
+const BundleSlider = () => {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { restaurant, userOwnershipMap } = useRestaurant();
+  const { openBundleModal } = useBottomSheet();
   const [activeBundle, setActiveBundle] = useState(0);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
   const autoScrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -124,7 +121,7 @@ const BundleSlider = ({
                   restaurant={restaurant as Restaurant}
                   bundleId={bundleId}
                   isOwned={userOwnershipMap[bundleId]}
-                  onCardClick={onCardClick}
+                  onCardClick={openBundleModal}
                 />
               </div>
             ))}
@@ -142,7 +139,7 @@ const BundleSlider = ({
                 style={{
                   backgroundColor:
                     activeBundle === index
-                      ? restaurant.metadata.primaryColor
+                      ? restaurant?.metadata.primaryColor
                       : undefined,
                 }}
               ></button>

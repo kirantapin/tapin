@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { ChevronDown, QrCode } from "lucide-react";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 
-export function PhoneInput({
+export function PhoneInputComponent({
   onSubmit,
   onClose,
 }: {
@@ -9,10 +10,11 @@ export function PhoneInput({
   onClose: () => void;
 }) {
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [value, setValue] = useState<string>("+1"); //default to american dial code
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(phoneNumber);
+    onSubmit(value + phoneNumber);
   };
 
   return (
@@ -38,15 +40,47 @@ export function PhoneInput({
           <label className="block text-lg mb-2">Phone Number</label>
           <div className="relative mb-4">
             <div className="flex items-center bg-[#FFFFFF] rounded-xl p-4 border border-[#CAA650]">
-              <div className="flex items-center gap-2 pr-3 border-r border-gray-600">
-                <img
-                  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAABmJLR0QA/wD/AP+gvaeTAAAA50lEQVRIie3WMQ6CMRQG4B8TB2/gIcTVG+jkETyFMTExunoWJyfv4eAF3JwcXGBQByeeSUhoGgptGejwJ09I0/Z7/0BeA/+WM1QnVnmCU5RHuEWHD3xzPEeHt5YbvEeHn1tu8YwGl+jwDg8NnqLDB7y2eMB9dHiPpxbvsMUcmwT4BjfYxL6Td7jFY+qbzrBKhK/xkPqmU6wT4Bs8pr7pBJsE+Br3qW86xjYBvsZd6puO8JIA3+Ih9U2H2CXAnxLhu9Q3HeBc7v/6G3yR+qYDXEWG/0Uq3P0C/JtZZIafM8PzM8PPM8PPvgAHQElZXVw6lQAAAABJRU5ErkJggg=="
-                  alt="US flag"
-                  className="w-6 h-4"
+              {/* Country code selector */}
+              <div className="flex items-center gap-2 pr-1 border-r border-gray-600 min-w-[90px]">
+                <PhoneInput
+                  country={"us"}
+                  value={value}
+                  onChange={(data) => {
+                    setValue("+" + data);
+                  }}
+                  containerClass="font-[Gilroy]" // applies to whole component
+                  inputClass="font-[Gilroy] text-base"
+                  inputStyle={{
+                    width: "100%", // ✅ let it expand in its container
+                    minWidth: "50px", // ✅ still prevents shrinking too much
+                    maxWidth: "80px",
+                    border: "none",
+                    background: "transparent",
+                    fontSize: "16px",
+                  }}
+                  buttonStyle={{
+                    backgroundColor: "transparent",
+                    border: "none",
+                    padding: 0,
+                    marginRight: "10px",
+                    transform: "scale(1.25)", // ⬅️ Make flag icon bigger
+                    transformOrigin: "left center",
+                  }}
+                  containerStyle={{
+                    width: "auto",
+                  }}
+                  dropdownStyle={{
+                    zIndex: 1000,
+                    borderRadius: "8px",
+                  }}
+                  disableCountryCode // prevents typing in code
+                  disableDropdown={false} // keep dropdown enabled
+                  countryCodeEditable={false}
+                  placeholder=""
                 />
-                <span>+1</span>
-                <ChevronDown className="w-4 h-4 text-gray-600" />
               </div>
+
+              {/* Phone number input */}
               <input
                 type="tel"
                 value={phoneNumber}
