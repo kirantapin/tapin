@@ -74,7 +74,18 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
         return (
           <div key={bundleId}>
             <div className="mb-4 mt-8 px-4">
-              <h1 className="text-xl font-bold mb-2">{bundle.name}</h1>
+              <div className="flex justify-between items-center mb-2">
+                <h1 className="text-2xl font-bold">{bundle.name}</h1>
+                <button
+                  className="text-md font-semibold"
+                  style={{ color: restaurant?.metadata.primaryColor as string }}
+                  onClick={() => {
+                    openBundleModal(bundle);
+                  }}
+                >
+                  View Details
+                </button>
+              </div>
               <div className="grid grid-cols-2 gap-4 mt-4">
                 {/* Points Box */}
                 <div className="flex flex-col justify-between p-4 rounded-xl bg-gray-100 h-24">

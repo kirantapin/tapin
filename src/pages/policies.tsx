@@ -17,6 +17,7 @@ import { useRestaurant } from "@/context/restaurant_context";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import React from "react";
 import { PolicyCard } from "@/components/cards/policy_card";
+import GoToCartButton from "@/components/go_to_cart_button";
 const tagMap: Record<string, { tag: string; icon: any }> = {
   Deals: { tag: NORMAL_DEAL_TAG, icon: Star },
   Rewards: { tag: LOYALTY_REWARD_TAG, icon: Gift },
@@ -38,17 +39,17 @@ export default function PoliciesPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { state } = useBottomSheet();
-  const [loading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (activeTag === NORMAL_DEAL_TAG && policies) {
+      setLoading(true);
       const filtered = policies.filter(
         (policy) => policy.definition.tag === activeTag
       );
-      if (JSON.stringify(filtered) !== JSON.stringify(activePolicies)) {
-        setActivePolicies(filtered);
-      }
+      setActivePolicies(filtered);
     }
+    setLoading(false);
   }, [activeTag, policies]);
 
   useEffect(() => {
@@ -114,7 +115,7 @@ export default function PoliciesPage() {
       {/* Deals */}
 
       {activeTag === NORMAL_DEAL_TAG && (
-        <div className="px-5 space-y-6 flex flex-col items-center w-full">
+        <div className="px-5 space-y-6 flex flex-col items-center w-full mb-24">
           {activePolicies.length > 0 ? (
             activePolicies.map((policy) => (
               <PolicyCard
@@ -147,6 +148,12 @@ export default function PoliciesPage() {
             />
           </div>
         ))}
+      <GoToCartButton
+        restaurant={restaurant}
+        cartCount={
+          state.cart.reduce((total, item) => total + item.quantity, 0) || 0
+        }
+      />
     </div>
   );
 }

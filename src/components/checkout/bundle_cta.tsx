@@ -40,7 +40,7 @@ export default function BundleCTA() {
         onClick={() => openBundleModal(chosenBundle)}
       >
         <div className="w-5 h-5 border-2 border-gray-300 rounded flex-shrink-0" />
-        <span className="text-sm">
+        <span className="text-md">
           <span
             className="font-semibold"
             style={{ color: restaurant.metadata.primaryColor as string }}

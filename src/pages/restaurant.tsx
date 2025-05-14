@@ -101,8 +101,9 @@ export default function RestaurantPage() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
-  if (loading || !restaurant) return <LoadingPage />;
-
+  if (loading || !restaurant) {
+    return <LoadingPage />;
+  }
   return (
     <div className="min-h-screen bg-gray-25">
       {/* Hero Image */}

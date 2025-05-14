@@ -41,7 +41,7 @@ export const PolicySlider: React.FC<PolicySliderProps> = ({
 
       <div className="overflow-x-auto pb-2 no-scrollbar -mx-4 px-4">
         <div className="flex gap-4">
-          {dealPolicies.map((policy, index) => (
+          {dealPolicies.slice(0, 4).map((policy, index) => (
             <div className="flex-none w-[80vw]" key={index}>
               <PolicyCard
                 cart={state.cart}

@@ -71,49 +71,33 @@ const SpendGoalCard: FC = () => {
     Math.round(PolicyUtils.getLoyaltyRewardPoints(nextReward) - userProgress) /
     POINTS_PER_DOLLAR;
 
-  if (dollarsAway <= 0) {
-    return (
-      <div
-        className="w-full rounded-2xl p-4 py-6 relative overflow-hidden bg-white border border-gray-200 mt-4 shadow-sm"
-        onClick={() => {
-          navigate(OFFERS_PAGE_PATH.replace(":id", restaurant.id), {
-            state: { tag: LOYALTY_REWARD_TAG },
-          });
-        }}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col">
-            <span className="text-lg font-normal">
-              Claim your reward after purchasing!
-            </span>
-          </div>
-        </div>
-      </div>
-    );
-  }
   return (
     <div
-      className="w-full rounded-2xl p-4 py-6 relative overflow-hidden bg-white border border-gray-200 mt-4 shadow-sm"
+      className="w-full mt-4"
       onClick={() => {
         navigate(OFFERS_PAGE_PATH.replace(":id", restaurant.id), {
           state: { tag: LOYALTY_REWARD_TAG },
         });
       }}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col">
-          <span className="text-lg font-semibold">
-            <span
-              className="font-semibold"
-              style={{ color: restaurant.metadata.primaryColor as string }}
-            >
-              ${dollarsAway}
-            </span>{" "}
-            away from next reward
-          </span>
-        </div>
+      <div className="flex flex-col gap-2">
+        <span className="text-lg font-semibold">
+          {dollarsAway <= 0 ? (
+            "Claim your reward after purchase!"
+          ) : (
+            <>
+              <span
+                className="font-semibold"
+                style={{ color: restaurant.metadata.primaryColor as string }}
+              >
+                ${dollarsAway}
+              </span>{" "}
+              away from next reward
+            </>
+          )}
+        </span>
 
-        <div className="w-32 h-3 bg-gray-200 rounded-full overflow-hidden">
+        <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden mt-2">
           <div
             className="h-full rounded-full"
             style={{

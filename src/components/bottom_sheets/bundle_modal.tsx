@@ -5,7 +5,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { X, Wallet, CircleX, Tag } from "lucide-react";
+import { X, Wallet, CircleX, Tag, Check } from "lucide-react";
 import { Bundle, Restaurant, Policy, BundleItem } from "@/types";
 import { GradientIcon } from "@/utils/gradient";
 import { useAuth } from "@/context/auth_context";
@@ -35,6 +35,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
   restaurant,
 }) => {
   const { userSession } = useAuth();
+  const { userOwnershipMap } = useRestaurant();
   const { refreshCart } = useBottomSheet();
   const { state, addPolicy, addToCart, removePolicy } = useGlobalCartManager(
     restaurant,
@@ -100,6 +101,8 @@ const BundleModal: React.FC<BundleModalProps> = ({
     bundlePolicies
   );
 
+  const isOwned = userOwnershipMap && userOwnershipMap[bundle.bundle_id];
+
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent
@@ -113,7 +116,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
             </SheetTitle>
             <button
               onClick={onClose}
-              className="text-gray-500 bg-gray-200 rounded-full p-2"
+              className="text-gray-500 bg-gray-200 rounded-full p-2 focus:outline-none"
             >
               <X size={20} />
             </button>
@@ -237,14 +240,16 @@ const BundleModal: React.FC<BundleModalProps> = ({
           </div>
 
           {!loadingLocalCart ? (
-            <AddOnManager
-              state={state}
-              isPreEntry={false}
-              addPolicy={addPolicy}
-              removePolicy={removePolicy}
-              allowTimer={false}
-              allowNormalItems={false}
-            />
+            !isOwned ? (
+              <AddOnManager
+                state={state}
+                isPreEntry={false}
+                addPolicy={addPolicy}
+                removePolicy={removePolicy}
+                allowTimer={false}
+                allowNormalItems={false}
+              />
+            ) : null
           ) : (
             <div className="mt-4 mb-4 flex justify-center">
               <div
@@ -255,26 +260,36 @@ const BundleModal: React.FC<BundleModalProps> = ({
               ></div>
             </div>
           )}
-          <CheckoutSummary
-            state={state}
-            restaurant={restaurant as Restaurant}
-            setTipAmount={() => {}}
-            tipAmount={0}
-          />
-        </div>
+          {!isOwned && (
+            <CheckoutSummary
+              state={state}
+              restaurant={restaurant as Restaurant}
+              setTipAmount={() => {}}
+              tipAmount={0}
+            />
+          )}
 
-        {/* Fixed bottom section */}
-        <div className="flex-none px-6 py-4 bg-white mt-auto">
-          <div className="mb-4">
+          {/* Payment section */}
+          <div className="mt-6">
             {!userSession ? (
               <SignInButton
                 onClose={onClose}
                 primaryColor={restaurant?.metadata.primaryColor as string}
               />
+            ) : isOwned ? (
+              <div className="flex justify-center w-full">
+                <div className="relative">
+                  <div className="absolute -left-8 top-1/2 -translate-y-1/2 text-green-500">
+                    <Check size={24} />
+                  </div>
+                  <p className="text-lg text-gray-600 font-medium">
+                    You already own this bundle.
+                  </p>
+                </div>
+              </div>
             ) : (
-              state &&
               state?.cartResults?.totalPrice &&
-              state?.cartResults?.totalPrice > 0 && (
+              state.cartResults.totalPrice > 0 && (
                 <ApplePayButton
                   payload={{
                     userAccessToken: userSession.access_token,
@@ -298,7 +313,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
           </div>
 
           {/* Terms */}
-          <div className="text-sm text-gray-600 leading-[1.4]">
+          <div className="text-sm text-gray-600 leading-[1.4] mt-6">
             <p className="m-0">
               The Bundle is valid for {bundle.duration}{" "}
               {bundle.duration > 1 ? "Days" : "Day"} and grants access to

@@ -7,5 +7,5 @@ export const checkoutStyles = {
   summaryRow: "flex justify-between",
   summaryTotal: "flex justify-between text-xl font-bold",
 
-  paymentContainer: "space-y-4",
+  paymentContainer: "space-y-4 mb-8",
 };

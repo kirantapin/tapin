@@ -68,7 +68,7 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
                   onClose();
                   setStep("phone");
                 }}
-                className="text-gray-500 bg-gray-200 rounded-full p-2"
+                className="text-gray-500 bg-gray-200 rounded-full p-2 focus:outline-none"
               >
                 <X size={20} />
               </button>

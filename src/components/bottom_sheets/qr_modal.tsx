@@ -186,7 +186,7 @@ const QRModal: React.FC<QRModalProps> = ({
             />
             <button
               onClick={async () => await modifiedOnClose()}
-              className="text-black text-sm font-normal p-2 rounded-full bg-gray-200 flex items-center gap-1"
+              className="text-black text-sm font-normal p-2 rounded-full bg-gray-200 flex items-center gap-1 focus:outline-none"
             >
               {updatingTransactions ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-2 border-black border-t-transparent" />
