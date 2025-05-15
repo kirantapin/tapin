@@ -13,14 +13,15 @@ export class BundleUtils {
   ): Promise<{ bundle: Bundle; bundlePolicies: string[] }[]> => {
     if (!restaurantId) return [];
     const { data, error } = await supabase
-      .from("bundles")
+      .from<"bundles", Bundle>("bundles")
       .select("*")
       .eq("restaurant_id", restaurantId)
       .or(
         `deactivated_at.is.null,deactivated_at.gt.${new Date(
           Date.now() - 90 * 24 * 60 * 60 * 1000 // 90 days
         ).toISOString()}`
-      );
+      )
+      .returns<Bundle[]>();
 
     if (error) {
       console.error("Error fetching bundles:", error);

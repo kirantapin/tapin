@@ -109,6 +109,11 @@ function getPreviousDay(day: string): string {
   return days[(currentIndex - 1 + 7) % 7];
 }
 
+function timeToMinutes(timeStr: string): number {
+  const [hours, minutes] = timeStr.split(":").map(Number);
+  return hours * 60 + minutes;
+}
+
 export function isAvailableNow(
   constraint: AvailabilityConstraint,
   now: Date = new Date()

@@ -3,8 +3,13 @@ import { ArrowLeft, Check, ChevronLeft, Tag, X } from "lucide-react";
 import { checkoutStyles } from "../styles/checkout_styles.ts";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/auth_context.tsx";
-import ApplePayButton from "../components/apple_pay_button.tsx";
-import { NORMAL_DEAL_TAG, RESTAURANT_PATH } from "../constants.ts";
+import ApplePayButton from "../components/pay_button.tsx";
+import {
+  LOYALTY_REWARD_TAG,
+  NORMAL_DEAL_TAG,
+  OFFERS_PAGE_PATH,
+  RESTAURANT_PATH,
+} from "../constants.ts";
 import { CartItem, Policy, Restaurant } from "../types.ts";
 import { CheckoutItemCard } from "@/components/checkout/checkout_item_card.tsx";
 import AccessCardSlider from "../components/sliders/access_card_slider.tsx";
@@ -217,7 +222,13 @@ export default function CheckoutPage() {
             </div>
           )}
 
-        <SpendGoalCard />
+        <SpendGoalCard
+          onClick={() => {
+            navigate(OFFERS_PAGE_PATH.replace(":id", restaurant.id), {
+              state: { tag: LOYALTY_REWARD_TAG },
+            });
+          }}
+        />
 
         {/* <BundleCTA /> */}
 
@@ -254,7 +265,7 @@ export default function CheckoutPage() {
                     ),
                     connectedAccountId: restaurant?.stripe_account_id,
                   }}
-                  sanityCheck={refreshCart}
+                  refresh={refreshCart}
                   clearCart={clearCart}
                 />
               )

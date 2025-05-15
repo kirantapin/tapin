@@ -3,7 +3,7 @@ import { Restaurant, BundleItem } from "@/types";
 import { useRestaurant } from "@/context/restaurant_context";
 import { ItemUtils } from "@/utils/item_utils";
 import { useAuth } from "@/context/auth_context";
-import { CircleX, DollarSign, Wallet } from "lucide-react";
+import { CircleX, Wallet } from "lucide-react";
 import { BundleUtils } from "@/utils/bundle_utils";
 import BundleSlider from "./sliders/bundle_slider";
 import { PolicyCard } from "./cards/policy_card";
@@ -51,6 +51,25 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
 
   if (!restaurant || policyStatsMap === undefined) {
     return null;
+  }
+
+  const bundlesToDisplay = Object.entries(userOwnershipMap)
+    .filter(([bundleId, isOwned]) => {
+      // Check if user doesn't own the bundle
+      if (isOwned) return true;
+
+      // Get the bundle object and check deactivated_at is null
+      const bundle = (restaurant?.menu[bundleId]?.info as BundleItem)?.object;
+      return bundle && bundle.deactivated_at === null;
+    })
+    .map(([bundleId]) => bundleId);
+
+  if (bundlesToDisplay.length === 0) {
+    return (
+      <div className="mt-8 px-4 flex justify-center">
+        <h1 className="text-lg font-semibold">No Available Bundles</h1>
+      </div>
+    );
   }
 
   return (
@@ -189,7 +208,7 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
       {Object.values(userOwnershipMap).some((value) => value === false) && (
         <div className="mt-8 px-4">
           <h1 className="text-xl font-bold">Other Bundles You Might Like</h1>
-          <BundleSlider onCardClick={openBundleModal} />
+          <BundleSlider />
         </div>
       )}
     </div>

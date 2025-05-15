@@ -8,11 +8,11 @@ import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { useState } from "react";
 const RedeemButton = ({
   payload,
-  sanityCheck,
+  refresh,
   clearCart,
 }: {
   payload: any;
-  sanityCheck: () => Promise<string | null>;
+  refresh: () => Promise<string | null>;
   clearCart: () => void;
 }) => {
   const { setTransactions, setUserData } = useAuth();
@@ -52,7 +52,7 @@ const RedeemButton = ({
       }}
       onClick={async () => {
         try {
-          const potentialError = await sanityCheck();
+          const potentialError = await refresh();
           if (potentialError) {
             //handle response error
             triggerToast(potentialError, "error");

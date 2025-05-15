@@ -200,10 +200,10 @@ export default function Card({
           </div>
         ) : (
           <button
-            className="py-[5px] px-4 rounded-full flex items-center justify-center text-white text-sm font-semibold bg-white"
+            className="py-[5px] px-4 rounded-full flex items-center justify-center text-sm font-semibold bg-white"
             style={{
               width: "110px",
-              color: primaryColor,
+              color: "black",
             }} // adjust as needed
             onClick={async () => {
               setLoading(true);

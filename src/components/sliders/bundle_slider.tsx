@@ -1,6 +1,5 @@
-import { useState, useRef, useEffect, useMemo } from "react";
-import AccessCard from "@/components/cards/access_card.tsx";
-import { Bundle, Restaurant } from "@/types";
+import { useState, useRef, useEffect } from "react";
+import { Restaurant } from "@/types";
 
 import BundleCard from "../cards/bundle_card";
 import { useRestaurant } from "@/context/restaurant_context";
@@ -139,7 +138,7 @@ const BundleSlider = () => {
                 style={{
                   backgroundColor:
                     activeBundle === index
-                      ? restaurant?.metadata.primaryColor
+                      ? (restaurant?.metadata.primaryColor as string)
                       : undefined,
                 }}
               ></button>

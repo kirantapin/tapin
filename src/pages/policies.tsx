@@ -18,6 +18,7 @@ import { useBottomSheet } from "@/context/bottom_sheet_context";
 import React from "react";
 import { PolicyCard } from "@/components/cards/policy_card";
 import GoToCartButton from "@/components/go_to_cart_button";
+import SpendGoalCard from "@/components/cards/spend_goal_card";
 const tagMap: Record<string, { tag: string; icon: any }> = {
   Deals: { tag: NORMAL_DEAL_TAG, icon: Star },
   Rewards: { tag: LOYALTY_REWARD_TAG, icon: Gift },
@@ -31,25 +32,25 @@ export default function PoliciesPage() {
     location.state?.tag || NORMAL_DEAL_TAG
   );
   const { restaurant, setCurrentRestaurantId, policyManager } = useRestaurant();
-  const policies =
-    restaurant && policyManager
-      ? policyManager?.getAllPolicies(restaurant)
-      : [];
+  const policies = React.useMemo(
+    () =>
+      restaurant && policyManager
+        ? policyManager?.getAllPolicies(restaurant)
+        : [],
+    [restaurant, policyManager]
+  );
   const [activePolicies, setActivePolicies] = useState<Policy[]>([]);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { state } = useBottomSheet();
-  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (activeTag === NORMAL_DEAL_TAG && policies) {
-      setLoading(true);
       const filtered = policies.filter(
         (policy) => policy.definition.tag === activeTag
       );
       setActivePolicies(filtered);
     }
-    setLoading(false);
   }, [activeTag, policies]);
 
   useEffect(() => {
@@ -59,7 +60,7 @@ export default function PoliciesPage() {
     window.scrollTo(0, 0);
   }, [id]);
 
-  if (loading) {
+  if (!restaurant) {
     return <OffersSkeleton />;
   }
   return (
@@ -116,6 +117,12 @@ export default function PoliciesPage() {
 
       {activeTag === NORMAL_DEAL_TAG && (
         <div className="px-5 space-y-6 flex flex-col items-center w-full mb-24">
+          <SpendGoalCard
+            onClick={() => {
+              setActiveTag(LOYALTY_REWARD_TAG);
+            }}
+            progressThreshold={0}
+          />
           {activePolicies.length > 0 ? (
             activePolicies.map((policy) => (
               <PolicyCard

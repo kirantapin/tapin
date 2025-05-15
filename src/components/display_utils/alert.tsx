@@ -18,13 +18,22 @@ export function Alert({
   trigger,
   title,
   description,
-  children,
   onConfirm,
   confirmLabel = "Continue",
   cancelLabel = "Cancel",
   confirmClassName,
   cancelClassName,
   contentClassName,
+}: {
+  trigger: React.ReactNode;
+  title: string;
+  description: string;
+  onConfirm: () => void;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  confirmClassName?: string;
+  cancelClassName?: string;
+  contentClassName?: string;
 }) {
   const { restaurant } = useRestaurant();
   return (
@@ -33,7 +42,7 @@ export function Alert({
 
       <AlertDialogContent
         className={cn(
-          "w-[90vw] max-w-xs rounded-lg font-gilroy",
+          "w-[90vw] max-w-xs rounded-2xl font-[Gilroy]",
           contentClassName
         )}
       >
@@ -44,7 +53,6 @@ export function Alert({
               {description}
             </AlertDialogDescription>
           )}
-          {children}
         </AlertDialogHeader>
 
         <AlertDialogFooter className="flex-col gap-2">

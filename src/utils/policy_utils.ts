@@ -124,9 +124,7 @@ export class PolicyUtils {
             0
           )}% discount on your entire order`;
         case "add_to_user_credit":
-          return `Earn $${policy.definition.action.amount.toFixed(
-            2
-          )} of credit`;
+          return `Earn $${action.amount.toFixed(2)} of credit`;
         default:
           return null;
       }
@@ -187,12 +185,14 @@ export class PolicyUtils {
     restaurant: Restaurant
   ): number => {
     const action = policy.definition.action;
-    const items: ItemSpecification[] = policy.definition.action.items || [];
+    let items: ItemSpecification[] = [];
 
     switch (action.type) {
       case "add_free_item":
+        items = action.items;
         return this.returnHighestCostItem(items, restaurant) * action.quantity;
       case "apply_percent_discount":
+        items = action.items;
         return (
           this.returnHighestCostItem(items, restaurant) *
           action.amount *
@@ -202,6 +202,7 @@ export class PolicyUtils {
       case "apply_fixed_discount":
         return action.amount * action.maxEffectedItems;
       case "apply_point_multiplier":
+        items = action.items;
         return this.returnHighestCostItem(items, restaurant) * action.amount;
       case "apply_order_point_multiplier":
         return 0;

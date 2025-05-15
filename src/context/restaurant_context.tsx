@@ -1,10 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { Policy, Restaurant } from "@/types";
+import { BundleItem, Policy, Restaurant } from "@/types";
 import { PolicyManager } from "@/utils/policy_manager";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./auth_context";
 import { BUNDLE_MENU_TAG } from "@/constants";
-import { doesUserOwnBundle } from "@/utils/queries/bundles";
 import { fetchRestaurantById } from "@/utils/queries/restaurant";
 import { BundleUtils } from "@/utils/bundle_utils";
 type RestaurantContextType = {
@@ -53,7 +52,7 @@ export const RestaurantProvider = ({
     const userOwnershipMap: Record<string, boolean> = {};
 
     const ownershipPromises = activeBundles.map((bundleId: string) => {
-      const bundle = restaurantData.menu[bundleId].info.object;
+      const bundle = (restaurantData.menu[bundleId].info as BundleItem).object;
       return BundleUtils.doesUserOwnBundle(userSession?.user?.id, bundle).then(
         (ownership) => ({ bundleId, ownership })
       );

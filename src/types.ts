@@ -157,6 +157,7 @@ export interface PassItem {
   name: string;
   price: number;
   for_date: string;
+  description: string | null;
   amount_remaining: number | null;
   end_time: string;
 }
@@ -212,8 +213,6 @@ export interface Transaction {
   };
   tip_amount: number | null;
   price: number | null;
-  points_awarded: number | null;
-  point_cost: number | 0;
 }
 
 export interface Order {
@@ -222,12 +221,20 @@ export interface Order {
   user_id: string;
   restaurant_id: string;
   total_price: number | null;
-  tip: number | null;
-  tax: number | null;
-  discount: number;
   type: string | null;
   type_id: string | null;
   payment_intent_id: string | null;
+  metadata: {
+    point_cost?: number;
+    points_awarded?: number;
+    credit_used?: number;
+    credit_to_add?: number;
+    tip_amount?: number;
+    tax?: number;
+    discount?: number;
+    service_fee?: number;
+    back_charge?: number;
+  };
 }
 
 export interface User {

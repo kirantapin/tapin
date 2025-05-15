@@ -10,7 +10,7 @@ import { Bundle, Restaurant, Policy, BundleItem } from "@/types";
 import { GradientIcon } from "@/utils/gradient";
 import { useAuth } from "@/context/auth_context";
 import { SignInButton } from "../signin/signin_button";
-import ApplePayButton from "../apple_pay_button";
+import ApplePayButton from "../pay_button";
 import { useGlobalCartManager } from "@/hooks/useGlobalCartManager";
 import { PassAddOnCard } from "../cards/pass_add_on_card";
 import { useRestaurant } from "@/context/restaurant_context";
@@ -300,7 +300,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
                     ),
                     connectedAccountId: restaurant?.stripe_account_id,
                   }}
-                  sanityCheck={refreshCart}
+                  refresh={refreshCart}
                   clearCart={async () => {
                     await refreshCart();
                     onClose();
@@ -310,18 +310,6 @@ const BundleModal: React.FC<BundleModalProps> = ({
                 />
               )
             )}
-          </div>
-
-          {/* Terms */}
-          <div className="text-sm text-gray-600 leading-[1.4] mt-6">
-            <p className="m-0">
-              The Bundle is valid for {bundle.duration}{" "}
-              {bundle.duration > 1 ? "Days" : "Day"} and grants access to
-              exclusive perks, discounts, and offers at the associated location
-              while supplies last.{" "}
-              <span className="underline">Terms and conditions</span> are
-              subject to change without prior notice.
-            </p>
           </div>
         </div>
       </SheetContent>

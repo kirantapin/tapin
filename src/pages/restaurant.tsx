@@ -12,7 +12,7 @@ import AccessCardSlider from "../components/sliders/access_card_slider.tsx";
 import Rewards from "@/components/rewards.tsx";
 import { Sidebar } from "@/components/sidebar.tsx";
 import { useSearch } from "@/hooks/useSearch.tsx";
-import { Hero } from "@/utils/gradient.tsx";
+import { Hero } from "@/components/display_utils/hero.tsx";
 import { useBannerColor } from "@/hooks/useBannerColor.tsx";
 import HighlightSlider from "@/components/sliders/highlight_slider.tsx";
 import { RecentActivity } from "@/components/sliders/recent_activity.tsx";

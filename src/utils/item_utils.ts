@@ -45,7 +45,6 @@ export class ItemUtils {
     itemSpecifications: ItemSpecification[],
     restaurant: Restaurant
   ): string[] {
-    console.log(itemSpecifications);
     const itemIds: string[] = [];
     for (const itemSpecification of itemSpecifications) {
       const items = this.getAllItemsInCategory(itemSpecification, restaurant);

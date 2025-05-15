@@ -1,10 +1,11 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useMemo } from "react";
 import AccessCard from "@/components/cards/access_card.tsx";
 import {
   Cart,
   CartItem,
   DealEffectPayload,
   Item,
+  PassItem,
   Policy,
   Restaurant,
 } from "@/types";
@@ -34,7 +35,7 @@ const AccessCardSlider = ({
   } | null;
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const scrollContainerRef = useRef(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Function to update active card based on scroll position
   const handleScroll = () => {
@@ -46,7 +47,7 @@ const AccessCardSlider = ({
   };
 
   // Scroll to a specific card when clicking a dot
-  const scrollToCard = (index) => {
+  const scrollToCard = (index: number) => {
     console.log("scrollToCard", index);
     if (!scrollContainerRef.current) return;
     const cardWidth = scrollContainerRef.current.clientWidth;
@@ -77,9 +78,11 @@ const AccessCardSlider = ({
     // Sort items by for_date before pushing to flattened
     const sortedItemIds = [...itemIds].sort((a, b) => {
       const aDate =
-        ItemUtils.getMenuItemFromItemId(a, restaurant)?.for_date || "";
+        (ItemUtils.getMenuItemFromItemId(a, restaurant) as PassItem).for_date ||
+        "";
       const bDate =
-        ItemUtils.getMenuItemFromItemId(b, restaurant)?.for_date || "";
+        (ItemUtils.getMenuItemFromItemId(b, restaurant) as PassItem).for_date ||
+        "";
       return aDate.localeCompare(bDate);
     });
 
@@ -165,7 +168,7 @@ const AccessCardSlider = ({
               style={{
                 backgroundColor:
                   activeIndex === index
-                    ? restaurant.metadata.primaryColor
+                    ? (restaurant.metadata.primaryColor as string)
                     : undefined,
               }}
             ></button>

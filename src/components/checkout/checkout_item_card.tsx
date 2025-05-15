@@ -1,4 +1,12 @@
-import { CartItem, DealEffectPayload, Item, Policy, Restaurant } from "@/types";
+import {
+  CartItem,
+  DealEffectPayload,
+  Item,
+  NormalItem,
+  PassItem,
+  Policy,
+  Restaurant,
+} from "@/types";
 import { modifiedItemFlair } from "@/utils/pricer";
 import { project_url } from "@/utils/supabase_client";
 import { ChevronRight, Minus, Plus, Trash2 } from "lucide-react";
@@ -26,7 +34,11 @@ export function CheckoutItemCard({
     policy: Policy;
   } | null;
 }) {
-  const itemInfo = ItemUtils.getMenuItemFromItemId(item.item.id, restaurant);
+  const itemInfo = ItemUtils.getMenuItemFromItemId(
+    item.item.id,
+    restaurant
+  ) as NormalItem;
+
   const { openPolicyModal } = useBottomSheet();
 
   const { oldPrice, currentPrice, discountDescription } = modifiedItemFlair(
@@ -43,7 +55,7 @@ export function CheckoutItemCard({
         {/* Image */}
         <img
           src={
-            itemInfo.image_url ||
+            itemInfo?.image_url ||
             `${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`
           }
           alt={ItemUtils.getItemName(item.item, restaurant)}
@@ -111,7 +123,7 @@ export function CheckoutItemCard({
           {item.quantity === 1 ? (
             <Trash2
               className="w-5 h-5"
-              style={{ color: restaurant.metadata.primaryColor }}
+              style={{ color: restaurant.metadata.primaryColor as string }}
             />
           ) : (
             <Minus className="w-5 h-5 text-black" />

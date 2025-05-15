@@ -8,7 +8,15 @@ import {
 } from "@/constants";
 import LiquorForm from "./liquor_form";
 import { titleCase } from "title-case";
-import { Cart, Item, ItemSpecification, Policy, Restaurant } from "@/types";
+import {
+  Cart,
+  Item,
+  ItemSpecification,
+  NormalItem,
+  PassItem,
+  Policy,
+  Restaurant,
+} from "@/types";
 import { project_url } from "@/utils/supabase_client";
 import { ItemUtils } from "@/utils/item_utils";
 import { adjustColor } from "@/utils/color";
@@ -72,12 +80,12 @@ export function DrinkItem({
             </h3>
             {isPass && (
               <span className="text-xs text-gray-500 ml-2">
-                {menuItem?.for_date}
+                {(menuItem as PassItem)?.for_date}
               </span>
             )}
           </div>
           <p className="text-sm text-gray-500 custom-line-clamp">
-            {menuItem?.description}
+            {(menuItem as NormalItem | PassItem)?.description}
           </p>
         </div>
 
@@ -87,14 +95,20 @@ export function DrinkItem({
               ${ItemUtils.priceItem(item, restaurant)?.toFixed(2)}
             </p>
             {purchaseDate && quantity === 0 && (
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-gray-500 -mr-6">
                 {convertUtcToLocal(purchaseDate)}
               </span>
             )}
           </div>
 
-          {quantity > 0 ? (
-            <div className="flex items-center bg-white rounded-full px-3 py-1 ">
+          <div className="flex items-center bg-white rounded-full px-1 py-1 relative">
+            <div
+              className={`flex items-center transition-all duration-300 ${
+                quantity > 0
+                  ? "translate-x-0"
+                  : "translate-x-8 opacity-0 pointer-events-none"
+              }`}
+            >
               <button
                 onClick={async () => {
                   if (cartItem?.id) {
@@ -112,42 +126,30 @@ export function DrinkItem({
                   <Trash2 className="w-4 h-4 text-white" />
                 )}
               </button>
-              {loading ? (
+              {loading && quantity > 0 ? (
                 <div className="mx-3 animate-spin rounded-full h-4 w-4 border-2 border-gray-800 border-t-transparent" />
               ) : (
                 <span className="mx-3 text-sm font-semibold text-gray-800">
                   {quantity}
                 </span>
               )}
-              <button
-                onClick={async () => {
-                  setLoading(true);
-                  await addToCart(item);
-                  setLoading(false);
-                }}
-                className="w-6 h-6 flex items-center justify-center bg-gray-100 rounded-full"
-                style={{ backgroundColor: primaryColor }}
-              >
-                <Plus className="w-4 h-4 text-white" />
-              </button>
             </div>
-          ) : (
             <button
-              className="h-6 w-6 rounded-full flex items-center justify-center text-white"
-              style={{ backgroundColor: primaryColor }}
               onClick={async () => {
                 setLoading(true);
                 await addToCart(item);
                 setLoading(false);
               }}
+              className="w-6 h-6 flex items-center justify-center rounded-full transition-all duration-300"
+              style={{ backgroundColor: primaryColor }}
             >
-              {loading ? (
+              {loading && quantity === 0 ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
               ) : (
-                <Plus className="h-4 w-4" />
+                <Plus className="w-4 h-4 text-white" />
               )}
             </button>
-          )}
+          </div>
         </div>
       </div>
     </div>
@@ -203,12 +205,12 @@ export function SingleSelectionItem({
             </h3>
             {isPass && (
               <span className="text-xs text-gray-500 ml-2">
-                {menuItem?.for_date}
+                {(menuItem as PassItem)?.for_date}
               </span>
             )}
           </div>
           <p className="text-sm text-gray-500 custom-line-clamp">
-            {menuItem?.description}
+            {(menuItem as NormalItem | PassItem)?.description}
           </p>
         </div>
 
@@ -282,15 +284,17 @@ export function LoyaltyRewardItem({
       <div className="flex flex-1 flex-col justify-between">
         <div>
           <div className="flex justify-between items-start">
-            <h3 className="font-bold text-base">{titleCase(menuItem?.name)}</h3>
+            <h3 className="font-bold text-base">
+              {titleCase((menuItem as NormalItem | PassItem)?.name)}
+            </h3>
             {isPass && (
               <span className="text-xs text-gray-500 ml-2">
-                {menuItem?.for_date}
+                {(menuItem as PassItem)?.for_date}
               </span>
             )}
           </div>
           <p className="text-sm text-gray-500 custom-line-clamp">
-            {menuItem?.description}
+            {(menuItem as NormalItem | PassItem)?.description}
           </p>
         </div>
 
@@ -379,12 +383,12 @@ export function PreviousTransactionItem({
             </h3>
             {isPass && (
               <span className="text-xs text-gray-500 ml-2">
-                {menuItem?.for_date}
+                {(menuItem as PassItem)?.for_date}
               </span>
             )}
           </div>
           <p className="text-sm text-gray-500 custom-line-clamp">
-            {menuItem?.description}
+            {(menuItem as NormalItem | PassItem)?.description}
           </p>
         </div>
 
@@ -498,7 +502,7 @@ export const DrinkList = ({
                     type={menuLabel}
                     restaurant={restaurant}
                     addToCart={addToCart}
-                    primaryColor={restaurant.metadata.primaryColor}
+                    primaryColor={restaurant.metadata.primaryColor as string}
                   />
                 ) : (
                   drinksForLabel.map(({ id }) => (

@@ -12,7 +12,10 @@ import { Policy } from "@/types";
 import { adjustColor } from "@/utils/color";
 import { PolicyUtils } from "@/utils/policy_utils";
 
-const SpendGoalCard: FC = () => {
+const SpendGoalCard: FC<{
+  onClick: () => void;
+  progressThreshold?: number;
+}> = ({ onClick, progressThreshold = 80 }) => {
   const { restaurant, policyManager } = useRestaurant();
   const { state } = useBottomSheet();
 
@@ -26,13 +29,30 @@ const SpendGoalCard: FC = () => {
     (cartResults?.totalPointCost || 0);
   const navigate = useNavigate();
   const [nextReward, setNextReward] = useState<Policy | null>(null);
-
+  const [nextSmallest, setNextSmallest] = useState<Policy | null>(null);
   const computeRange = (policies: Policy[]) => {
     if (policies.length === 0) return;
-    const nextLargest = policies.find(
-      (policy) => PolicyUtils.getLoyaltyRewardPoints(policy) > userPoints
-    );
+    // Find the smallest policy that's still larger than user points
+    const nextLargest = policies.reduce((closest, policy) => {
+      const points = PolicyUtils.getLoyaltyRewardPoints(policy);
+      if (points <= userPoints) return closest;
+      if (!closest) return policy;
+      return points < PolicyUtils.getLoyaltyRewardPoints(closest)
+        ? policy
+        : closest;
+    }, null as Policy | null);
+
+    // Find the largest policy that's smaller than user points
+    const nextSmallest = policies.reduce((closest, policy) => {
+      const points = PolicyUtils.getLoyaltyRewardPoints(policy);
+      if (points >= userPoints) return closest;
+      if (!closest) return policy;
+      return points > PolicyUtils.getLoyaltyRewardPoints(closest)
+        ? policy
+        : closest;
+    }, null as Policy | null);
     setNextReward(nextLargest || null);
+    setNextSmallest(nextSmallest || null);
   };
 
   useEffect(() => {
@@ -60,26 +80,26 @@ const SpendGoalCard: FC = () => {
     return null;
   }
 
-  const progress =
-    (userProgress / PolicyUtils.getLoyaltyRewardPoints(nextReward)) * 100;
-  console.log(userProgress, PolicyUtils.getLoyaltyRewardPoints(nextReward));
-  if (progress < 80) {
+  const beforePoints = nextSmallest
+    ? PolicyUtils.getLoyaltyRewardPoints(nextSmallest)
+    : 0;
+
+  const nextPoints = PolicyUtils.getLoyaltyRewardPoints(nextReward);
+
+  const progress = (userProgress / nextPoints) * 100;
+  if (progress < progressThreshold) {
     return null;
   }
+
+  const inbetweenProgress =
+    ((userProgress - beforePoints) / (nextPoints - beforePoints)) * 100;
 
   const dollarsAway =
     Math.round(PolicyUtils.getLoyaltyRewardPoints(nextReward) - userProgress) /
     POINTS_PER_DOLLAR;
 
   return (
-    <div
-      className="w-full mt-4"
-      onClick={() => {
-        navigate(OFFERS_PAGE_PATH.replace(":id", restaurant.id), {
-          state: { tag: LOYALTY_REWARD_TAG },
-        });
-      }}
-    >
+    <div className="w-full mt-4" onClick={onClick}>
       <div className="flex flex-col gap-2">
         <span className="text-lg font-semibold">
           {dollarsAway <= 0 ? (
@@ -99,9 +119,9 @@ const SpendGoalCard: FC = () => {
 
         <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden mt-2">
           <div
-            className="h-full rounded-full"
+            className="h-full rounded-full transition-all duration-500 ease-in-out"
             style={{
-              width: `${progress}%`,
+              width: `${inbetweenProgress}%`,
               background: `linear-gradient(45deg, 
               ${adjustColor(restaurant.metadata.primaryColor as string, 40)},
               ${adjustColor(restaurant.metadata.primaryColor as string, -30)}

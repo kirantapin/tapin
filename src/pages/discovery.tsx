@@ -8,14 +8,6 @@ import { project_url } from "../utils/supabase_client.ts";
 import { setThemeColor } from "../utils/color";
 export default function RestaurantDiscovery() {
   setThemeColor();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState<
-    {
-      name: string;
-      id: string;
-      metadata: Record<string, any>;
-    }[]
-  >([]);
   const [restaurants, setRestaurants] = useState<
     {
       name: string;
@@ -32,6 +24,8 @@ export default function RestaurantDiscovery() {
       const { data, error } = await supabase
         .from("restaurants")
         .select("name,id,metadata");
+
+      console.log(data);
       if (error) console.error("Error fetching restaurants:", error.message);
       else setRestaurants(data as Restaurant[]);
       setLoading(false);
@@ -39,17 +33,6 @@ export default function RestaurantDiscovery() {
     window.scrollTo(0, 0);
     fetchRestaurants();
   }, []);
-
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const term = event.target.value;
-    setSearchTerm(term);
-    const filteredResults = restaurants.filter(
-      (restaurant) =>
-        restaurant.id.toLowerCase().includes(term.toLowerCase()) ||
-        restaurant.name.toLowerCase().includes(term.toLowerCase())
-    );
-    setSearchResults(filteredResults);
-  };
 
   return (
     <div className="min-h-screen flex flex-col items-center gap-8 px-4 py-8 bg-white">
@@ -69,7 +52,7 @@ export default function RestaurantDiscovery() {
         More Locations Coming Soon
       </h3>
 
-      <div className="w-full max-w-md">
+      {/* <div className="w-full max-w-md">
         <div className="relative">
           <input
             type="text"
@@ -83,7 +66,7 @@ export default function RestaurantDiscovery() {
             size={20}
           />
         </div>
-      </div>
+      </div> */}
 
       <div className="w-full max-w-md space-y-4 mr-4 ml-4">
         {loading ? (

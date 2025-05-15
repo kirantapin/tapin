@@ -37,6 +37,7 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
 
   const setPolicyInfo = async () => {
     const policy = policyManager?.getPolicyFromId(content_pointer);
+    if (!policy) return;
     setTitle(policy?.name);
     setDescription(policy?.header);
     setImageUrl(

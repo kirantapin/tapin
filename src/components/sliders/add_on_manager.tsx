@@ -57,26 +57,26 @@ const AddOnManager: FC<AddOnManagerProps> = ({
       restaurant
     );
 
-    const addedItems = (
-      state.dealEffect as DealEffectPayload
-    ).addedItems.filter((item) =>
-      addOns.some((policy) => policy.policy_id === item.policy_id)
-    );
+    // const addedItems = (
+    //   state.dealEffect as DealEffectPayload
+    // ).addedItems.filter((item) =>
+    //   addOns.some((policy) => policy.policy_id === item.policy_id)
+    // );
     const activePolicies = policyManager.getActivePolicies(state.dealEffect);
     addOns = addOns.filter((policy) => !activePolicies.includes(policy));
     setAddOnPolicies(addOns);
     const addOnItems: { policy: Policy; itemId: string }[] = [];
 
-    for (const item of addedItems) {
-      const policy = policyManager.getPolicyFromId(item.policy_id);
-      if (!policy) {
-        continue;
-      }
-      addOnItems.push({
-        policy,
-        itemId: item.cartItem.item.id,
-      });
-    }
+    // for (const item of addedItems) {
+    //   const policy = policyManager.getPolicyFromId(item.policy_id);
+    //   if (!policy) {
+    //     continue;
+    //   }
+    //   addOnItems.push({
+    //     policy,
+    //     itemId: item.cartItem.item.id,
+    //   });
+    // }
     for (const policy of addOns) {
       const itemSpecs = policy.definition.action.items;
       const itemIds = ItemUtils.policyItemSpecificationsToItemIds(

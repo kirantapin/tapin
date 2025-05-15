@@ -90,14 +90,15 @@ const OrderHistory = () => {
                         <p className="text-sm text-black">
                           {convertUtcToLocal(order.created_at)}
                         </p>
-                        {order.discount > 0 && (
-                          <p
-                            className="text-md text-black mt-auto"
-                            style={{ color: "#40C4AA" }}
-                          >
-                            You saved ${order.discount.toFixed(2)}
-                          </p>
-                        )}
+                        {order.metadata?.discount &&
+                          order.metadata?.discount > 0 && (
+                            <p
+                              className="text-md text-black mt-auto"
+                              style={{ color: "#40C4AA" }}
+                            >
+                              You saved ${order.metadata?.discount?.toFixed(2)}
+                            </p>
+                          )}
                       </div>
                       <div className="w-12 h-12 rounded-full overflow-hidden">
                         <img
@@ -112,10 +113,7 @@ const OrderHistory = () => {
                     <div className="mt-4 pt-3 border-t flex justify-between items-center">
                       <span className="font-semibold">Total</span>
                       <span className="font-semibold">
-                        $
-                        {((order.total_price || 0) + (order.tip || 0)).toFixed(
-                          2
-                        )}
+                        ${(order.total_price || 0).toFixed(2)}
                       </span>
                     </div>
                   </div>

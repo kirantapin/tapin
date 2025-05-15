@@ -5,8 +5,8 @@ import {
   useElements,
   ExpressCheckoutElement,
 } from "@stripe/react-stripe-js";
-import { supabase_local } from "../utils/supabase_client";
-import { useAuth } from "../context/auth_context";
+import { supabase_local } from "../utils/supabase_client.ts";
+import { useAuth } from "../context/auth_context.tsx";
 import { useNavigate } from "react-router-dom";
 
 import { Transaction, User } from "../types.ts";
@@ -18,7 +18,7 @@ import { useBottomSheet } from "@/context/bottom_sheet_context";
 const stripePublishableKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || "";
 const stripePromise = loadStripe(stripePublishableKey);
 
-const PayButton = ({ payload, sanityCheck, clearCart }) => {
+const StripePayButton = ({ payload, refresh, clearCart }) => {
   const stripe = useStripe();
   const elements = useElements();
   const { setTransactions, setUserData } = useAuth();
@@ -54,7 +54,7 @@ const PayButton = ({ payload, sanityCheck, clearCart }) => {
 
     try {
       // Submit payment details
-      const potentialError = await sanityCheck();
+      const potentialError = await refresh();
       if (potentialError) {
         //handle response error
         triggerToast(potentialError, "error");
@@ -132,6 +132,7 @@ const PayButton = ({ payload, sanityCheck, clearCart }) => {
               amazonPay: "never",
               googlePay: "always",
               applePay: "always",
+              klarna: "never",
             },
             layout: {
               type: "auto",
@@ -154,14 +155,10 @@ const PayButton = ({ payload, sanityCheck, clearCart }) => {
   );
 };
 
-function ApplePayButton({ payload, sanityCheck, clearCart }) {
+function PayButton({ payload, refresh, clearCart }) {
   if (payload.totalWithTip <= 0) {
     return (
-      <RedeemButton
-        payload={payload}
-        sanityCheck={sanityCheck}
-        clearCart={clearCart}
-      />
+      <RedeemButton payload={payload} refresh={refresh} clearCart={clearCart} />
     );
   }
 
@@ -191,13 +188,23 @@ function ApplePayButton({ payload, sanityCheck, clearCart }) {
         },
       }}
     >
-      <PayButton
+      <StripePayButton
         payload={payload}
-        sanityCheck={sanityCheck}
+        refresh={refresh}
         clearCart={clearCart}
       />
+      <div className="text-sm text-gray-600 leading-[1.4] mt-6 mb-6">
+        <p className="m-0">
+          By completing this purchase, you confirm that you are 21 years of age
+          or older and will present a valid government-issued ID upon
+          redemption. All sales are final, and subject to venue rules and
+          availability. By purchasing, you agree to Tapin’s{" "}
+          <span className="underline">Terms & Conditions</span> and{" "}
+          <span className="underline">Privacy Policy</span>.
+        </p>
+      </div>
     </Elements>
   );
 }
 
-export default ApplePayButton;
+export default PayButton;

@@ -18,8 +18,8 @@ import {
 } from "@/types";
 import { supabase_local } from "./supabase_client";
 
-const localStorageCartTag = "_cart";
-const CART_EXPIRATION_MINUTES = 15;
+const localStorageCartTag = "cart";
+const CART_EXPIRATION_MINUTES = 5;
 
 export class CartManager {
   cart: Cart;
@@ -35,7 +35,7 @@ export class CartManager {
     this.restaurant_id = restaurant_id;
     this.userSession = userSession;
     this.global = global;
-    const localStorageKey = `${restaurant_id}${localStorageCartTag}`;
+    const localStorageKey = `${localStorageCartTag}`;
     this.localStorageKey = localStorageKey;
 
     const storedCartData = this.global
@@ -52,7 +52,11 @@ export class CartManager {
       try {
         const parsedData = JSON.parse(storedCartData);
 
-        if (parsedData.timestamp && isCartValid(parsedData.timestamp)) {
+        if (
+          parsedData.timestamp &&
+          isCartValid(parsedData.timestamp) &&
+          parsedData.restaurant_id === restaurant_id
+        ) {
           // Set existing cart if timestamp is valid
           this.cart = parsedData.cart || [];
           this.dealEffect = parsedData.dealEffect || emptyDealEffect;
@@ -85,6 +89,7 @@ export class CartManager {
       return;
     }
     const data = {
+      restaurant_id: this.restaurant_id,
       cart: this.cart,
       dealEffect: this.dealEffect,
       cartResults: this.cartResults,

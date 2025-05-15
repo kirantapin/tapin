@@ -110,7 +110,8 @@ const CheckoutSummary: FC<CheckoutSummaryProps> = ({
                         100
                       }%`,
                       width: `${100 / tipAmounts.length}%`,
-                      backgroundColor: restaurant?.metadata.primaryColor,
+                      backgroundColor: restaurant?.metadata
+                        .primaryColor as string,
                     }}
                   />
 

@@ -10,8 +10,19 @@ import { ItemUtils } from "@/utils/item_utils";
 import { adjustColor } from "@/utils/color";
 import { toast } from "react-toastify";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
+import { Restaurant } from "@/types";
 
-const LiquorForm = ({ type, restaurant, addToCart, primaryColor }) => {
+const LiquorForm = ({
+  type,
+  restaurant,
+  addToCart,
+  primaryColor,
+}: {
+  type: string;
+  restaurant: Restaurant;
+  addToCart: (item: any) => Promise<void>;
+  primaryColor: string;
+}) => {
   const { triggerToast } = useBottomSheet();
   const [liquorType, setLiquorType] = useState<{
     id: string;
@@ -264,7 +275,7 @@ const LiquorForm = ({ type, restaurant, addToCart, primaryColor }) => {
         onClick={handleSubmit}
         className="w-full text-white py-2 rounded-full transition "
         style={{
-          background: restaurant?.metadata.primaryColor,
+          background: restaurant?.metadata.primaryColor as string,
         }}
       >
         {loading ? (
