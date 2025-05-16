@@ -36,8 +36,9 @@ export const MySpot: React.FC<MySpotProps> = ({
       !t.metadata?.path?.includes(PASS_MENU_TAG) &&
       t.restaurant_id === restaurant?.id
   );
-  const activeBundlesCount =
-    Object.values(userOwnershipMap).filter(Boolean).length;
+  const activeBundlesCount = Object.values(userOwnershipMap).filter(
+    (value) => value !== null
+  ).length;
 
   if (!restaurant) {
     return null;

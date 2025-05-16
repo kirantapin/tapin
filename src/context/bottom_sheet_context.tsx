@@ -29,6 +29,7 @@ import { CartManager } from "@/utils/cartManager";
 import ProfileModal from "@/components/bottom_sheets/profile_modal";
 import OrderHistoryModal from "@/components/display_utils/order_history";
 import SignInModal from "@/components/bottom_sheets/signin_modal";
+import LockedPolicyModal from "@/components/bottom_sheets/locked_policy_modal";
 
 // Define the shape of your sheet registry: keys → sheet components
 type SheetMap = Record<string, FC<any>>;
@@ -43,7 +44,7 @@ interface BottomSheetContextValue {
   openQrModal: (transactionsToRedeem: Transaction[]) => void;
   handlePolicyClick: (
     policy: Policy,
-    userOwnershipMap: Record<string, boolean>
+    userOwnershipMap: Record<string, string | null>
   ) => void;
   state: CartState;
   addPolicy: (
@@ -60,6 +61,7 @@ interface BottomSheetContextValue {
   cartManager: CartManager;
   openSignInModal: () => void;
   openProfileModal: () => void;
+  openLockedPolicyModal: (policy: Policy) => void;
   triggerToast: (message: string, type: "success" | "error" | "info") => void;
 }
 
@@ -89,6 +91,7 @@ const BottomSheetContext = createContext<BottomSheetContextValue>({
   cartManager: null,
   openSignInModal: () => {},
   openProfileModal: () => {},
+  openLockedPolicyModal: () => {},
   triggerToast: () => {},
 });
 
@@ -126,10 +129,13 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
   } | null>(null);
   const [showSignInModal, setShowSignInModal] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
-
+  const [lockedPolicyModal, setLockedPolicyModal] = useState<{
+    policy: Policy;
+    bundle_id: string;
+  } | null>(null);
   const handlePolicyClick = (
     policy: Policy,
-    userOwnershipMap: Record<string, boolean>
+    userOwnershipMap: Record<string, string | null>
   ) => {
     if (policy.locked) {
       //we're deal with a potential bundle here
@@ -157,7 +163,7 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
         ) as BundleItem;
         const bundleObject = bundleMenuItem.object;
         if (bundleObject.deactivated_at === null) {
-          openBundleModal(bundleObject);
+          openLockedPolicyModal(policy, bundleId);
           return;
         }
       }
@@ -217,6 +223,16 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
     }, 200); // Wait for animation to complete
   };
 
+  const openLockedPolicyModal = (policy: Policy, bundle_id: string) => {
+    if (isOpen) {
+      closeSheet();
+    }
+    setTimeout(() => {
+      setLockedPolicyModal({ policy, bundle_id });
+      setIsOpen(true);
+    }, 200); // Wait for animation to complete
+  };
+
   const closeSheet = () => {
     setIsOpen(false);
     setTimeout(() => {
@@ -225,6 +241,7 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
       setQrModal(null);
       setShowSignInModal(false);
       setShowProfile(false);
+      setLockedPolicyModal(null);
     }, 200);
   };
 
@@ -259,8 +276,6 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
           restaurant={restaurant as Restaurant}
           addPolicy={addPolicy}
           state={state}
-          addToCart={addToCart}
-          removeFromCart={removeFromCart}
           bundle_id={policyModal.bundle_id}
         />
       )}
@@ -270,6 +285,15 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
           onClose={closeSheet}
           bundle={bundleModal}
           restaurant={restaurant as Restaurant}
+        />
+      )}
+
+      {lockedPolicyModal && (
+        <LockedPolicyModal
+          isOpen={isOpen}
+          onClose={closeSheet}
+          policy={lockedPolicyModal.policy}
+          bundle_id={lockedPolicyModal.bundle_id}
         />
       )}
 

@@ -28,6 +28,7 @@ import { useAuth } from "@/context/auth_context";
 import { SignInButton } from "../signin/signin_button";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { PolicyUtils } from "@/utils/policy_utils";
+import CustomIcon from "../svg/custom_icon";
 
 interface PolicyModalProps {
   isOpen: boolean;
@@ -40,8 +41,6 @@ interface PolicyModalProps {
     userPreference: string | null
   ) => void;
   state: CartState;
-  addToCart: (item: any) => void;
-  removeFromCart: (itemId: number, updates: any) => void;
   bundle_id: string | null;
 }
 
@@ -79,7 +78,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent
         side="bottom"
-        className="w-full max-w-full h-[85vh] rounded-t-3xl [&>button]:hidden p-0 flex flex-col border-none outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0"
+        className="w-full max-w-full h-[85vh] rounded-t-3xl [&>button]:hidden p-0 flex flex-col gap-0 border-none outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0"
       >
         <SheetHeader className="flex-none px-6 pt-6 pb-4 border-b">
           <div className="flex justify-between items-start">
@@ -95,15 +94,20 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
           </div>
         </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto pb-28">
+        <div className="flex-1 overflow-y-auto pb-28 pt-4">
           <div className="px-6">
             <div className="flex flex-wrap gap-2 mb-4">
               {bundleObject && policy.locked && (
-                <div className="bg-black/70 text-white text-xs font-medium px-3 py-2 rounded-full flex items-center gap-1 border border-[#d4af37]">
-                  <img
-                    src="/tapin_icon_white.png"
-                    alt="Tap In Icon"
-                    className="w-4 h-4"
+                <div
+                  className="bg-black/70 text-white text-xs font-medium px-3 py-2 rounded-full flex items-center gap-1 border border-[#d4af37]"
+                  style={{
+                    borderColor: restaurant?.metadata.primaryColor as string,
+                  }}
+                >
+                  <CustomIcon
+                    circleColor={restaurant?.metadata.primaryColor as string}
+                    baseColor="white"
+                    size={16}
                   />
                   <span>{bundleObject.name}</span>
                 </div>

@@ -107,7 +107,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent
         side="bottom"
-        className="h-[85vh] rounded-t-3xl [&>button]:hidden p-0 flex flex-col"
+        className="h-[85vh] rounded-t-3xl [&>button]:hidden p-0 flex flex-col gap-0"
       >
         <SheetHeader className="flex-none px-6 pt-6 pb-4 border-b">
           <div className="flex justify-between items-start">
@@ -123,7 +123,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
           </div>
         </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto px-6 pb-6">
+        <div className="flex-1 overflow-y-auto px-6 pb-6 pt-4">
           {/* Price and time */}
           <div className="flex items-center mb-2">
             <span className="text-2xl font-semibold text-gray-800">

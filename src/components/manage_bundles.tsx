@@ -93,8 +93,39 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
         return (
           <div key={bundleId}>
             <div className="mb-4 mt-8 px-4">
-              <div className="flex justify-between items-center mb-2">
-                <h1 className="text-2xl font-bold">{bundle.name}</h1>
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <h1 className="text-xl font-bold">{bundle.name}</h1>
+                </div>
+              </div>
+              <div className="flex justify-between items-center">
+                <div className="text-md text-gray-500">
+                  {(() => {
+                    const purchaseDate = new Date(
+                      userOwnershipMap[bundleId] as string
+                    );
+                    const expiryDate = new Date(
+                      purchaseDate.getTime() +
+                        bundle.duration * 24 * 60 * 60 * 1000
+                    );
+                    const timeLeft = expiryDate.getTime() - Date.now();
+                    const daysLeft = Math.floor(
+                      timeLeft / (24 * 60 * 60 * 1000)
+                    );
+                    const hoursLeft = Math.floor(
+                      (timeLeft % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000)
+                    );
+                    const minsLeft = Math.floor(
+                      (timeLeft % (60 * 60 * 1000)) / (60 * 1000)
+                    );
+
+                    if (daysLeft > 0) {
+                      return `${daysLeft}d ${hoursLeft}h remaining`;
+                    } else {
+                      return `${hoursLeft}h ${minsLeft}m remaining`;
+                    }
+                  })()}
+                </div>
                 <button
                   className="text-md font-semibold"
                   style={{ color: restaurant?.metadata.primaryColor as string }}

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Restaurant } from "@/types";
+import { BundleItem, Restaurant } from "@/types";
 
 import BundleCard from "../cards/bundle_card";
 import { useRestaurant } from "@/context/restaurant_context";
@@ -94,7 +94,7 @@ const BundleSlider = () => {
       if (isOwned) return false;
 
       // Get the bundle object and check deactivated_at is null
-      const bundle = restaurant?.menu[bundleId]?.info?.object;
+      const bundle = (restaurant?.menu[bundleId]?.info as BundleItem).object;
       return bundle && bundle.deactivated_at === null;
     })
     .map(([bundleId]) => bundleId);

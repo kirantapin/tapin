@@ -12,7 +12,7 @@ type RestaurantContextType = {
   setCurrentRestaurantId: (id: string | null) => void;
   setRestaurant: (restaurant: Restaurant | null) => void;
   policyManager: PolicyManager | null;
-  userOwnershipMap: Record<string, boolean>;
+  userOwnershipMap: Record<string, string | null>;
 };
 
 const RestaurantContext = createContext<RestaurantContextType>({
@@ -40,7 +40,7 @@ export const RestaurantProvider = ({
   );
 
   const [userOwnershipMap, setUserOwnershipMap] = useState<
-    Record<string, boolean>
+    Record<string, string | null>
   >({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -49,7 +49,7 @@ export const RestaurantProvider = ({
 
   const fetchUserOwnership = async (restaurantData: Restaurant) => {
     const activeBundles = restaurantData.menu[BUNDLE_MENU_TAG].children;
-    const userOwnershipMap: Record<string, boolean> = {};
+    const userOwnershipMap: Record<string, string | null> = {};
 
     const ownershipPromises = activeBundles.map((bundleId: string) => {
       const bundle = (restaurantData.menu[bundleId].info as BundleItem).object;
@@ -60,7 +60,13 @@ export const RestaurantProvider = ({
 
     const ownershipResults = await Promise.all(ownershipPromises);
     ownershipResults.forEach(
-      ({ bundleId, ownership }: { bundleId: string; ownership: boolean }) => {
+      ({
+        bundleId,
+        ownership,
+      }: {
+        bundleId: string;
+        ownership: string | null;
+      }) => {
         userOwnershipMap[bundleId] = ownership;
       }
     );

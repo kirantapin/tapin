@@ -64,24 +64,25 @@ export class BundleUtils {
   static doesUserOwnBundle = async (
     user_id: string | null,
     bundle: Bundle
-  ): Promise<boolean> => {
-    if (!user_id) return false;
+  ): Promise<string | null> => {
+    if (!user_id) return null;
     const duration = bundle.duration;
     const { data, error } = await supabase
       .from("bundle_user")
-      .select("*")
+      .select("purchased_at")
       .eq("user_id", user_id)
       .eq("bundle_id", bundle.bundle_id)
       .gte(
         "purchased_at",
         new Date(Date.now() - duration * 24 * 60 * 60 * 1000).toISOString()
-      );
+      )
+      .order("purchased_at", { ascending: false });
 
     if (error || data.length === 0) {
-      return false;
+      return null;
     }
 
-    return data.length > 0;
+    return data[0].purchased_at;
   };
   static getUsersBundleUsageStats = async (
     user_id: string,
