@@ -185,7 +185,7 @@ export default function RestaurantPage() {
 
           {userOwnershipMap &&
             Object.values(userOwnershipMap).some((isOwned) => !isOwned) && (
-              <div className="mt-8">
+              <div className="mt-2">
                 <h1 className="text-xl font-bold">Great Value</h1>
                 <BundleSlider />
               </div>

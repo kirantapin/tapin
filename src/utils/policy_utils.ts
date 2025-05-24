@@ -315,4 +315,25 @@ export class PolicyUtils {
     }
     return 0;
   };
+  static getUsageDescription(policy: Policy): string | null {
+    const { total_usages, days_since_last_use } = policy;
+
+    if (total_usages && days_since_last_use) {
+      return `One use every ${days_since_last_use} ${
+        days_since_last_use === 1 ? "day" : "days"
+      } up to ${total_usages} ${total_usages === 1 ? "use" : "uses"}`;
+    }
+
+    if (total_usages) {
+      return `Up to ${total_usages} ${total_usages === 1 ? "use" : "uses"}`;
+    }
+
+    if (days_since_last_use) {
+      return `Single use every ${days_since_last_use} ${
+        days_since_last_use === 1 ? "day" : "days"
+      }`;
+    }
+
+    return null;
+  }
 }

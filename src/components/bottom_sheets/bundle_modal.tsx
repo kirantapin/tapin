@@ -21,6 +21,7 @@ import CheckoutSummary from "../checkout/checkout_summary";
 import AddOnManager from "../sliders/add_on_manager";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import SmallPolicyCard from "../cards/small_policy_card";
+import { PolicyUtils } from "@/utils/policy_utils";
 
 interface BundleModalProps {
   isOpen: boolean;
@@ -200,6 +201,9 @@ const BundleModal: React.FC<BundleModalProps> = ({
                       <SmallPolicyCard
                         policy={policy}
                         restaurant={restaurant}
+                        bottomTongueText={PolicyUtils.getUsageDescription(
+                          policy
+                        )}
                       />
                     </div>
                   )
