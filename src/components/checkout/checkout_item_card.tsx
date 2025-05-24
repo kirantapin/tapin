@@ -26,8 +26,8 @@ export function CheckoutItemCard({
   item: CartItem;
   restaurant: Restaurant;
   dealEffect: DealEffectPayload;
-  addToCart: (item: Item) => void;
-  removeFromCart: (itemId: number) => void;
+  addToCart: (item: Item, showToast?: boolean) => Promise<void>;
+  removeFromCart: (itemId: number) => Promise<void>;
   inlineRecommendation: {
     cartId: number;
     flair: string;

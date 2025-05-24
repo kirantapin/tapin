@@ -8,7 +8,6 @@ import { fetchRestaurantById } from "@/utils/queries/restaurant";
 import { BundleUtils } from "@/utils/bundle_utils";
 type RestaurantContextType = {
   restaurant: Restaurant | null;
-  loading: boolean;
   setCurrentRestaurantId: (id: string | null) => void;
   setRestaurant: (restaurant: Restaurant | null) => void;
   policyManager: PolicyManager | null;
@@ -17,7 +16,6 @@ type RestaurantContextType = {
 
 const RestaurantContext = createContext<RestaurantContextType>({
   restaurant: null,
-  loading: true,
   setCurrentRestaurantId: () => {},
   setRestaurant: () => {},
   policyManager: null,
@@ -42,7 +40,6 @@ export const RestaurantProvider = ({
   const [userOwnershipMap, setUserOwnershipMap] = useState<
     Record<string, string | null>
   >({});
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const { userSession } = useAuth();
@@ -80,14 +77,18 @@ export const RestaurantProvider = ({
     }
   }, [userSession, restaurant]);
 
+  const resetState = () => {
+    setRestaurant(null);
+    setPolicyManager(null);
+    setUserOwnershipMap({});
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       if (!currentRestaurantId) return;
 
-      // Only fetch if it's a different restaurant
       if (restaurant?.id === currentRestaurantId) return;
-
-      setLoading(true);
+      resetState();
       fetchRestaurantById(currentRestaurantId).then((restaurantData) => {
         if (!restaurantData) {
           navigate("/not_found");
@@ -99,8 +100,6 @@ export const RestaurantProvider = ({
       policyManager.init().then(() => {
         setPolicyManager(policyManager);
       });
-
-      setLoading(false);
     };
 
     fetchData();
@@ -110,7 +109,6 @@ export const RestaurantProvider = ({
     <RestaurantContext.Provider
       value={{
         restaurant,
-        loading,
         setRestaurant,
         setCurrentRestaurantId,
         policyManager,

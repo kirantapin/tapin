@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 export default function BundleCTA() {
   const { restaurant, userOwnershipMap } = useRestaurant();
-  const { openBundleModal, state } = useBottomSheet();
+  const { openAllBundlesModal, state } = useBottomSheet();
   const [chosenBundle, setChosenBundle] = useState<Bundle | null>(null);
 
   useEffect(() => {
@@ -15,8 +15,10 @@ export default function BundleCTA() {
       !userOwnershipMap ||
       !state.cartResults ||
       state.cartResults.totalPrice <= 0
-    )
+    ) {
+      setChosenBundle(null);
       return;
+    }
     for (const bundleId of Object.keys(userOwnershipMap)) {
       if (!userOwnershipMap[bundleId]) {
         const bundle = ItemUtils.getMenuItemFromItemId(
@@ -33,11 +35,11 @@ export default function BundleCTA() {
   if (!chosenBundle || !restaurant || !state.cartResults) return null;
 
   return (
-    <div className="mt-2 mb-4">
+    <div className=" mb-4">
       <div className="border-t border-gray-200 -mx-4" />
       <div
         className="py-2 px-4 flex items-center gap-4 cursor-pointer"
-        onClick={() => openBundleModal(chosenBundle)}
+        onClick={() => openAllBundlesModal()}
       >
         <div className="w-5 h-5 border-2 border-gray-300 rounded flex-shrink-0" />
         <span className="text-md">

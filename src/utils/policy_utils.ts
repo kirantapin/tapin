@@ -5,6 +5,7 @@ import { formatPoints, listItemsToStringDescription } from "./parse";
 import { ItemUtils } from "./item_utils";
 import { titleCase } from "title-case";
 import { LOYALTY_REWARD_TAG } from "@/constants";
+import { formatAvailabilityWindow } from "./time";
 
 export class PolicyUtils {
   static async fetchPoliciesByRestaurantId(
@@ -21,18 +22,61 @@ export class PolicyUtils {
     }
     const currentTime = new Date().toISOString();
 
+    const [{ data: unlockedPolicies }, bundlePolicies] = await Promise.all([
+      supabase
+        .from("policies")
+        .select("*")
+        .eq("restaurant_id", restaurant_id)
+        .eq("active", true)
+        .eq("locked", false)
+        .or(`end_time.gte.${currentTime},end_time.is.null`),
+      this.fetchBundlePolicies(restaurant_id),
+    ]);
+
+    return [...(unlockedPolicies || []), ...(bundlePolicies || [])];
+  };
+  static fetchBundlePolicies = async (
+    restaurantId: string
+  ): Promise<Policy[]> => {
+    const ninetyDaysAgo = new Date(
+      Date.now() - 90 * 24 * 60 * 60 * 1000 // 90 days
+    ).toISOString();
     const { data, error } = await supabase
-      .from("policies")
-      .select("*")
-      .eq("restaurant_id", restaurant_id)
-      .eq("active", true)
-      .or(`end_time.gte.${currentTime},end_time.is.null`);
+      .from("bundles")
+      .select(
+        `bundle_id,
+        bundle_policy_junction (policies:policy_id (*))
+        `
+      )
+      .eq("restaurant_id", restaurantId)
+      .or(`deactivated_at.is.null,deactivated_at.gt.${ninetyDaysAgo}`)
+      .returns<
+        {
+          bundle_id: string;
+          bundle_policy_junction: {
+            policies: Policy | null;
+          }[];
+        }[]
+      >();
+
     if (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error fetching bundle policies:", error);
       return [];
-    } else {
-      return data;
     }
+
+    const bundlePolicies = data
+      .flatMap((b) => b.bundle_policy_junction)
+      .map((bp) => bp.policies)
+      .filter((p): p is Policy => !!p && p.active);
+
+    // Remove duplicate policies based on policy_id
+    const uniquePolicies = Array.from(
+      new Map(
+        bundlePolicies.map((policy) => [policy.policy_id, policy])
+      ).values()
+    );
+
+    return uniquePolicies;
   };
   static policyToStringDescription = (
     policy: Policy,
@@ -62,9 +106,12 @@ export class PolicyUtils {
             break;
           case "time_range":
             descriptions.push(
-              `Available from ${condition.begin_time} to ${
-                condition.end_time
-              } on ${condition.allowed_days.join(", ")}`
+              `Available from ${formatAvailabilityWindow(
+                condition.begin_time,
+                condition.end_time,
+                condition.allowed_days,
+                restaurant.metadata.timeZone as string
+              )}`
             );
             break;
           default:
@@ -157,7 +204,6 @@ export class PolicyUtils {
         return "";
     }
   }
-
   static returnHighestCostItem = (
     items: ItemSpecification[],
     restaurant: Restaurant
@@ -179,7 +225,6 @@ export class PolicyUtils {
     }
     return highestCost;
   };
-
   static getEstimatedPolicyValue = (
     policy: Policy,
     restaurant: Restaurant
@@ -226,7 +271,6 @@ export class PolicyUtils {
         return 0;
     }
   };
-
   static getPolicyName = (policy: Policy, restaurant: Restaurant): string => {
     if (policy.definition.tag === LOYALTY_REWARD_TAG) {
       if (policy.definition.action.type === "add_free_item") {
@@ -243,7 +287,6 @@ export class PolicyUtils {
     }
     return titleCase(policy.name || "");
   };
-
   static getUserChoicesForPolicy = (
     policy: Policy,
     restaurant: Restaurant
@@ -264,7 +307,6 @@ export class PolicyUtils {
         return [];
     }
   };
-
   static getLoyaltyRewardPoints = (policy: Policy): number => {
     for (const condition of policy.definition.conditions) {
       if (condition.type === "minimum_user_points") {

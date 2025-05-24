@@ -20,6 +20,7 @@ import { BundleUtils } from "@/utils/bundle_utils";
 import CheckoutSummary from "../checkout/checkout_summary";
 import AddOnManager from "../sliders/add_on_manager";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
+import SmallPolicyCard from "../cards/small_policy_card";
 
 interface BundleModalProps {
   isOpen: boolean;
@@ -59,7 +60,8 @@ const BundleModal: React.FC<BundleModalProps> = ({
         !isOpen ||
         !userSession ||
         !policyManager ||
-        !bundleMenuItem
+        !bundleMenuItem ||
+        userOwnershipMap?.[bundle.bundle_id]
       ) {
         return;
       }
@@ -126,15 +128,19 @@ const BundleModal: React.FC<BundleModalProps> = ({
         <div className="flex-1 overflow-y-auto px-6 pb-6 pt-4">
           {/* Price and time */}
           <div className="flex items-center mb-2">
-            <span className="text-2xl font-semibold text-gray-800">
+            <span className="text-2xl font-semibold text-black">
               ${bundle.price.toFixed(2)}
             </span>
-            <span className="text-xl text-gray-500 line-through ml-2">
-              ${Math.round(savedBundleValue + bundle.price) - 0.01}
-            </span>
-          </div>
-          <div className="text-md text-green-500">
-            Receive ${Math.round(savedBundleValue)} in value
+            <div
+              className="flex items-center rounded-full ml-4 px-3 py-1"
+              style={{
+                backgroundColor: restaurant?.metadata.primaryColor as string,
+              }}
+            >
+              <span className="text-md text-white font-semibold">
+                ${Math.round(savedBundleValue + bundle.price) - 0.01} value
+              </span>
+            </div>
           </div>
           <div className="text-md font-bold text-gray-600 mt-1 mb-4">
             Lasts {bundle.duration} {bundle.duration > 1 ? "Days" : "Day"}
@@ -186,52 +192,15 @@ const BundleModal: React.FC<BundleModalProps> = ({
             </h1>
           )}
           <div className="mt-2">
-            <div className="flex flex-col gap-4">
+            <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar -mx-6 px-6">
               {bundlePolicies.map((policy, index) => {
                 return (
                   policy && (
-                    <div key={index}>
-                      <h2 className="text-gray-800 font-medium flex items-center gap-2">
-                        <GradientIcon
-                          icon={Tag}
-                          primaryColor={
-                            restaurant?.metadata.primaryColor as string
-                          }
-                          size={20}
-                        />
-                        <div className="flex items-center gap-2">
-                          <span>
-                            {policy.name}{" "}
-                            {(policy.total_usages ||
-                              policy.days_since_last_use) && (
-                              <span className="text-sm text-gray-600">
-                                {policy.total_usages &&
-                                policy.days_since_last_use
-                                  ? `(One use every ${
-                                      policy.days_since_last_use
-                                    } ${
-                                      policy.days_since_last_use === 1
-                                        ? "day"
-                                        : "days"
-                                    } up to ${policy.total_usages} ${
-                                      policy.total_usages === 1 ? "use" : "uses"
-                                    })`
-                                  : policy.total_usages
-                                  ? `(Up to ${policy.total_usages} ${
-                                      policy.total_usages === 1 ? "use" : "uses"
-                                    })`
-                                  : `(One use every ${
-                                      policy.days_since_last_use
-                                    } ${
-                                      policy.days_since_last_use === 1
-                                        ? "day"
-                                        : "days"
-                                    })`}
-                              </span>
-                            )}
-                          </span>
-                        </div>
-                      </h2>
+                    <div key={index} className="flex-shrink-0 w-[95%]">
+                      <SmallPolicyCard
+                        policy={policy}
+                        restaurant={restaurant}
+                      />
                     </div>
                   )
                 );
@@ -279,7 +248,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
             ) : isOwned ? (
               <div className="flex justify-center w-full">
                 <div className="relative">
-                  <div className="absolute -left-8 top-1/2 -translate-y-1/2 text-green-500">
+                  <div className="absolute -left-8 top-1/2 -translate-y-1/2 text-[#40C4AA]">
                     <Check size={24} />
                   </div>
                   <p className="text-lg text-gray-600 font-medium">

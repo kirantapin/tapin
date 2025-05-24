@@ -6,14 +6,15 @@ import { ItemUtils } from "@/utils/item_utils";
 import { NORMAL_DEAL_TAG } from "@/constants";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { useRestaurant } from "@/context/restaurant_context";
+
 const HighlightSlider = ({
   addToCart,
   policies,
 }: {
-  addToCart: (item_id: string) => void;
+  addToCart: (item_id: string) => Promise<void>;
   policies: Policy[];
 }) => {
-  const scrollContainerRef = useRef(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [activePromo, setActivePromo] = useState(0);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
@@ -21,6 +22,7 @@ const HighlightSlider = ({
   const { openBundleModal, handlePolicyClick } = useBottomSheet();
   const { restaurant, policyManager, userOwnershipMap } = useRestaurant();
   const { triggerToast } = useBottomSheet();
+  const [cardLoading, setCardLoading] = useState(false);
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -92,6 +94,7 @@ const HighlightSlider = ({
 
   useEffect(() => {
     const fetchHighlights = async () => {
+      if (!restaurant) return;
       const highlights = await fetch_highlights(restaurant.id);
       const filteredHighlights = highlights.filter((highlight) => {
         if (highlight.content_type === "item") {
@@ -99,7 +102,7 @@ const HighlightSlider = ({
             highlight.content_pointer,
             restaurant
           );
-          return menuItem?.price != null;
+          return menuItem && menuItem?.price;
         } else if (highlight.content_type === "policy") {
           const policy = policies.find(
             (p) => p.policy_id === highlight.content_pointer
@@ -109,8 +112,11 @@ const HighlightSlider = ({
           const bundle = ItemUtils.getMenuItemFromItemId(
             highlight.content_pointer,
             restaurant
-          );
+          ) as BundleItem;
           return bundle?.price && bundle.object.deactivated_at === null;
+        } else if (highlight.content_type === "media") {
+          const { title_override, description_override } = highlight;
+          return title_override && description_override;
         }
         return false;
       });
@@ -121,80 +127,90 @@ const HighlightSlider = ({
 
   if (!restaurant || !policyManager) return null;
 
-  const handleHighlightClick = (highlight: Highlight) => {
+  const handleHighlightClick = async (highlight: Highlight) => {
+    setCardLoading(true);
+    const content_pointer = highlight.content_pointer;
+    if (!content_pointer) return;
     if (highlight.content_type === "item") {
-      addToCart(highlight.content_pointer);
+      await addToCart(content_pointer);
     } else if (highlight.content_type === "bundle") {
       const bundle = ItemUtils.getMenuItemFromItemId(
-        highlight.content_pointer,
+        content_pointer,
         restaurant
       ) as BundleItem;
       openBundleModal(bundle.object);
     } else if (highlight.content_type === "policy") {
-      const policy = policyManager.getPolicyFromId(highlight.content_pointer);
+      const policy = policyManager.getPolicyFromId(content_pointer);
       if (policy) {
         handlePolicyClick(policy, userOwnershipMap);
       } else {
         triggerToast("This offering no longer exists", "error");
       }
+    } else if (highlight.content_type === "media") {
+      const url = content_pointer.startsWith("http")
+        ? content_pointer
+        : `http://${content_pointer}`;
+      window.open(url, "_blank");
     }
+    setCardLoading(false);
   };
 
-  if (highlights.length > 0) {
-    return (
-      <div className="mt-3">
-        <div
-          ref={scrollContainerRef}
-          className="overflow-x-auto snap-x snap-mandatory no-scrollbar scrollbar-hide -mx-4 px-4"
-          onScroll={handleScroll}
-          onWheel={() => {
-            handleUserInteraction();
-          }}
-          onTouchStart={() => {
-            handleUserInteraction();
-          }}
-        >
-          <div className="flex gap-4">
-            {highlights.map((h, idx) => (
-              <div key={idx} className="snap-center shrink-0 w-full">
-                <HighlightCard
-                  content_type={h.content_type}
-                  content_pointer={h.content_pointer}
-                  title_override={h.title_override}
-                  description_override={h.description_override}
-                  image_url_override={h.image_url_override}
-                  restaurant={restaurant}
-                  onClick={() => {
-                    handleHighlightClick(h);
-                  }}
-                />
-              </div>
-            ))}
-            <div className="shrink-0 w-10" />
-          </div>
-        </div>
-
-        <div className="flex justify-center mt-4">
-          {highlights.map((_, index) => (
-            <button
-              key={index}
-              className={`h-2 mx-1 rounded-full transition-all duration-300 ${
-                activePromo === index ? "w-4" : "bg-gray-300 w-2"
-              }`}
-              style={{
-                backgroundColor:
-                  activePromo === index
-                    ? (restaurant.metadata.primaryColor as string)
-                    : undefined,
-              }}
-            ></button>
-          ))}
-        </div>
-      </div>
-    );
-  } else {
+  if (highlights.length === 0) {
     return null;
   }
+
+  return (
+    <div className="mt-3">
+      <div
+        ref={scrollContainerRef}
+        className="overflow-x-auto snap-x snap-mandatory no-scrollbar scrollbar-hide -mx-4 px-4"
+        onScroll={handleScroll}
+        onWheel={() => {
+          handleUserInteraction();
+        }}
+        onTouchStart={() => {
+          handleUserInteraction();
+        }}
+      >
+        <div className="flex gap-4">
+          {highlights.map((h, idx) => (
+            <div key={idx} className="snap-center shrink-0 w-full">
+              <HighlightCard
+                content_type={h.content_type}
+                content_pointer={h.content_pointer}
+                title_override={h.title_override}
+                description_override={h.description_override}
+                image_url_override={h.image_url_override}
+                restaurant={restaurant}
+                onClick={() => {
+                  handleHighlightClick(h);
+                }}
+                loading={cardLoading}
+              />
+            </div>
+          ))}
+          <div className="shrink-0 w-10" />
+        </div>
+      </div>
+
+      <div className="flex justify-center mt-4">
+        {highlights.map((_, index) => (
+          <button
+            key={index}
+            className={`h-2 mx-1 rounded-full transition-all duration-300 ${
+              activePromo === index ? "w-4" : "bg-gray-300 w-2"
+            }`}
+            style={{
+              backgroundColor:
+                activePromo === index
+                  ? (restaurant.metadata.primaryColor as string)
+                  : undefined,
+            }}
+          ></button>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 export default HighlightSlider;

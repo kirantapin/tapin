@@ -66,15 +66,15 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({
         </div>
 
         {/* Description */}
-        <p className="text-lg text-gray-500 custom-line-clamp-1 -mr-10">
+        <p className="text-md text-gray-500 custom-line-clamp-1 -mr-10">
           {sentenceCase(policy.header)}
         </p>
 
         <p
-          className={`text-lg custom-line-clamp-1 -mr-10 ${
+          className={`text-md custom-line-clamp-1 -mr-10 ${
             !policyIsActive && totalMissingQuantity > 0
               ? "text-red-500"
-              : "text-green-500"
+              : "text-[#40C4AA]"
           }`}
         >
           {policyIsActive

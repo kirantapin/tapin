@@ -15,7 +15,7 @@ export function modifiedItemFlair(
   );
 
   const addedItem = dealEffect.addedItems.find(
-    (added) => added.cartItem.id === cartItem.id
+    (added) => added.id === cartItem.id
   );
 
   const temp: {
@@ -29,16 +29,15 @@ export function modifiedItemFlair(
   };
 
   if (addedItem) {
-    if (addedItem.cartItem.point_cost > 0) {
+    if (cartItem.point_cost > 0) {
       temp["discountDescription"] = `-${formatPoints(
-        addedItem.cartItem.point_cost
+        cartItem.point_cost
       )} points`;
-    } else if (addedItem.cartItem.price == 0) {
+    } else if (cartItem.price == 0) {
       temp["discountDescription"] = "Free Item";
     } else {
       temp["discountDescription"] = `$${
-        ItemUtils.priceItem(addedItem.cartItem.item, restaurant) -
-        addedItem.cartItem.price
+        ItemUtils.priceItem(cartItem.item, restaurant) - cartItem.price
       } off`;
     }
     return temp;
@@ -52,7 +51,7 @@ export function modifiedItemFlair(
     };
   }
 
-  switch (modifiedItem.modificationType) {
+  switch (modifiedItem.type) {
     case "apply_fixed_discount":
       // Add logic for fixed discount
       temp["discountDescription"] = `$${modifiedItem.amount} off`;
@@ -77,7 +76,8 @@ export function modifiedItemFlair(
 export function priceCartNormally(cart: Cart, restaurant: Restaurant): number {
   let total = 0;
   for (const cartItem of cart) {
-    total += ItemUtils.priceItem(cartItem.item, restaurant) * cartItem.quantity;
+    total +=
+      (ItemUtils.priceItem(cartItem.item, restaurant) || 0) * cartItem.quantity;
   }
   return total;
 }

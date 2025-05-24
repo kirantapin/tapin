@@ -142,9 +142,9 @@ export class PolicyManager {
     });
 
     // Get policy ID from whole cart modification if it exists
-    if (dealeffect.wholeCartModification) {
-      activePolicyIds.add(dealeffect.wholeCartModification.policy_id);
-    }
+    dealeffect.wholeCartModification.forEach(({ policy_id }) => {
+      activePolicyIds.add(policy_id);
+    });
 
     // Return policies that match the active IDs
     return activePolicyIds;

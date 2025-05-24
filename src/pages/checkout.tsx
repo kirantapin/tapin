@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect, useReducer } from "react";
-import { ArrowLeft, Check, ChevronLeft, Tag, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronLeft, Tag, X } from "lucide-react";
 import { checkoutStyles } from "../styles/checkout_styles.ts";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/auth_context.tsx";
 import ApplePayButton from "../components/pay_button.tsx";
 import {
@@ -14,15 +14,11 @@ import { CartItem, Policy, Restaurant } from "../types.ts";
 import { CheckoutItemCard } from "@/components/checkout/checkout_item_card.tsx";
 import AccessCardSlider from "../components/sliders/access_card_slider.tsx";
 import DealPreOrderBar from "@/components/checkout/deal_checkout_bar.tsx";
-import { motion } from "framer-motion";
 import { titleCase } from "title-case";
-import AddOnCard from "@/components/cards/add_on_card.tsx";
 import { useTimer } from "@/hooks/useTimer.tsx";
-import { PassAddOnCard } from "@/components/cards/pass_add_on_card.tsx";
 import { ItemUtils } from "@/utils/item_utils.ts";
-import { formatPoints } from "@/utils/parse.ts";
 import { Alert } from "@/components/display_utils/alert.tsx";
-import { adjustColor, setThemeColor } from "@/utils/color.ts";
+import { setThemeColor } from "@/utils/color.ts";
 import { SignInButton } from "@/components/signin/signin_button.tsx";
 import { useRestaurant } from "@/context/restaurant_context.tsx";
 import { CheckoutSkeleton } from "@/components/skeletons/checkout_skeleton.tsx";
@@ -32,6 +28,7 @@ import SpendGoalCard from "@/components/cards/spend_goal_card.tsx";
 import AddOnManager from "@/components/sliders/add_on_manager.tsx";
 import CheckoutSummary from "@/components/checkout/checkout_summary.tsx";
 import BundleCTA from "@/components/checkout/bundle_cta.tsx";
+
 export default function CheckoutPage() {
   setThemeColor();
   const { userSession } = useAuth();
@@ -166,7 +163,7 @@ export default function CheckoutPage() {
                   <button
                     key={policy.policy_id}
                     onClick={() => console.log("intention to remove")}
-                    className="px-2 py-2 bg-gray-200 rounded-full text-xs flex items-center gap-1"
+                    className="px-2 py-2 bg-gray-100 rounded-full text-xs flex items-center gap-1"
                   >
                     <Tag size={13} className="text-gray-800" />
                     <span>{titleCase(policy.name)}</span>
@@ -248,35 +245,37 @@ export default function CheckoutPage() {
           tipAmount={tipAmount}
         />
 
-        <BundleCTA />
+        <div className="bg-white pt-0 -mx-4 px-4 shadow-[0_-8px_16px_-6px_rgba(0,0,0,0.1)]">
+          <BundleCTA />
 
-        {state.cart.length > 0 && (
-          <div className={checkoutStyles.paymentContainer}>
-            {userSession ? (
-              state.token &&
-              state.cartResults && (
-                <ApplePayButton
-                  payload={{
-                    userAccessToken: userSession.access_token,
-                    restaurant_id: restaurant?.id,
-                    state: state,
-                    totalWithTip: Math.round(
-                      (state.cartResults.totalPrice + tipAmount) * 100
-                    ),
-                    connectedAccountId: restaurant?.stripe_account_id,
-                  }}
-                  refresh={refreshCart}
-                  clearCart={clearCart}
+          {state.cart.length > 0 && (
+            <div className={checkoutStyles.paymentContainer}>
+              {userSession ? (
+                state.token &&
+                state.cartResults && (
+                  <ApplePayButton
+                    payload={{
+                      userAccessToken: userSession.access_token,
+                      restaurant_id: restaurant?.id,
+                      state: state,
+                      totalWithTip: Math.round(
+                        (state.cartResults.totalPrice + tipAmount) * 100
+                      ),
+                      connectedAccountId: restaurant?.stripe_account_id,
+                    }}
+                    refresh={refreshCart}
+                    clearCart={clearCart}
+                  />
+                )
+              ) : (
+                <SignInButton
+                  onClose={() => {}}
+                  primaryColor={restaurant?.metadata.primaryColor as string}
                 />
-              )
-            ) : (
-              <SignInButton
-                onClose={() => {}}
-                primaryColor={restaurant?.metadata.primaryColor as string}
-              />
-            )}
-          </div>
-        )}
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -156,7 +156,6 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
                     );
                   })}
 
-                  {/* 🎁 Gift Icon for next reward */}
                   {(() => {
                     const total = intervals[intervals.length - 1];
                     let nextReward = null;

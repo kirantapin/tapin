@@ -10,20 +10,22 @@ import { ItemUtils } from "@/utils/item_utils";
 import { adjustColor } from "@/utils/color";
 import { toast } from "react-toastify";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
-import { Restaurant } from "@/types";
+import { Item, Restaurant } from "@/types";
 
 const LiquorForm = ({
   type,
   restaurant,
   addToCart,
   primaryColor,
+  afterAdd,
 }: {
   type: string;
   restaurant: Restaurant;
-  addToCart: (item: any) => Promise<void>;
+  addToCart: (item: Item, showToast?: boolean) => Promise<void>;
   primaryColor: string;
+  afterAdd?: () => void;
 }) => {
-  const { triggerToast } = useBottomSheet();
+  const { triggerToast, openLiquorFormModal } = useBottomSheet();
   const [liquorType, setLiquorType] = useState<{
     id: string;
     name: string;
@@ -126,13 +128,16 @@ const LiquorForm = ({
       itemToAdd.modifiers.push(`with ${titleCase(selectedMixer)}`);
     }
     setLoading(true);
-    await addToCart(itemToAdd);
+    await addToCart(itemToAdd, true);
     setLoading(false);
 
     setLiquorType(null);
     setLiquorBrand(null);
     setSelectedMixer("");
     setModifiers([]);
+    if (afterAdd) {
+      afterAdd();
+    }
   };
 
   const addModifier = (modifier: string) => {
@@ -162,130 +167,133 @@ const LiquorForm = ({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-4 p-5 border rounded-2xl shadow-md"
-    >
-      {/* Liquor Buttons */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Select Liquor
-        </label>
-        <div className="grid grid-cols-2 gap-2">
-          {liquors.map((liquor) => (
-            <button
-              key={liquor.id}
-              type="button"
-              onClick={() => setLiquorType(liquor)}
-              className="p-3 rounded-full text-sm font-medium transition-colors duration-200 border bg-transparent"
-              style={{
-                borderColor:
-                  liquorType?.id === liquor.id ? primaryColor : "#e5e7eb",
-                color: liquorType?.id === liquor.id ? primaryColor : "#374151",
-              }}
-            >
-              {titleCase(liquor.name)}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Liquor Brand Buttons (shows only if a liquor is selected) */}
-      {liquorType && liquorBrands.length > 0 && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
-            Select {titleCase(liquorType.name)} Brand
-          </label>
-          <div className="flex gap-2 overflow-x-auto whitespace-nowrap pb-2">
-            {liquorBrands.map((brand: { id: string; name: string }) => (
-              <button
-                key={brand.id}
-                type="button"
-                onClick={() => setLiquorBrand(brand)}
-                className="flex-none p-3 rounded-full text-sm font-medium transition-colors duration-200 border bg-transparent"
-                style={{
-                  borderColor:
-                    liquorBrand?.id === brand.id ? primaryColor : "#e5e7eb",
-                  color:
-                    liquorBrand?.id === brand.id ? primaryColor : "#374151",
-                }}
-              >
-                {titleCase(brand.name)}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Mixer Buttons */}
-      {type === HOUSE_MIXER_LABEL && (
+    <form onSubmit={handleSubmit} className="flex flex-col h-full">
+      <div className="flex-1 space-y-4 p-5 pt-4 rounded-2xl overflow-y-auto">
+        {/* Liquor Buttons */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Select Mixer
+            Select Liquor
           </label>
           <div className="grid grid-cols-2 gap-2">
-            {modifierGroups.mixer.map((mixer) => (
+            {liquors.map((liquor) => (
               <button
-                key={mixer}
+                key={liquor.id}
                 type="button"
-                onClick={() => setSelectedMixer(mixer)}
+                onClick={() => setLiquorType(liquor)}
                 className="p-3 rounded-full text-sm font-medium transition-colors duration-200 border bg-transparent"
                 style={{
                   borderColor:
-                    selectedMixer === mixer ? primaryColor : "#e5e7eb",
-                  color: selectedMixer === mixer ? primaryColor : "#374151",
+                    liquorType?.id === liquor.id ? primaryColor : "#e5e7eb",
+                  color:
+                    liquorType?.id === liquor.id ? primaryColor : "#374151",
                 }}
               >
-                {titleCase(mixer)}
+                {titleCase(liquor.name)}
               </button>
             ))}
           </div>
         </div>
-      )}
 
-      {/* Modifiers Section */}
-      {type === HOUSE_MIXER_LABEL && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Modifiers
-          </label>
-          <div className="flex gap-2 mt-2">
-            {modifierGroups.amount.map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => toggleModifier("amount", option)}
-                className={`px-4 py-2 text-black border bg-white rounded-full cursor-pointer transition font-medium text-sm`}
-                style={{
-                  borderColor: modifiers.includes(option)
-                    ? primaryColor
-                    : "#e5e7eb",
-                  color: modifiers.includes(option) ? primaryColor : "#374151",
-                }}
-              >
-                {titleCase(option)}
-              </button>
-            ))}
+        {/* Liquor Brand Buttons (shows only if a liquor is selected) */}
+        {liquorType && liquorBrands.length > 0 && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
+              Select {titleCase(liquorType.name)} Brand
+            </label>
+            <div className="flex gap-2 overflow-x-auto whitespace-nowrap pb-2">
+              {liquorBrands.map((brand: { id: string; name: string }) => (
+                <button
+                  key={brand.id}
+                  type="button"
+                  onClick={() => setLiquorBrand(brand)}
+                  className="flex-none p-3 rounded-full text-sm font-medium transition-colors duration-200 border bg-transparent"
+                  style={{
+                    borderColor:
+                      liquorBrand?.id === brand.id ? primaryColor : "#e5e7eb",
+                    color:
+                      liquorBrand?.id === brand.id ? primaryColor : "#374151",
+                  }}
+                >
+                  {titleCase(brand.name)}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
-
-      <button
-        type="submit"
-        onClick={handleSubmit}
-        className="w-full text-white py-2 rounded-full transition "
-        style={{
-          background: restaurant?.metadata.primaryColor as string,
-        }}
-      >
-        {loading ? (
-          <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-          </div>
-        ) : (
-          "Add To Cart"
         )}
-      </button>
+
+        {/* Mixer Buttons */}
+        {type === HOUSE_MIXER_LABEL && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Select Mixer
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {modifierGroups.mixer.map((mixer) => (
+                <button
+                  key={mixer}
+                  type="button"
+                  onClick={() => setSelectedMixer(mixer)}
+                  className="p-3 rounded-full text-sm font-medium transition-colors duration-200 border bg-transparent"
+                  style={{
+                    borderColor:
+                      selectedMixer === mixer ? primaryColor : "#e5e7eb",
+                    color: selectedMixer === mixer ? primaryColor : "#374151",
+                  }}
+                >
+                  {titleCase(mixer)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Modifiers Section */}
+        {type === HOUSE_MIXER_LABEL && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Modifiers
+            </label>
+            <div className="flex gap-2 mt-2">
+              {modifierGroups.amount.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => toggleModifier("amount", option)}
+                  className={`px-4 py-2 text-black border bg-white rounded-full cursor-pointer transition font-medium text-sm`}
+                  style={{
+                    borderColor: modifiers.includes(option)
+                      ? primaryColor
+                      : "#e5e7eb",
+                    color: modifiers.includes(option)
+                      ? primaryColor
+                      : "#374151",
+                  }}
+                >
+                  {titleCase(option)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="flex-none p-5 border-t border-gray-300">
+        <button
+          type="submit"
+          className="w-full text-white py-3 rounded-full transition"
+          style={{
+            background: restaurant?.metadata.primaryColor as string,
+          }}
+        >
+          {loading ? (
+            <div className="flex justify-center">
+              <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+            </div>
+          ) : (
+            "Add To Cart"
+          )}
+        </button>
+      </div>
     </form>
   );
 };

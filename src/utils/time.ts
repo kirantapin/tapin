@@ -166,3 +166,87 @@ export function isAvailableNow(
     );
   }
 }
+
+const WEEKDAYS = [
+  "sunday",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+];
+
+function formatTime(date: Date, timeZone: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZone,
+  }).format(date);
+}
+
+function getLocalDayName(date: Date, timeZone: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    timeZone,
+  }).format(date);
+}
+
+export function formatAvailabilityWindow(
+  begin_time: string,
+  end_time: string,
+  allowed_days: string[],
+  timeZone: string
+): string {
+  const timeGroups: Record<string, string[]> = {};
+
+  for (const day of allowed_days) {
+    const dayIndex = WEEKDAYS.indexOf(day);
+    if (dayIndex === -1) continue;
+
+    // Anchor to most recent Sunday
+    const now = new Date();
+    const sunday = new Date(
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate() - now.getUTCDay()
+      )
+    );
+
+    const baseDate = new Date(sunday);
+    baseDate.setUTCDate(baseDate.getUTCDate() + dayIndex);
+
+    const [startHour, startMinute] = begin_time.split(":").map(Number);
+    const [endHour, endMinute] = end_time.split(":").map(Number);
+
+    const utcStart = new Date(baseDate);
+    utcStart.setUTCHours(startHour, startMinute, 0, 0);
+
+    const utcEnd = new Date(baseDate);
+    utcEnd.setUTCHours(endHour, endMinute, 0, 0);
+    if (utcEnd <= utcStart) {
+      utcEnd.setUTCDate(utcEnd.getUTCDate() + 1);
+    }
+
+    const localStart = formatTime(utcStart, timeZone);
+    const localEnd = formatTime(utcEnd, timeZone);
+    const localDay = getLocalDayName(utcStart, timeZone);
+
+    const key = `from ${localStart} to ${localEnd}`;
+    if (!timeGroups[key]) timeGroups[key] = [];
+    timeGroups[key].push(localDay);
+  }
+
+  // Build readable strings
+  const output = Object.entries(timeGroups).map(([timeRange, days]) => {
+    const formattedDays =
+      days.length === 1
+        ? days[0]
+        : days.slice(0, -1).join(", ") + " and " + days[days.length - 1];
+    return `${timeRange} on ${formattedDays}`;
+  });
+
+  return output.join(", ");
+}

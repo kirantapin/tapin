@@ -1,16 +1,11 @@
-import React, { useEffect, useState } from "react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import { X, ChevronDown } from "lucide-react";
+import React, { useState } from "react";
+import { Sheet, SheetContent, SheetHeader } from "@/components/ui/sheet";
+import { X } from "lucide-react";
 import { Transaction, Restaurant } from "@/types";
 import { useAuth } from "@/context/auth_context";
-import { project_url, supabase, supabase_local } from "@/utils/supabase_client";
-import { QRCode } from "react-qrcode-logo";
-import { toast } from "react-toastify";
+import { supabase, supabase_local } from "@/utils/supabase_client";
+import QRCode from "react-qr-code";
+
 import { ItemUtils } from "@/utils/item_utils";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import CustomLogo from "../svg/custom_logo";
@@ -35,16 +30,31 @@ const QRModal: React.FC<QRModalProps> = ({
   const [verifyingState, setVerifyingState] = useState("");
   const [updatingTransactions, setUpdatingTransactions] = useState(false);
 
+  if (transactionsToRedeem.length > 4) {
+    triggerToast(
+      "Please try to redeem again with a fewer number of items.",
+      "error"
+    );
+    onClose();
+    return null;
+  }
+
   const formatTransactions = (): string => {
     const displayList = [];
     for (const transaction of transactionsToRedeem) {
-      displayList.push({
-        transaction_id: transaction.transaction_id,
-        item: transaction.item,
-      });
+      displayList.push(transaction.transaction_id);
     }
     return JSON.stringify(displayList);
   };
+
+  function determineErrorCorrectionLevel(value: string): "L" | "M" | "Q" | "H" {
+    const length = value.length;
+
+    if (length <= 50) return "L"; // light data
+    if (length <= 100) return "M"; // moderate
+    if (length <= 200) return "Q"; // dense
+    return "H"; // very dense, highest correction
+  }
 
   const formatCode = () => {
     const digitsOnly = codeEntered.replace(/\D/g, "");
@@ -80,7 +90,7 @@ const QRModal: React.FC<QRModalProps> = ({
         },
       }
     );
-    const { success, updatedTransactions, error } = response.data;
+    const { updatedTransactions } = response.data;
     if (response.error || response.data.error || !response.data.success) {
       setRedeemError("Failed to Redeem Transactions");
       setVerifyingState("");
@@ -176,7 +186,7 @@ const QRModal: React.FC<QRModalProps> = ({
     <Sheet open={isOpen} onOpenChange={async () => await modifiedOnClose()}>
       <SheetContent
         side="bottom"
-        className="h-[85vh] rounded-t-3xl [&>button]:hidden p-0 flex flex-col gap-0"
+        className="h-[80vh] rounded-t-3xl [&>button]:hidden p-0 flex flex-col gap-0"
       >
         <SheetHeader className="flex-none px-6 pt-6 pb-4 border-b">
           <div className="flex justify-between items-center">
@@ -206,14 +216,17 @@ const QRModal: React.FC<QRModalProps> = ({
 
           <div className="w-full aspect-square flex items-center justify-center rounded-xl">
             <QRCode
-              value={formatTransactions()}
+              size={256}
               style={{
-                width: "80%",
-                height: "80%",
-                maxWidth: "90%",
+                height: "auto",
+                maxWidth: "100%",
+                width: "100%",
+                padding: "30px",
               }}
-              qrStyle="dots"
-              eyeRadius={8}
+              value={formatTransactions()}
+              viewBox={`0 0 256 256`}
+              radius={15}
+              level={determineErrorCorrectionLevel(formatTransactions())}
             />
           </div>
 

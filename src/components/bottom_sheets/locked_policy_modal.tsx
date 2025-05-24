@@ -95,7 +95,7 @@ const LockedPolicyModal: React.FC<LockedPolicyModalProps> = ({
             className={`text-sm custom-line-clamp-1 -mr-10 ${
               !policyIsActive && totalMissingQuantity > 0
                 ? "text-red-500"
-                : "text-green-500"
+                : "text-[#40C4AA]"
             }`}
           >
             {policyIsActive

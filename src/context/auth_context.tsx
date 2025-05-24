@@ -9,6 +9,7 @@ import React, {
 import { Transaction, User } from "../types";
 import { supabase } from "../utils/supabase_client";
 import { Session } from "@supabase/supabase-js";
+import { TransactionUtils } from "@/utils/transaction_utils";
 
 // Create a context with default values (optional)
 interface AuthContextProps {
@@ -49,7 +50,11 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     fetchUserData(userSession?.user?.id ?? null);
-    fetchTransactionData(userSession?.user?.id ?? null);
+    TransactionUtils.fetchTransactionData(userSession?.user?.id ?? null).then(
+      (transactions) => {
+        setTransactions(transactions);
+      }
+    );
   }, [userSession]);
 
   // Fetch user data
@@ -70,32 +75,6 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       setUserData(data);
     } catch (error) {
       console.error("Error fetching user data:", error);
-    }
-  };
-
-  // Fetch transaction data
-  const fetchTransactionData = async (userId: string | null) => {
-    if (!userId) {
-      setTransactions([]);
-      return;
-    }
-    try {
-      const ninetyDaysAgo = new Date();
-      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
-      const formattedDate = ninetyDaysAgo.toISOString();
-
-      const { data, error } = await supabase
-        .from("transactions")
-        .select("*")
-        .eq("user_id", userId)
-        .gte("created_at", formattedDate)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      setTransactions(data);
-    } catch (error) {
-      setTransactions([]);
-      console.error("Error fetching transactions:", error);
     }
   };
 

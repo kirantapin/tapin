@@ -22,7 +22,6 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
   const { triggerToast } = useBottomSheet();
   // Handle phone number submission
   const handlePhoneSubmit = async (phone: string) => {
-    // Optional: format phone number, e.g. +1
     setPhoneNumber(phone);
 
     const { error } = await supabase.auth.signInWithOtp({
@@ -39,6 +38,7 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
 
   // Handle OTP verification
   const handleVerify = async (code: string) => {
+    console.log(phoneNumber);
     const { data: session, error } = await supabase.auth.verifyOtp({
       phone: phoneNumber,
       token: code,

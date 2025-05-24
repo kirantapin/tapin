@@ -24,7 +24,7 @@ const AccessCardSlider = ({
 }: {
   cart: Cart;
   restaurant: Restaurant;
-  addToCart: (item: Item) => Promise<void>;
+  addToCart: (item: Item, showToast?: boolean) => Promise<void>;
   removeFromCart: (itemId: number) => Promise<void>;
   displayCartPasses: boolean;
   dealEffect: DealEffectPayload | null;

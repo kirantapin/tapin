@@ -7,6 +7,7 @@ import {
   BundleItem,
   Category,
   Cart,
+  CartItem,
 } from "@/types";
 import {
   PASS_MENU_TAG,
@@ -162,9 +163,6 @@ export class ItemUtils {
     }
     return false;
   }
-  static isItemRedeemable(itemId: string, restaurant: Restaurant): boolean {
-    return !this.isBundleItem(itemId, restaurant);
-  }
   static isItemAvailable(
     item: Item,
     restaurant: Restaurant,
@@ -195,5 +193,8 @@ export class ItemUtils {
       }
     }
     return null;
+  }
+  static getCartItemFromId(id: number, cart: Cart): CartItem | null {
+    return cart.find((item) => item.id === id) || null;
   }
 }

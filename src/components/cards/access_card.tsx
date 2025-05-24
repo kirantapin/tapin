@@ -10,8 +10,8 @@ interface CardProps {
   cartItem: CartItem | null;
   restaurant: Restaurant;
   itemId: string;
-  addToCart: (item: Item) => void;
-  removeFromCart: (itemId: number) => void;
+  addToCart: (item: Item, showToast?: boolean) => Promise<void>;
+  removeFromCart: (itemId: number) => Promise<void>;
   modifiedFlair: {
     oldPrice: number | null;
     currentPrice: number;

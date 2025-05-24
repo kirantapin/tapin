@@ -22,14 +22,14 @@ import { useAuth } from "./auth_context";
 import BundleModal from "@/components/bottom_sheets/bundle_modal";
 import QRModal from "@/components/bottom_sheets/qr_modal";
 import { BundleUtils } from "@/utils/bundle_utils";
-import { toast } from "react-toastify";
-import { emptyDealEffect, MY_SPOT_PATH } from "@/constants";
+import { emptyDealEffect } from "@/constants";
 import { ItemUtils } from "@/utils/item_utils";
 import { CartManager } from "@/utils/cartManager";
 import ProfileModal from "@/components/bottom_sheets/profile_modal";
-import OrderHistoryModal from "@/components/display_utils/order_history";
 import SignInModal from "@/components/bottom_sheets/signin_modal";
 import LockedPolicyModal from "@/components/bottom_sheets/locked_policy_modal";
+import AllBundlesModal from "@/components/bottom_sheets/all_bundles_modal";
+import LiquorFormModal from "@/components/bottom_sheets/liquor_form_modal";
 
 // Define the shape of your sheet registry: keys → sheet components
 type SheetMap = Record<string, FC<any>>;
@@ -52,7 +52,7 @@ interface BottomSheetContextValue {
     policy_id: string,
     userPreference: string | null
   ) => Promise<void>;
-  addToCart: (item: Item) => Promise<void>;
+  addToCart: (item: Item, showToast?: boolean) => Promise<void>;
   removeFromCart: (id: number) => Promise<void>;
   removePolicy: (policy_id: string) => Promise<void>;
   refreshCart: () => Promise<string | null>;
@@ -63,6 +63,8 @@ interface BottomSheetContextValue {
   openProfileModal: () => void;
   openLockedPolicyModal: (policy: Policy) => void;
   triggerToast: (message: string, type: "success" | "error" | "info") => void;
+  openAllBundlesModal: () => void;
+  openLiquorFormModal: (type: string) => void;
 }
 
 const BottomSheetContext = createContext<BottomSheetContextValue>({
@@ -93,6 +95,8 @@ const BottomSheetContext = createContext<BottomSheetContextValue>({
   openProfileModal: () => {},
   openLockedPolicyModal: () => {},
   triggerToast: () => {},
+  openAllBundlesModal: () => {},
+  openLiquorFormModal: (type: string) => {},
 });
 
 interface BottomSheetProviderProps {
@@ -133,6 +137,11 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
     policy: Policy;
     bundle_id: string;
   } | null>(null);
+  const [showAllBundlesModal, setShowAllBundlesModal] = useState(false);
+  const [showLiquorFormModal, setShowLiquorFormModal] = useState<{
+    type: string;
+  } | null>(null);
+
   const handlePolicyClick = (
     policy: Policy,
     userOwnershipMap: Record<string, string | null>
@@ -223,6 +232,26 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
     }, 200); // Wait for animation to complete
   };
 
+  const openLiquorFormModal = (type: string) => {
+    if (isOpen) {
+      closeSheet();
+    }
+    setTimeout(() => {
+      setShowLiquorFormModal({ type });
+      setIsOpen(true);
+    }, 200); // Wait for animation to complete
+  };
+
+  const openAllBundlesModal = () => {
+    if (isOpen) {
+      closeSheet();
+    }
+    setTimeout(() => {
+      setShowAllBundlesModal(true);
+      setIsOpen(true);
+    }, 200);
+  };
+
   const openLockedPolicyModal = (policy: Policy, bundle_id: string) => {
     if (isOpen) {
       closeSheet();
@@ -242,6 +271,8 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
       setShowSignInModal(false);
       setShowProfile(false);
       setLockedPolicyModal(null);
+      setShowAllBundlesModal(false);
+      setShowLiquorFormModal(false);
     }, 200);
   };
 
@@ -265,6 +296,8 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
         openSignInModal,
         openProfileModal,
         triggerToast,
+        openAllBundlesModal,
+        openLiquorFormModal,
       }}
     >
       {children}
@@ -309,6 +342,14 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
       <SignInModal isOpen={showSignInModal} onClose={closeSheet} />
 
       <ProfileModal isOpen={showProfile} onClose={closeSheet} />
+      <AllBundlesModal isOpen={showAllBundlesModal} onClose={closeSheet} />
+      {showLiquorFormModal && (
+        <LiquorFormModal
+          isOpen={isOpen}
+          onClose={closeSheet}
+          type={showLiquorFormModal.type}
+        />
+      )}
     </BottomSheetContext.Provider>
   );
 };

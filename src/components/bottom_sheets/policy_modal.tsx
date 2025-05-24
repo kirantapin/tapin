@@ -20,7 +20,7 @@ import { titleCase } from "title-case";
 import { PolicyDescriptionDisplay } from "@/components/display_utils/policy_description_display";
 import { getMissingItemsForPolicy } from "@/utils/item_recommender";
 import { PolicyManager } from "@/utils/policy_manager";
-import { DRINK_CHECKOUT_PATH, LOYALTY_REWARD_TAG } from "@/constants";
+import { DRINK_CHECKOUT_PATH } from "@/constants";
 import { useNavigate } from "react-router-dom";
 import { ItemUtils } from "@/utils/item_utils";
 import { adjustColor } from "@/utils/color";
@@ -266,7 +266,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
           </div>
         </div>
 
-        <div className="mt-4 mb-2 pt-4 fixed bottom-0 left-0 right-0 px-6 pb-4 bg-white border-t-0">
+        <div className="mt-4 pt-4 fixed bottom-0 left-0 right-0 px-6 pb-4 bg-white border-t-0">
           {userSession ? (
             <button
               className="w-full text-white py-3 rounded-full flex items-center justify-center gap-2"

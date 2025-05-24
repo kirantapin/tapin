@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
-import { Plus, Trash2, Minus, Check } from "lucide-react";
+import { Plus, Trash2, Minus, Check, Sparkles } from "lucide-react";
 import {
   HOUSE_MIXER_LABEL,
+  LIQUOR_MENU_TAG,
   MENU_DISPLAY_MAP,
   PASS_MENU_TAG,
   SHOTS_SHOOTERS_LABEL,
@@ -19,9 +20,12 @@ import {
 } from "@/types";
 import { project_url } from "@/utils/supabase_client";
 import { ItemUtils } from "@/utils/item_utils";
-import { adjustColor } from "@/utils/color";
 import { useAuth } from "@/context/auth_context";
 import { convertUtcToLocal } from "@/utils/time";
+import { useBottomSheet } from "@/context/bottom_sheet_context";
+import { SuggestedMenuItems } from "./display_utils/suggested_menu_items";
+import { isEqual } from "lodash";
+import { PolicyUtils } from "@/utils/policy_utils";
 
 export function DrinkItem({
   cart,
@@ -40,16 +44,20 @@ export function DrinkItem({
 }) {
   const primaryColor = restaurant.metadata.primaryColor as string;
   const menuItem = ItemUtils.getMenuItemFromItemId(item.id, restaurant);
+  const [loading, setLoading] = useState(false);
+
+  if (!menuItem || !menuItem.price) {
+    return null;
+  }
   const isPass = ItemUtils.isPassItem(item.id, restaurant);
 
   const cartItem = cart.find((cartItem) => cartItem.item.id === item.id);
   const quantity = cart.reduce(
     (total, cartItem) =>
-      cartItem.item.id === item.id ? total + cartItem.quantity : total,
+      isEqual(cartItem.item, item) ? total + cartItem.quantity : total,
     0
   );
 
-  const [loading, setLoading] = useState(false);
   return (
     <div
       className={`flex-none flex items-stretch m-3 border p-3 rounded-3xl bg-white transition-colors duration-300 ${
@@ -252,7 +260,7 @@ export function LoyaltyRewardItem({
       )} of credit`,
       price: policy.definition.action.amount,
       image_url: `${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`,
-    };
+    } as NormalItem;
   }
   if (policy.definition.action.type === "add_free_item") {
     const itemIds = ItemUtils.policyItemSpecificationsToItemIds(
@@ -261,6 +269,10 @@ export function LoyaltyRewardItem({
     );
     itemId = itemIds[0];
     menuItem = ItemUtils.getMenuItemFromItemId(itemId, restaurant);
+  }
+
+  if (!menuItem) {
+    return null;
   }
   const isPass = itemId ? ItemUtils.isPassItem(itemId, restaurant) : false;
 
@@ -285,7 +297,7 @@ export function LoyaltyRewardItem({
         <div>
           <div className="flex justify-between items-start">
             <h3 className="font-bold text-base">
-              {titleCase((menuItem as NormalItem | PassItem)?.name)}
+              {titleCase(PolicyUtils.getPolicyName(policy, restaurant))}
             </h3>
             {isPass && (
               <span className="text-xs text-gray-500 ml-2">
@@ -325,7 +337,7 @@ export function LoyaltyRewardItem({
             >
               {isActive ? (
                 <div className="flex items-center gap-1">
-                  <Check className="w-4 h-4 text-green-500" />
+                  <Check className="w-4 h-4 text-[#40C4AA]" />
                   <span>Active</span>
                 </div>
               ) : (
@@ -441,6 +453,7 @@ export const DrinkList = ({
   removeFromCart: (id: number) => Promise<void>;
   setActiveLabel: (label: string) => void;
 }) => {
+  const { openLiquorFormModal } = useBottomSheet();
   const labelRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const isInitialMount = useRef(true);
 
@@ -475,6 +488,28 @@ export const DrinkList = ({
     }
   }, [label]);
 
+  const houseMixerFilters = [
+    (object: any) => {
+      return object.modifiers?.some((modifier: string) =>
+        modifier.toLowerCase().includes("with")
+      );
+    },
+    (object: any) => {
+      return restaurant.menu[object.id].path.includes(LIQUOR_MENU_TAG);
+    },
+  ];
+
+  const shotsShootersFilters = [
+    (object: any) => {
+      return !object.modifiers?.some((modifier: string) =>
+        modifier.toLowerCase().includes("with")
+      );
+    },
+    (object: any) => {
+      return restaurant.menu[object.id].path.includes(LIQUOR_MENU_TAG);
+    },
+  ];
+
   return (
     <div className="space-y-4  overflow-y-auto scroll-smooth no-scrollbar">
       <div className="pb-20">
@@ -498,12 +533,32 @@ export const DrinkList = ({
               <div className="space-y-2">
                 {menuLabel === HOUSE_MIXER_LABEL ||
                 menuLabel === SHOTS_SHOOTERS_LABEL ? (
-                  <LiquorForm
-                    type={menuLabel}
-                    restaurant={restaurant}
-                    addToCart={addToCart}
-                    primaryColor={restaurant.metadata.primaryColor as string}
-                  />
+                  <div className="space-y-4">
+                    <SuggestedMenuItems
+                      type={menuLabel}
+                      filters={
+                        menuLabel === HOUSE_MIXER_LABEL
+                          ? houseMixerFilters
+                          : shotsShootersFilters
+                      }
+                    />
+                    <div className="px-3">
+                      <button
+                        onClick={() => {
+                          openLiquorFormModal(menuLabel);
+                        }}
+                        className="w-full text-center text-md text-gray-500 rounded-full border border-gray-200 py-3 px-4 mx-auto block flex items-center justify-center"
+                        style={{
+                          color: restaurant.metadata.primaryColor as string,
+                          borderColor: restaurant.metadata
+                            .primaryColor as string,
+                        }}
+                      >
+                        <Sparkles className="w-6 h-6 mr-2" />
+                        Make A Drink
+                      </button>
+                    </div>
+                  </div>
                 ) : (
                   drinksForLabel.map(({ id }) => (
                     <DrinkItem

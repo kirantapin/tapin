@@ -13,7 +13,7 @@ export class BundleUtils {
   ): Promise<{ bundle: Bundle; bundlePolicies: string[] }[]> => {
     if (!restaurantId) return [];
     const { data, error } = await supabase
-      .from<"bundles", Bundle>("bundles")
+      .from("bundles")
       .select("*")
       .eq("restaurant_id", restaurantId)
       .or(
@@ -48,13 +48,16 @@ export class BundleUtils {
         : { data: [], error: null };
 
     // Group policies by bundle_id
-    const policyMap = policies.reduce((acc: Record<string, string[]>, curr) => {
-      if (!acc[curr.bundle_id]) {
-        acc[curr.bundle_id] = [];
-      }
-      acc[curr.bundle_id].push(curr.policy_id);
-      return acc;
-    }, {});
+    const policyMap = (policies ?? []).reduce(
+      (acc: Record<string, string[]>, curr) => {
+        if (!acc[curr.bundle_id]) {
+          acc[curr.bundle_id] = [];
+        }
+        acc[curr.bundle_id].push(curr.policy_id);
+        return acc;
+      },
+      {}
+    );
 
     return relevantBundles.map((bundle) => ({
       bundle,

@@ -1,5 +1,6 @@
 import { DRINK_CHECKOUT_PATH, RESTAURANT_IMAGE_BUCKET } from "@/constants";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
+import { useRestaurant } from "@/context/restaurant_context";
 import { project_url } from "@/utils/supabase_client";
 import { Menu, ShoppingBag, User } from "lucide-react";
 import { useState } from "react";
@@ -13,6 +14,7 @@ export function Hero({
   restaurant_id: string;
   setSidebarOpen: (open: boolean) => void;
 }) {
+  const { restaurant } = useRestaurant();
   const { openProfileModal } = useBottomSheet();
   const navigate = useNavigate();
 
@@ -84,16 +86,18 @@ export function Hero({
         </div>
       </div>
       {/* Profile Image */}
-      <div className="absolute -bottom-5" style={{ left: "18px" }}>
-        {/* Moved further down */}
-        <div className="w-24 h-24 rounded-full border-2 border-white  overflow-hidden shadow-2xl">
-          <img
-            src={`${project_url}/storage/v1/object/public/${RESTAURANT_IMAGE_BUCKET}/${restaurant_id}_profile.png`}
-            alt="Profile"
-            className="w-full h-full object-cover"
-          />
+      {restaurant && (
+        <div className="absolute -bottom-5" style={{ left: "18px" }}>
+          {/* Moved further down */}
+          <div className="w-24 h-24 rounded-full border-2 border-white  overflow-hidden shadow-2xl">
+            <img
+              src={`${project_url}/storage/v1/object/public/${RESTAURANT_IMAGE_BUCKET}/${restaurant_id}_profile.png`}
+              alt="Profile"
+              className="w-full h-full object-cover"
+            />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

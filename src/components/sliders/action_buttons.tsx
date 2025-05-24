@@ -1,4 +1,4 @@
-import { Beer, Info, Gift, Star, MapPin } from "lucide-react";
+import { Beer, Info, Gift, Star, MapPin, HandCoins } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { GradientIcon } from "@/utils/gradient";
 import {
@@ -6,6 +6,7 @@ import {
   OFFERS_PAGE_PATH,
   LOYALTY_REWARD_TAG,
   NORMAL_DEAL_TAG,
+  MY_SPOT_PATH,
 } from "@/constants";
 import { useRestaurant } from "@/context/restaurant_context";
 
@@ -55,6 +56,24 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
         />
         <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
           Rewards
+        </span>
+      </button>
+
+      <button
+        className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-300 bg-white"
+        onClick={() =>
+          navigate(MY_SPOT_PATH.replace(":id", restaurant.id), {
+            state: { type: "My Bundles" },
+          })
+        }
+      >
+        <GradientIcon
+          icon={HandCoins}
+          primaryColor={restaurant?.metadata.primaryColor as string}
+          size={17}
+        />
+        <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
+          Bundles
         </span>
       </button>
       <button

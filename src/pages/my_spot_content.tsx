@@ -11,6 +11,7 @@ import { adjustColor, setThemeColor } from "@/utils/color";
 import ManageBundles from "@/components/manage_bundles";
 import { MySpotSkeleton } from "@/components/skeletons/my_spot_skeleton";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
+import GoToCartButton from "@/components/go_to_cart_button";
 
 const tagMap: Record<string, { tag: string; icon: any }> = {
   Passes: { tag: "Passes", icon: Ticket },
@@ -22,6 +23,7 @@ const MySpotContent: React.FC = () => {
   const { transactions } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  console.log(location.state);
   const { id } = useParams();
   const [type, setType] = useState<string>(location.state?.type || "Passes");
   const [activeFilter, setActiveFilter] = useState<string>(
@@ -199,7 +201,7 @@ const MySpotContent: React.FC = () => {
       ) : (
         <>
           {/* Transactions List */}
-          <ul className="bg-white rounded-lg overflow-hidden space-y-6 pb-24">
+          <ul className="bg-white rounded-lg overflow-hidden space-y-4 pb-24">
             {Object.entries(groupedTransactions).map(
               ([key, { transactions, maxQuantity, currentQuantity }]) => {
                 const existingItem = ItemUtils.getMenuItemFromItemId(

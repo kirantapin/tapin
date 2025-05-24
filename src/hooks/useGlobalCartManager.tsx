@@ -110,14 +110,15 @@ export function useGlobalCartManager(
   }, [restaurant, userSession]);
 
   // Cart operations
-  const addToCart = async (item: Item): Promise<void> => {
-    console.log(cartManagerRef.current);
+  const addToCart = async (item: Item, showToast?: boolean): Promise<void> => {
     if (!cartManagerRef.current || !restaurant) return;
     const result = await cartManagerRef.current.addToCart(item);
-    console.log(result);
     if (result) {
       triggerToast(result, "error");
     } else {
+      if (showToast) {
+        triggerToast("Item added to cart", "success");
+      }
       dispatch(cartManagerRef.current.getCartState());
     }
   };

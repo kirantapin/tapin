@@ -3,8 +3,7 @@ import { Bundle, BundleItem, Policy, Restaurant } from "@/types";
 import { project_url } from "@/utils/supabase_client";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckIcon } from "lucide-react";
-import { adjustColor } from "@/utils/color";
+import { CheckIcon, CircleX, Wallet } from "lucide-react";
 import {
   BUNDLE_IMAGE_BUCKET,
   MY_SPOT_PATH,
@@ -14,6 +13,8 @@ import { ItemUtils } from "@/utils/item_utils";
 import { useRestaurant } from "@/context/restaurant_context";
 import { BundleUtils } from "@/utils/bundle_utils";
 import CustomIcon from "../svg/custom_icon";
+import SmallPolicyCard from "./small_policy_card";
+import { GradientIcon } from "@/utils/gradient";
 const BundleCard = ({
   restaurant,
   bundleId,
@@ -22,7 +23,7 @@ const BundleCard = ({
 }: {
   restaurant: Restaurant;
   bundleId: string;
-  isOwned: boolean;
+  isOwned: string | null;
   onCardClick: (bundle: Bundle) => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -58,98 +59,120 @@ const BundleCard = ({
     restaurant,
     childPolicies
   );
+  const isBundleValueGreaterThanPrice = savedBundleValue + 5 > bundle.price;
   const baseUrl = `${project_url}/storage/v1/object/public`;
 
   return (
     <div className="mt-1">
-      <div className="flex justify-center items-center p-4">
-        <div className="w-full max-w-[380px] rounded-[24px] overflow-hidden bg-white shadow-md border border-gray-400 ">
-          <div className="p-4 pb-0">
-            <div className="relative w-full h-[180px] rounded-2xl overflow-hidden border border-gray-400">
-              <img
-                src={`${baseUrl}/${BUNDLE_IMAGE_BUCKET}/${bundle.bundle_id}.jpeg`}
-                onError={(e) => {
-                  e.currentTarget.src = `${baseUrl}/${RESTAURANT_IMAGE_BUCKET}/${restaurant.id}_profile.png`;
-                  setIsFallback(true);
-                }}
-                alt="Bundle"
-                className={`w-full h-[180px] ${
-                  isFallback
-                    ? "object-contain bg-gray-100 py-2"
-                    : "object-cover"
-                }`}
-                style={{
-                  backgroundColor: isFallback ? "#f3f4f6" : undefined, // Tailwind gray-100
-                }}
-              />
+      <div className="flex items-start p-3">
+        <div className="w-full max-w-[340px] rounded-[24px] overflow-hidden bg-white shadow-md border border-gray-400">
+          <div className="relative w-full h-[160px]">
+            <img
+              src={`${baseUrl}/${BUNDLE_IMAGE_BUCKET}/${bundle.bundle_id}.jpeg`}
+              onError={(e) => {
+                e.currentTarget.src = `${baseUrl}/${RESTAURANT_IMAGE_BUCKET}/${restaurant.id}_profile.png`;
+                setIsFallback(true);
+              }}
+              alt="Bundle"
+              className={`w-full h-[160px] ${
+                isFallback ? "object-contain bg-gray-100 py-2" : "object-cover"
+              }`}
+              style={{
+                backgroundColor: isFallback ? "#f3f4f6" : undefined,
+              }}
+            />
 
-              <div
-                className="absolute bottom-3 left-3 bg-black/80 border  rounded-[20px] p-[6px_12px] flex items-center gap-[6px]"
-                style={{
-                  borderColor: restaurant?.metadata.primaryColor as string,
-                }}
-              >
-                <CustomIcon
-                  circleColor={restaurant?.metadata.primaryColor as string}
-                  baseColor="white"
-                  size={16}
-                />
-                <span className="text-white text-sm font-medium">
-                  Tap In Exclusive
-                </span>
-              </div>
+            <div className="absolute -bottom-6 right-4 bg-white rounded-full px-5 py-2 shadow-md">
+              <span className="text-xl font-semibold text-gray-800">
+                ${bundle.price}
+              </span>
             </div>
           </div>
 
-          <div className="p-4">
-            <div className="flex justify-between items-start mb-4">
+          <div className="p-4 pt-4">
+            <div className="flex justify-between items-start mb-0">
               <div className="flex-1">
-                <h2 className="text-2xl font-semibold m-0 text-gray-800">
+                <h2 className="text-xl font-semibold m-0 text-gray-800">
                   {bundle.name}
                 </h2>
-                <p className="text-md text-green-500 mt-1">
-                  Save around ${Math.round(savedBundleValue)} with this Bundle
-                </p>
-              </div>
-              <div className="flex flex-col items-end">
-                <span className="text-2xl font-semibold text-gray-800">
-                  ${bundle.price}
-                </span>
-                <span className="text-base text-gray-400 line-through">
-                  ${Math.round(savedBundleValue + bundle.price) - 0.01}
-                </span>
               </div>
             </div>
 
-            <div className="mb-5 min-h-[140px]">
-              <p className="text-base font-semibold mb-2 text-gray-700">
-                Includes:
-              </p>
-              <ul className="list-disc pl-5 m-0">
-                <li className="text-[15px] h-[30px] text-gray-700">
-                  ${bundle.fixed_credit} Credit
-                </li>
-                <li className="text-[15px] h-[30px] text-gray-700">
-                  {bundle.point_multiplier}x Point Multiplier
-                </li>
-                {childPolicies.length > 0 && (
-                  <h2 className="text-base font-semibold mb-2 text-gray-700">
-                    Exclusive Access To
-                  </h2>
-                )}
-                {childPolicies.map((policy, index) => (
-                  <li
+            <div className="mb-5">
+              <div className="grid grid-cols-2 gap-2 mt-2 mb-4">
+                {/* Credits Box */}
+                <div className="flex flex-col h-[48px] px-4 rounded-xl bg-white border border-gray-300 shadow-md">
+                  <div className="flex items-center gap-2 h-full">
+                    <GradientIcon
+                      icon={Wallet}
+                      primaryColor={restaurant?.metadata.primaryColor as string}
+                      size={20}
+                    />
+                    <span
+                      className="text-sm font-bold"
+                      style={{
+                        color: restaurant?.metadata.primaryColor as string,
+                      }}
+                    >
+                      ${bundle.fixed_credit.toFixed(2)} Credit
+                    </span>
+                  </div>
+                </div>
+
+                {/* Points Box */}
+                <div className="flex flex-col h-[48px] px-4 rounded-xl bg-white border border-gray-300 shadow-md">
+                  <div className="flex items-center gap-2 h-full">
+                    <GradientIcon
+                      icon={CircleX}
+                      primaryColor={restaurant?.metadata.primaryColor as string}
+                      size={20}
+                    />
+                    <span
+                      className="text-sm font-bold"
+                      style={{
+                        color: restaurant?.metadata.primaryColor as string,
+                      }}
+                    >
+                      {bundle.point_multiplier}x Points
+                    </span>
+                  </div>
+                </div>
+              </div>
+              {childPolicies.length > 0 && (
+                <h2 className="text-base font-semibold mb-2 text-gray-700">
+                  Access To
+                </h2>
+              )}
+              <div className="flex flex-col gap-0">
+                {childPolicies.map((policy) => (
+                  <div
                     key={policy.policy_id}
-                    className="text-[15px] text-gray-700"
+                    className="flex items-center gap-2"
                     style={{
                       height: childPolicies.length <= 3 ? "30px" : "auto",
                       marginBottom: childPolicies.length > 3 ? "8px" : "0",
                     }}
                   >
-                    {policy.name}
-                  </li>
+                    <CheckIcon
+                      size={20}
+                      strokeWidth={3}
+                      color={restaurant?.metadata.primaryColor as string}
+                      className="text-gray-700 mb-[6px]"
+                    />
+                    <p
+                      key={policy.policy_id}
+                      className="text-[15px] text-gray-700"
+                      style={{
+                        height: childPolicies.length <= 3 ? "30px" : "auto",
+                        marginBottom: childPolicies.length > 3 ? "8px" : "0",
+                      }}
+                    >
+                      {policy.name}
+                    </p>
+                  </div>
                 ))}
-                {childPolicies.length <= 2 && (
+              </div>
+              {/* {childPolicies.length <= 2 && (
                   <>
                     {[...Array(3 - childPolicies.length)].map((_, i) => (
                       <li
@@ -160,17 +183,12 @@ const BundleCard = ({
                       </li>
                     ))}
                   </>
-                )}
-              </ul>
+                )} */}
             </div>
 
             <div className="mt-4">
-              <p className="text-sm text-gray-600 mb-4 text-left">
-                Lasts {bundle.duration} {bundle.duration > 1 ? "Days" : "Day"} •
-                One-Time Purchase
-              </p>
               <button
-                className="w-full bg-[linear-gradient(225deg,#CAA650,#F4E4A8)] text-white border-none rounded-full py-[14px] text-base font-medium enhance-contrast"
+                className="w-full text-white border-none rounded-full py-[12px] text-base font-semibold enhance-contrast"
                 style={{
                   background: restaurant?.metadata.primaryColor as string,
                 }}
@@ -191,9 +209,13 @@ const BundleCard = ({
                     <span>View your Bundle</span>
                   </div>
                 ) : (
-                  "View this Bundle"
+                  "View Bundle"
                 )}
               </button>
+              <p className="text-sm text-gray-600 mt-4 text-center">
+                Lasts {bundle.duration} {bundle.duration > 1 ? "Days" : "Day"} •
+                One-Time Purchase
+              </p>
             </div>
           </div>
         </div>

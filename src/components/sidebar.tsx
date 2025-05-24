@@ -61,7 +61,6 @@ export const Sidebar = ({ restaurant, isOpen, onClose }: SidebarProps) => {
     }
     onClose();
     navigate(RESTAURANT_PATH.replace(":id", restaurantId));
-    window.location.reload();
   };
 
   return (

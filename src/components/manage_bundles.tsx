@@ -9,6 +9,7 @@ import BundleSlider from "./sliders/bundle_slider";
 import { PolicyCard } from "./cards/policy_card";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { GradientIcon } from "@/utils/gradient";
+import GoToCartButton from "./go_to_cart_button";
 interface ManageBundlesProps {
   restaurant: Restaurant;
 }
@@ -138,7 +139,7 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
               </div>
               <div className="grid grid-cols-2 gap-4 mt-4">
                 {/* Points Box */}
-                <div className="flex flex-col justify-between p-4 rounded-xl bg-gray-100 h-24">
+                <div className="flex flex-col justify-between p-4 rounded-xl bg-white h-24 border border-gray-200">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-500 font-medium">
                       Points
@@ -155,7 +156,7 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
                 </div>
 
                 {/* Credits Box */}
-                <div className="flex flex-col justify-between p-4 rounded-xl bg-gray-100 h-24">
+                <div className="flex flex-col justify-between p-4 rounded-xl bg-white h-24 border border-gray-200">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-500 font-medium">
                       Credit Earned
@@ -236,12 +237,18 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
         );
       })}
 
-      {Object.values(userOwnershipMap).some((value) => value === false) && (
-        <div className="mt-8 px-4">
-          <h1 className="text-xl font-bold">Other Bundles You Might Like</h1>
+      {Object.values(userOwnershipMap).some((value) => value === null) && (
+        <div className="mt-6 px-4 mb-8">
+          <h1 className="text-xl font-bold">Bundles You Might Like</h1>
           <BundleSlider />
         </div>
       )}
+      <GoToCartButton
+        restaurant={restaurant}
+        cartCount={
+          state.cart.reduce((total, item) => total + item.quantity, 0) || 0
+        }
+      />
     </div>
   );
 };

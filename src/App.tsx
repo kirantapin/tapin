@@ -38,8 +38,9 @@ const App: React.FC = () => {
         pauseOnHover={false}
         stacked
         className="w-full"
-        style={{ width: "100%" }}
+        style={{ width: "100%", top: 0, marginTop: 0, paddingTop: 0 }}
       />
+
       <Routes>
         <Route
           path={BASE_PATH}

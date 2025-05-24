@@ -17,7 +17,7 @@ export const DEVICE_NOT_SUPPORTED_PATH = "/device-not-supported";
 export const emptyDealEffect: DealEffectPayload = {
   addedItems: [],
   modifiedItems: [],
-  wholeCartModification: null,
+  wholeCartModification: [],
 };
 
 //error messages
@@ -72,6 +72,7 @@ export const HISTORY_KEY = "history";
 export const RESTAURANT_IMAGE_BUCKET = "restaurant_images";
 export const BUNDLE_IMAGE_BUCKET = "bundle-images";
 export const ITEM_IMAGE_BUCKET = "item-images";
+export const HIGHLIGHT_IMAGE_BUCKET = "highlight-images";
 
 export const POINTS_PER_DOLLAR = 10;
 export const STRIPE_MIN_AMOUNT = 50; //50 cents

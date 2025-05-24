@@ -213,21 +213,19 @@ export class CartManager {
   public getActivePolicies(): string[] {
     const policyIds = this.dealEffect.modifiedItems
       .map((item) => item.policy_id)
-      .concat(this.dealEffect.addedItems.map((item) => item.policy_id));
-    if (this.dealEffect.wholeCartModification?.policy_id) {
-      policyIds.push(this.dealEffect.wholeCartModification.policy_id);
-    }
+      .concat(this.dealEffect.addedItems.map((item) => item.policy_id))
+      .concat(
+        this.dealEffect.wholeCartModification.map((item) => item.policy_id)
+      );
+
     return policyIds;
   }
 
   public async refresh(): Promise<string | null> {
-    console.log("refreshing cart");
     await this.verifyOrder(REFRESH, "");
     if (this.errorDisplay) {
-      console.log("error refreshing cart", this.errorDisplay);
       return this.errorDisplay;
     }
-    console.log("refreshed cart", this.getCartState());
     return null;
   }
 

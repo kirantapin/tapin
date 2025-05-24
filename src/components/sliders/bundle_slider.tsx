@@ -104,18 +104,14 @@ const BundleSlider = () => {
       <div className="-mx-4">
         <div
           ref={scrollContainerRef}
-          className="overflow-x-auto snap-x snap-mandatory no-scrollbar scrollbar-hide "
+          className="overflow-x-auto snap-x snap-mandatory no-scrollbar"
           onScroll={handleScroll}
-          onWheel={() => {
-            handleUserInteraction();
-          }}
-          onTouchStart={() => {
-            handleUserInteraction();
-          }}
+          onWheel={handleUserInteraction}
+          onTouchStart={handleUserInteraction}
         >
-          <div className="flex gap-4">
-            {bundlesToDisplay.map((bundleId, index) => (
-              <div key={bundleId} className="snap-center shrink-0 w-full">
+          <div className="flex justify-center gap-0 w-max px-[calc(7.5vw)]">
+            {bundlesToDisplay.map((bundleId) => (
+              <div key={bundleId} className="snap-center w-[85vw] shrink-0">
                 <BundleCard
                   restaurant={restaurant as Restaurant}
                   bundleId={bundleId}

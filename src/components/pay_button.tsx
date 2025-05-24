@@ -18,7 +18,15 @@ import { useBottomSheet } from "@/context/bottom_sheet_context";
 const stripePublishableKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || "";
 const stripePromise = loadStripe(stripePublishableKey);
 
-const StripePayButton = ({ payload, refresh, clearCart }) => {
+const StripePayButton = ({
+  payload,
+  refresh,
+  clearCart,
+}: {
+  payload: any;
+  refresh: () => Promise<string | null>;
+  clearCart: () => void;
+}) => {
   const stripe = useStripe();
   const elements = useElements();
   const { setTransactions, setUserData } = useAuth();
@@ -116,7 +124,6 @@ const StripePayButton = ({ payload, refresh, clearCart }) => {
       console.error("Unexpected Error:", err);
     }
   };
-
   return payload ? (
     <div>
       {payload && (
@@ -136,6 +143,8 @@ const StripePayButton = ({ payload, refresh, clearCart }) => {
             },
             layout: {
               type: "auto",
+              maxColumns: 1,
+              overflow: "auto",
             },
           }}
           onReady={(event) => {
@@ -155,7 +164,15 @@ const StripePayButton = ({ payload, refresh, clearCart }) => {
   );
 };
 
-function PayButton({ payload, refresh, clearCart }) {
+function PayButton({
+  payload,
+  refresh,
+  clearCart,
+}: {
+  payload: any;
+  refresh: () => Promise<string | null>;
+  clearCart: () => void;
+}) {
   if (payload.totalWithTip <= 0) {
     return (
       <RedeemButton payload={payload} refresh={refresh} clearCart={clearCart} />
@@ -178,14 +195,13 @@ function PayButton({ payload, refresh, clearCart }) {
 
   return (
     <Elements
+      key={payload.totalWithTip}
       stripe={stripePromise}
       options={{
         mode: "payment",
         amount: payload.totalWithTip,
         currency: "usd",
-        appearance: {
-          // Customize with Stripe's Appearance API
-        },
+        appearance: {},
       }}
     >
       <StripePayButton

@@ -33,7 +33,6 @@ export default function RestaurantPage() {
   const location = useLocation();
   const {
     restaurant,
-    loading,
     setCurrentRestaurantId,
     policyManager,
     userOwnershipMap,
@@ -101,7 +100,7 @@ export default function RestaurantPage() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
-  if (loading || !restaurant) {
+  if (!restaurant) {
     return <LoadingPage />;
   }
   return (
@@ -144,8 +143,8 @@ export default function RestaurantPage() {
         {/* Highlight Slider */}
 
         <HighlightSlider
-          addToCart={(itemId: string) => {
-            addToCart({ id: itemId, modifiers: [] });
+          addToCart={async (itemId: string) => {
+            await addToCart({ id: itemId, modifiers: [] }, true);
           }}
           policies={policies || []}
         />

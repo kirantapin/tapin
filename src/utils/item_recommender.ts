@@ -14,7 +14,7 @@ function isCartItemAffectedByPolicy(
 ) {
   const { id } = cartItem;
   const { addedItems, modifiedItems } = dealEffect;
-  if (addedItems.find((item) => item.cartItem.id === id)) {
+  if (addedItems.find((item) => item.id === id)) {
     return true;
   }
   if (modifiedItems.find((item) => item.id === id)) {

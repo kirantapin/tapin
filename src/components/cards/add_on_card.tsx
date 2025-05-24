@@ -54,7 +54,7 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
         />
         {active ? (
           <div className="absolute bottom-2 right-2 flex items-center justify-center bg-white h-7 w-7 rounded-full">
-            <Check className="w-4 h-4 text-green-500" />
+            <Check className="w-4 h-4 text-[#40C4AA]" />
           </div>
         ) : (
           <button

@@ -57,29 +57,21 @@ export type CartResultsPayload = {
   totalPoints: number;
   totalPointCost: number;
 } | null;
-
 export interface DealEffectPayload {
-  addedItems: {
-    bundle_id: string | null;
-    policy_id: string;
-    userPreference: string | null;
-    cartItem: CartItem;
-  }[];
+  addedItems: AddedItem[];
   modifiedItems: ModifiedCartItem[];
-  wholeCartModification: WholeCartModification | null;
-  metadata: {
-    wholeCartPointCost: number;
-  };
+  wholeCartModification: WholeCartModification[];
 }
 
 export type WholeCartModification = {
   policy_id: string;
   bundle_id: string | null;
-  modificationType:
+  type:
     | "apply_fixed_order_discount"
     | "apply_order_percent_discount"
     | "apply_order_point_multiplier"
-    | "add_to_user_credit";
+    | "add_to_user_credit"
+    | "add_to_point_cost";
   amount: number;
 };
 
@@ -87,10 +79,23 @@ export interface ModifiedCartItem {
   id: number;
   policy_id: string;
   bundle_id: string | null;
-  modificationType: string;
+  type: string;
   amount: number;
   quantity: number;
   maxEffectedItems: number | null;
+  itemSpec: ItemSpecification[] | null;
+}
+
+export interface AddedItem {
+  id: number;
+  type: string;
+  bundle_id: string | null;
+  policy_id: string;
+  item: Item;
+  quantity: number;
+  maxEffectedItems: number | null;
+  itemSpec: ItemSpecification[];
+  changedFields: Partial<Pick<CartItem, "price" | "points">>;
 }
 
 export interface CartItem {
@@ -190,8 +195,8 @@ export interface Pass {
 export interface Highlight {
   highlight_id: string;
   restaurant_id: string;
-  content_type: "item" | "policy" | "bundle";
-  content_pointer: string;
+  content_type: "item" | "policy" | "bundle" | "media";
+  content_pointer: string | null;
   title_override: string;
   description_override: string;
   image_url_override: string;

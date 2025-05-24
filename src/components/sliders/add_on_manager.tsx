@@ -72,9 +72,13 @@ const AddOnManager: FC<AddOnManagerProps> = ({
       if (!policy) {
         continue;
       }
+      const cartItem = ItemUtils.getCartItemFromId(item.id, state.cart);
+      if (!cartItem) {
+        continue;
+      }
       addOnItems.push({
         policy,
-        itemId: item.cartItem.item.id,
+        itemId: cartItem.item.id,
       });
     }
     for (const policy of addOns) {
