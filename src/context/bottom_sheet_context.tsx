@@ -270,7 +270,7 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
       setShowProfile(false);
       setLockedPolicyModal(null);
       setShowAllBundlesModal(false);
-      setShowLiquorFormModal(false);
+      setShowLiquorFormModal(null);
     }, 200);
   };
 

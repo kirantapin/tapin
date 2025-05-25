@@ -82,7 +82,7 @@ const AddOnManager: FC<AddOnManagerProps> = ({
       });
     }
     for (const policy of addOns) {
-      const itemSpecs = policy.definition.action.items;
+      const itemSpecs = policy.definition.action.items || [];
       const itemIds = ItemUtils.policyItemSpecificationsToItemIds(
         itemSpecs,
         restaurant

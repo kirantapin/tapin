@@ -95,7 +95,11 @@ export interface AddedItem {
   quantity: number;
   maxEffectedItems: number | null;
   itemSpec: ItemSpecification[];
-  changedFields: Partial<Pick<CartItem, "price" | "points">>;
+  changedFields: {
+    free?: boolean;
+    percentDiscount?: number;
+    fixedDiscount?: number;
+  };
 }
 
 export interface CartItem {
@@ -311,15 +315,12 @@ export type PolicyDefinitionCondition =
     };
 export type PolicyDefinitionAction =
   | {
-      type: "add_free_item";
+      type: "add_item";
       items: ItemSpecification[];
+      free: boolean;
+      percentDiscount: number | null;
+      fixedDiscount: number | null;
       quantity: number;
-    }
-  | {
-      type: "apply_add_on";
-      items: ItemSpecification[];
-      amount: number;
-      frequency: number;
     }
   | {
       type: "apply_percent_discount";

@@ -25,7 +25,7 @@ export const PassAddOnCard: React.FC<PassAddOnCardProps> = ({
   policy,
 }) => {
   const [loading, setLoading] = useState(false);
-  if (policy.definition.action.type !== "apply_add_on") {
+  if (policy.definition.action.type !== "add_item") {
     return null;
   }
   if (
@@ -44,14 +44,30 @@ export const PassAddOnCard: React.FC<PassAddOnCardProps> = ({
   ) as PassItem;
   const name = passItem.name;
   const originalPrice = passItem.price;
-  const newPrice = Math.max(0, originalPrice - policy.definition.action.amount);
+  const newPrice = (() => {
+    const action = policy.definition.action;
+    if (action.free) {
+      return 0;
+    } else if (action.percentDiscount) {
+      return parseFloat(
+        (originalPrice * (1 - action.percentDiscount)).toFixed(2)
+      );
+    } else if (action.fixedDiscount) {
+      return Math.max(0, originalPrice - action.fixedDiscount);
+    }
+    return originalPrice;
+  })();
   const for_date = passItem.for_date;
   // Get policy IDs from all deal effect sources
   const policyAndItemIds: {
     policy_id: string;
     userPreference: string | null;
   }[] = state.dealEffect.addedItems.map((item) => {
-    return { policy_id: item.policy_id, userPreference: item.userPreference };
+    return {
+      policy_id: item.policy_id,
+      userPreference:
+        state.cart.find((cartItem) => cartItem.id === item.id)?.item.id || null,
+    };
   });
   const addOnIsActive = policyAndItemIds.some(
     (item) =>

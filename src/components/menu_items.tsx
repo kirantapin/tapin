@@ -257,7 +257,7 @@ export function LoyaltyRewardItem({
       image_url: ImageUtils.getProfileImageUrl(restaurant),
     } as NormalItem;
   }
-  if (policy.definition.action.type === "add_free_item") {
+  if (policy.definition.action.type === "add_item") {
     const itemIds = ItemUtils.policyItemSpecificationsToItemIds(
       policy.definition.action.items,
       restaurant
@@ -304,7 +304,7 @@ export function LoyaltyRewardItem({
 
         <div className="flex items-center justify-between mt-2">
           <div className="flex items-center gap-2">
-            <p className="font-bold text-base" style={{ color: primaryColor }}>
+            <p className="font-bold text-sm" style={{ color: primaryColor }}>
               {numPoints} points
             </p>
             <p className="text-sm text-gray-500 line-through show-at-400">

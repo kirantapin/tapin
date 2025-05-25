@@ -116,7 +116,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                 </div>
               )}
 
-              {policy.end_time && (
+              {policy.end_time && !policy.locked && (
                 <div
                   className="relative text-white px-3 py-2 rounded-full flex items-center gap-1"
                   style={{

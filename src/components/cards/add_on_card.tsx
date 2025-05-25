@@ -22,7 +22,7 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
   restaurant,
 }) => {
   const { policyManager } = useRestaurant();
-  if (policy.definition.action.type !== "apply_add_on") {
+  if (policy.definition.action.type !== "add_item") {
     return null;
   }
   const menuItem = ItemUtils.getMenuItemFromItemId(
@@ -34,7 +34,19 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
   }
   const name = menuItem.name;
   const originalPrice = menuItem.price;
-  const newPrice = Math.max(0, originalPrice - policy.definition.action.amount);
+  const newPrice = (() => {
+    const action = policy.definition.action;
+    if (action.free) {
+      return 0;
+    } else if (action.percentDiscount) {
+      return parseFloat(
+        (originalPrice * (1 - action.percentDiscount)).toFixed(2)
+      );
+    } else if (action.fixedDiscount) {
+      return Math.max(0, originalPrice - action.fixedDiscount);
+    }
+    return originalPrice;
+  })();
 
   const policies = policyManager
     ? policyManager.getActivePolicies(state.dealEffect)

@@ -225,7 +225,7 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
         <div className="space-y-4 mt-8 mb-24">
           {loyaltyPolicies.map((policy) => {
             if (
-              policy.definition.action.type === "add_free_item" ||
+              policy.definition.action.type === "add_item" ||
               policy.definition.action.type === "add_to_user_credit"
             ) {
               return (

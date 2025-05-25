@@ -123,14 +123,35 @@ export class PolicyUtils {
 
     const actionDescription: string | null = (() => {
       switch (action.type) {
-        case "add_free_item":
-          return `Receive ${listItemsToStringDescription(
-            action.quantity,
-            action.items,
-            "free",
-            restaurant
-          )}`;
-        //Get 30 % off on up to 3 orders of either item or item or item
+        case "add_item":
+          if (action.free) {
+            return `Receive ${listItemsToStringDescription(
+              action.quantity,
+              action.items,
+              "free",
+              restaurant
+            )}`;
+          } else if (action.percentDiscount) {
+            return `Get ${(action.percentDiscount * 100).toFixed(
+              0
+            )}% off on ${listItemsToStringDescription(
+              action.quantity,
+              action.items,
+              null,
+              restaurant
+            )}`;
+          } else if (action.fixedDiscount) {
+            return `Get $${action.fixedDiscount.toFixed(
+              2
+            )} off on ${listItemsToStringDescription(
+              action.quantity,
+              action.items,
+              null,
+              restaurant
+            )}`;
+          } else {
+            return null;
+          }
         case "apply_percent_discount":
           return `Get ${(action.amount * 100).toFixed(
             0
@@ -182,8 +203,18 @@ export class PolicyUtils {
   static getPolicyFlair(policy: Policy): string {
     const action = policy.definition.action;
     switch (action.type) {
-      case "add_free_item":
-        return `${action.quantity} Free Item${action.quantity > 1 ? "s" : ""}`;
+      case "add_item":
+        if (action.free) {
+          return `${action.quantity} Free Item${
+            action.quantity > 1 ? "s" : ""
+          }`;
+        } else if (action.percentDiscount) {
+          return `${(action.percentDiscount * 100).toFixed(0)}% Off`;
+        } else if (action.fixedDiscount) {
+          return `$${action.fixedDiscount.toFixed(2)} Off`;
+        } else {
+          return "";
+        }
       case "apply_percent_discount":
         return `${(action.amount * 100).toFixed(0)}% Off`;
       case "apply_fixed_discount":
@@ -233,9 +264,26 @@ export class PolicyUtils {
     let items: ItemSpecification[] = [];
 
     switch (action.type) {
-      case "add_free_item":
-        items = action.items;
-        return this.returnHighestCostItem(items, restaurant) * action.quantity;
+      case "add_item":
+        if (action.free) {
+          return (
+            this.returnHighestCostItem(items, restaurant) * action.quantity
+          );
+        } else if (action.percentDiscount) {
+          return (
+            this.returnHighestCostItem(items, restaurant) *
+            action.percentDiscount *
+            action.quantity
+          );
+        } else if (action.fixedDiscount) {
+          return (
+            this.returnHighestCostItem(items, restaurant) *
+            action.fixedDiscount *
+            action.quantity
+          );
+        } else {
+          return 0;
+        }
       case "apply_percent_discount":
         items = action.items;
         return (
@@ -273,13 +321,33 @@ export class PolicyUtils {
   };
   static getPolicyName = (policy: Policy, restaurant: Restaurant): string => {
     if (policy.definition.tag === LOYALTY_REWARD_TAG) {
-      if (policy.definition.action.type === "add_free_item") {
-        return `${titleCase(
-          ItemUtils.getMenuItemFromItemId(
-            policy.definition.action.items[0],
-            restaurant
-          )?.name || ""
-        )} for ${formatPoints(this.getLoyaltyRewardPoints(policy))} points!`;
+      if (policy.definition.action.type === "add_item") {
+        if (policy.definition.action.free) {
+          return `${titleCase(
+            ItemUtils.getMenuItemFromItemId(
+              policy.definition.action.items[0],
+              restaurant
+            )?.name || ""
+          )} for ${formatPoints(this.getLoyaltyRewardPoints(policy))} points!`;
+        } else if (policy.definition.action.percentDiscount) {
+          return `${(policy.definition.action.percentDiscount * 100).toFixed(
+            0
+          )}% off on ${titleCase(
+            ItemUtils.getMenuItemFromItemId(
+              policy.definition.action.items[0],
+              restaurant
+            )?.name || ""
+          )} for ${formatPoints(this.getLoyaltyRewardPoints(policy))} points!`;
+        } else if (policy.definition.action.fixedDiscount) {
+          return `$${policy.definition.action.fixedDiscount.toFixed(
+            2
+          )} off on ${titleCase(
+            ItemUtils.getMenuItemFromItemId(
+              policy.definition.action.items[0],
+              restaurant
+            )?.name || ""
+          )} for ${formatPoints(this.getLoyaltyRewardPoints(policy))} points!`;
+        }
       }
       if (policy.definition.action.type === "add_to_user_credit") {
         return `Earn $${policy.definition.action.amount.toFixed(2)} of credit`;
@@ -293,12 +361,7 @@ export class PolicyUtils {
   ): string[] => {
     const action = policy.definition.action;
     switch (action.type) {
-      case "add_free_item":
-        return ItemUtils.policyItemSpecificationsToItemIds(
-          action.items,
-          restaurant
-        );
-      case "apply_add_on":
+      case "add_item":
         return ItemUtils.policyItemSpecificationsToItemIds(
           action.items,
           restaurant
