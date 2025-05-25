@@ -347,8 +347,4 @@ export type PolicyDefinitionAction =
       items: { item: ItemSpecification; quantity: number }[];
     }
   | { type: "apply_order_percent_discount"; amount: number }
-  | { type: "add_to_user_credit"; amount: number }
-  | {
-      type: "apply_loyalty_reward";
-      items: ItemSpecification[];
-    };
+  | { type: "add_to_user_credit"; amount: number };

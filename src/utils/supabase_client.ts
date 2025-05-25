@@ -18,12 +18,12 @@ if (!supabase_key_local || !project_url_local) {
 }
 
 export const supabase: SupabaseClient = createClient(project_url, supabase_key);
-export const supabase_local: SupabaseClient = createClient(
-  window.location.hostname === "localhost" ? project_url_local : project_url,
-  window.location.hostname === "localhost" ? supabase_key_local : supabase_key
-);
-
 // export const supabase_local: SupabaseClient = createClient(
-//   project_url_local,
-//   supabase_key_local
+//   window.location.hostname === "localhost" ? project_url_local : project_url,
+//   window.location.hostname === "localhost" ? supabase_key_local : supabase_key
 // );
+
+export const supabase_local: SupabaseClient = createClient(
+  project_url_local,
+  supabase_key_local
+);

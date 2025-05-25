@@ -239,13 +239,14 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
           </div>
         );
       })}
-
-      {Object.values(userOwnershipMap).some((value) => value === null) && (
-        <div className="mt-6 px-4 mb-8">
-          <h1 className="text-xl font-bold">Bundles You Might Like</h1>
-          <BundleSlider />
-        </div>
-      )}
+      <div className="pb-16">
+        {Object.values(userOwnershipMap).some((value) => value === null) && (
+          <div className="mt-6 px-4 mb-8">
+            <h1 className="text-xl font-bold">Bundles You Might Like</h1>
+            <BundleSlider />
+          </div>
+        )}
+      </div>
       <GoToCartButton
         restaurant={restaurant}
         cartCount={
