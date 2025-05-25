@@ -1,53 +1,54 @@
 import React, { useEffect, useState } from "react";
-import { BundleItem, NormalItem, PassItem, Restaurant } from "@/types";
+import {
+  BundleItem,
+  Highlight,
+  NormalItem,
+  PassItem,
+  Restaurant,
+} from "@/types";
 import { ItemUtils } from "@/utils/item_utils";
 import { project_url } from "@/utils/supabase_client";
 import { titleCase } from "title-case";
 import { sentenceCase } from "@/utils/parse";
-import { adjustColor } from "@/utils/color";
 import { useRestaurant } from "@/context/restaurant_context";
-import { BundleUtils } from "@/utils/bundle_utils";
-import { BUNDLE_IMAGE_BUCKET, HIGHLIGHT_IMAGE_BUCKET } from "@/constants";
-import { rest } from "lodash";
+import { HIGHLIGHT_IMAGE_BUCKET } from "@/constants";
 import { PolicyUtils } from "@/utils/policy_utils";
+import { ImageUtils } from "@/utils/image_utils";
 
 interface HighlightCardProps {
-  content_type: "item" | "policy" | "bundle" | "media";
-  content_pointer: string | null;
-  title_override: string;
-  description_override: string;
-  image_url_override: string;
+  highlight: Highlight;
   restaurant: Restaurant;
   onClick?: () => void;
   loading?: boolean;
 }
 
 const HighlightCard: React.FC<HighlightCardProps> = ({
-  content_type,
-  content_pointer,
-  title_override,
-  description_override,
-  image_url_override,
+  highlight,
   restaurant,
   onClick,
   loading,
 }) => {
+  const {
+    content_type,
+    content_pointer,
+    title_override,
+    description_override,
+    image_url_override,
+  } = highlight;
   const primaryColor = restaurant?.metadata.primaryColor as string;
   const [title, setTitle] = useState<string | null>(null);
   const [description, setDescription] = useState<string | null>(null);
   const [defaultImageUrl, setDefaultImageUrl] = useState<string | null>(null);
   const { policyManager } = useRestaurant();
   const [bgLoaded, setBgLoaded] = useState(false);
+  const [dontShow, setDontShow] = useState(false);
 
   const setPolicyInfo = async () => {
     const policy = policyManager?.getPolicyFromId(content_pointer || "");
-    console.log(policy);
     if (!policy) return;
     setTitle(PolicyUtils.getPolicyName(policy, restaurant));
     setDescription(policy?.header);
-    setDefaultImageUrl(
-      `${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`
-    );
+    setDefaultImageUrl(ImageUtils.getProfileImageUrl(restaurant) || "");
   };
   const setBundleInfo = async () => {
     const bundle = ItemUtils.getMenuItemFromItemId(
@@ -65,10 +66,10 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
         content_pointer || "",
         restaurant
       ) as NormalItem | PassItem;
-      //if item cannot be found, return null
-      // if (!item) {
-      //   return null;
-      // }
+      if (!item) {
+        setDontShow(true);
+        return;
+      }
       setTitle(`Grab a ${item?.name} for $${item?.price}`);
       if (ItemUtils.isPassItem(content_pointer || "", restaurant)) {
         setDescription("Limited amount remaining. Grab while supplies last.");
@@ -87,17 +88,18 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
       setBundleInfo();
     }
     if (content_type === "media") {
-      setDefaultImageUrl(
-        `${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`
-      );
+      setDefaultImageUrl(ImageUtils.getProfileImageUrl(restaurant) || "");
     }
   }, []);
 
   useEffect(() => {
+    if (!image_url_override) return;
     const img = new Image();
-    img.src = `${project_url}/storage/v1/object/public/${HIGHLIGHT_IMAGE_BUCKET}/test`;
+    img.src = ImageUtils.getHighlightImageUrl(highlight) || "";
     img.onload = () => setBgLoaded(true);
-  }, []);
+  }, [image_url_override]);
+
+  if (dontShow) return null;
 
   return (
     <div
@@ -121,7 +123,9 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
               bgLoaded ? "opacity-100" : "opacity-0"
             }`}
             style={{
-              backgroundImage: `linear-gradient(155deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.7) 20%, rgba(0, 0, 0, 0.7) 40%, rgba(0, 0, 0, 0.5) 50%, rgba(0, 0, 0, 0) 60%), url(${project_url}/storage/v1/object/public/${HIGHLIGHT_IMAGE_BUCKET}/test)`,
+              backgroundImage: `linear-gradient(155deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.7) 20%, rgba(0, 0, 0, 0.7) 40%, rgba(0, 0, 0, 0.5) 50%, rgba(0, 0, 0, 0) 60%), url(${ImageUtils.getHighlightImageUrl(
+                highlight
+              )})`,
             }}
           />
         </div>
@@ -144,7 +148,7 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
             }`}
             style={{ width: image_url_override ? "60%" : "100%" }}
           >
-            {sentenceCase(description_override) || description || ""}
+            {sentenceCase(description_override || description || "")}
           </p>
         </div>
 

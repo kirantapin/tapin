@@ -3,7 +3,7 @@ import { DealEffectPayload } from "./types";
 
 //paths
 export const BASE_PATH = "/";
-export const DRINK_CHECKOUT_PATH = "/restaurant/:id/drink_checkout";
+export const DRINK_CHECKOUT_PATH = "/restaurant/:id/checkout";
 export const RESTAURANT_PATH = "/restaurant/:id";
 export const APPLOAD_PATH = "";
 export const LOYALTY_REWARD_PATH = "/restaurant/:id/rewards";
@@ -76,3 +76,5 @@ export const HIGHLIGHT_IMAGE_BUCKET = "highlight-images";
 
 export const POINTS_PER_DOLLAR = 10;
 export const STRIPE_MIN_AMOUNT = 50; //50 cents
+
+export const MAX_BUNDLE_DURATION = 90;

@@ -43,11 +43,8 @@ const MySpotContent: React.FC = () => {
   >({});
   const { openQrModal } = useBottomSheet();
   useEffect(() => {
-    if (id) {
-      setCurrentRestaurantId(id);
-    }
     window.scrollTo(0, 0);
-  }, [id]);
+  }, []);
 
   const filterTransactions = () => {
     if (!restaurant) return;
@@ -136,7 +133,7 @@ const MySpotContent: React.FC = () => {
 
   return (
     <div className="px-3 ">
-      <div className="flex items-center p-4 sticky top-0 bg-white shadow-sm border-b -mx-3 z-10">
+      <div className="flex items-center p-3 sticky top-0 bg-white shadow-sm border-b -mx-3 z-10">
         {/* Back button - absolute positioning to keep it in left corner */}
         <div className="absolute left-4">
           <button
@@ -153,7 +150,7 @@ const MySpotContent: React.FC = () => {
         <h1 className="flex-1 text-xl font-semibold text-center">My Spot</h1>
       </div>
 
-      <div className="flex gap-3 mb-2 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar ml-1 mt-6">
+      <div className="flex gap-3 mb-2 overflow-x-auto pb-2 px-3 no-scrollbar mt-6">
         {Object.keys(tagMap).map((filter) => (
           <button
             key={tagMap[filter].tag}

@@ -4,6 +4,7 @@ import { BundleItem, Restaurant } from "@/types";
 import BundleCard from "../cards/bundle_card";
 import { useRestaurant } from "@/context/restaurant_context";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
+import { BundleUtils } from "@/utils/bundle_utils";
 const BundleSlider = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { restaurant, userOwnershipMap } = useRestaurant();
@@ -90,12 +91,9 @@ const BundleSlider = () => {
 
   const bundlesToDisplay = Object.entries(userOwnershipMap)
     .filter(([bundleId, isOwned]) => {
-      // Check if user doesn't own the bundle
       if (isOwned) return false;
-
-      // Get the bundle object and check deactivated_at is null
       const bundle = (restaurant?.menu[bundleId]?.info as BundleItem).object;
-      return bundle && bundle.deactivated_at === null;
+      return bundle && BundleUtils.isBundlePurchaseable(bundle);
     })
     .map(([bundleId]) => bundleId);
 

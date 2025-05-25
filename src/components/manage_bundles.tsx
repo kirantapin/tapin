@@ -10,6 +10,7 @@ import { PolicyCard } from "./cards/policy_card";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { GradientIcon } from "@/utils/gradient";
 import GoToCartButton from "./go_to_cart_button";
+import { PolicyUtils } from "@/utils/policy_utils";
 interface ManageBundlesProps {
   restaurant: Restaurant;
 }
@@ -56,12 +57,9 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
 
   const bundlesToDisplay = Object.entries(userOwnershipMap)
     .filter(([bundleId, isOwned]) => {
-      // Check if user doesn't own the bundle
       if (isOwned) return true;
-
-      // Get the bundle object and check deactivated_at is null
       const bundle = (restaurant?.menu[bundleId]?.info as BundleItem)?.object;
-      return bundle && bundle.deactivated_at === null;
+      return bundle && BundleUtils.isBundlePurchaseable(bundle);
     })
     .map(([bundleId]) => bundleId);
 
@@ -226,7 +224,12 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
                         restaurant={restaurant}
                         dealEffect={state.dealEffect}
                         cart={state.cart}
-                        extraTags={tags}
+                        extraTags={[
+                          ...tags,
+                          ...(PolicyUtils.isPolicyUsable(policy, restaurant)
+                            ? []
+                            : ["Not Currently Active"]),
+                        ]}
                       />
                     </div>
                   );

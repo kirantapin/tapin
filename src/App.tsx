@@ -1,5 +1,5 @@
-import React, { Suspense, lazy } from "react";
-import { Routes, Route } from "react-router-dom";
+import React, { Suspense, lazy, useEffect } from "react";
+import { Routes, Route, useParams } from "react-router-dom";
 import {
   BASE_PATH,
   DRINK_CHECKOUT_PATH,
@@ -15,6 +15,7 @@ import { CheckoutSkeleton } from "./components/skeletons/checkout_skeleton.tsx";
 import { MySpotSkeleton } from "./components/skeletons/my_spot_skeleton.tsx";
 import { OffersSkeleton } from "./components/skeletons/offers_skeleton.tsx";
 import LoadingPage from "./components/skeletons/loading_page.tsx";
+import { useRestaurant } from "./context/restaurant_context.tsx";
 // Lazy imports
 const Discovery = lazy(() => import("./pages/discovery.tsx"));
 const CheckoutPage = lazy(() => import("./pages/checkout.tsx"));
@@ -54,7 +55,9 @@ const App: React.FC = () => {
           path={RESTAURANT_PATH}
           element={
             <Suspense fallback={<LoadingPage />}>
-              <RestaurantPage />
+              <RequireRestaurant>
+                <RestaurantPage />
+              </RequireRestaurant>
             </Suspense>
           }
         />
@@ -62,7 +65,9 @@ const App: React.FC = () => {
           path={DRINK_CHECKOUT_PATH}
           element={
             <Suspense fallback={<CheckoutSkeleton />}>
-              <CheckoutPage />
+              <RequireRestaurant>
+                <CheckoutPage />
+              </RequireRestaurant>
             </Suspense>
           }
         />
@@ -70,7 +75,9 @@ const App: React.FC = () => {
           path={OFFERS_PAGE_PATH}
           element={
             <Suspense fallback={<OffersSkeleton />}>
-              <PoliciesPage />
+              <RequireRestaurant>
+                <PoliciesPage />
+              </RequireRestaurant>
             </Suspense>
           }
         />
@@ -78,7 +85,9 @@ const App: React.FC = () => {
           path={INFO_PAGE_PATH}
           element={
             <Suspense fallback={null}>
-              <RestaurantInfo />
+              <RequireRestaurant>
+                <RestaurantInfo />
+              </RequireRestaurant>
             </Suspense>
           }
         />
@@ -86,7 +95,9 @@ const App: React.FC = () => {
           path={MY_SPOT_PATH}
           element={
             <Suspense fallback={<MySpotSkeleton />}>
-              <MySpotContent />
+              <RequireRestaurant>
+                <MySpotContent />
+              </RequireRestaurant>
             </Suspense>
           }
         />
@@ -109,6 +120,22 @@ const App: React.FC = () => {
       </Routes>
     </div>
   );
+};
+
+const RequireRestaurant: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const { id } = useParams();
+  const { restaurant, setCurrentRestaurantId, policyManager } = useRestaurant();
+
+  useEffect(() => {
+    if (id) setCurrentRestaurantId(id);
+  }, [id]);
+
+  // Only show loading while restaurant is null
+  if (!restaurant || !policyManager) return <LoadingPage />;
+
+  return <>{children}</>;
 };
 
 export default App;

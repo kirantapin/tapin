@@ -31,12 +31,7 @@ export default function RestaurantPage() {
   const { userSession, transactions } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const {
-    restaurant,
-    setCurrentRestaurantId,
-    policyManager,
-    userOwnershipMap,
-  } = useRestaurant();
+  const { restaurant, policyManager, userOwnershipMap } = useRestaurant();
   const policies = policyManager?.policies;
   const { id } = useParams<{ id: string }>();
   const [activeFilter, setActiveFilter] = useState(HOUSE_MIXER_LABEL);
@@ -80,11 +75,8 @@ export default function RestaurantPage() {
   };
 
   useEffect(() => {
-    if (id) {
-      setCurrentRestaurantId(id);
-    }
     handleLocation();
-  }, [id]);
+  }, []);
 
   const [titleElement, setTitleElement] = useState<HTMLHeadingElement | null>(
     null
@@ -100,9 +92,8 @@ export default function RestaurantPage() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
-  if (!restaurant) {
-    return <LoadingPage />;
-  }
+  if (!restaurant) return <LoadingPage />;
+
   return (
     <div className="min-h-screen bg-gray-25">
       {/* Hero Image */}

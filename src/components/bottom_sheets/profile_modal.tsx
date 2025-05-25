@@ -145,7 +145,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
                             <div className="flex items-center gap-4">
                               <div className="w-16 h-16 rounded-full overflow-hidden">
                                 <img
-                                  src={`${project_url}/storage/v1/object/public/${RESTAURANT_IMAGE_BUCKET}/${restaurantId}_profile.png`}
+                                  src={`${project_url}/storage/v1/object/public/${RESTAURANT_IMAGE_BUCKET}/${restaurantId}_profile`}
                                   alt="Restaurant"
                                   className="w-full h-full object-cover"
                                 />

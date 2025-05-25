@@ -197,9 +197,9 @@ export interface Highlight {
   restaurant_id: string;
   content_type: "item" | "policy" | "bundle" | "media";
   content_pointer: string | null;
-  title_override: string;
-  description_override: string;
-  image_url_override: string;
+  title_override: string | null;
+  description_override: string | null;
+  image_url_override: string | null;
   active: boolean;
   end_time: string | null;
 }

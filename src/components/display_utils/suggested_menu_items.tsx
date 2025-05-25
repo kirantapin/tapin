@@ -104,7 +104,7 @@ export const SuggestedMenuItems: React.FC<SuggestedMenuItemsProps> = ({
             removeFromCart={removeFromCart}
             cart={state.cart}
             item={item as Item}
-            purchaseDate={item?.purchaseDate || null}
+            purchaseDate={null}
           />
         );
       })}

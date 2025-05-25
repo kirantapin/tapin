@@ -5,8 +5,15 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { X, Wallet, CircleX, Tag, Check } from "lucide-react";
-import { Bundle, Restaurant, Policy, BundleItem } from "@/types";
+import { X, Wallet, CircleX, Tag, Check, Beer } from "lucide-react";
+import {
+  Bundle,
+  Restaurant,
+  Policy,
+  BundleItem,
+  NormalItem,
+  Item,
+} from "@/types";
 import { GradientIcon } from "@/utils/gradient";
 import { useAuth } from "@/context/auth_context";
 import { SignInButton } from "../signin/signin_button";
@@ -22,7 +29,8 @@ import AddOnManager from "../sliders/add_on_manager";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import SmallPolicyCard from "../cards/small_policy_card";
 import { PolicyUtils } from "@/utils/policy_utils";
-
+import { titleCase } from "title-case";
+import GenericItemIcon from "../display_utils/generic_item_icons";
 interface BundleModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -39,6 +47,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
   const { userSession } = useAuth();
   const { userOwnershipMap } = useRestaurant();
   const { refreshCart } = useBottomSheet();
+  const { handlePolicyClick } = useBottomSheet();
   const { state, addPolicy, addToCart, removePolicy } = useGlobalCartManager(
     restaurant,
     userSession,
@@ -98,6 +107,9 @@ const BundleModal: React.FC<BundleModalProps> = ({
     })
     .filter((policy): policy is Policy => policy !== null);
 
+  const { deals, freeItems } =
+    BundleUtils.separateBundlePoliciesByType(bundlePolicies);
+
   const savedBundleValue = BundleUtils.estimateBundleValue(
     bundle,
     restaurant,
@@ -148,6 +160,53 @@ const BundleModal: React.FC<BundleModalProps> = ({
           </div>
 
           <div className="flex gap-4 overflow-x-auto mb-4 pb-2 no-scrollbar -mx-6 px-6">
+            {freeItems.map((policy, index) => {
+              return (
+                <div
+                  key={index}
+                  className="w-[220px] h-[160px] p-4 rounded-xl border border-gray-200 flex flex-col items-start flex-shrink-0"
+                  onClick={() => {
+                    handlePolicyClick(policy, userOwnershipMap);
+                  }}
+                >
+                  {(() => {
+                    const itemId = PolicyUtils.getUserChoicesForPolicy(
+                      policy,
+                      restaurant
+                    )[0];
+
+                    return (
+                      <div className="mb-2">
+                        <GenericItemIcon
+                          itemId={itemId}
+                          restaurant={restaurant}
+                          size={30}
+                        />
+                      </div>
+                    );
+                  })()}
+
+                  <h3 className="m-0 mb-1 text-base font-bold text-gray-800">
+                    {titleCase(PolicyUtils.getPolicyName(policy, restaurant))}
+                  </h3>
+                  <p
+                    className="m-0 text-xs text-gray-600 custom-line-clamp"
+                    style={{
+                      color: PolicyUtils.isPolicyUsable(policy, restaurant)
+                        ? "inherit"
+                        : (restaurant?.metadata.primaryColor as string),
+                      fontWeight: PolicyUtils.isPolicyUsable(policy, restaurant)
+                        ? "normal"
+                        : "bold",
+                    }}
+                  >
+                    {titleCase(
+                      PolicyUtils.getUsageDescription(policy, restaurant) || ""
+                    )}
+                  </p>
+                </div>
+              );
+            })}
             {bundle.fixed_credit > 0 && (
               <div className="w-[220px] h-[160px] p-4 rounded-xl border border-gray-200 flex flex-col items-start flex-shrink-0">
                 <div className="text-[#E6C677] mb-4">
@@ -194,7 +253,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
           )}
           <div className="mt-2">
             <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar -mx-6 px-6">
-              {bundlePolicies.map((policy, index) => {
+              {deals.map((policy, index) => {
                 return (
                   policy && (
                     <div key={index} className="flex-shrink-0 w-[95%]">
@@ -202,7 +261,8 @@ const BundleModal: React.FC<BundleModalProps> = ({
                         policy={policy}
                         restaurant={restaurant}
                         bottomTongueText={PolicyUtils.getUsageDescription(
-                          policy
+                          policy,
+                          restaurant
                         )}
                       />
                     </div>

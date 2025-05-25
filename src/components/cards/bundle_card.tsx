@@ -12,9 +12,10 @@ import {
 import { ItemUtils } from "@/utils/item_utils";
 import { useRestaurant } from "@/context/restaurant_context";
 import { BundleUtils } from "@/utils/bundle_utils";
-import CustomIcon from "../svg/custom_icon";
-import SmallPolicyCard from "./small_policy_card";
 import { GradientIcon } from "@/utils/gradient";
+import { ImageUtils } from "@/utils/image_utils";
+const NUM_POLICY_TO_SHOW = 3;
+
 const BundleCard = ({
   restaurant,
   bundleId,
@@ -39,7 +40,7 @@ const BundleCard = ({
   }
 
   const bundle: Bundle = bundleMenuItem.object;
-  if (bundle.deactivated_at) {
+  if (!BundleUtils.isBundlePurchaseable(bundle)) {
     return null;
   }
   const childPolicyIds = bundleMenuItem.bundle_policies;
@@ -54,13 +55,8 @@ const BundleCard = ({
     })
     .filter((policy): policy is Policy => policy !== null);
 
-  const savedBundleValue = BundleUtils.estimateBundleValue(
-    bundle,
-    restaurant,
-    childPolicies
-  );
-  const isBundleValueGreaterThanPrice = savedBundleValue + 5 > bundle.price;
-  const baseUrl = `${project_url}/storage/v1/object/public`;
+  const { deals, freeItems } =
+    BundleUtils.separateBundlePoliciesByType(childPolicies);
 
   return (
     <div className="mt-1">
@@ -68,9 +64,10 @@ const BundleCard = ({
         <div className="w-full max-w-[340px] rounded-[24px] overflow-hidden bg-white shadow-md border border-gray-400">
           <div className="relative w-full h-[160px]">
             <img
-              src={`${baseUrl}/${BUNDLE_IMAGE_BUCKET}/${bundle.bundle_id}.jpeg`}
+              src={ImageUtils.getBundleImageUrl(bundle) || ""}
               onError={(e) => {
-                e.currentTarget.src = `${baseUrl}/${RESTAURANT_IMAGE_BUCKET}/${restaurant.id}_profile.png`;
+                e.currentTarget.src =
+                  ImageUtils.getProfileImageUrl(restaurant) || "";
                 setIsFallback(true);
               }}
               alt="Bundle"
@@ -101,7 +98,7 @@ const BundleCard = ({
             <div className="mb-5">
               <div className="grid grid-cols-2 gap-2 mt-2 mb-4">
                 {/* Credits Box */}
-                <div className="flex flex-col h-[48px] px-4 rounded-xl bg-white border border-gray-300 shadow-md">
+                <div className="flex flex-col h-[48px] px-4 pr-2 rounded-xl bg-white border border-gray-300 shadow-md">
                   <div className="flex items-center gap-2 h-full">
                     <GradientIcon
                       icon={Wallet}
@@ -144,46 +141,46 @@ const BundleCard = ({
                 </h2>
               )}
               <div className="flex flex-col gap-0">
-                {childPolicies.map((policy) => (
-                  <div
-                    key={policy.policy_id}
-                    className="flex items-center gap-2"
-                    style={{
-                      height: childPolicies.length <= 3 ? "30px" : "auto",
-                      marginBottom: childPolicies.length > 3 ? "8px" : "0",
-                    }}
-                  >
+                {[...freeItems, ...deals]
+                  .slice(0, NUM_POLICY_TO_SHOW)
+                  .map((policy) => (
+                    <div
+                      key={policy.policy_id}
+                      className="flex items-center gap-2 h-[30px]"
+                    >
+                      <CheckIcon
+                        size={20}
+                        strokeWidth={3}
+                        color={restaurant?.metadata.primaryColor as string}
+                        className="text-gray-700 mb-[6px]"
+                      />
+                      <p
+                        key={policy.policy_id}
+                        className="text-[15px] text-gray-700 h-[30px]"
+                      >
+                        {policy.name}
+                      </p>
+                    </div>
+                  ))}
+                {childPolicies.length > NUM_POLICY_TO_SHOW && (
+                  <div className="flex items-center gap-2 h-[30px]">
                     <CheckIcon
                       size={20}
                       strokeWidth={3}
                       color={restaurant?.metadata.primaryColor as string}
                       className="text-gray-700 mb-[6px]"
                     />
-                    <p
-                      key={policy.policy_id}
-                      className="text-[15px] text-gray-700"
-                      style={{
-                        height: childPolicies.length <= 3 ? "30px" : "auto",
-                        marginBottom: childPolicies.length > 3 ? "8px" : "0",
-                      }}
-                    >
-                      {policy.name}
+                    <p className="text-[15px] text-gray-700 h-[30px]">
+                      {`${childPolicies.length - NUM_POLICY_TO_SHOW} More
+                      ${
+                        childPolicies.length - NUM_POLICY_TO_SHOW === 1
+                          ? "Benefit"
+                          : "Benefits"
+                      }`}
                     </p>
                   </div>
-                ))}
+                )}
               </div>
-              {/* {childPolicies.length <= 2 && (
-                  <>
-                    {[...Array(3 - childPolicies.length)].map((_, i) => (
-                      <li
-                        key={i}
-                        className="text-[15px] h-[30px] text-gray-700 invisible"
-                      >
-                        Spacer
-                      </li>
-                    ))}
-                  </>
-                )} */}
             </div>
 
             <div className="mt-4">

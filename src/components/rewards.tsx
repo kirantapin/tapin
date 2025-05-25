@@ -21,8 +21,9 @@ interface RewardsProps {
 
 const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
   const { restaurant, policyManager } = useRestaurant();
-  const { openPolicyModal, getActivePolicies } = useBottomSheet();
+  const { handlePolicyClick, getActivePolicies } = useBottomSheet();
   const { userData } = useAuth();
+  const { userOwnershipMap } = useRestaurant();
   const userPoints = userData?.points[restaurant?.id as string] || 0;
   const [loyaltyPolicies, setLoyaltyPolicies] = useState<Policy[]>([]);
   const navigate = useNavigate();
@@ -232,7 +233,7 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
                   restaurant={restaurant}
                   policy={policy}
                   numPoints={PolicyUtils.getLoyaltyRewardPoints(policy)}
-                  onRedeem={() => openPolicyModal(policy, null)}
+                  onRedeem={() => handlePolicyClick(policy, userOwnershipMap)}
                   isActive={getActivePolicies().includes(policy.policy_id)}
                 />
               );

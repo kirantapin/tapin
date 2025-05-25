@@ -27,7 +27,7 @@ const AllBundlesModal: React.FC<AllBundlesModalProps> = ({
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent
         side="bottom"
-        className="h-[70vh] rounded-t-3xl [&>button]:hidden p-0"
+        className="h-[75vh] rounded-t-3xl [&>button]:hidden p-0"
       >
         <div className="flex flex-col">
           <SheetHeader className="flex-none px-6 pt-6 pb-4">

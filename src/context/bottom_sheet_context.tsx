@@ -35,7 +35,6 @@ import LiquorFormModal from "@/components/bottom_sheets/liquor_form_modal";
 type SheetMap = Record<string, FC<any>>;
 
 interface BottomSheetContextValue {
-  openPolicyModal: (policy: Policy, bundle_id: string | null) => void;
   openBundleModal: (bundle: Bundle) => void;
   closeSheet: () => void;
   bundleModal: Bundle | null;
@@ -68,7 +67,6 @@ interface BottomSheetContextValue {
 }
 
 const BottomSheetContext = createContext<BottomSheetContextValue>({
-  openPolicyModal: () => {},
   openBundleModal: () => {},
   closeSheet: () => {},
   bundleModal: null,
@@ -171,7 +169,7 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
           restaurant
         ) as BundleItem;
         const bundleObject = bundleMenuItem.object;
-        if (bundleObject.deactivated_at === null) {
+        if (BundleUtils.isBundlePurchaseable(bundleObject)) {
           openLockedPolicyModal(policy, bundleId);
           return;
         }
@@ -279,7 +277,6 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
   return (
     <BottomSheetContext.Provider
       value={{
-        openPolicyModal,
         openBundleModal,
         closeSheet,
         openQrModal,

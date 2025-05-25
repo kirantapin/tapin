@@ -102,7 +102,7 @@ const OrderHistory = () => {
                       </div>
                       <div className="w-12 h-12 rounded-full overflow-hidden">
                         <img
-                          src={`${project_url}/storage/v1/object/public/${RESTAURANT_IMAGE_BUCKET}/${order.restaurant_id}_profile.png`}
+                          src={`${project_url}/storage/v1/object/public/${RESTAURANT_IMAGE_BUCKET}/${order.restaurant_id}_profile`}
                           alt="Restaurant"
                           className="w-full h-full object-cover"
                         />

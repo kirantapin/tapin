@@ -28,6 +28,7 @@ import SpendGoalCard from "@/components/cards/spend_goal_card.tsx";
 import AddOnManager from "@/components/sliders/add_on_manager.tsx";
 import CheckoutSummary from "@/components/checkout/checkout_summary.tsx";
 import BundleCTA from "@/components/checkout/bundle_cta.tsx";
+import { PolicyUtils } from "@/utils/policy_utils.ts";
 
 export default function CheckoutPage() {
   setThemeColor();
@@ -61,12 +62,9 @@ export default function CheckoutPage() {
   } = useBottomSheet();
 
   useEffect(() => {
-    if (id) {
-      setCurrentRestaurantId(id);
-    }
     window.scrollTo(0, 0);
     // start();
-  }, [id]);
+  }, []);
 
   useEffect(() => {
     const activePolicy =
@@ -211,6 +209,11 @@ export default function CheckoutPage() {
                           policy={policy}
                           restaurant={restaurant as Restaurant}
                           dealEffect={state.dealEffect}
+                          extraTags={[
+                            ...(PolicyUtils.isPolicyUsable(policy, restaurant)
+                              ? []
+                              : ["Not Currently Active"]),
+                          ]}
                         />
                       </div>
                     ))}

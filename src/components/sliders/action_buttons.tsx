@@ -6,9 +6,9 @@ import {
   OFFERS_PAGE_PATH,
   LOYALTY_REWARD_TAG,
   NORMAL_DEAL_TAG,
-  MY_SPOT_PATH,
 } from "@/constants";
 import { useRestaurant } from "@/context/restaurant_context";
+import { useBottomSheet } from "@/context/bottom_sheet_context";
 
 interface ActionButtonsProps {
   scrollToOrderDrinks: () => void;
@@ -19,6 +19,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
 }) => {
   const navigate = useNavigate();
   const { restaurant } = useRestaurant();
+  const { openAllBundlesModal } = useBottomSheet();
 
   if (!restaurant) {
     return null;
@@ -61,11 +62,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
 
       <button
         className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-300 bg-white"
-        onClick={() =>
-          navigate(MY_SPOT_PATH.replace(":id", restaurant.id), {
-            state: { type: "My Bundles" },
-          })
-        }
+        onClick={() => openAllBundlesModal()}
       >
         <GradientIcon
           icon={HandCoins}

@@ -86,7 +86,7 @@ export default function RestaurantDiscovery() {
                 {/* Hero Image */}
                 <div className="h-32 relative">
                   <img
-                    src={`${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_hero.jpeg`}
+                    src={`${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_hero`}
                     alt={`${restaurant.name} Hero`}
                     className="w-full h-full object-cover"
                   />
@@ -94,7 +94,7 @@ export default function RestaurantDiscovery() {
                   {/* Profile Avatar */}
                   <div className="absolute -bottom-6 left-4">
                     <img
-                      src={`${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`}
+                      src={`${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile`}
                       alt={restaurant.name}
                       className="w-16 h-16 object-cover rounded-full border-3 border-white shadow-sm"
                     />

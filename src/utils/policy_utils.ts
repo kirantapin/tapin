@@ -4,7 +4,7 @@ import { supabase } from "./supabase_client";
 import { formatPoints, listItemsToStringDescription } from "./parse";
 import { ItemUtils } from "./item_utils";
 import { titleCase } from "title-case";
-import { LOYALTY_REWARD_TAG } from "@/constants";
+import { LOYALTY_REWARD_TAG, MAX_BUNDLE_DURATION } from "@/constants";
 import { formatAvailabilityWindow } from "./time";
 
 export class PolicyUtils {
@@ -38,8 +38,8 @@ export class PolicyUtils {
   static fetchBundlePolicies = async (
     restaurantId: string
   ): Promise<Policy[]> => {
-    const ninetyDaysAgo = new Date(
-      Date.now() - 90 * 24 * 60 * 60 * 1000 // 90 days
+    const maxDaysAgo = new Date(
+      Date.now() - MAX_BUNDLE_DURATION * 24 * 60 * 60 * 1000
     ).toISOString();
     const { data, error } = await supabase
       .from("bundles")
@@ -49,7 +49,7 @@ export class PolicyUtils {
         `
       )
       .eq("restaurant_id", restaurantId)
-      .or(`deactivated_at.is.null,deactivated_at.gt.${ninetyDaysAgo}`)
+      .or(`deactivated_at.is.null,deactivated_at.gt.${maxDaysAgo}`)
       .returns<
         {
           bundle_id: string;
@@ -315,12 +315,18 @@ export class PolicyUtils {
     }
     return 0;
   };
-  static getUsageDescription(policy: Policy): string | null {
+  static getUsageDescription(
+    policy: Policy,
+    restaurant: Restaurant
+  ): string | null {
+    if (!this.isPolicyUsable(policy, restaurant)) {
+      return "This Deal is not Currently Active";
+    }
     const { total_usages, days_since_last_use } = policy;
 
     if (total_usages && days_since_last_use) {
-      return `One use every ${days_since_last_use} ${
-        days_since_last_use === 1 ? "day" : "days"
+      return `One use every${
+        days_since_last_use === 1 ? `day` : ` ${days_since_last_use} days`
       } up to ${total_usages} ${total_usages === 1 ? "use" : "uses"}`;
     }
 
@@ -329,11 +335,53 @@ export class PolicyUtils {
     }
 
     if (days_since_last_use) {
-      return `Single use every ${days_since_last_use} ${
-        days_since_last_use === 1 ? "day" : "days"
+      return `One use every${
+        days_since_last_use === 1 ? `day` : ` ${days_since_last_use} days`
       }`;
     }
 
     return null;
   }
+  static isPolicyUsable = (policy: Policy, restaurant: Restaurant): boolean => {
+    const { action, conditions } = policy.definition;
+
+    for (const condition of conditions) {
+      if (condition.type === "minimum_quantity") {
+        const itemSpecs = condition.items;
+        const itemIds = ItemUtils.policyItemSpecificationsToItemIds(
+          itemSpecs,
+          restaurant
+        );
+        if (itemIds.length === 0) {
+          return false;
+        }
+      }
+    }
+
+    if (action.type === "apply_blanket_price") {
+      for (const item of action.items) {
+        const itemIds = ItemUtils.getAllItemsInCategory(item.item, restaurant);
+        if (itemIds.length === 0) {
+          return false;
+        }
+      }
+    } else {
+      if ("items" in action) {
+        const itemIds = ItemUtils.policyItemSpecificationsToItemIds(
+          action.items,
+          restaurant
+        );
+        if (itemIds.length === 0) {
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+  static getAllUsablePolicies = (
+    policies: Policy[],
+    restaurant: Restaurant
+  ): Policy[] => {
+    return policies.filter((policy) => this.isPolicyUsable(policy, restaurant));
+  };
 }

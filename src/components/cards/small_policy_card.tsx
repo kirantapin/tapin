@@ -59,7 +59,7 @@ const SmallPolicyCard: React.FC<SmallPolicyCardProps> = ({
       </div>
       {bottomTongueText && (
         <div
-          className="absolute left-0 bottom-0 w-full z-0 flex justify-center overflow-visible"
+          className="absolute left-0 bottom-0 w-full flex justify-center overflow-visible"
           style={{ pointerEvents: "none" }}
         >
           <div

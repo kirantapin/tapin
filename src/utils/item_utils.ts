@@ -18,6 +18,7 @@ import {
 } from "@/constants";
 import { titleCase } from "title-case";
 import { PassUtils } from "./pass_utils";
+import { BundleUtils } from "./bundle_utils";
 
 export class ItemUtils {
   static getAllItemsInCategory(
@@ -30,8 +31,8 @@ export class ItemUtils {
 
     while (queue.length > 0) {
       const currentId = queue.shift()!;
-      const currentNode = restaurant.menu[currentId];
-      if ("price" in currentNode.info) {
+      const currentNode = restaurant.menu[currentId] || null;
+      if (currentNode && "price" in currentNode.info) {
         // If it's a leaf node (has a price), add it to our results
         items.push(currentId);
       } else {
@@ -175,7 +176,7 @@ export class ItemUtils {
     }
     if (this.isBundleItem(item.id, restaurant)) {
       const bundleItem = itemInfo as BundleItem;
-      if (bundleItem.object.deactivated_at) {
+      if (!BundleUtils.isBundlePurchaseable(bundleItem.object)) {
         return "This item is no longer available";
       }
       return null;

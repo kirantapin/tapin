@@ -26,6 +26,7 @@ import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { SuggestedMenuItems } from "./display_utils/suggested_menu_items";
 import { isEqual } from "lodash";
 import { PolicyUtils } from "@/utils/policy_utils";
+import { ImageUtils } from "@/utils/image_utils";
 
 export function DrinkItem({
   cart,
@@ -70,10 +71,7 @@ export function DrinkItem({
       {/* Image */}
       <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 p-3">
         <img
-          src={
-            menuItem?.image_url ||
-            `${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`
-          }
+          src={menuItem?.image_url || ImageUtils.getProfileImageUrl(restaurant)}
           alt={menuItem?.name}
           className="h-full w-full object-cover"
         />
@@ -92,7 +90,7 @@ export function DrinkItem({
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-500 custom-line-clamp">
+          <p className="text-sm text-gray-500 custom-line-clamp-1 show-at-400">
             {(menuItem as NormalItem | PassItem)?.description}
           </p>
         </div>
@@ -103,7 +101,7 @@ export function DrinkItem({
               ${ItemUtils.priceItem(item, restaurant)?.toFixed(2)}
             </p>
             {purchaseDate && quantity === 0 && (
-              <span className="text-xs text-gray-500 -mr-6">
+              <span className="text-xs text-gray-500 -mr-6 show-at-400">
                 {convertUtcToLocal(purchaseDate)}
               </span>
             )}
@@ -195,10 +193,7 @@ export function SingleSelectionItem({
       {/* Image */}
       <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 p-3">
         <img
-          src={
-            menuItem?.image_url ||
-            `${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`
-          }
+          src={menuItem?.image_url || ImageUtils.getProfileImageUrl(restaurant)}
           alt={menuItem?.name}
           className="h-full w-full object-cover"
         />
@@ -217,7 +212,7 @@ export function SingleSelectionItem({
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-500 custom-line-clamp">
+          <p className="text-sm text-gray-500 custom-line-clamp-1 show-at-400">
             {(menuItem as NormalItem | PassItem)?.description}
           </p>
         </div>
@@ -259,7 +254,7 @@ export function LoyaltyRewardItem({
         2
       )} of credit`,
       price: policy.definition.action.amount,
-      image_url: `${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`,
+      image_url: ImageUtils.getProfileImageUrl(restaurant),
     } as NormalItem;
   }
   if (policy.definition.action.type === "add_free_item") {
@@ -283,10 +278,7 @@ export function LoyaltyRewardItem({
       {/* Image */}
       <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 p-3">
         <img
-          src={
-            menuItem?.image_url ||
-            `${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`
-          }
+          src={menuItem?.image_url || ImageUtils.getProfileImageUrl(restaurant)}
           alt={menuItem?.name}
           className="h-full w-full object-cover"
         />
@@ -305,7 +297,7 @@ export function LoyaltyRewardItem({
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-500 custom-line-clamp">
+          <p className="text-sm text-gray-500 custom-line-clamp-1 show-at-400">
             {(menuItem as NormalItem | PassItem)?.description}
           </p>
         </div>
@@ -315,7 +307,7 @@ export function LoyaltyRewardItem({
             <p className="font-bold text-base" style={{ color: primaryColor }}>
               {numPoints} points
             </p>
-            <p className="text-sm text-gray-500 line-through">
+            <p className="text-sm text-gray-500 line-through show-at-400">
               ${menuItem?.price?.toFixed(2)}
             </p>
           </div>
@@ -377,10 +369,7 @@ export function PreviousTransactionItem({
       {/* Image */}
       <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 p-3">
         <img
-          src={
-            menuItem?.image_url ||
-            `${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`
-          }
+          src={menuItem?.image_url || ImageUtils.getProfileImageUrl(restaurant)}
           alt={menuItem?.name}
           className="h-full w-full object-cover"
         />
@@ -399,7 +388,7 @@ export function PreviousTransactionItem({
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-500 custom-line-clamp">
+          <p className="text-sm text-gray-500 custom-line-clamp-1 show-at-400">
             {(menuItem as NormalItem | PassItem)?.description}
           </p>
         </div>

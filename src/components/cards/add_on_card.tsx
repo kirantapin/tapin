@@ -1,5 +1,6 @@
 import { useRestaurant } from "@/context/restaurant_context";
 import { NormalItem, Policy, Restaurant } from "@/types";
+import { ImageUtils } from "@/utils/image_utils";
 import { ItemUtils } from "@/utils/item_utils";
 import { project_url } from "@/utils/supabase_client";
 import { Check } from "lucide-react";
@@ -45,10 +46,7 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
       {/* Image container with 1:1 aspect ratio */}
       <div className="relative aspect-square overflow-hidden rounded-lg">
         <img
-          src={
-            menuItem?.image_url ||
-            `${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`
-          }
+          src={menuItem?.image_url || ImageUtils.getProfileImageUrl(restaurant)}
           alt={name}
           className="w-full h-full object-cover bg-gray-100"
         />

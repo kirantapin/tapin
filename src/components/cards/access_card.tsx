@@ -5,6 +5,7 @@ import { useState } from "react";
 import { titleCase } from "title-case";
 import { generateGradientColors } from "@/utils/color";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
+import { useRestaurant } from "@/context/restaurant_context";
 interface CardProps {
   cart: Cart;
   cartItem: CartItem | null;
@@ -43,8 +44,8 @@ export default function Card({
   let quantity = 0;
   let name = null;
   const [loading, setLoading] = useState(false);
-  const { openPolicyModal } = useBottomSheet();
-
+  const { handlePolicyClick } = useBottomSheet();
+  const { userOwnershipMap } = useRestaurant();
   if (cartItem) {
     quantity = cartItem.quantity || 0;
     itemInfo = ItemUtils.getMenuItemFromItemId(
@@ -121,7 +122,10 @@ export default function Card({
               <div
                 className="mb-2 inline-block"
                 onClick={() => {
-                  openPolicyModal(inlineRecommendation.policy, null);
+                  handlePolicyClick(
+                    inlineRecommendation.policy,
+                    userOwnershipMap
+                  );
                 }}
               >
                 <span

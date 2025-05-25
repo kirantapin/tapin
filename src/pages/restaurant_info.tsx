@@ -22,6 +22,7 @@ import { Restaurant } from "@/types";
 import { project_url } from "@/utils/supabase_client";
 import { GradientIcon } from "@/utils/gradient";
 import { useRestaurant } from "@/context/restaurant_context";
+import { ImageUtils } from "@/utils/image_utils";
 
 const RestaurantInfo: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -41,10 +42,8 @@ const RestaurantInfo: React.FC = () => {
   };
 
   useEffect(() => {
-    if (id) {
-      setCurrentRestaurantId(id);
-    }
-  }, [id]);
+    window.scrollTo(0, 0);
+  }, []);
 
   if (!restaurant) {
     return null;
@@ -98,7 +97,7 @@ const RestaurantInfo: React.FC = () => {
       {restaurant && (
         <div className="flex justify-center mt-4 mb-2">
           <img
-            src={`${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`}
+            src={ImageUtils.getProfileImageUrl(restaurant) || ""}
             alt={`Profile`}
             className="w-32 h-32 rounded-full object-cover border border-gray-300"
           />

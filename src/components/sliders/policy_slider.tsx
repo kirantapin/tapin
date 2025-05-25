@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Policy, Restaurant, Bundle } from "@/types";
 import { NORMAL_DEAL_TAG, OFFERS_PAGE_PATH } from "@/constants";
 import SmallPolicyCard from "../cards/small_policy_card.tsx";
+import { PolicyUtils } from "@/utils/policy_utils.ts";
 
 interface PolicySliderProps {
   restaurant: Restaurant | null;
@@ -52,7 +53,11 @@ export const PolicySlider: React.FC<PolicySliderProps> = ({
               <SmallPolicyCard
                 policy={policy}
                 restaurant={restaurant}
-                onClick={() => {}}
+                bottomTongueText={
+                  PolicyUtils.isPolicyUsable(policy, restaurant)
+                    ? null
+                    : PolicyUtils.getUsageDescription(policy, restaurant)
+                }
               />
             </div>
           ))}

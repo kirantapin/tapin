@@ -14,6 +14,8 @@ import { useState } from "react";
 import { ItemUtils } from "@/utils/item_utils";
 import { adjustColor } from "@/utils/color";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
+import { useRestaurant } from "@/context/restaurant_context";
+import { ImageUtils } from "@/utils/image_utils";
 
 export function CheckoutItemCard({
   item,
@@ -38,8 +40,8 @@ export function CheckoutItemCard({
     item.item.id,
     restaurant
   ) as NormalItem;
-
-  const { openPolicyModal } = useBottomSheet();
+  const { userOwnershipMap } = useRestaurant();
+  const { handlePolicyClick } = useBottomSheet();
 
   const { oldPrice, currentPrice, discountDescription } = modifiedItemFlair(
     item,
@@ -54,10 +56,7 @@ export function CheckoutItemCard({
       <div className="flex items-start gap-3">
         {/* Image */}
         <img
-          src={
-            itemInfo?.image_url ||
-            `${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`
-          }
+          src={itemInfo?.image_url || ImageUtils.getProfileImageUrl(restaurant)}
           alt={ItemUtils.getItemName(item.item, restaurant)}
           className="w-20 h-20 rounded-md object-cover bg-gray-100"
         />
@@ -96,7 +95,10 @@ export function CheckoutItemCard({
             <div
               className="mt-2"
               onClick={() => {
-                openPolicyModal(inlineRecommendation.policy, null);
+                handlePolicyClick(
+                  inlineRecommendation.policy,
+                  userOwnershipMap
+                );
               }}
             >
               <span

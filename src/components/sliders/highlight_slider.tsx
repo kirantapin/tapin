@@ -6,6 +6,8 @@ import { ItemUtils } from "@/utils/item_utils";
 import { NORMAL_DEAL_TAG } from "@/constants";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { useRestaurant } from "@/context/restaurant_context";
+import { PolicyUtils } from "@/utils/policy_utils";
+import { BundleUtils } from "@/utils/bundle_utils";
 
 const HighlightSlider = ({
   addToCart,
@@ -107,13 +109,18 @@ const HighlightSlider = ({
           const policy = policies.find(
             (p) => p.policy_id === highlight.content_pointer
           );
-          return policy?.definition?.tag === NORMAL_DEAL_TAG;
+          return (
+            policy?.definition?.tag === NORMAL_DEAL_TAG &&
+            PolicyUtils.isPolicyUsable(policy, restaurant)
+          );
         } else if (highlight.content_type === "bundle") {
           const bundle = ItemUtils.getMenuItemFromItemId(
             highlight.content_pointer,
             restaurant
           ) as BundleItem;
-          return bundle?.price && bundle.object.deactivated_at === null;
+          return (
+            bundle?.price && BundleUtils.isBundlePurchaseable(bundle.object)
+          );
         } else if (highlight.content_type === "media") {
           const { title_override, description_override } = highlight;
           return title_override && description_override;
@@ -124,8 +131,6 @@ const HighlightSlider = ({
     };
     fetchHighlights();
   }, [restaurant]);
-
-  if (!restaurant || !policyManager) return null;
 
   const handleHighlightClick = async (highlight: Highlight) => {
     setCardLoading(true);
@@ -140,7 +145,7 @@ const HighlightSlider = ({
       ) as BundleItem;
       openBundleModal(bundle.object);
     } else if (highlight.content_type === "policy") {
-      const policy = policyManager.getPolicyFromId(content_pointer);
+      const policy = policyManager?.getPolicyFromId(content_pointer);
       if (policy) {
         handlePolicyClick(policy, userOwnershipMap);
       } else {
@@ -155,7 +160,7 @@ const HighlightSlider = ({
     setCardLoading(false);
   };
 
-  if (highlights.length === 0) {
+  if (highlights.length === 0 || !restaurant || !policyManager) {
     return null;
   }
 
@@ -176,11 +181,7 @@ const HighlightSlider = ({
           {highlights.map((h, idx) => (
             <div key={idx} className="snap-center shrink-0 w-full">
               <HighlightCard
-                content_type={h.content_type}
-                content_pointer={h.content_pointer}
-                title_override={h.title_override}
-                description_override={h.description_override}
-                image_url_override={h.image_url_override}
+                highlight={h}
                 restaurant={restaurant}
                 onClick={() => {
                   handleHighlightClick(h);

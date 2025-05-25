@@ -2,7 +2,7 @@ import { BundleItem, Policy } from "@/types";
 
 import { Bundle, Restaurant } from "@/types";
 
-import { BUNDLE_MENU_TAG } from "@/constants";
+import { BUNDLE_MENU_TAG, MAX_BUNDLE_DURATION } from "@/constants";
 
 import { supabase } from "./supabase_client";
 import { PolicyUtils } from "./policy_utils";
@@ -18,7 +18,7 @@ export class BundleUtils {
       .eq("restaurant_id", restaurantId)
       .or(
         `deactivated_at.is.null,deactivated_at.gt.${new Date(
-          Date.now() - 90 * 24 * 60 * 60 * 1000 // 90 days
+          Date.now() - MAX_BUNDLE_DURATION * 24 * 60 * 60 * 1000
         ).toISOString()}`
       )
       .returns<Bundle[]>();
@@ -160,5 +160,38 @@ export class BundleUtils {
       return totalValue + estimatedPolicyValue * estimatedUses;
     }, 0);
     return bundlePolicyValue + bundle.fixed_credit;
+  };
+
+  static separateBundlePoliciesByType = (
+    policies: Policy[]
+  ): {
+    deals: Policy[];
+    freeItems: Policy[];
+  } => {
+    const deals: Policy[] = [];
+    const freeItems: Policy[] = [];
+
+    for (const policy of policies) {
+      const { conditions, action } = policy.definition;
+      if (conditions.length === 0 && action.type === "add_free_item") {
+        freeItems.push(policy);
+      } else {
+        deals.push(policy);
+      }
+    }
+    return {
+      deals,
+      freeItems,
+    };
+  };
+
+  static isBundlePurchaseable = (bundle: Bundle) => {
+    if (bundle.deactivated_at === null) {
+      return true;
+    }
+    if (new Date(bundle.deactivated_at) > new Date()) {
+      return true;
+    }
+    return false;
   };
 }

@@ -19,6 +19,7 @@ import React from "react";
 import { PolicyCard } from "@/components/cards/policy_card";
 import GoToCartButton from "@/components/go_to_cart_button";
 import SpendGoalCard from "@/components/cards/spend_goal_card";
+import { PolicyUtils } from "@/utils/policy_utils";
 const tagMap: Record<string, { tag: string; icon: any }> = {
   Deals: { tag: NORMAL_DEAL_TAG, icon: Star },
   Rewards: { tag: LOYALTY_REWARD_TAG, icon: Gift },
@@ -54,11 +55,8 @@ export default function PoliciesPage() {
   }, [activeTag, policies]);
 
   useEffect(() => {
-    if (id) {
-      setCurrentRestaurantId(id);
-    }
     window.scrollTo(0, 0);
-  }, [id]);
+  }, []);
 
   if (!restaurant) {
     return <OffersSkeleton />;
@@ -131,6 +129,11 @@ export default function PoliciesPage() {
                 policy={policy}
                 restaurant={restaurant as Restaurant}
                 dealEffect={state.dealEffect}
+                extraTags={[
+                  ...(PolicyUtils.isPolicyUsable(policy, restaurant)
+                    ? []
+                    : ["Not Currently Active"]),
+                ]}
               />
             ))
           ) : (

@@ -23,7 +23,6 @@ import { PolicyManager } from "@/utils/policy_manager";
 import { DRINK_CHECKOUT_PATH } from "@/constants";
 import { useNavigate } from "react-router-dom";
 import { ItemUtils } from "@/utils/item_utils";
-import { adjustColor } from "@/utils/color";
 import { useAuth } from "@/context/auth_context";
 import { SignInButton } from "../signin/signin_button";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
@@ -74,6 +73,8 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
         .object
     : null;
 
+  const isUsable = PolicyUtils.isPolicyUsable(policy, restaurant);
+
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent
@@ -99,7 +100,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
             <div className="flex flex-wrap gap-2 mb-4">
               {bundleObject && policy.locked && (
                 <div
-                  className="bg-black/70 text-white text-xs font-medium px-3 py-2 rounded-full flex items-center gap-1 border border-[#d4af37]"
+                  className="bg-black/70 text-white px-3 py-2 rounded-full flex items-center gap-1 border"
                   style={{
                     borderColor: restaurant?.metadata.primaryColor as string,
                   }}
@@ -109,7 +110,9 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                     baseColor="white"
                     size={16}
                   />
-                  <span>{bundleObject.name}</span>
+                  <span className="font-semibold text-xs">
+                    {bundleObject.name}
+                  </span>
                 </div>
               )}
 
@@ -117,17 +120,12 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                 <div
                   className="relative text-white px-3 py-2 rounded-full flex items-center gap-1"
                   style={{
-                    background: `linear-gradient(225deg, ${adjustColor(
-                      restaurant?.metadata.primaryColor as string,
-                      -30
-                    )}, ${adjustColor(
-                      restaurant?.metadata.primaryColor as string,
-                      40
-                    )})`,
+                    backgroundColor: restaurant?.metadata
+                      .primaryColor as string,
                   }}
                 >
                   <Clock size={16} />
-                  <span className="font-medium text-xs">
+                  <span className="font-semibold text-xs">
                     Limited Time Offer
                   </span>
                 </div>
@@ -136,16 +134,10 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
               <div
                 className="relative text-white px-3 py-2 rounded-full flex items-center gap-1"
                 style={{
-                  background: `linear-gradient(225deg, ${adjustColor(
-                    restaurant?.metadata.primaryColor as string,
-                    -30
-                  )}, ${adjustColor(
-                    restaurant?.metadata.primaryColor as string,
-                    40
-                  )})`,
+                  backgroundColor: restaurant?.metadata.primaryColor as string,
                 }}
               >
-                <span className="font-medium text-xs">
+                <span className="font-semibold text-xs">
                   {policy.total_usages
                     ? `${policy.total_usages} Uses`
                     : "Unlimited Uses"}
@@ -156,17 +148,12 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                 <div
                   className="relative text-white px-3 py-2 rounded-full flex items-center gap-1"
                   style={{
-                    background: `linear-gradient(225deg, ${adjustColor(
-                      restaurant?.metadata.primaryColor as string,
-                      -30
-                    )}, ${adjustColor(
-                      restaurant?.metadata.primaryColor as string,
-                      40
-                    )})`,
+                    backgroundColor: restaurant?.metadata
+                      .primaryColor as string,
                   }}
                 >
                   <RefreshCw size={16} />
-                  <span className="font-medium text-xs">
+                  <span className="font-semibold text-xs">
                     {policy.days_since_last_use} Day Between Uses
                   </span>
                 </div>
@@ -176,17 +163,12 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                 <div
                   className="relative text-white px-3 py-2 rounded-full flex items-center gap-1"
                   style={{
-                    background: `linear-gradient(225deg, ${adjustColor(
-                      restaurant?.metadata.primaryColor as string,
-                      -30
-                    )}, ${adjustColor(
-                      restaurant?.metadata.primaryColor as string,
-                      40
-                    )})`,
+                    backgroundColor: restaurant?.metadata
+                      .primaryColor as string,
                   }}
                 >
                   <Lock size={16} />
-                  <span className="font-medium text-xs">Counts As Deal</span>
+                  <span className="font-semibold text-xs">Counts As Deal</span>
                 </div>
               )}
             </div>
@@ -202,67 +184,81 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
               />
             </div>
 
-            {!policyIsActive && hasMissingItems ? (
+            {!isUsable && (
               <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-1">
-                {missingItemsResults.map((result, index) => (
-                  <div key={index} className="mt-2">
-                    <div className="flex items-center gap-2 text-amber-700 ml-3 mb-2">
-                      <AlertCircle size={20} />
-                      <span className="font-medium">
-                        Add {result.quantityNeeded} more from any of the
-                        following:
-                      </span>
-                    </div>
-                    {ItemUtils.policyItemSpecificationsToItemIds(
-                      result.missingItems,
-                      restaurant
-                    ).map((itemId) => (
-                      <DrinkItem
-                        key={itemId}
-                        cart={state.cart}
-                        restaurant={restaurant}
-                        addToCart={addToCart}
-                        removeFromCart={removeFromCart}
-                        item={{ id: itemId, modifiers: [] }}
-                      />
-                    ))}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-1">
                 <div>
-                  <div className="flex items-center gap-2 text-green-700 p-3">
-                    <CheckCircle size={20} />
+                  <div className="flex items-center gap-2 text-amber-700 p-3">
+                    <AlertCircle size={20} />
                     <span className="font-medium">
-                      {policyIsActive
-                        ? "This deal is active in your cart."
-                        : `You're ready to add this deal.${
-                            userChoices.length > 1 ? ` ` : ""
-                          }`}
-                      {userChoices.length > 1 && (
-                        <span className="font-bold">
-                          Select your preferred item.
-                        </span>
-                      )}
+                      This Deal is not Currently Active
                     </span>
                   </div>
-                  {!policyIsActive &&
-                    userChoices.length > 1 &&
-                    userChoices.map((itemId) => (
-                      <SingleSelectionItem
-                        key={itemId}
-                        restaurant={restaurant}
-                        item={{ id: itemId, modifiers: [] }}
-                        selected={userPreference === itemId}
-                        onSelect={() => {
-                          setUserPreference(itemId);
-                        }}
-                      />
-                    ))}
                 </div>
               </div>
             )}
+
+            {isUsable &&
+              (!policyIsActive && hasMissingItems ? (
+                <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-1">
+                  {missingItemsResults.map((result, index) => (
+                    <div key={index} className="mt-2">
+                      <div className="flex items-center gap-2 text-amber-700 ml-3 mb-2">
+                        <AlertCircle size={20} />
+                        <span className="font-medium">
+                          Add {result.quantityNeeded} more from any of the
+                          following:
+                        </span>
+                      </div>
+                      {ItemUtils.policyItemSpecificationsToItemIds(
+                        result.missingItems,
+                        restaurant
+                      ).map((itemId) => (
+                        <DrinkItem
+                          key={itemId}
+                          cart={state.cart}
+                          restaurant={restaurant}
+                          addToCart={addToCart}
+                          removeFromCart={removeFromCart}
+                          item={{ id: itemId, modifiers: [] }}
+                        />
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-1">
+                  <div>
+                    <div className="flex items-center gap-2 text-green-700 p-3">
+                      <CheckCircle size={20} />
+                      <span className="font-medium">
+                        {policyIsActive
+                          ? "This deal is active in your cart."
+                          : `You're ready to add this deal.${
+                              userChoices.length > 1 ? ` ` : ""
+                            }`}
+                        {userChoices.length > 1 && (
+                          <span className="font-bold">
+                            Select your preferred item.
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                    {!policyIsActive &&
+                      userChoices.length > 1 &&
+                      userChoices.map((itemId) => (
+                        <SingleSelectionItem
+                          key={itemId}
+                          restaurant={restaurant}
+                          item={{ id: itemId, modifiers: [] }}
+                          selected={userPreference === itemId}
+                          onSelect={() => {
+                            setUserPreference(itemId);
+                          }}
+                        />
+                      ))}
+                  </div>
+                </div>
+              ))}
           </div>
         </div>
 
@@ -273,7 +269,8 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
               style={{
                 backgroundColor:
                   (hasMissingItems && !policyIsActive) ||
-                  (userChoices.length > 1 && !userPreference)
+                  (userChoices.length > 1 && !userPreference) ||
+                  !isUsable
                     ? "#969292"
                     : (restaurant?.metadata.primaryColor as string),
               }}
@@ -289,7 +286,8 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
               }}
               disabled={
                 (userChoices.length > 1 && !userPreference) ||
-                (hasMissingItems && !policyIsActive)
+                (hasMissingItems && !policyIsActive) ||
+                !isUsable
               }
             >
               {loading ? (

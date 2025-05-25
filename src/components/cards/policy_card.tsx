@@ -97,10 +97,9 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({
           {/* Extra tags */}
           {extraTags.length > 0 && (
             <>
-              {policy.locked && <span className="text-gray-500">•</span>}
               {extraTags.map((tag, index) => (
                 <>
-                  {(index !== 0 || !policy.locked) && (
+                  {(index !== 0 || policy.locked) && (
                     <span className="text-gray-500">•</span>
                   )}
                   <span key={index} className="whitespace-nowrap">

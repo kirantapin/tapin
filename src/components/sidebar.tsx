@@ -15,6 +15,7 @@ import { project_url } from "@/utils/supabase_client.ts";
 import { Restaurant } from "@/types.ts";
 import { SignInButton } from "./signin/signin_button.tsx";
 import CustomLogo from "./svg/custom_logo.tsx";
+import { ImageUtils } from "@/utils/image_utils.ts";
 
 interface SidebarProps {
   restaurant: Restaurant | null;
@@ -117,7 +118,7 @@ export const Sidebar = ({ restaurant, isOpen, onClose }: SidebarProps) => {
               >
                 <div className="flex-shrink-0 w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200">
                   <img
-                    src={`${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile.png`}
+                    src={ImageUtils.getProfileImageUrl(restaurant)}
                     alt={restaurant.name}
                     className="w-full h-full object-cover"
                   />

@@ -20,9 +20,9 @@ const GoToCartButton = ({
   }, [cartCount]);
 
   return (
-    <>
+    <div>
       <div
-        className={`fixed bottom-0 left-0 right-0 h-20 bg-white shadow-[0_-8px_16px_-3px_rgba(0,0,0,0.15)] transition-all duration-300
+        className={`fixed bottom-0 left-0 right-0 h-20 bg-white shadow-[0_-8px_16px_-3px_rgba(0,0,0,0.15)] transition-all duration-300 z-40
           ${isVisible ? "translate-y-0" : "translate-y-24"}`}
       />
       <button
@@ -51,7 +51,7 @@ const GoToCartButton = ({
           </span>
         </span>
       </button>
-    </>
+    </div>
   );
 };
 

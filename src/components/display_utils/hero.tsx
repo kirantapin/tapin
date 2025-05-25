@@ -1,6 +1,7 @@
 import { DRINK_CHECKOUT_PATH, RESTAURANT_IMAGE_BUCKET } from "@/constants";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { useRestaurant } from "@/context/restaurant_context";
+import { ImageUtils } from "@/utils/image_utils";
 import { project_url } from "@/utils/supabase_client";
 import { Menu, ShoppingBag, User } from "lucide-react";
 import { useState } from "react";
@@ -20,9 +21,10 @@ export function Hero({
 
   const [bgLoaded, setBgLoaded] = useState(false);
 
-  const backgroundImageUrl = `${project_url}/storage/v1/object/public/${RESTAURANT_IMAGE_BUCKET}/${restaurant_id}_hero.jpeg`;
+  const backgroundImageUrl = ImageUtils.getHeroImageUrl(restaurant);
 
   useEffect(() => {
+    if (!backgroundImageUrl) return;
     const img = new Image();
     img.src = backgroundImageUrl;
     img.onload = () => setBgLoaded(true);
@@ -91,7 +93,7 @@ export function Hero({
           {/* Moved further down */}
           <div className="w-24 h-24 rounded-full border-2 border-white  overflow-hidden shadow-2xl">
             <img
-              src={`${project_url}/storage/v1/object/public/${RESTAURANT_IMAGE_BUCKET}/${restaurant_id}_profile.png`}
+              src={ImageUtils.getProfileImageUrl(restaurant) || ""}
               alt="Profile"
               className="w-full h-full object-cover"
             />

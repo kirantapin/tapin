@@ -178,11 +178,11 @@ button {
 
 .custom-line-clamp-1 {
   display: -webkit-box;
-  -webkit-line-clamp: 1; /* Show 2 full lines */
+  -webkit-line-clamp: 1; /* Show 1 full line */
   -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis; /* Adds "..." only after two lines */
-  max-height: 3rem; /* Adjust based on font-size to fit exactly 2 lines */
+  text-overflow: ellipsis; /* Adds "..." only after one line */
+  max-height: 1.5rem; /* Adjust based on font-size to fit exactly 1 line */
   line-height: 1.5rem; /* Ensures consistent line spacing */
   white-space: normal; /* Allows wrapping */
   word-wrap: break-word; /* Prevents words from overflowing */
@@ -190,4 +190,14 @@ button {
 
 .enhance-contrast {
   filter: contrast(1.1);
+}
+
+.show-at-400 {
+  display: none;
+}
+
+@media (min-width: 400px) {
+  .show-at-400 {
+    display: block;
+  }
 }
