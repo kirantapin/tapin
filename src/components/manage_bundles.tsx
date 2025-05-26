@@ -67,6 +67,12 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
     return (
       <div className="mt-8 px-4 flex justify-center">
         <h1 className="text-lg font-semibold">No Available Bundles</h1>
+        <GoToCartButton
+          restaurant={restaurant}
+          cartCount={
+            state.cart.reduce((total, item) => total + item.quantity, 0) || 0
+          }
+        />
       </div>
     );
   }
@@ -215,7 +221,11 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
                         })()
                   );
                   if (policy.total_usages) {
-                    tags.push(`${policy.total_usages - numUsages} Uses Left`);
+                    tags.push(
+                      `${policy.total_usages - numUsages} ${
+                        policy.total_usages - numUsages === 1 ? "Use" : "Uses"
+                      } Left`
+                    );
                   }
                   return (
                     <div key={index}>
@@ -241,7 +251,7 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
       })}
       <div className="pb-16">
         {Object.values(userOwnershipMap).some((value) => value === null) && (
-          <div className="mt-6 px-4 mb-8">
+          <div className="mt-6 px-1 mb-8">
             <h1 className="text-xl font-bold">Bundles You Might Like</h1>
             <BundleSlider />
           </div>

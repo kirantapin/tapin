@@ -8,18 +8,19 @@ import {
 import { useAuth } from "@/context/auth_context";
 import { SignInButton } from "../signin/signin_button";
 import { X } from "lucide-react";
-import { RESTAURANT_IMAGE_BUCKET } from "@/constants";
+import { RESTAURANT_IMAGE_BUCKET, RESTAURANT_PATH } from "@/constants";
 import { project_url } from "@/utils/supabase_client";
 import OrderHistory from "../display_utils/order_history";
 import { useRestaurant } from "@/context/restaurant_context";
 import CustomIcon from "../svg/custom_icon";
-
+import { useNavigate } from "react-router-dom";
 interface ProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
 const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
+  const navigate = useNavigate();
   const { userSession, userData, transactions } = useAuth();
   const [userInfo, setUserInfo] = useState<
     Record<string, { points: number; credit: number; numTransactions: number }>
@@ -130,7 +131,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
                     <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-800 border-t-transparent mx-auto" />
                   </div>
                 ) : (
-                  <div className="space-y-4 pt-2">
+                  <div className="space-y-4 pt-4">
                     {Object.entries(userInfo).map(([restaurantId, stats]) => {
                       if (
                         stats.points > 0 ||
@@ -140,12 +141,20 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
                         return (
                           <div
                             key={restaurantId}
-                            className="border rounded-lg p-4 shadow-sm"
+                            className="border border-gray-300 rounded-3xl p-4 shadow-sm"
+                            onClick={() => {
+                              onClose();
+                              if (restaurantId !== restaurant?.id) {
+                                navigate(
+                                  RESTAURANT_PATH.replace(":id", restaurantId)
+                                );
+                              }
+                            }}
                           >
                             <div className="flex items-center gap-4">
                               <div className="w-16 h-16 rounded-full overflow-hidden">
                                 <img
-                                  src={`${project_url}/storage/v1/object/public/${RESTAURANT_IMAGE_BUCKET}/${restaurantId}_profile`}
+                                  src={`${project_url}/storage/v1/object/public/${RESTAURANT_IMAGE_BUCKET}/profile/${restaurantId}`}
                                   alt="Restaurant"
                                   className="w-full h-full object-cover"
                                 />

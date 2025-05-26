@@ -1,4 +1,4 @@
-import { CartState, PassItem, Policy, Restaurant } from "@/types";
+import { CartState, PassItem, Policy, Restaurant, Item } from "@/types";
 import { ItemUtils } from "@/utils/item_utils";
 import { Check } from "lucide-react";
 import { useState } from "react";
@@ -7,7 +7,7 @@ interface PassAddOnCardProps {
   addPolicy: (
     bundle_id: string | null,
     policy_id: string,
-    userPreference: string | null
+    userPreference: Item | null
   ) => Promise<void>;
   removePolicy: (policy_id: string) => void;
   restaurant: Restaurant;
@@ -61,17 +61,17 @@ export const PassAddOnCard: React.FC<PassAddOnCardProps> = ({
   // Get policy IDs from all deal effect sources
   const policyAndItemIds: {
     policy_id: string;
-    userPreference: string | null;
+    userPreference: Item | null;
   }[] = state.dealEffect.addedItems.map((item) => {
+    const cartItem = ItemUtils.getCartItemFromId(item.id, state.cart);
     return {
       policy_id: item.policy_id,
-      userPreference:
-        state.cart.find((cartItem) => cartItem.id === item.id)?.item.id || null,
+      userPreference: cartItem?.item || null,
     };
   });
   const addOnIsActive = policyAndItemIds.some(
     (item) =>
-      item.policy_id === policy.policy_id && item.userPreference === itemId
+      item.policy_id === policy.policy_id && item.userPreference?.id === itemId
   );
 
   return (

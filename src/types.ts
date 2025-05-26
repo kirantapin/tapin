@@ -15,7 +15,7 @@ export interface VerifyOrderPayload {
       | {
           bundle_id: string | null;
           policy_id: string;
-          userPreference: string | null;
+          userPreference: Item | null;
         };
   };
   jwtToken: string | null;

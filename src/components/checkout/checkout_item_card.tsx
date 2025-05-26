@@ -16,6 +16,7 @@ import { adjustColor } from "@/utils/color";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { useRestaurant } from "@/context/restaurant_context";
 import { ImageUtils } from "@/utils/image_utils";
+import { ImageFallback } from "../display_utils/image_fallback";
 
 export function CheckoutItemCard({
   item,
@@ -52,13 +53,12 @@ export function CheckoutItemCard({
 
   return (
     <div className="flex items-center justify-between py-4">
-      {/* Left: Image and info */}
       <div className="flex items-start gap-3">
-        {/* Image */}
-        <img
-          src={itemInfo?.image_url || ImageUtils.getProfileImageUrl(restaurant)}
+        <ImageFallback
+          src={itemInfo?.image_url || ""}
           alt={ItemUtils.getItemName(item.item, restaurant)}
-          className="w-20 h-20 rounded-md object-cover bg-gray-100"
+          className="w-20 h-20  object-cover bg-gray-100"
+          restaurant={restaurant}
         />
 
         {/* Info */}

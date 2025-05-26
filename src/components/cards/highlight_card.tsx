@@ -14,6 +14,7 @@ import { useRestaurant } from "@/context/restaurant_context";
 import { HIGHLIGHT_IMAGE_BUCKET } from "@/constants";
 import { PolicyUtils } from "@/utils/policy_utils";
 import { ImageUtils } from "@/utils/image_utils";
+import { ImageFallback } from "../display_utils/image_fallback";
 
 interface HighlightCardProps {
   highlight: Highlight;
@@ -175,10 +176,11 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
 
       {defaultImageUrl && !image_url_override && (
         <div className="flex-shrink-0 p-3 bg-gray-200 h-full w-32">
-          <img
+          <ImageFallback
             src={defaultImageUrl || ""}
             alt="name"
             className="w-full h-full object-contain"
+            restaurant={restaurant}
           />
         </div>
       )}

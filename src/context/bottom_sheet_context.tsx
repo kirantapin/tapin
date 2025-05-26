@@ -10,6 +10,7 @@ import {
   BundleItem,
   CartState,
   Item,
+  ItemSpecification,
   Policy,
   Restaurant,
   Transaction,
@@ -49,7 +50,7 @@ interface BottomSheetContextValue {
   addPolicy: (
     bundle_id: string | null,
     policy_id: string,
-    userPreference: string | null
+    userPreference: Item | null
   ) => Promise<void>;
   addToCart: (item: Item, showToast?: boolean) => Promise<void>;
   removeFromCart: (id: number) => Promise<void>;
@@ -63,7 +64,10 @@ interface BottomSheetContextValue {
   openLockedPolicyModal: (policy: Policy) => void;
   triggerToast: (message: string, type: "success" | "error" | "info") => void;
   openAllBundlesModal: () => void;
-  openLiquorFormModal: (type: string) => void;
+  openLiquorFormModal: (
+    type: string,
+    postFunction: (item: Item) => Promise<void>
+  ) => void;
 }
 
 const BottomSheetContext = createContext<BottomSheetContextValue>({
@@ -94,7 +98,10 @@ const BottomSheetContext = createContext<BottomSheetContextValue>({
   openLockedPolicyModal: () => {},
   triggerToast: () => {},
   openAllBundlesModal: () => {},
-  openLiquorFormModal: (type: string) => {},
+  openLiquorFormModal: (
+    type: string,
+    postFunction: (item: Item) => Promise<void>
+  ) => {},
 });
 
 interface BottomSheetProviderProps {
@@ -125,6 +132,7 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
   const [policyModal, setPolicyModal] = useState<{
     policy: Policy;
     bundle_id: string | null;
+    userPreference?: Item;
   } | null>(null);
   const [qrModal, setQrModal] = useState<{
     transactionsToRedeem: Transaction[];
@@ -136,9 +144,6 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
     bundle_id: string;
   } | null>(null);
   const [showAllBundlesModal, setShowAllBundlesModal] = useState(false);
-  const [showLiquorFormModal, setShowLiquorFormModal] = useState<{
-    type: string;
-  } | null>(null);
 
   const handlePolicyClick = (
     policy: Policy,
@@ -230,16 +235,6 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
     }, 200); // Wait for animation to complete
   };
 
-  const openLiquorFormModal = (type: string) => {
-    if (isOpen) {
-      closeSheet();
-    }
-    setTimeout(() => {
-      setShowLiquorFormModal({ type });
-      setIsOpen(true);
-    }, 200); // Wait for animation to complete
-  };
-
   const openAllBundlesModal = () => {
     if (isOpen) {
       closeSheet();
@@ -270,7 +265,6 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
       setShowProfile(false);
       setLockedPolicyModal(null);
       setShowAllBundlesModal(false);
-      setShowLiquorFormModal(null);
     }, 200);
   };
 
@@ -294,7 +288,6 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
         openProfileModal,
         triggerToast,
         openAllBundlesModal,
-        openLiquorFormModal,
       }}
     >
       {children}
@@ -340,13 +333,6 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
 
       <ProfileModal isOpen={showProfile} onClose={closeSheet} />
       <AllBundlesModal isOpen={showAllBundlesModal} onClose={closeSheet} />
-      {showLiquorFormModal && (
-        <LiquorFormModal
-          isOpen={isOpen}
-          onClose={closeSheet}
-          type={showLiquorFormModal.type}
-        />
-      )}
     </BottomSheetContext.Provider>
   );
 };

@@ -45,7 +45,7 @@ export function Hero({
           bgLoaded ? "opacity-100" : "opacity-0"
         }`}
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url(${backgroundImageUrl})`,
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1)), url(${backgroundImageUrl})`,
         }}
       />
       <div className="absolute w-full top-0 z-10 flex justify-between items-center px-4 py-3">

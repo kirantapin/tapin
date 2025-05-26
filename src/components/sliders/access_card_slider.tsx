@@ -93,7 +93,7 @@ const AccessCardSlider = ({
 
   if (flatAccessCards.length > 0) {
     return (
-      <div className="mt-8">
+      <div>
         {/* Scrollable Access Cards Container */}
         {!displayCartPasses && (
           <h1 className="text-xl font-bold">
@@ -103,7 +103,7 @@ const AccessCardSlider = ({
         {flatAccessCards.length > 0 ? (
           <div
             ref={scrollContainerRef}
-            className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar -mx-4 px-8 gap-4"
+            className="flex overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar -mx-5 px-9 gap-4"
             onScroll={handleScroll}
           >
             {flatAccessCards.map((x, index) => {

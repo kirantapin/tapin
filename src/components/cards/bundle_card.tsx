@@ -14,6 +14,7 @@ import { useRestaurant } from "@/context/restaurant_context";
 import { BundleUtils } from "@/utils/bundle_utils";
 import { GradientIcon } from "@/utils/gradient";
 import { ImageUtils } from "@/utils/image_utils";
+import { ImageFallback } from "../display_utils/image_fallback";
 const NUM_POLICY_TO_SHOW = 3;
 
 const BundleCard = ({
@@ -27,7 +28,6 @@ const BundleCard = ({
   isOwned: string | null;
   onCardClick: (bundle: Bundle) => void;
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const { policyManager } = useRestaurant();
   const navigate = useNavigate();
   const [isFallback, setIsFallback] = useState(false);
@@ -61,35 +61,41 @@ const BundleCard = ({
   return (
     <div className="mt-1">
       <div className="flex items-start p-3">
-        <div className="w-full max-w-[340px] rounded-[24px] overflow-hidden bg-white shadow-md border border-gray-400">
-          <div className="relative w-full h-[160px]">
-            <img
-              src={ImageUtils.getBundleImageUrl(bundle) || ""}
-              onError={(e) => {
-                e.currentTarget.src =
-                  ImageUtils.getProfileImageUrl(restaurant) || "";
-                setIsFallback(true);
-              }}
-              alt="Bundle"
-              className={`w-full h-[160px] ${
-                isFallback ? "object-contain bg-gray-100 py-2" : "object-cover"
+        <div className="w-full max-w-[340px] rounded-3xl overflow-hidden bg-white shadow-md border border-gray-400">
+          <div className="relative w-full h-[140px]">
+            <div
+              className={`${
+                isFallback
+                  ? "bg-gray-100 py-2 flex justify-center items-center"
+                  : ""
               }`}
-              style={{
-                backgroundColor: isFallback ? "#f3f4f6" : undefined,
-              }}
-            />
+            >
+              <ImageFallback
+                src={ImageUtils.getBundleImageUrl(bundle) || ""}
+                restaurant={restaurant}
+                postFunction={() => {
+                  setIsFallback(true);
+                }}
+                alt="Bundle"
+                className={`h-[140px] ${
+                  isFallback
+                    ? "w-[140px] object-contain"
+                    : "w-full object-cover"
+                }`}
+              />
+            </div>
 
-            <div className="absolute -bottom-6 right-4 bg-white rounded-full px-5 py-2 shadow-md">
+            <div className="absolute -bottom-9 right-4 bg-white rounded-full px-5 py-2 shadow-md">
               <span className="text-xl font-semibold text-gray-800">
-                ${bundle.price}
+                ${bundle.price.toFixed(2)}
               </span>
             </div>
           </div>
 
           <div className="p-4 pt-4">
-            <div className="flex justify-between items-start mb-0">
+            <div className="flex justify-between items-start mb-0 mt-2">
               <div className="flex-1">
-                <h2 className="text-xl font-semibold m-0 text-gray-800">
+                <h2 className="text-xl font-bold m-0 text-gray-800">
                   {bundle.name}
                 </h2>
               </div>

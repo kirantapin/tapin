@@ -261,7 +261,7 @@ export class PolicyUtils {
     restaurant: Restaurant
   ): number => {
     const action = policy.definition.action;
-    let items: ItemSpecification[] = [];
+    let items: ItemSpecification[] = action.items || [];
 
     switch (action.type) {
       case "add_item":
@@ -415,7 +415,20 @@ export class PolicyUtils {
           itemSpecs,
           restaurant
         );
-        if (itemIds.length === 0) {
+
+        if (
+          itemIds
+            .map(
+              (id) =>
+                ItemUtils.isItemAvailable(
+                  { id, modifiers: [] },
+                  restaurant,
+                  [],
+                  0
+                ) !== null
+            )
+            .every(Boolean)
+        ) {
           return false;
         }
       }
@@ -424,7 +437,19 @@ export class PolicyUtils {
     if (action.type === "apply_blanket_price") {
       for (const item of action.items) {
         const itemIds = ItemUtils.getAllItemsInCategory(item.item, restaurant);
-        if (itemIds.length === 0) {
+        if (
+          itemIds
+            .map(
+              (id) =>
+                ItemUtils.isItemAvailable(
+                  { id, modifiers: [] },
+                  restaurant,
+                  [],
+                  0
+                ) !== null
+            )
+            .every(Boolean)
+        ) {
           return false;
         }
       }
@@ -434,7 +459,19 @@ export class PolicyUtils {
           action.items,
           restaurant
         );
-        if (itemIds.length === 0) {
+        if (
+          itemIds
+            .map(
+              (id) =>
+                ItemUtils.isItemAvailable(
+                  { id, modifiers: [] },
+                  restaurant,
+                  [],
+                  0
+                ) !== null
+            )
+            .every(Boolean)
+        ) {
           return false;
         }
       }

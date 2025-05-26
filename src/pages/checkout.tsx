@@ -81,6 +81,7 @@ export default function CheckoutPage() {
           restaurant as Restaurant
         );
         if (inlineRec) {
+          console.log("inlineRec", inlineRec);
           setInlineRecommendation(inlineRec);
         }
       }
@@ -97,7 +98,7 @@ export default function CheckoutPage() {
 
   return (
     <div className={checkoutStyles.pageContainer}>
-      <div className="relative flex items-center justify-center mb-6 sticky top-0 bg-white border-b shadow-sm -mx-4 p-4 z-20">
+      <div className="relative flex items-center justify-center mb-2 sticky top-0 bg-white border-b shadow-sm -mx-4 p-4 z-20">
         {/* Back Button */}
         <button
           className="absolute left-0 w-9 h-9 bg-black/10 rounded-full flex items-center justify-center ml-4"
@@ -164,8 +165,10 @@ export default function CheckoutPage() {
                     className="px-2 py-2 bg-gray-100 rounded-full text-xs flex items-center gap-1"
                   >
                     <Tag size={13} className="text-gray-800" />
-                    <span>{titleCase(policy.name)}</span>
-                    <X className="text-gray-800 h-3.5 w-3.5" />
+                    <span className="text-gray-800 text-md font-semibold">
+                      {titleCase(policy.name)}
+                    </span>
+                    <X className="text-gray-800 h-4 w-4" />
                   </button>
                 }
                 title="Are you sure?"

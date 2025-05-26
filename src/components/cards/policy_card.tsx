@@ -85,7 +85,7 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({
         </p>
 
         {/* Time and Bundle requirement */}
-        <div className="flex flex-wrap items-center gap-2 mt-2 text-sm text-gray-500 font-medium">
+        <div className="flex flex-wrap items-center gap-2 mt-2 -mr-8 text-sm text-gray-500 font-medium">
           {/* Locked? Add requires bundle */}
           {policy.locked && (
             <span className="flex items-center gap-1">

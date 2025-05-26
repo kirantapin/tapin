@@ -67,7 +67,7 @@ const OrderHistory = () => {
         <div className="flex items-center gap-2">
           <h2 className="text-xl font-bold break-words">Your Order History</h2>
         </div>
-        <div className="mt-8">
+        <div className="mt-4">
           {loading ? (
             <div className="text-center py-4">
               <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-800 border-t-transparent mx-auto" />
@@ -102,7 +102,7 @@ const OrderHistory = () => {
                       </div>
                       <div className="w-12 h-12 rounded-full overflow-hidden">
                         <img
-                          src={`${project_url}/storage/v1/object/public/${RESTAURANT_IMAGE_BUCKET}/${order.restaurant_id}_profile`}
+                          src={`${project_url}/storage/v1/object/public/${RESTAURANT_IMAGE_BUCKET}/profile/${order.restaurant_id}`}
                           alt="Restaurant"
                           className="w-full h-full object-cover"
                         />

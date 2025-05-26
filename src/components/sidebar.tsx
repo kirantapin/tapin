@@ -31,14 +31,16 @@ export const Sidebar = ({ restaurant, isOpen, onClose }: SidebarProps) => {
   const [history, setHistory] = useState<any[]>([]);
 
   useEffect(() => {
+    if (!isOpen) return;
     if (userSession) {
       setIsSignedIn(true);
     } else {
       setIsSignedIn(false);
     }
-  }, [userSession]);
+  }, [userSession, isOpen]);
 
   useEffect(() => {
+    if (!isOpen) return;
     const historyStr = localStorage.getItem(HISTORY_KEY);
     if (historyStr) {
       try {
@@ -53,7 +55,7 @@ export const Sidebar = ({ restaurant, isOpen, onClose }: SidebarProps) => {
         setHistory([]);
       }
     }
-  }, []);
+  }, [isOpen]);
 
   const handleRestaurantClick = (restaurantId: string) => {
     if (restaurantId === restaurant?.id) {
@@ -80,7 +82,6 @@ export const Sidebar = ({ restaurant, isOpen, onClose }: SidebarProps) => {
     >
       {/* Header with logo + close button */}
       <div className="flex items-center justify-between px-4 pt-4 pb-2">
-        {/* <img src="/tapin_logo_black.png" alt="TapIn Logo" className="w-28" /> */}
         <CustomLogo
           primaryColor={restaurant?.metadata.primaryColor as string}
           size={124}

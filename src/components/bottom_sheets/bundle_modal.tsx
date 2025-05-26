@@ -5,21 +5,13 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { X, Wallet, CircleX, Tag, Check, Beer } from "lucide-react";
-import {
-  Bundle,
-  Restaurant,
-  Policy,
-  BundleItem,
-  NormalItem,
-  Item,
-} from "@/types";
+import { X, Wallet, CircleX, Check } from "lucide-react";
+import { Bundle, Restaurant, Policy, BundleItem } from "@/types";
 import { GradientIcon } from "@/utils/gradient";
 import { useAuth } from "@/context/auth_context";
 import { SignInButton } from "../signin/signin_button";
 import ApplePayButton from "../pay_button";
 import { useGlobalCartManager } from "@/hooks/useGlobalCartManager";
-import { PassAddOnCard } from "../cards/pass_add_on_card";
 import { useRestaurant } from "@/context/restaurant_context";
 import { ItemUtils } from "@/utils/item_utils";
 import { BundleUtils } from "@/utils/bundle_utils";
@@ -176,7 +168,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
                     )[0];
 
                     return (
-                      <div className="mb-2">
+                      <div className="mb-4">
                         <GenericItemIcon
                           itemId={itemId}
                           restaurant={restaurant}
@@ -209,7 +201,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
             })}
             {bundle.fixed_credit > 0 && (
               <div className="w-[220px] h-[160px] p-4 rounded-xl border border-gray-200 flex flex-col items-start flex-shrink-0">
-                <div className="text-[#E6C677] mb-4">
+                <div className=" mb-4">
                   <GradientIcon
                     icon={Wallet}
                     primaryColor={restaurant?.metadata.primaryColor as string}
@@ -299,6 +291,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
               restaurant={restaurant as Restaurant}
               setTipAmount={() => {}}
               tipAmount={0}
+              fees={false}
             />
           )}
 
@@ -316,7 +309,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
                     <Check size={24} />
                   </div>
                   <p className="text-lg text-gray-600 font-medium">
-                    You already own this bundle.
+                    You own this bundle.
                   </p>
                 </div>
               </div>

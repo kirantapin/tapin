@@ -21,6 +21,8 @@ import {
   PASS_MENU_TAG,
   SPECIALTY_DRINKS_TAG,
 } from "@/constants";
+import { ImageUtils } from "@/utils/image_utils";
+import { ImageFallback } from "./image_fallback";
 
 interface GenericItemIconProps {
   itemId: string;
@@ -42,11 +44,12 @@ const GenericItemIcon: React.FC<GenericItemIconProps> = ({
 
   if (itemInfo.image_url) {
     return (
-      <img
-        src={itemInfo.image_url}
+      <ImageFallback
+        src={itemInfo.image_url || ""}
         alt=""
-        className="w-full h-full object-cover rounded-md"
-        style={{ width: size * 2, height: size * 2 }}
+        className="w-full h-full object-cover"
+        style={{ width: size, height: size }}
+        restaurant={restaurant}
       />
     );
   }

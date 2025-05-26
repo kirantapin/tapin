@@ -9,6 +9,7 @@ interface CheckoutSummaryProps {
   restaurant: Restaurant;
   tipAmount: number;
   setTipAmount: (tipAmount: number) => void;
+  fees?: boolean;
 }
 
 const CheckoutSummary: FC<CheckoutSummaryProps> = ({
@@ -16,6 +17,7 @@ const CheckoutSummary: FC<CheckoutSummaryProps> = ({
   state,
   tipAmount,
   setTipAmount,
+  fees = true,
 }) => {
   const [tipPercent, setTipPercent] = useState<number>(0.2);
 
@@ -69,7 +71,7 @@ const CheckoutSummary: FC<CheckoutSummaryProps> = ({
           <span>${state.cartResults.subtotal.toFixed(2)}</span>
         </div>
         <div className={checkoutStyles.summaryRow}>
-          <span>Fees & Tax</span>
+          <span>{fees ? "Fees & Tax" : "Tax"}</span>
           <span>
             $
             {(

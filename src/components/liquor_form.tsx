@@ -1,31 +1,21 @@
 import React, { useEffect, useState } from "react";
-import {
-  HOUSE_MIXER_LABEL,
-  MENU_DISPLAY_MAP,
-  DRINK_MENU_TAG,
-  LIQUOR_MENU_TAG,
-} from "@/constants";
+import { HOUSE_MIXER_LABEL, LIQUOR_MENU_TAG } from "@/constants";
 import { titleCase } from "title-case";
-import { ItemUtils } from "@/utils/item_utils";
-import { adjustColor } from "@/utils/color";
-import { toast } from "react-toastify";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { Item, Restaurant } from "@/types";
 
 const LiquorForm = ({
   type,
   restaurant,
-  addToCart,
   primaryColor,
   afterAdd,
 }: {
   type: string;
   restaurant: Restaurant;
-  addToCart: (item: Item, showToast?: boolean) => Promise<void>;
   primaryColor: string;
-  afterAdd?: () => void;
+  afterAdd: (item: Item) => Promise<void>;
 }) => {
-  const { triggerToast, openLiquorFormModal } = useBottomSheet();
+  const { triggerToast } = useBottomSheet();
   const [liquorType, setLiquorType] = useState<{
     id: string;
     name: string;
@@ -35,10 +25,8 @@ const LiquorForm = ({
     name: string;
   } | null>(null);
   const [selectedMixer, setSelectedMixer] = useState("");
-  const [isMixerDropdownOpen, setIsMixerDropdownOpen] = useState(false);
   const [modifiers, setModifiers] = useState<string[]>([]);
-  const [currentCustomModifier, setCurrentCustomModifier] =
-    useState<string>("");
+
   const [loading, setLoading] = useState(false);
   const modifierGroups = {
     amount: ["double", "triple"],
@@ -88,22 +76,6 @@ const LiquorForm = ({
     }
   }, [liquorType]);
 
-  const mixerOptions = [
-    "Coca Cola",
-    "Diet Coke",
-    "Sprite",
-    "Ginger Ale",
-    "Tonic",
-    "Soda",
-    "Cranberry",
-    "Orange Juice",
-    "Pineapple Juice",
-    "Grapefruit Juice",
-    "Red Bull",
-    "Water",
-    "Lemonade",
-  ];
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -127,17 +99,15 @@ const LiquorForm = ({
       }
       itemToAdd.modifiers.push(`with ${titleCase(selectedMixer)}`);
     }
+
     setLoading(true);
-    await addToCart(itemToAdd, true);
+    await afterAdd(itemToAdd);
     setLoading(false);
 
     setLiquorType(null);
     setLiquorBrand(null);
     setSelectedMixer("");
     setModifiers([]);
-    if (afterAdd) {
-      afterAdd();
-    }
   };
 
   const addModifier = (modifier: string) => {

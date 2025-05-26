@@ -6,6 +6,7 @@ import { project_url } from "@/utils/supabase_client";
 import { Check } from "lucide-react";
 import React from "react";
 import { titleCase } from "title-case";
+import { ImageFallback } from "../display_utils/image_fallback";
 interface AddOnCardProps {
   state: any;
   policy: Policy;
@@ -57,11 +58,13 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
     <div className="w-32">
       {/* Image container with 1:1 aspect ratio */}
       <div className="relative aspect-square overflow-hidden rounded-lg">
-        <img
-          src={menuItem?.image_url || ImageUtils.getProfileImageUrl(restaurant)}
+        <ImageFallback
+          src={menuItem?.image_url || ""}
           alt={name}
           className="w-full h-full object-cover bg-gray-100"
+          restaurant={restaurant}
         />
+
         {active ? (
           <div className="absolute bottom-2 right-2 flex items-center justify-center bg-white h-7 w-7 rounded-full">
             <Check className="w-4 h-4 text-[#40C4AA]" />

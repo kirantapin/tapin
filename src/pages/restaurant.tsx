@@ -110,7 +110,6 @@ export default function RestaurantPage() {
           </h1>
         </div>
         <div className="flex items-center gap-1 mt-1 mb-4">
-          {/* <MapPin className="w-4 h-4 text-gray-500" /> */}
           <LocationMarkerIcon fillColor="#6B7280" />
           <span className="text-sm text-gray-500 ml-1">
             {restaurant?.metadata.locationTag}
@@ -288,17 +287,14 @@ export default function RestaurantPage() {
               </pre>
             </div>
           ) : (
-            <>
-              {/* Drinks List */}
-              <DrinkList
-                cart={state.cart}
-                label={activeFilter}
-                restaurant={restaurant}
-                addToCart={addToCart}
-                removeFromCart={removeFromCart}
-                setActiveLabel={setActiveFilter}
-              />
-            </>
+            <DrinkList
+              cart={state.cart}
+              label={activeFilter}
+              restaurant={restaurant}
+              addToCart={addToCart}
+              removeFromCart={removeFromCart}
+              itemSpecifications={[]}
+            />
           )}
         </div>
         <GoToCartButton

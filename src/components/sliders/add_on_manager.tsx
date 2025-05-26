@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from "react";
-import { Restaurant, Policy, PassItem, DealEffectPayload } from "@/types";
+import { Restaurant, Policy, PassItem, DealEffectPayload, Item } from "@/types";
 import { PassAddOnCard } from "../cards/pass_add_on_card";
 import { useRestaurant } from "@/context/restaurant_context";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
@@ -13,7 +13,7 @@ interface AddOnManagerProps {
   addPolicy: (
     bundle_id: string | null,
     policy_id: string,
-    userPreference: string | null
+    userPreference: Item | null
   ) => Promise<void>;
   removePolicy: (policy_id: string) => Promise<void>;
   allowTimer?: boolean;
@@ -154,7 +154,10 @@ const AddOnManager: FC<AddOnManagerProps> = ({
                   itemId={itemId}
                   restaurant={restaurant}
                   addPolicy={async () => {
-                    await addPolicy(null, policy.policy_id, itemId);
+                    await addPolicy(null, policy.policy_id, {
+                      id: itemId,
+                      modifiers: [],
+                    });
                     pause();
                   }}
                 />
@@ -168,7 +171,10 @@ const AddOnManager: FC<AddOnManagerProps> = ({
             <PassAddOnCard
               state={state}
               addPolicy={async () => {
-                await addPolicy(null, policy.policy_id, itemId);
+                await addPolicy(null, policy.policy_id, {
+                  id: itemId,
+                  modifiers: [],
+                });
                 pause();
               }}
               removePolicy={removePolicy}

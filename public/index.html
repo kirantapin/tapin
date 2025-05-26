@@ -18,34 +18,19 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <!-- <meta
+    <meta
       http-equiv="Content-Security-Policy"
       content="
-        default-src 'self';
-
-        script-src  'self' https://js.stripe.com;
-
-        frame-src   https://js.stripe.com https://checkout.stripe.com;
-
-        connect-src
-          'self'
-          https://api.stripe.com
-          https://bwsbkfvxiiwmlkxhnbdk.supabase.co
-          wss://bwsbkfvxiiwmlkxhnbdk.supabase.co
-          http://127.0.0.1:54321
-          ws://127.0.0.1:54321;
-
-        img-src
-          'self'
-          https://*.stripe.com
-          https://bwsbkfvxiiwmlkxhnbdk.supabase.co
-          data:;
-
-        style-src  'self' 'unsafe-inline';
-
-        object-src 'none';
-      "
-    /> -->
+    default-src 'self';
+    script-src 'self' https://js.stripe.com https://b.stripecdn.com https://newassets.hcaptcha.com;
+    frame-src https://js.stripe.com https://checkout.stripe.com https://newassets.hcaptcha.com https://hcaptcha.com;
+    connect-src 'self' https://api.stripe.com https://b.stripe.com https://m.stripe.network https://bwsbkfvxiiwmlkxhnbdk.supabase.co wss://bwsbkfvxiiwmlkxhnbdk.supabase.co http://127.0.0.1:54321 ws://127.0.0.1:54321 wss://086114c724ec.ngrok.app:3000;
+    img-src 'self' https://*.stripe.com https://b.stripe.com https://newassets.hcaptcha.com https://*.hcaptcha.com https://bwsbkfvxiiwmlkxhnbdk.supabase.co data:;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src 'self' https://fonts.gstatic.com;
+    object-src 'none';
+  "
+    />
     <meta name="theme-color" content="#ffffff" />
     <meta
       name="description"

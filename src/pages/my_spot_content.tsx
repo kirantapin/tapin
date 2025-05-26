@@ -23,7 +23,6 @@ const MySpotContent: React.FC = () => {
   const { transactions } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  console.log(location.state);
   const { id } = useParams();
   const [type, setType] = useState<string>(location.state?.type || "Passes");
   const [activeFilter, setActiveFilter] = useState<string>(
@@ -133,7 +132,7 @@ const MySpotContent: React.FC = () => {
 
   return (
     <div className="px-3 ">
-      <div className="flex items-center p-3 sticky top-0 bg-white shadow-sm border-b -mx-3 z-10">
+      <div className="flex items-center p-4 sticky top-0 bg-white shadow-sm border-b -mx-3 z-10">
         {/* Back button - absolute positioning to keep it in left corner */}
         <div className="absolute left-4">
           <button

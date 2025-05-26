@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { RESTAURANT_PATH } from "../constants.ts";
 import { project_url } from "../utils/supabase_client.ts";
 import { setThemeColor } from "../utils/color";
+import { ImageUtils } from "@/utils/image_utils.ts";
 export default function RestaurantDiscovery() {
   setThemeColor();
   const [restaurants, setRestaurants] = useState<
@@ -52,22 +53,6 @@ export default function RestaurantDiscovery() {
         More Locations Coming Soon
       </h3>
 
-      {/* <div className="w-full max-w-md">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search for restaurants..."
-            value={searchTerm}
-            onChange={handleSearch}
-            className="w-full p-4 pl-12 text-sm rounded-full border border-black focus:outline-none focus:ring-2 focus:ring-[#CAA650] focus:border-transparent transition duration-300 ease-in-out"
-          />
-          <Search
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-black"
-            size={20}
-          />
-        </div>
-      </div> */}
-
       <div className="w-full max-w-md space-y-4 mr-4 ml-4">
         {loading ? (
           <div className="flex justify-center items-center">
@@ -86,7 +71,9 @@ export default function RestaurantDiscovery() {
                 {/* Hero Image */}
                 <div className="h-32 relative">
                   <img
-                    src={`${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_hero`}
+                    src={
+                      ImageUtils.getHeroImageUrl(restaurant as Restaurant) || ""
+                    }
                     alt={`${restaurant.name} Hero`}
                     className="w-full h-full object-cover"
                   />
@@ -94,7 +81,11 @@ export default function RestaurantDiscovery() {
                   {/* Profile Avatar */}
                   <div className="absolute -bottom-6 left-4">
                     <img
-                      src={`${project_url}/storage/v1/object/public/restaurant_images/${restaurant.id}_profile`}
+                      src={
+                        ImageUtils.getProfileImageUrl(
+                          restaurant as Restaurant
+                        ) || ""
+                      }
                       alt={restaurant.name}
                       className="w-16 h-16 object-cover rounded-full border-3 border-white shadow-sm"
                     />

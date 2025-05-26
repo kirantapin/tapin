@@ -28,16 +28,17 @@ export class ItemUtils {
     //this function is good for passing any arbitrary node id and getting all the tangible items under it
     const items: string[] = [];
     const queue: string[] = [categoryId];
-
     while (queue.length > 0) {
       const currentId = queue.shift()!;
       const currentNode = restaurant.menu[currentId] || null;
-      if (currentNode && "price" in currentNode.info) {
-        // If it's a leaf node (has a price), add it to our results
-        items.push(currentId);
-      } else {
-        // If not a leaf node, add children to queue to process
-        queue.push(...currentNode.children);
+      if (currentNode) {
+        if ("price" in currentNode.info) {
+          // If it's a leaf node (has a price), add it to our results
+          items.push(currentId);
+        } else {
+          // If not a leaf node, add children to queue to process
+          queue.push(...currentNode.children);
+        }
       }
     }
 

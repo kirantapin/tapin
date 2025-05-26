@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { Plus, Trash2, Minus, Check, Sparkles } from "lucide-react";
 import {
   HOUSE_MIXER_LABEL,
@@ -7,7 +7,6 @@ import {
   PASS_MENU_TAG,
   SHOTS_SHOOTERS_LABEL,
 } from "@/constants";
-import LiquorForm from "./liquor_form";
 import { titleCase } from "title-case";
 import {
   Cart,
@@ -23,10 +22,12 @@ import { ItemUtils } from "@/utils/item_utils";
 import { useAuth } from "@/context/auth_context";
 import { convertUtcToLocal } from "@/utils/time";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
-import { SuggestedMenuItems } from "./display_utils/suggested_menu_items";
+import { getSuggestedMenuItems } from "./display_utils/suggested_menu_items";
 import { isEqual } from "lodash";
 import { PolicyUtils } from "@/utils/policy_utils";
 import { ImageUtils } from "@/utils/image_utils";
+import { ImageFallback } from "./display_utils/image_fallback";
+import LiquorForm from "./liquor_form";
 
 export function DrinkItem({
   cart,
@@ -35,6 +36,8 @@ export function DrinkItem({
   removeFromCart,
   item,
   purchaseDate = null,
+  onSelect = null,
+  selected = null,
 }: {
   cart: Cart;
   restaurant: Restaurant;
@@ -42,6 +45,8 @@ export function DrinkItem({
   removeFromCart: (id: number) => Promise<void>;
   item: Item;
   purchaseDate?: string | null;
+  onSelect?: ((item: Item) => void) | null;
+  selected?: Item | null;
 }) {
   const primaryColor = restaurant.metadata.primaryColor as string;
   const menuItem = ItemUtils.getMenuItemFromItemId(item.id, restaurant);
@@ -59,21 +64,31 @@ export function DrinkItem({
     0
   );
 
+  const highlight =
+    (onSelect === null && quantity > 0) ||
+    (onSelect && isEqual(selected, item));
+
   return (
     <div
       className={`flex-none flex items-stretch m-3 border p-3 rounded-3xl bg-white transition-colors duration-300 ${
-        quantity > 0 ? undefined : "border-gray-200"
+        highlight ? undefined : "border-gray-200"
       }`}
       style={{
-        borderColor: quantity > 0 ? primaryColor : undefined,
+        borderColor: highlight ? primaryColor : undefined,
+      }}
+      onClick={() => {
+        if (onSelect) {
+          onSelect(item);
+        }
       }}
     >
       {/* Image */}
       <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 p-3">
-        <img
-          src={menuItem?.image_url || ImageUtils.getProfileImageUrl(restaurant)}
+        <ImageFallback
+          src={menuItem?.image_url || ""}
           alt={menuItem?.name}
           className="h-full w-full object-cover"
+          restaurant={restaurant}
         />
       </div>
 
@@ -107,127 +122,129 @@ export function DrinkItem({
             )}
           </div>
 
-          <div className="flex items-center bg-white rounded-full px-1 py-1 relative">
-            <div
-              className={`flex items-center transition-all duration-300 ${
-                quantity > 0
-                  ? "translate-x-0"
-                  : "translate-x-8 opacity-0 pointer-events-none"
-              }`}
-            >
+          {!onSelect && (
+            <div className="flex items-center bg-white rounded-full px-1 py-1 relative">
+              <div
+                className={`flex items-center transition-all duration-300 ${
+                  quantity > 0
+                    ? "translate-x-0"
+                    : "translate-x-8 opacity-0 pointer-events-none"
+                }`}
+              >
+                <button
+                  onClick={async () => {
+                    if (cartItem?.id) {
+                      setLoading(true);
+                      await removeFromCart(cartItem?.id);
+                      setLoading(false);
+                    }
+                  }}
+                  className="w-6 h-6 flex items-center justify-center rounded-full"
+                  style={{ backgroundColor: primaryColor }}
+                >
+                  {quantity > 1 ? (
+                    <Minus className="w-4 h-4 text-white" />
+                  ) : (
+                    <Trash2 className="w-4 h-4 text-white" />
+                  )}
+                </button>
+                {loading && quantity > 0 ? (
+                  <div className="mx-3 animate-spin rounded-full h-4 w-4 border-2 border-gray-800 border-t-transparent" />
+                ) : (
+                  <span className="mx-3 text-sm font-semibold text-gray-800">
+                    {quantity}
+                  </span>
+                )}
+              </div>
               <button
                 onClick={async () => {
-                  if (cartItem?.id) {
-                    setLoading(true);
-                    await removeFromCart(cartItem?.id);
-                    setLoading(false);
-                  }
+                  setLoading(true);
+                  await addToCart(item);
+                  setLoading(false);
                 }}
-                className="w-6 h-6 flex items-center justify-center rounded-full"
+                className="w-6 h-6 flex items-center justify-center rounded-full transition-all duration-300"
                 style={{ backgroundColor: primaryColor }}
               >
-                {quantity > 1 ? (
-                  <Minus className="w-4 h-4 text-white" />
+                {loading && quantity === 0 ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
                 ) : (
-                  <Trash2 className="w-4 h-4 text-white" />
+                  <Plus className="w-4 h-4 text-white" />
                 )}
               </button>
-              {loading && quantity > 0 ? (
-                <div className="mx-3 animate-spin rounded-full h-4 w-4 border-2 border-gray-800 border-t-transparent" />
-              ) : (
-                <span className="mx-3 text-sm font-semibold text-gray-800">
-                  {quantity}
-                </span>
-              )}
             </div>
-            <button
-              onClick={async () => {
-                setLoading(true);
-                await addToCart(item);
-                setLoading(false);
-              }}
-              className="w-6 h-6 flex items-center justify-center rounded-full transition-all duration-300"
-              style={{ backgroundColor: primaryColor }}
-            >
-              {loading && quantity === 0 ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-              ) : (
-                <Plus className="w-4 h-4 text-white" />
-              )}
-            </button>
-          </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-export function SingleSelectionItem({
-  restaurant,
-  item,
-  selected,
-  onSelect,
-}: {
-  restaurant: Restaurant;
-  item: Item;
-  selected: boolean;
-  onSelect: () => void;
-}) {
-  const primaryColor = restaurant.metadata.primaryColor as string;
-  const menuItem = ItemUtils.getMenuItemFromItemId(item.id, restaurant);
-  if (!menuItem || !menuItem.price) {
-    return null;
-  }
-  const isPass = ItemUtils.isPassItem(item.id, restaurant);
+// export function SingleSelectionItem({
+//   restaurant,
+//   item,
+//   selected,
+//   onSelect,
+// }: {
+//   restaurant: Restaurant;
+//   item: Item;
+//   selected: boolean;
+//   onSelect: () => void;
+// }) {
+//   const primaryColor = restaurant.metadata.primaryColor as string;
+//   const menuItem = ItemUtils.getMenuItemFromItemId(item.id, restaurant);
+//   if (!menuItem || !menuItem.price) {
+//     return null;
+//   }
+//   const isPass = ItemUtils.isPassItem(item.id, restaurant);
 
-  return (
-    <div
-      className={`flex-none flex items-stretch m-3 border p-3 rounded-3xl bg-white transition-colors duration-300 ${
-        selected ? undefined : "border-gray-200"
-      }`}
-      style={{
-        borderColor: selected ? primaryColor : undefined,
-      }}
-      onClick={onSelect}
-    >
-      {/* Image */}
-      <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 p-3">
-        <img
-          src={menuItem?.image_url || ImageUtils.getProfileImageUrl(restaurant)}
-          alt={menuItem?.name}
-          className="h-full w-full object-cover"
-        />
-      </div>
+//   return (
+//     <div
+//       className={`flex-none flex items-stretch m-3 border p-3 rounded-3xl bg-white transition-colors duration-300 ${
+//         selected ? undefined : "border-gray-200"
+//       }`}
+//       style={{
+//         borderColor: selected ? primaryColor : undefined,
+//       }}
+//       onClick={onSelect}
+//     >
+//       {/* Image */}
+//       <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 p-3">
+//         <img
+//           src={menuItem?.image_url || ImageUtils.getProfileImageUrl(restaurant)}
+//           alt={menuItem?.name}
+//           className="h-full w-full object-cover"
+//         />
+//       </div>
 
-      {/* Text + Price + Button */}
-      <div className="flex flex-1 flex-col justify-between">
-        <div>
-          <div className="flex justify-between items-start">
-            <h3 className="font-bold text-base">
-              {titleCase(ItemUtils.getItemName(item, restaurant))}
-            </h3>
-            {isPass && (
-              <span className="text-xs text-gray-500 ml-2">
-                {(menuItem as PassItem)?.for_date}
-              </span>
-            )}
-          </div>
-          <p className="text-sm text-gray-500 custom-line-clamp-1 show-at-400">
-            {(menuItem as NormalItem | PassItem)?.description}
-          </p>
-        </div>
+//       {/* Text + Price + Button */}
+//       <div className="flex flex-1 flex-col justify-between">
+//         <div>
+//           <div className="flex justify-between items-start">
+//             <h3 className="font-bold text-base">
+//               {titleCase(ItemUtils.getItemName(item, restaurant))}
+//             </h3>
+//             {isPass && (
+//               <span className="text-xs text-gray-500 ml-2">
+//                 {(menuItem as PassItem)?.for_date}
+//               </span>
+//             )}
+//           </div>
+//           <p className="text-sm text-gray-500 custom-line-clamp-1 show-at-400">
+//             {(menuItem as NormalItem | PassItem)?.description}
+//           </p>
+//         </div>
 
-        <div className="flex items-center justify-between mt-2">
-          <div className="flex items-center gap-2">
-            <p className="font-bold text-base">
-              ${ItemUtils.priceItem(item, restaurant)?.toFixed(2)}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+//         <div className="flex items-center justify-between mt-2">
+//           <div className="flex items-center gap-2">
+//             <p className="font-bold text-base">
+//               ${ItemUtils.priceItem(item, restaurant)?.toFixed(2)}
+//             </p>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
 
 export function LoyaltyRewardItem({
   restaurant,
@@ -277,10 +294,11 @@ export function LoyaltyRewardItem({
     >
       {/* Image */}
       <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 p-3">
-        <img
-          src={menuItem?.image_url || ImageUtils.getProfileImageUrl(restaurant)}
+        <ImageFallback
+          src={menuItem?.image_url || ""}
           alt={menuItem?.name}
           className="h-full w-full object-cover"
+          restaurant={restaurant}
         />
       </div>
 
@@ -343,7 +361,6 @@ export function LoyaltyRewardItem({
   );
 }
 export function PreviousTransactionItem({
-  key,
   currentQuantity,
   maxQuantity,
   restaurant,
@@ -363,15 +380,15 @@ export function PreviousTransactionItem({
   const menuItem = ItemUtils.getMenuItemFromItemId(item.id, restaurant);
   const isPass = ItemUtils.isPassItem(item.id, restaurant);
 
-  const [loading, setLoading] = useState(false);
   return (
     <div className="flex-none flex items-stretch m-3 border p-3 rounded-3xl bg-white">
       {/* Image */}
       <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 p-3">
-        <img
-          src={menuItem?.image_url || ImageUtils.getProfileImageUrl(restaurant)}
-          alt={menuItem?.name}
+        <ImageFallback
+          src={menuItem?.image_url || ""}
+          alt={menuItem?.name || ""}
           className="h-full w-full object-cover"
+          restaurant={restaurant}
         />
       </div>
 
@@ -397,9 +414,7 @@ export function PreviousTransactionItem({
           <div className="flex items-center">
             <button
               onClick={async () => {
-                setLoading(true);
                 decrement();
-                setLoading(false);
               }}
               className="w-6 h-6 flex items-center justify-center rounded-full mr-2"
               style={{ backgroundColor: primaryColor }}
@@ -411,9 +426,7 @@ export function PreviousTransactionItem({
             </p>
             <button
               onClick={async () => {
-                setLoading(true);
                 increment();
-                setLoading(false);
               }}
               className="w-6 h-6 flex items-center justify-center bg-gray-100 rounded-full ml-2"
               style={{ backgroundColor: primaryColor }}
@@ -433,18 +446,23 @@ export const DrinkList = ({
   restaurant,
   addToCart,
   removeFromCart,
-  setActiveLabel,
+  itemSpecifications,
+  selected = null,
+  onSelect = null,
 }: {
   cart: Cart;
-  label: string;
+  label: string | null;
   restaurant: Restaurant;
-  addToCart: (item: Item) => Promise<void>;
+  addToCart: (item: Item, showToast?: boolean) => Promise<void>;
   removeFromCart: (id: number) => Promise<void>;
-  setActiveLabel: (label: string) => void;
+  itemSpecifications: ItemSpecification[];
+  selected?: Item | null;
+  onSelect?: ((item: Item) => Promise<void>) | null;
 }) => {
   const { openLiquorFormModal } = useBottomSheet();
   const labelRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const isInitialMount = useRef(true);
+  const [showLiquorForm, setShowLiquorForm] = useState(false);
 
   const scrollToLabel = (menuLabel: string) => {
     const el = labelRefs.current.get(menuLabel);
@@ -453,18 +471,23 @@ export const DrinkList = ({
     }
   };
 
-  function getNestedObject(label: string) {
-    const categoryId = MENU_DISPLAY_MAP[label];
-    return ItemUtils.getAllItemsInCategory(categoryId, restaurant);
-  }
   const drinks: { id: string; label: string }[] = useMemo(() => {
-    const allItemIds: { id: string; label: string }[] = [];
+    let allItemIds: { id: string; label: string }[] = [];
     for (const key of Object.keys(MENU_DISPLAY_MAP)) {
-      const itemIds = getNestedObject(key);
+      const itemIds = ItemUtils.getAllItemsInCategory(
+        MENU_DISPLAY_MAP[key],
+        restaurant
+      );
       itemIds.forEach((id) => allItemIds.push({ id: id, label: key }));
     }
+    if (itemSpecifications.length > 0) {
+      allItemIds = allItemIds.filter(({ id }) => {
+        const path = restaurant.menu[id].path;
+        return itemSpecifications.some((spec) => path.includes(spec));
+      });
+    }
     return allItemIds;
-  }, [restaurant.menu]);
+  }, [restaurant.menu, itemSpecifications]);
 
   useEffect(() => {
     if (isInitialMount.current) {
@@ -506,63 +529,106 @@ export const DrinkList = ({
           const drinksForLabel = drinks.filter(
             (drink) => drink.label === menuLabel
           );
-
-          return drinksForLabel.length > 0 ? (
-            <div
-              key={menuLabel}
-              ref={(el) => {
-                if (el) {
-                  labelRefs.current.set(menuLabel, el);
-                }
-              }}
-            >
-              <h3 className="text-lg font-bold mb-1 ml-3 mt-4 pb-2 sticky top-0 bg-white z-5">
-                {menuLabel.toUpperCase()}
-              </h3>
-              <div className="space-y-2">
-                {menuLabel === HOUSE_MIXER_LABEL ||
-                menuLabel === SHOTS_SHOOTERS_LABEL ? (
-                  <div className="space-y-4">
-                    <SuggestedMenuItems
-                      type={menuLabel}
-                      filters={
-                        menuLabel === HOUSE_MIXER_LABEL
-                          ? houseMixerFilters
-                          : shotsShootersFilters
-                      }
-                    />
-                    <div className="px-3">
-                      <button
-                        onClick={() => {
-                          openLiquorFormModal(menuLabel);
-                        }}
-                        className="w-full text-center text-md text-gray-500 rounded-full border border-gray-200 py-3 px-4 mx-auto block flex items-center justify-center"
+          if (drinksForLabel.length > 0) {
+            return (
+              <div
+                key={menuLabel}
+                ref={(el) => {
+                  if (el) {
+                    labelRefs.current.set(menuLabel, el);
+                  }
+                }}
+              >
+                <h3 className="text-xl font-bold mb-1 ml-3 mt-4 pb-2 sticky top-0 bg-white z-5">
+                  {menuLabel.toUpperCase()}
+                </h3>
+                <div className="space-y-2">
+                  {menuLabel === HOUSE_MIXER_LABEL ||
+                  menuLabel === SHOTS_SHOOTERS_LABEL ? (
+                    <div className="space-y-4">
+                      {getSuggestedMenuItems({
+                        type: menuLabel,
+                        filters:
+                          menuLabel === HOUSE_MIXER_LABEL
+                            ? houseMixerFilters
+                            : shotsShootersFilters,
+                        restaurant: restaurant,
+                      }).map((item) => (
+                        <DrinkItem
+                          key={item.id}
+                          cart={cart}
+                          restaurant={restaurant}
+                          addToCart={addToCart}
+                          removeFromCart={removeFromCart}
+                          item={item}
+                          purchaseDate={null}
+                          onSelect={onSelect}
+                          selected={selected}
+                        />
+                      ))}
+                      <div
+                        className="px-3 border rounded-2xl"
                         style={{
-                          color: restaurant.metadata.primaryColor as string,
                           borderColor: restaurant.metadata
                             .primaryColor as string,
                         }}
                       >
-                        <Sparkles className="w-6 h-6 mr-2" />
-                        Make A Drink
-                      </button>
+                        <div
+                          onClick={() => {
+                            setShowLiquorForm(!showLiquorForm);
+                          }}
+                          className="w-full text-center text-md text-gray-500 rounded-2xl py-3 px-4 mx-auto block flex items-center justify-center font-semibold"
+                          style={{
+                            color: restaurant.metadata.primaryColor as string,
+                            borderColor: restaurant.metadata
+                              .primaryColor as string,
+                          }}
+                        >
+                          <Sparkles className="w-6 h-6 mr-2" />
+                          Make A Drink
+                        </div>
+                        <div
+                          className={`transition-all duration-300 ease-in-out ${
+                            showLiquorForm
+                              ? "max-h-[1000px] opacity-100"
+                              : "max-h-0 opacity-0 overflow-hidden"
+                          }`}
+                        >
+                          <LiquorForm
+                            type={menuLabel}
+                            restaurant={restaurant}
+                            primaryColor={
+                              restaurant.metadata.primaryColor as string
+                            }
+                            afterAdd={async (item) => {
+                              if (onSelect) {
+                                await onSelect(item);
+                              } else {
+                                await addToCart(item, true);
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  drinksForLabel.map(({ id }) => (
-                    <DrinkItem
-                      key={id}
-                      cart={cart}
-                      restaurant={restaurant}
-                      addToCart={addToCart}
-                      removeFromCart={removeFromCart}
-                      item={{ id: id, modifiers: [] }}
-                    />
-                  ))
-                )}
+                  ) : (
+                    drinksForLabel.map(({ id }) => (
+                      <DrinkItem
+                        key={id}
+                        cart={cart}
+                        restaurant={restaurant}
+                        addToCart={addToCart}
+                        removeFromCart={removeFromCart}
+                        item={{ id: id, modifiers: [] }}
+                        onSelect={onSelect}
+                        selected={selected}
+                      />
+                    ))
+                  )}
+                </div>
               </div>
-            </div>
-          ) : null;
+            );
+          }
         })}
       </div>
     </div>

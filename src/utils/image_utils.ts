@@ -11,11 +11,11 @@ import { project_url, supabase } from "./supabase_client";
 export class ImageUtils {
   static getHeroImageUrl = (restaurant: Restaurant | null) => {
     if (!restaurant) return null;
-    return `${project_url}/storage/v1/object/public/${RESTAURANT_IMAGE_BUCKET}/${restaurant.id}_hero`;
+    return `${project_url}/storage/v1/object/public/${RESTAURANT_IMAGE_BUCKET}/hero/${restaurant.id}`;
   };
   static getProfileImageUrl = (restaurant: Restaurant | null) => {
     if (!restaurant) return null;
-    return `${project_url}/storage/v1/object/public/${RESTAURANT_IMAGE_BUCKET}/${restaurant.id}_profile`;
+    return `${project_url}/storage/v1/object/public/${RESTAURANT_IMAGE_BUCKET}/profile/${restaurant.id}`;
   };
   static getBundleImageUrl = (bundle: Bundle | null) => {
     if (!bundle) return null;

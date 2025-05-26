@@ -109,7 +109,7 @@ export class CartManager {
       | {
           policy_id: string;
           bundle_id: string | null;
-          userPreference: string | null;
+          userPreference: Item | null;
         }
   ): Promise<void> {
     console.log("verifyOrder", type, content);
@@ -161,7 +161,7 @@ export class CartManager {
   public async addPolicy(
     bundle_id: string | null,
     policy_id: string,
-    userPreference: string | null = null
+    userPreference: Item | null = null
   ): Promise<string | null> {
     console.log("adding policy", policy_id);
     await this.verifyOrder(ADD_POLICY, {
@@ -169,8 +169,9 @@ export class CartManager {
       bundle_id: bundle_id,
       userPreference: userPreference,
     });
-    if (this.errorDisplay) {
-      return this.errorDisplay;
+    const errorMessage = this.handleErrorMessage();
+    if (errorMessage) {
+      return errorMessage;
     }
     return null;
   }
@@ -178,24 +179,27 @@ export class CartManager {
   public async removePolicy(policy_id: string): Promise<string | null> {
     await this.verifyOrder(REMOVE_POLICY, policy_id);
     console.log("inside remove policy", this.getCartState());
-    if (this.errorDisplay) {
-      return this.errorDisplay;
+    const errorMessage = this.handleErrorMessage();
+    if (errorMessage) {
+      return errorMessage;
     }
     return null;
   }
 
   public async addToCart(item: Item): Promise<string | null> {
     await this.verifyOrder(ADD_ITEM, item);
-    if (this.errorDisplay) {
-      return this.errorDisplay;
+    const errorMessage = this.handleErrorMessage();
+    if (errorMessage) {
+      return errorMessage;
     }
     return null;
   }
 
   public async removeFromCart(itemId: number): Promise<string | null> {
     await this.verifyOrder(REMOVE_ITEM, itemId);
-    if (this.errorDisplay) {
-      return this.errorDisplay;
+    const errorMessage = this.handleErrorMessage();
+    if (errorMessage) {
+      return errorMessage;
     }
     return null;
   }
@@ -223,19 +227,32 @@ export class CartManager {
 
   public async refresh(): Promise<string | null> {
     await this.verifyOrder(REFRESH, "");
-    if (this.errorDisplay) {
-      return this.errorDisplay;
+    const errorMessage = this.handleErrorMessage();
+    if (errorMessage) {
+      return errorMessage;
     }
     return null;
   }
 
-  public async newUserSession(userSession: any) {
+  public async newUserSession(userSession: any): Promise<string | null> {
     await this.verifyOrder(NEW_USER_SESSION, userSession.access_token);
     this.userSession = userSession;
+    this.saveCartToLocalStorage();
+    const errorMessage = this.handleErrorMessage();
+    if (errorMessage) {
+      return errorMessage;
+    }
+    return null;
+  }
+
+  private handleErrorMessage(): string | null {
     if (this.errorDisplay) {
+      if (this.errorDisplay.toLowerCase().includes("2xx")) {
+        return "Something went wrong. Please try again.";
+      }
       return this.errorDisplay;
     }
-    this.saveCartToLocalStorage();
+    return null;
   }
 
   public clearCart() {

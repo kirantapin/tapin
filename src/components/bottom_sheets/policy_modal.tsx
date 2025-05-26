@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Sheet,
   SheetContent,
@@ -14,8 +14,8 @@ import {
   RefreshCw,
   Lock,
 } from "lucide-react";
-import { Policy, Restaurant, CartState, BundleItem } from "@/types";
-import { DrinkItem, SingleSelectionItem } from "@/components/menu_items";
+import { Policy, Restaurant, CartState, BundleItem, Item } from "@/types";
+import { DrinkItem, DrinkList } from "@/components/menu_items";
 import { titleCase } from "title-case";
 import { PolicyDescriptionDisplay } from "@/components/display_utils/policy_description_display";
 import { getMissingItemsForPolicy } from "@/utils/item_recommender";
@@ -28,6 +28,8 @@ import { SignInButton } from "../signin/signin_button";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { PolicyUtils } from "@/utils/policy_utils";
 import CustomIcon from "../svg/custom_icon";
+import { useRestaurant } from "@/context/restaurant_context";
+import { ImageFallback } from "../display_utils/image_fallback";
 
 interface PolicyModalProps {
   isOpen: boolean;
@@ -37,11 +39,13 @@ interface PolicyModalProps {
   addPolicy: (
     bundle_id: string | null,
     policy_id: string,
-    userPreference: string | null
+    userPreference: Item | null
   ) => void;
   state: CartState;
   bundle_id: string | null;
 }
+
+const MAX_ITEMS_TO_SHOW = 5;
 
 const PolicyModal: React.FC<PolicyModalProps> = ({
   isOpen,
@@ -54,7 +58,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
 }) => {
   const { userSession } = useAuth();
   const { addToCart, removeFromCart } = useBottomSheet();
-  const [userPreference, setUserPreference] = useState<string | null>(null);
+  const [userPreference, setUserPreference] = useState<Item | null>(null);
   const [loading, setLoading] = useState(false);
   const missingItemsResults = getMissingItemsForPolicy(
     policy,
@@ -100,19 +104,17 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
             <div className="flex flex-wrap gap-2 mb-4">
               {bundleObject && policy.locked && (
                 <div
-                  className="bg-black/70 text-white px-3 py-2 rounded-full flex items-center gap-1 border"
+                  className="bg-white text-black px-3 py-2 rounded-full flex items-center gap-1 border"
                   style={{
                     borderColor: restaurant?.metadata.primaryColor as string,
                   }}
                 >
                   <CustomIcon
                     circleColor={restaurant?.metadata.primaryColor as string}
-                    baseColor="white"
+                    baseColor="black"
                     size={16}
                   />
-                  <span className="font-semibold text-xs">
-                    {bundleObject.name}
-                  </span>
+                  <span className="font-bold text-xs">{bundleObject.name}</span>
                 </div>
               )}
 
@@ -185,7 +187,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
             </div>
 
             {!isUsable && (
-              <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-1">
+              <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg">
                 <div>
                   <div className="flex items-center gap-2 text-amber-700 p-3">
                     <AlertCircle size={20} />
@@ -199,63 +201,65 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
 
             {isUsable &&
               (!policyIsActive && hasMissingItems ? (
-                <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-1">
+                <div className="mt-4 ">
                   {missingItemsResults.map((result, index) => (
                     <div key={index} className="mt-2">
-                      <div className="flex items-center gap-2 text-amber-700 ml-3 mb-2">
+                      <div className="flex items-center gap-2 text-amber-700  bg-amber-50 border border-amber-200 py-2 px-3 rounded-lg">
                         <AlertCircle size={20} />
                         <span className="font-medium">
                           Add {result.quantityNeeded} more from any of the
                           following:
                         </span>
                       </div>
-                      {ItemUtils.policyItemSpecificationsToItemIds(
-                        result.missingItems,
-                        restaurant
-                      ).map((itemId) => (
-                        <DrinkItem
-                          key={itemId}
-                          cart={state.cart}
-                          restaurant={restaurant}
-                          addToCart={addToCart}
-                          removeFromCart={removeFromCart}
-                          item={{ id: itemId, modifiers: [] }}
-                        />
-                      ))}
+
+                      <DrinkList
+                        cart={state.cart}
+                        restaurant={restaurant}
+                        addToCart={addToCart}
+                        removeFromCart={removeFromCart}
+                        itemSpecifications={ItemUtils.policyItemSpecificationsToItemIds(
+                          result.missingItems,
+                          restaurant
+                        )}
+                        label={null}
+                        onSelect={null}
+                        selected={null}
+                      />
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-1">
-                  <div>
-                    <div className="flex items-center gap-2 text-green-700 p-3">
-                      <CheckCircle size={20} />
-                      <span className="font-medium">
-                        {policyIsActive
-                          ? "This deal is active in your cart."
-                          : `You're ready to add this deal.${
-                              userChoices.length > 1 ? ` ` : ""
-                            }`}
-                        {userChoices.length > 1 && (
-                          <span className="font-bold">
-                            Select your preferred item.
-                          </span>
-                        )}
-                      </span>
-                    </div>
-                    {!policyIsActive &&
-                      userChoices.length > 1 &&
-                      userChoices.map((itemId) => (
-                        <SingleSelectionItem
-                          key={itemId}
-                          restaurant={restaurant}
-                          item={{ id: itemId, modifiers: [] }}
-                          selected={userPreference === itemId}
-                          onSelect={() => {
-                            setUserPreference(itemId);
-                          }}
-                        />
-                      ))}
+                <div className="mt-2">
+                  <div className="flex items-center gap-2 text-green-700 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <CheckCircle size={20} />
+                    <span className="font-medium">
+                      {policyIsActive
+                        ? "This deal is active in your cart."
+                        : `You're ready to add this deal.${
+                            userChoices.length > 1 ? ` ` : ""
+                          }`}
+                      {!policyIsActive && userChoices.length > 1 && (
+                        <span className="font-bold">
+                          Select your preferred item.
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                  <div className="rounded-lg">
+                    {!policyIsActive && (
+                      <DrinkList
+                        cart={state.cart}
+                        restaurant={restaurant}
+                        addToCart={addToCart}
+                        removeFromCart={removeFromCart}
+                        itemSpecifications={userChoices}
+                        label={null}
+                        onSelect={async (item) => {
+                          setUserPreference(item);
+                        }}
+                        selected={userPreference}
+                      />
+                    )}
                   </div>
                 </div>
               ))}
@@ -263,48 +267,117 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
         </div>
 
         <div className="mt-4 pt-4 fixed bottom-0 left-0 right-0 px-6 pb-4 bg-white border-t-0">
-          {userSession ? (
-            <button
-              className="w-full text-white py-3 rounded-full flex items-center justify-center gap-2"
+          <div className="relative">
+            <div
+              className={`absolute left-0 right-0 transition-transform duration-300 ease-in-out ${
+                userPreference
+                  ? "translate-y-[-70px]"
+                  : "translate-y-full pointer-events-none"
+              }`}
               style={{
-                backgroundColor:
-                  (hasMissingItems && !policyIsActive) ||
-                  (userChoices.length > 1 && !userPreference) ||
-                  !isUsable
-                    ? "#969292"
-                    : (restaurant?.metadata.primaryColor as string),
+                bottom: -16,
+                zIndex: 0,
+                left: "-24px",
+                right: "-24px",
               }}
-              onClick={async () => {
-                setLoading(true);
-                if (policyIsActive) {
-                  navigate(DRINK_CHECKOUT_PATH.replace(":id", restaurant.id));
-                } else if (!hasMissingItems) {
-                  await addPolicy(bundle_id, policy.policy_id, userPreference);
-                }
-                setLoading(false);
-                onClose();
-              }}
-              disabled={
-                (userChoices.length > 1 && !userPreference) ||
-                (hasMissingItems && !policyIsActive) ||
-                !isUsable
-              }
             >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  <ShoppingCart size={18} />
-                  {policyIsActive ? "Go to Checkout" : "Add to Cart"}
-                </>
-              )}
-            </button>
-          ) : (
-            <SignInButton
-              onClose={onClose}
-              primaryColor={restaurant?.metadata.primaryColor as string}
-            />
-          )}
+              <div className="bg-white border border-t-gray-200 rounded-t-3xl px-6 py-3">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-semibold text-gray-900">Selected Item</h3>
+                  <button
+                    onClick={() => setUserPreference(null)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="h-14 w-14 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 p-2">
+                    <ImageFallback
+                      src={
+                        ItemUtils.getMenuItemFromItemId(
+                          userPreference?.id || "",
+                          restaurant
+                        )?.image_url || ""
+                      }
+                      alt="Selected item"
+                      className="h-full w-full object-cover"
+                      restaurant={restaurant}
+                    />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900">
+                      {userPreference
+                        ? titleCase(
+                            ItemUtils.getItemName(userPreference, restaurant)
+                          )
+                        : ""}
+                    </h4>
+                    <p className="text-sm text-gray-500">
+                      $
+                      {userPreference
+                        ? ItemUtils.priceItem(
+                            userPreference,
+                            restaurant
+                          )?.toFixed(2)
+                        : "0.00"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {userSession ? (
+              <button
+                className="w-full text-white py-3 rounded-full flex items-center justify-center gap-2 relative z-10"
+                style={{
+                  backgroundColor:
+                    (hasMissingItems && !policyIsActive) ||
+                    (userChoices.length > 1 &&
+                      !userPreference &&
+                      !policyIsActive) ||
+                    !isUsable
+                      ? "#969292"
+                      : (restaurant?.metadata.primaryColor as string),
+                }}
+                onClick={async () => {
+                  setLoading(true);
+                  if (policyIsActive) {
+                    navigate(DRINK_CHECKOUT_PATH.replace(":id", restaurant.id));
+                  } else if (!hasMissingItems) {
+                    await addPolicy(
+                      bundle_id,
+                      policy.policy_id,
+                      userPreference
+                    );
+                  }
+                  setLoading(false);
+                  onClose();
+                }}
+                disabled={
+                  (userChoices.length > 1 &&
+                    !userPreference &&
+                    !policyIsActive) ||
+                  (hasMissingItems && !policyIsActive) ||
+                  !isUsable
+                }
+              >
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <ShoppingCart size={18} />
+                    {policyIsActive ? "Go to Checkout" : "Add to Cart"}
+                  </>
+                )}
+              </button>
+            ) : (
+              <SignInButton
+                onClose={onClose}
+                primaryColor={restaurant?.metadata.primaryColor as string}
+              />
+            )}
+          </div>
         </div>
       </SheetContent>
     </Sheet>
