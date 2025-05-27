@@ -7,6 +7,7 @@ import {
   LIQUOR_MENU_TAG,
   HOUSE_MIXER_LABEL,
   SHOTS_SHOOTERS_LABEL,
+  RESERVED_MENU_KEYWORDS,
 } from "@/constants";
 import { BundleUtils } from "../bundle_utils";
 import { PassUtils } from "../pass_utils";
@@ -150,7 +151,7 @@ export function indexMenu(menu: Record<string, any>): {
         }
       }
 
-      if (key !== "name" && key !== "label") {
+      if (!RESERVED_MENU_KEYWORDS.includes(key)) {
         children.push(key);
       } else {
         info[key] = value;
