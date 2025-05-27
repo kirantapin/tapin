@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/auth_context.tsx";
 import { Restaurant, Transaction } from "../types.ts";
-import { MENU_DISPLAY_MAP, HOUSE_MIXER_LABEL } from "../constants.ts";
+import { HOUSE_MIXER_LABEL } from "../constants.ts";
 
 import { DrinkItem, DrinkList } from "@/components/menu_items.tsx";
 import GoToCartButton from "@/components/go_to_cart_button.tsx";
@@ -26,6 +26,7 @@ import { useBottomSheet } from "@/context/bottom_sheet_context.tsx";
 import LocationMarkerIcon from "@/components/svg/location_tag.tsx";
 import { isOpenNow } from "@/utils/time.ts";
 import LoadingPage from "@/components/skeletons/loading_page.tsx";
+import { titleCase } from "title-case";
 
 export default function RestaurantPage() {
   const { userSession, transactions } = useAuth();
@@ -219,7 +220,7 @@ export default function RestaurantPage() {
               className="flex gap-3 mb-4 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar"
               ref={scrollContainerRef}
             >
-              {Object.keys(MENU_DISPLAY_MAP).map((filter) => (
+              {Object.keys(restaurant.labelMap).map((filter) => (
                 <button
                   key={filter}
                   ref={(el) => {
@@ -258,7 +259,7 @@ export default function RestaurantPage() {
                     }
                   }}
                 >
-                  {filter}
+                  {titleCase(filter)}
                 </button>
               ))}
             </div>
@@ -277,10 +278,6 @@ export default function RestaurantPage() {
                 {searchResults.map((searchResult, index) => (
                   <DrinkItem
                     key={searchResult}
-                    cart={state.cart}
-                    restaurant={restaurant as Restaurant}
-                    addToCart={addToCart}
-                    removeFromCart={removeFromCart}
                     item={{ id: searchResult, modifiers: [] }}
                   />
                 ))}

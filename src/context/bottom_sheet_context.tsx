@@ -30,7 +30,6 @@ import ProfileModal from "@/components/bottom_sheets/profile_modal";
 import SignInModal from "@/components/bottom_sheets/signin_modal";
 import LockedPolicyModal from "@/components/bottom_sheets/locked_policy_modal";
 import AllBundlesModal from "@/components/bottom_sheets/all_bundles_modal";
-import LiquorFormModal from "@/components/bottom_sheets/liquor_form_modal";
 
 // Define the shape of your sheet registry: keys → sheet components
 type SheetMap = Record<string, FC<any>>;
@@ -64,10 +63,6 @@ interface BottomSheetContextValue {
   openLockedPolicyModal: (policy: Policy) => void;
   triggerToast: (message: string, type: "success" | "error" | "info") => void;
   openAllBundlesModal: () => void;
-  openLiquorFormModal: (
-    type: string,
-    postFunction: (item: Item) => Promise<void>
-  ) => void;
 }
 
 const BottomSheetContext = createContext<BottomSheetContextValue>({
@@ -98,10 +93,6 @@ const BottomSheetContext = createContext<BottomSheetContextValue>({
   openLockedPolicyModal: () => {},
   triggerToast: () => {},
   openAllBundlesModal: () => {},
-  openLiquorFormModal: (
-    type: string,
-    postFunction: (item: Item) => Promise<void>
-  ) => {},
 });
 
 interface BottomSheetProviderProps {
@@ -297,8 +288,6 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
           onClose={closeSheet}
           policy={policyModal.policy}
           restaurant={restaurant as Restaurant}
-          addPolicy={addPolicy}
-          state={state}
           bundle_id={policyModal.bundle_id}
         />
       )}

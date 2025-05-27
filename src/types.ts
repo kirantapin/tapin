@@ -121,6 +121,7 @@ export interface Restaurant {
   name: string;
   //how to do location
   menu: Menu;
+  labelMap: Record<string, string>;
   stripe_account_id: string;
   active: boolean;
   metadata: Record<string, string | boolean>;

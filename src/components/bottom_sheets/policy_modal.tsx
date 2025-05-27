@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Sheet,
   SheetContent,
@@ -15,7 +15,7 @@ import {
   Lock,
 } from "lucide-react";
 import { Policy, Restaurant, CartState, BundleItem, Item } from "@/types";
-import { DrinkItem, DrinkList } from "@/components/menu_items";
+import { DrinkList } from "@/components/menu_items";
 import { titleCase } from "title-case";
 import { PolicyDescriptionDisplay } from "@/components/display_utils/policy_description_display";
 import { getMissingItemsForPolicy } from "@/utils/item_recommender";
@@ -35,14 +35,8 @@ interface PolicyModalProps {
   isOpen: boolean;
   onClose: () => void;
   policy: Policy;
-  restaurant: Restaurant;
-  addPolicy: (
-    bundle_id: string | null,
-    policy_id: string,
-    userPreference: Item | null
-  ) => void;
-  state: CartState;
   bundle_id: string | null;
+  restaurant: Restaurant;
 }
 
 const MAX_ITEMS_TO_SHOW = 5;
@@ -53,11 +47,9 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
   bundle_id,
   policy,
   restaurant,
-  addPolicy,
-  state,
 }) => {
   const { userSession } = useAuth();
-  const { addToCart, removeFromCart } = useBottomSheet();
+  const { addToCart, removeFromCart, addPolicy, state } = useBottomSheet();
   const [userPreference, setUserPreference] = useState<Item | null>(null);
   const [loading, setLoading] = useState(false);
   const missingItemsResults = getMissingItemsForPolicy(
@@ -246,7 +238,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                     </span>
                   </div>
                   <div className="rounded-lg">
-                    {!policyIsActive && (
+                    {!policyIsActive && userChoices.length > 1 && (
                       <DrinkList
                         cart={state.cart}
                         restaurant={restaurant}

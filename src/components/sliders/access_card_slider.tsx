@@ -9,7 +9,7 @@ import {
   Policy,
   Restaurant,
 } from "@/types";
-import { MENU_DISPLAY_MAP, PASS_LABEL } from "@/constants";
+import { PASS_MENU_TAG } from "@/constants";
 import { modifiedItemFlair } from "@/utils/pricer";
 import { ItemUtils } from "@/utils/item_utils";
 
@@ -70,10 +70,7 @@ const AccessCardSlider = ({
       return flattened;
     }
 
-    const itemIds = ItemUtils.getAllItemsInCategory(
-      MENU_DISPLAY_MAP[PASS_LABEL],
-      restaurant
-    );
+    const itemIds = ItemUtils.getAllItemsInCategory(PASS_MENU_TAG, restaurant);
 
     // Sort items by for_date before pushing to flattened
     const sortedItemIds = [...itemIds].sort((a, b) => {

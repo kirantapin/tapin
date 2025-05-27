@@ -3,7 +3,6 @@ import { Plus, Trash2, Minus, Check, Sparkles } from "lucide-react";
 import {
   HOUSE_MIXER_LABEL,
   LIQUOR_MENU_TAG,
-  MENU_DISPLAY_MAP,
   PASS_MENU_TAG,
   SHOTS_SHOOTERS_LABEL,
 } from "@/constants";
@@ -17,7 +16,6 @@ import {
   Policy,
   Restaurant,
 } from "@/types";
-import { project_url } from "@/utils/supabase_client";
 import { ItemUtils } from "@/utils/item_utils";
 import { useAuth } from "@/context/auth_context";
 import { convertUtcToLocal } from "@/utils/time";
@@ -28,33 +26,26 @@ import { PolicyUtils } from "@/utils/policy_utils";
 import { ImageUtils } from "@/utils/image_utils";
 import { ImageFallback } from "./display_utils/image_fallback";
 import LiquorForm from "./liquor_form";
+import { useRestaurant } from "@/context/restaurant_context";
 
 export function DrinkItem({
-  cart,
-  restaurant,
-  addToCart,
-  removeFromCart,
   item,
   purchaseDate = null,
   onSelect = null,
   selected = null,
 }: {
-  cart: Cart;
-  restaurant: Restaurant;
-  addToCart: (item: Item) => Promise<void>;
-  removeFromCart: (id: number) => Promise<void>;
   item: Item;
   purchaseDate?: string | null;
   onSelect?: ((item: Item) => void) | null;
   selected?: Item | null;
 }) {
-  const primaryColor = restaurant.metadata.primaryColor as string;
+  const { restaurant } = useRestaurant();
+  const { state, addToCart, removeFromCart } = useBottomSheet();
+  const cart = state.cart as Cart;
+  const primaryColor = restaurant?.metadata.primaryColor as string;
   const menuItem = ItemUtils.getMenuItemFromItemId(item.id, restaurant);
   const [loading, setLoading] = useState(false);
 
-  if (!menuItem || !menuItem.price) {
-    return null;
-  }
   const isPass = ItemUtils.isPassItem(item.id, restaurant);
 
   const cartItem = cart.find((cartItem) => cartItem.item.id === item.id);
@@ -67,6 +58,10 @@ export function DrinkItem({
   const highlight =
     (onSelect === null && quantity > 0) ||
     (onSelect && isEqual(selected, item));
+
+  if (!restaurant || !menuItem || !menuItem.price) {
+    return null;
+  }
 
   return (
     <div
@@ -178,73 +173,6 @@ export function DrinkItem({
     </div>
   );
 }
-
-// export function SingleSelectionItem({
-//   restaurant,
-//   item,
-//   selected,
-//   onSelect,
-// }: {
-//   restaurant: Restaurant;
-//   item: Item;
-//   selected: boolean;
-//   onSelect: () => void;
-// }) {
-//   const primaryColor = restaurant.metadata.primaryColor as string;
-//   const menuItem = ItemUtils.getMenuItemFromItemId(item.id, restaurant);
-//   if (!menuItem || !menuItem.price) {
-//     return null;
-//   }
-//   const isPass = ItemUtils.isPassItem(item.id, restaurant);
-
-//   return (
-//     <div
-//       className={`flex-none flex items-stretch m-3 border p-3 rounded-3xl bg-white transition-colors duration-300 ${
-//         selected ? undefined : "border-gray-200"
-//       }`}
-//       style={{
-//         borderColor: selected ? primaryColor : undefined,
-//       }}
-//       onClick={onSelect}
-//     >
-//       {/* Image */}
-//       <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 p-3">
-//         <img
-//           src={menuItem?.image_url || ImageUtils.getProfileImageUrl(restaurant)}
-//           alt={menuItem?.name}
-//           className="h-full w-full object-cover"
-//         />
-//       </div>
-
-//       {/* Text + Price + Button */}
-//       <div className="flex flex-1 flex-col justify-between">
-//         <div>
-//           <div className="flex justify-between items-start">
-//             <h3 className="font-bold text-base">
-//               {titleCase(ItemUtils.getItemName(item, restaurant))}
-//             </h3>
-//             {isPass && (
-//               <span className="text-xs text-gray-500 ml-2">
-//                 {(menuItem as PassItem)?.for_date}
-//               </span>
-//             )}
-//           </div>
-//           <p className="text-sm text-gray-500 custom-line-clamp-1 show-at-400">
-//             {(menuItem as NormalItem | PassItem)?.description}
-//           </p>
-//         </div>
-
-//         <div className="flex items-center justify-between mt-2">
-//           <div className="flex items-center gap-2">
-//             <p className="font-bold text-base">
-//               ${ItemUtils.priceItem(item, restaurant)?.toFixed(2)}
-//             </p>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
 
 export function LoyaltyRewardItem({
   restaurant,
@@ -459,7 +387,6 @@ export const DrinkList = ({
   selected?: Item | null;
   onSelect?: ((item: Item) => Promise<void>) | null;
 }) => {
-  const { openLiquorFormModal } = useBottomSheet();
   const labelRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const isInitialMount = useRef(true);
   const [showLiquorForm, setShowLiquorForm] = useState(false);
@@ -473,9 +400,10 @@ export const DrinkList = ({
 
   const drinks: { id: string; label: string }[] = useMemo(() => {
     let allItemIds: { id: string; label: string }[] = [];
-    for (const key of Object.keys(MENU_DISPLAY_MAP)) {
+    const labelMap = restaurant.labelMap;
+    for (const key of Object.keys(labelMap)) {
       const itemIds = ItemUtils.getAllItemsInCategory(
-        MENU_DISPLAY_MAP[key],
+        labelMap[key],
         restaurant
       );
       itemIds.forEach((id) => allItemIds.push({ id: id, label: key }));
@@ -487,7 +415,7 @@ export const DrinkList = ({
       });
     }
     return allItemIds;
-  }, [restaurant.menu, itemSpecifications]);
+  }, [restaurant, itemSpecifications]);
 
   useEffect(() => {
     if (isInitialMount.current) {
@@ -525,7 +453,7 @@ export const DrinkList = ({
   return (
     <div className="space-y-4  overflow-y-auto scroll-smooth no-scrollbar">
       <div className="pb-20">
-        {Object.keys(MENU_DISPLAY_MAP).map((menuLabel) => {
+        {Object.keys(restaurant.labelMap).map((menuLabel) => {
           const drinksForLabel = drinks.filter(
             (drink) => drink.label === menuLabel
           );
@@ -539,7 +467,7 @@ export const DrinkList = ({
                   }
                 }}
               >
-                <h3 className="text-xl font-bold mb-1 ml-3 mt-4 pb-2 sticky top-0 bg-white z-5">
+                <h3 className="text-xl font-bold ml-3 mt-4 pb-1 sticky top-0 bg-white z-5">
                   {menuLabel.toUpperCase()}
                 </h3>
                 <div className="space-y-2">
@@ -556,10 +484,6 @@ export const DrinkList = ({
                       }).map((item) => (
                         <DrinkItem
                           key={item.id}
-                          cart={cart}
-                          restaurant={restaurant}
-                          addToCart={addToCart}
-                          removeFromCart={removeFromCart}
                           item={item}
                           purchaseDate={null}
                           onSelect={onSelect}
@@ -615,10 +539,6 @@ export const DrinkList = ({
                     drinksForLabel.map(({ id }) => (
                       <DrinkItem
                         key={id}
-                        cart={cart}
-                        restaurant={restaurant}
-                        addToCart={addToCart}
-                        removeFromCart={removeFromCart}
                         item={{ id: id, modifiers: [] }}
                         onSelect={onSelect}
                         selected={selected}

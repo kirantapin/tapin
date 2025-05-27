@@ -1,6 +1,13 @@
 import { supabase } from "../supabase_client";
 import { Restaurant } from "../../types";
-import { PASS_MENU_TAG, HISTORY_KEY, BUNDLE_MENU_TAG } from "@/constants";
+import {
+  PASS_MENU_TAG,
+  HISTORY_KEY,
+  BUNDLE_MENU_TAG,
+  LIQUOR_MENU_TAG,
+  HOUSE_MIXER_LABEL,
+  SHOTS_SHOOTERS_LABEL,
+} from "@/constants";
 import { BundleUtils } from "../bundle_utils";
 import { PassUtils } from "../pass_utils";
 const HistoryCacheTTL = 30000;
@@ -87,27 +94,46 @@ export const fetchRestaurantById = async (
     };
   }
 
-  data.menu = indexMenu(data.menu);
+  const { menu, labelMap } = indexMenu(data.menu);
+  data.menu = menu;
+  data.labelMap = labelMap;
 
-  return data;
+  if (Object.values(data.labelMap).includes(LIQUOR_MENU_TAG)) {
+    const liquorId = Object.keys(data.labelMap).find(
+      (key) => data.labelMap[key] === LIQUOR_MENU_TAG
+    );
+    if (liquorId) {
+      delete data.labelMap[liquorId];
+      data.labelMap[HOUSE_MIXER_LABEL] = LIQUOR_MENU_TAG;
+      data.labelMap[SHOTS_SHOOTERS_LABEL] = LIQUOR_MENU_TAG;
+    }
+  }
+
+  return data as Restaurant;
 };
 
-export function indexMenu(menu: Record<string, any>): Record<string, any> {
+export function indexMenu(menu: Record<string, any>): {
+  menu: Record<string, any>;
+  labelMap: Record<string, string>;
+} {
   const index: Record<string, any> = {};
+  const labelMap: Record<string, string> = {};
 
   /** Depth‑first walk */
   function dfs(
     nodeObj: Record<string, any>,
     nodeId: string,
-    pathSoFar: string[]
+    pathSoFar: string[],
+    labelSoFar: boolean
   ): void {
     const path = [...pathSoFar, nodeId];
     const children: string[] = [];
     const info: Record<string, any> = {};
 
+    let activeLabel = false;
+
     if (nodeObj.price) {
       for (const [key, value] of Object.entries(nodeObj)) {
-        // Numeric keys are children, everything else is metadata
         info[key] = value;
       }
       index[nodeId] = { path, children, info };
@@ -116,7 +142,15 @@ export function indexMenu(menu: Record<string, any>): Record<string, any> {
 
     for (const [key, value] of Object.entries(nodeObj)) {
       // Numeric keys are children, everything else is metadata
-      if (key !== "name") {
+
+      if (!labelSoFar) {
+        if (key === "label" && value === true) {
+          activeLabel = true;
+          labelMap[nodeObj.name] = nodeId;
+        }
+      }
+
+      if (key !== "name" && key !== "label") {
         children.push(key);
       } else {
         info[key] = value;
@@ -128,16 +162,16 @@ export function indexMenu(menu: Record<string, any>): Record<string, any> {
     // Recurse into every child, even leaves — they’ll exit immediately
 
     for (const childId of children) {
-      dfs(nodeObj[childId], childId, path);
+      dfs(nodeObj[childId], childId, path, activeLabel);
     }
   }
 
   // Handle each top‑level branch (1, 2, 3, …)
   for (const [rootId, rootNode] of Object.entries(menu)) {
-    dfs(rootNode, rootId, []);
+    dfs(rootNode, rootId, [], false);
   }
 
-  return index;
+  return { menu: index, labelMap };
 }
 
 export function logVisit(restaurant: any) {

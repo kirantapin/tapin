@@ -1,14 +1,9 @@
 import { Bundle, BundleItem, Policy, Restaurant } from "@/types";
 
-import { project_url } from "@/utils/supabase_client";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CheckIcon, CircleX, Wallet } from "lucide-react";
-import {
-  BUNDLE_IMAGE_BUCKET,
-  MY_SPOT_PATH,
-  RESTAURANT_IMAGE_BUCKET,
-} from "@/constants";
+import { MY_SPOT_PATH } from "@/constants";
 import { ItemUtils } from "@/utils/item_utils";
 import { useRestaurant } from "@/context/restaurant_context";
 import { BundleUtils } from "@/utils/bundle_utils";
@@ -85,7 +80,7 @@ const BundleCard = ({
               />
             </div>
 
-            <div className="absolute -bottom-9 right-4 bg-white rounded-full px-5 py-2 shadow-md">
+            <div className="absolute -bottom-6 right-4 bg-white rounded-full px-5 py-2 shadow-md">
               <span className="text-xl font-semibold text-gray-800">
                 ${bundle.price.toFixed(2)}
               </span>

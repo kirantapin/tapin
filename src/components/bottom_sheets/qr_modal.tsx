@@ -209,10 +209,10 @@ const QRModal: React.FC<QRModalProps> = ({
 
         <div className="flex-1 overflow-y-auto px-6 pt-4">
           <h1 className="text-3xl font-bold mb-4">Scan QR Code</h1>
-          <p className="text-xl text-gray-500">
+          {/* <p className="text-xl text-gray-500">
             Or have an employee enter their code to redeem the purchase.
             Unredeemed Items will be saved to your account.
-          </p>
+          </p> */}
 
           <div className="w-full aspect-square flex items-center justify-center rounded-xl">
             <QRCode
@@ -240,7 +240,7 @@ const QRModal: React.FC<QRModalProps> = ({
 
           {redeemError && <div>{redeemError}</div>}
 
-          <form onSubmit={handleSubmit} className="mb-8 mt-4">
+          {/* <form onSubmit={handleSubmit} className="mb-8 mt-4">
             <div className="relative">
               <input
                 id="qr-code"
@@ -278,12 +278,12 @@ const QRModal: React.FC<QRModalProps> = ({
                 />
               </div>
             </button>
-          </form>
+          </form> */}
 
-          {verifyingState && <div>{verifyingState}</div>}
+          {/* {verifyingState && <div>{verifyingState}</div>}
           {verifyingState === "complete" && (
             <div onClick={onClose}>Go Back Home</div>
-          )}
+          )} */}
 
           <p className="text-center text-black mb-6">
             Having trouble? Ask a staff member for assistance.
