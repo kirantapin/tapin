@@ -509,7 +509,10 @@ export const DrinkList = ({
                           }}
                         >
                           <Sparkles className="w-6 h-6 mr-2" />
-                          Make A Drink
+                          Make A{" "}
+                          {menuLabel === HOUSE_MIXER_LABEL
+                            ? "House Mixer"
+                            : "Shot"}
                         </div>
                         <div
                           className={`transition-all duration-300 ease-in-out ${

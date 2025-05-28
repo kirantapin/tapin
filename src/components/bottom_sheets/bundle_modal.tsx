@@ -162,7 +162,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
                   }}
                 >
                   {(() => {
-                    const itemId = PolicyUtils.getUserChoicesForPolicy(
+                    const itemId = PolicyUtils.getPotentialPreferencesForPolicy(
                       policy,
                       restaurant
                     )[0];

@@ -62,7 +62,10 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
   const policyIsActive = PolicyManager.getActivePolicyIds(state.dealEffect).has(
     policy.policy_id
   );
-  const userChoices = PolicyUtils.getUserChoicesForPolicy(policy, restaurant);
+  const userChoices = PolicyUtils.getPotentialPreferencesForPolicy(
+    policy,
+    restaurant
+  );
   const navigate = useNavigate();
   const bundleObject = bundle_id
     ? (ItemUtils.getMenuItemFromItemId(bundle_id, restaurant) as BundleItem)
@@ -167,7 +170,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
               )}
             </div>
 
-            <p className="text-xl text-black whitespace-normal break-words">
+            <p className="text-xl text-black whitespace-normal break-words font-bold">
               {titleCase(policy.header || "")}
             </p>
 
@@ -305,7 +308,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                           )
                         : ""}
                     </h4>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 font-semibold">
                       $
                       {userPreference
                         ? ItemUtils.priceItem(
@@ -359,7 +362,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                 ) : (
                   <>
                     <ShoppingCart size={18} />
-                    {policyIsActive ? "Go to Checkout" : "Add to Cart"}
+                    {policyIsActive ? "Go to Checkout" : "Apply Deal"}
                   </>
                 )}
               </button>

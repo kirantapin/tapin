@@ -121,6 +121,12 @@ export class PolicyUtils {
       return descriptions;
     })();
 
+    if (action.priceLimit) {
+      conditionDescriptions.push(
+        `Valid for items up to $${action.priceLimit.toFixed(2)}`
+      );
+    }
+
     const actionDescription: string | null = (() => {
       switch (action.type) {
         case "add_item":
@@ -265,22 +271,14 @@ export class PolicyUtils {
 
     switch (action.type) {
       case "add_item":
+        let highestCost = this.returnHighestCostItem(items, restaurant);
+        highestCost = action.priceLimit || highestCost;
         if (action.free) {
-          return (
-            this.returnHighestCostItem(items, restaurant) * action.quantity
-          );
+          return highestCost * action.quantity;
         } else if (action.percentDiscount) {
-          return (
-            this.returnHighestCostItem(items, restaurant) *
-            action.percentDiscount *
-            action.quantity
-          );
+          return highestCost * action.percentDiscount * action.quantity;
         } else if (action.fixedDiscount) {
-          return (
-            this.returnHighestCostItem(items, restaurant) *
-            action.fixedDiscount *
-            action.quantity
-          );
+          return highestCost * action.fixedDiscount * action.quantity;
         } else {
           return 0;
         }
@@ -355,16 +353,22 @@ export class PolicyUtils {
     }
     return titleCase(policy.name || "");
   };
-  static getUserChoicesForPolicy = (
+  static getPotentialPreferencesForPolicy = (
     policy: Policy,
     restaurant: Restaurant
   ): string[] => {
     const action = policy.definition.action;
     switch (action.type) {
       case "add_item":
-        return ItemUtils.policyItemSpecificationsToItemIds(
+        const itemIds = ItemUtils.policyItemSpecificationsToItemIds(
           action.items,
           restaurant
+        );
+
+        return itemIds.filter(
+          (id) =>
+            (ItemUtils.priceItem({ id, modifiers: [] }, restaurant) ||
+              Infinity) < (action.priceLimit || Infinity)
         );
       default:
         return [];
@@ -455,8 +459,8 @@ export class PolicyUtils {
       }
     } else {
       if ("items" in action) {
-        const itemIds = ItemUtils.policyItemSpecificationsToItemIds(
-          action.items,
+        const itemIds = PolicyUtils.getPotentialPreferencesForPolicy(
+          policy,
           restaurant
         );
         if (
