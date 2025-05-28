@@ -99,6 +99,7 @@ export interface AddedItem {
     free?: boolean;
     percentDiscount?: number;
     fixedDiscount?: number;
+    priceLimit?: number | null;
   };
 }
 
@@ -318,6 +319,7 @@ export type PolicyDefinitionAction =
   | {
       type: "add_item";
       items: ItemSpecification[];
+      priceLimit?: number | null;
       free: boolean;
       percentDiscount: number | null;
       fixedDiscount: number | null;

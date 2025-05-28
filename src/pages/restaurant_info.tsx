@@ -23,6 +23,7 @@ import { project_url } from "@/utils/supabase_client";
 import { GradientIcon } from "@/utils/gradient";
 import { useRestaurant } from "@/context/restaurant_context";
 import { ImageUtils } from "@/utils/image_utils";
+import { convertUTCMilitaryTimeTo12HourTime } from "@/utils/time";
 
 const RestaurantInfo: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -66,13 +67,6 @@ const RestaurantInfo: React.FC = () => {
     openingHours.saturday ||
     openingHours.wednesday ||
     openingHours.thursday;
-
-  const convertMilitaryTimeTo12HourTime = (time: string) => {
-    const [hours, minutes] = time.split(":");
-    const isPm = parseInt(hours) >= 12;
-    const hour = parseInt(hours) % 12 || 12;
-    return `${hour}:${minutes}${isPm ? "PM" : "AM"}`;
-  };
 
   return (
     <div className="flex flex-col w-full max-w-md mx-auto bg-white min-h-screen">
@@ -160,9 +154,21 @@ const RestaurantInfo: React.FC = () => {
                   <>
                     <div>Monday</div>
                     <div>
-                      {convertMilitaryTimeTo12HourTime(openingHours.monday[0])}{" "}
-                      -{" "}
-                      {convertMilitaryTimeTo12HourTime(openingHours.monday[1])}
+                      {openingHours.monday[0] === openingHours.monday[1] ? (
+                        "Closed"
+                      ) : (
+                        <>
+                          {convertUTCMilitaryTimeTo12HourTime(
+                            openingHours.monday[0],
+                            restaurant.metadata.timezone as string
+                          )}{" "}
+                          -{" "}
+                          {convertUTCMilitaryTimeTo12HourTime(
+                            openingHours.monday[1],
+                            restaurant.metadata.timezone as string
+                          )}
+                        </>
+                      )}
                     </div>
                   </>
                 )}
@@ -170,9 +176,21 @@ const RestaurantInfo: React.FC = () => {
                   <>
                     <div>Tuesday</div>
                     <div>
-                      {convertMilitaryTimeTo12HourTime(openingHours.tuesday[0])}{" "}
-                      -{" "}
-                      {convertMilitaryTimeTo12HourTime(openingHours.tuesday[1])}
+                      {openingHours.tuesday[0] === openingHours.tuesday[1] ? (
+                        "Closed"
+                      ) : (
+                        <>
+                          {convertUTCMilitaryTimeTo12HourTime(
+                            openingHours.tuesday[0],
+                            restaurant.metadata.timezone as string
+                          )}{" "}
+                          -{" "}
+                          {convertUTCMilitaryTimeTo12HourTime(
+                            openingHours.tuesday[1],
+                            restaurant.metadata.timezone as string
+                          )}
+                        </>
+                      )}
                     </div>
                   </>
                 )}
@@ -180,12 +198,21 @@ const RestaurantInfo: React.FC = () => {
                   <>
                     <div>Wednesday</div>
                     <div>
-                      {convertMilitaryTimeTo12HourTime(
-                        openingHours.wednesday[0]
-                      )}{" "}
-                      -{" "}
-                      {convertMilitaryTimeTo12HourTime(
-                        openingHours.wednesday[1]
+                      {openingHours.wednesday[0] ===
+                      openingHours.wednesday[1] ? (
+                        "Closed"
+                      ) : (
+                        <>
+                          {convertUTCMilitaryTimeTo12HourTime(
+                            openingHours.wednesday[0],
+                            restaurant.metadata.timezone as string
+                          )}{" "}
+                          -{" "}
+                          {convertUTCMilitaryTimeTo12HourTime(
+                            openingHours.wednesday[1],
+                            restaurant.metadata.timezone as string
+                          )}
+                        </>
                       )}
                     </div>
                   </>
@@ -194,12 +221,20 @@ const RestaurantInfo: React.FC = () => {
                   <>
                     <div>Thursday</div>
                     <div>
-                      {convertMilitaryTimeTo12HourTime(
-                        openingHours.thursday[0]
-                      )}{" "}
-                      -{" "}
-                      {convertMilitaryTimeTo12HourTime(
-                        openingHours.thursday[1]
+                      {openingHours.thursday[0] === openingHours.thursday[1] ? (
+                        "Closed"
+                      ) : (
+                        <>
+                          {convertUTCMilitaryTimeTo12HourTime(
+                            openingHours.thursday[0],
+                            restaurant.metadata.timezone as string
+                          )}{" "}
+                          -{" "}
+                          {convertUTCMilitaryTimeTo12HourTime(
+                            openingHours.thursday[1],
+                            restaurant.metadata.timezone as string
+                          )}
+                        </>
                       )}
                     </div>
                   </>
@@ -208,9 +243,21 @@ const RestaurantInfo: React.FC = () => {
                   <>
                     <div>Friday</div>
                     <div>
-                      {convertMilitaryTimeTo12HourTime(openingHours.friday[0])}{" "}
-                      -{" "}
-                      {convertMilitaryTimeTo12HourTime(openingHours.friday[1])}
+                      {openingHours.friday[0] === openingHours.friday[1] ? (
+                        "Closed"
+                      ) : (
+                        <>
+                          {convertUTCMilitaryTimeTo12HourTime(
+                            openingHours.friday[0],
+                            restaurant.metadata.timezone as string
+                          )}{" "}
+                          -{" "}
+                          {convertUTCMilitaryTimeTo12HourTime(
+                            openingHours.friday[1],
+                            restaurant.metadata.timezone as string
+                          )}
+                        </>
+                      )}
                     </div>
                   </>
                 )}
@@ -218,12 +265,20 @@ const RestaurantInfo: React.FC = () => {
                   <>
                     <div>Saturday</div>
                     <div>
-                      {convertMilitaryTimeTo12HourTime(
-                        openingHours.saturday[0]
-                      )}{" "}
-                      -{" "}
-                      {convertMilitaryTimeTo12HourTime(
-                        openingHours.saturday[1]
+                      {openingHours.saturday[0] === openingHours.saturday[1] ? (
+                        "Closed"
+                      ) : (
+                        <>
+                          {convertUTCMilitaryTimeTo12HourTime(
+                            openingHours.saturday[0],
+                            restaurant.metadata.timezone as string
+                          )}{" "}
+                          -{" "}
+                          {convertUTCMilitaryTimeTo12HourTime(
+                            openingHours.saturday[1],
+                            restaurant.metadata.timezone as string
+                          )}
+                        </>
                       )}
                     </div>
                   </>
@@ -232,9 +287,21 @@ const RestaurantInfo: React.FC = () => {
                   <>
                     <div>Sunday</div>
                     <div>
-                      {convertMilitaryTimeTo12HourTime(openingHours.sunday[0])}{" "}
-                      -{" "}
-                      {convertMilitaryTimeTo12HourTime(openingHours.sunday[1])}
+                      {openingHours.sunday[0] === openingHours.sunday[1] ? (
+                        "Closed"
+                      ) : (
+                        <>
+                          {convertUTCMilitaryTimeTo12HourTime(
+                            openingHours.sunday[0],
+                            restaurant.metadata.timezone as string
+                          )}{" "}
+                          -{" "}
+                          {convertUTCMilitaryTimeTo12HourTime(
+                            openingHours.sunday[1],
+                            restaurant.metadata.timezone as string
+                          )}
+                        </>
+                      )}
                     </div>
                   </>
                 )}

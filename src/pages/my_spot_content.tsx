@@ -7,11 +7,10 @@ import { ChevronLeft, GlassWater, Ticket, HandCoins, Info } from "lucide-react";
 import { ItemUtils } from "@/utils/item_utils";
 import { useRestaurant } from "@/context/restaurant_context";
 import { PreviousTransactionItem } from "@/components/menu_items";
-import { adjustColor, setThemeColor } from "@/utils/color";
+import { setThemeColor } from "@/utils/color";
 import ManageBundles from "@/components/manage_bundles";
 import { MySpotSkeleton } from "@/components/skeletons/my_spot_skeleton";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
-import GoToCartButton from "@/components/go_to_cart_button";
 
 const tagMap: Record<string, { tag: string; icon: any }> = {
   Passes: { tag: "Passes", icon: Ticket },

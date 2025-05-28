@@ -64,7 +64,7 @@ const LockedPolicyModal: React.FC<LockedPolicyModalProps> = ({
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent
         side="bottom"
-        className="w-full max-w-full h-[55vh] rounded-t-3xl [&>button]:hidden p-0 flex gap-0 flex-col border-none outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0"
+        className="w-full max-w-full h-[40vh] rounded-t-3xl [&>button]:hidden p-0 flex gap-0 flex-col border-none outline-none focus:outline-none focus-visible:outline-none focus-visible:ring-0"
       >
         <div
           className="w-full text-white text-sm font-medium text-center py-1 rounded-t-3xl flex items-center justify-center gap-2"

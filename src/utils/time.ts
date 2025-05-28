@@ -250,3 +250,24 @@ export function formatAvailabilityWindow(
 
   return output.join(", ");
 }
+
+export const convertUTCMilitaryTimeTo12HourTime = (
+  time: string,
+  timeZone: string
+) => {
+  const [hours, minutes] = time.split(":");
+
+  // Create UTC date object with the given time
+  const date = new Date();
+  date.setUTCHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+  // Convert to target timezone
+  const localTime = date.toLocaleTimeString("en-US", {
+    timeZone,
+    hour12: true,
+    hour: "numeric",
+    minute: "2-digit",
+  });
+
+  return localTime;
+};

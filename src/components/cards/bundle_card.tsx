@@ -54,7 +54,12 @@ const BundleCard = ({
     BundleUtils.separateBundlePoliciesByType(childPolicies);
 
   return (
-    <div className="mt-1">
+    <div
+      className="mt-1"
+      onClick={() => {
+        onCardClick(bundle);
+      }}
+    >
       <div className="flex items-start p-3">
         <div className="w-full max-w-[340px] rounded-3xl overflow-hidden bg-white shadow-md border border-gray-400">
           <div className="relative w-full h-[140px]">
@@ -189,9 +194,6 @@ const BundleCard = ({
                 className="w-full text-white border-none rounded-full py-[12px] text-base font-semibold enhance-contrast"
                 style={{
                   background: restaurant?.metadata.primaryColor as string,
-                }}
-                onClick={() => {
-                  onCardClick(bundle);
                 }}
               >
                 {isOwned ? (
