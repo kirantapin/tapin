@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Restaurant } from "@/types";
 import { ImageUtils } from "@/utils/image_utils";
 
@@ -11,25 +11,37 @@ interface ImageFallbackProps {
   postFunction?: () => void;
 }
 
-export const ImageFallback: React.FC<ImageFallbackProps> = ({
+export const ImageFallback = ({
   src,
   alt,
   className,
   style,
   restaurant,
   postFunction,
-}) => {
+}: ImageFallbackProps) => {
   const [hasError, setHasError] = useState(false);
+  const fallbackSrc = ImageUtils.getProfileImageUrl(restaurant);
+
+  useEffect(() => {
+    setHasError(false); // reset on src change
+    if (!src) return;
+
+    const img = new Image();
+    img.src = src;
+    img.onload = () => setHasError(false);
+    img.onerror = () => {
+      setHasError(true);
+      postFunction?.();
+    };
+  }, [src]);
 
   if (!restaurant) return null;
-
-  const fallbackSrc = ImageUtils.getProfileImageUrl(restaurant) || "";
 
   return (
     <img
       src={hasError ? fallbackSrc : src}
       alt={alt}
-      className={`${className} ${hasError ? "rounded-full" : ""}`}
+      className={`${className} ${hasError ? "rounded-full p-3" : ""}`}
       style={style}
       onError={() => {
         setHasError(true);

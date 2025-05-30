@@ -137,7 +137,7 @@ export class ItemUtils {
   }
   static priceItem(item: Item, restaurant: Restaurant): number | null {
     const { id, modifiers } = item;
-    let multiple = modifiers.reduce(
+    const multiple = modifiers.reduce(
       (acc, modifier) => acc * (KNOWN_MODIFIERS[modifier] || 1),
       1
     );

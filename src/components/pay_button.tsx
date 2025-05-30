@@ -7,10 +7,9 @@ import {
 } from "@stripe/react-stripe-js";
 import { supabase_local } from "../utils/supabase_client.ts";
 import { useAuth } from "../context/auth_context.tsx";
-import { useNavigate } from "react-router-dom";
 
 import { Transaction, User } from "../types.ts";
-import { RESTAURANT_PATH, STRIPE_MIN_AMOUNT } from "../constants.ts";
+import { STRIPE_MIN_AMOUNT } from "../constants.ts";
 import { submitPurchase } from "@/utils/purchase.ts";
 import RedeemButton from "./redeem_button.tsx";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
@@ -21,16 +20,15 @@ const stripePromise = loadStripe(stripePublishableKey);
 const StripePayButton = ({
   payload,
   refresh,
-  clearCart,
+  postPurchase,
 }: {
   payload: any;
   refresh: () => Promise<string | null>;
-  clearCart: () => void;
+  postPurchase: (transactions: Transaction[]) => Promise<void>;
 }) => {
   const stripe = useStripe();
   const elements = useElements();
   const { setTransactions, setUserData } = useAuth();
-  const navigate = useNavigate();
   const { triggerToast } = useBottomSheet();
   const handleTapInResponse = async (
     transactions: Transaction[],
@@ -44,14 +42,7 @@ const StripePayButton = ({
       ...prevTransactions,
       ...transactions,
     ]);
-    await clearCart();
-    navigate(RESTAURANT_PATH.replace(":id", payload.restaurant_id), {
-      state: {
-        transactions: transactions,
-        qr: true,
-        message: { type: "success", message: "Purchase successful" },
-      },
-    });
+    await postPurchase(transactions);
   };
 
   const onConfirm = async () => {
@@ -167,15 +158,31 @@ const StripePayButton = ({
 function PayButton({
   payload,
   refresh,
-  clearCart,
+  postPurchase,
 }: {
   payload: any;
   refresh: () => Promise<string | null>;
-  clearCart: () => void;
+  postPurchase: (transactions: Transaction[]) => Promise<void>;
 }) {
   if (payload.totalWithTip <= 0) {
     return (
-      <RedeemButton payload={payload} refresh={refresh} clearCart={clearCart} />
+      <div>
+        <RedeemButton
+          payload={payload}
+          refresh={refresh}
+          postPurchase={postPurchase}
+        />
+        <div className="text-sm text-gray-600 leading-[1.4] mt-6 mb-6">
+          <p className="m-0">
+            By completing this purchase, you confirm that you are 21 years of
+            age or older and will present a valid government-issued ID upon
+            redemption. All sales are final, and subject to venue rules and
+            availability. By purchasing, you agree to Tapin’s{" "}
+            <span className="underline">Terms & Conditions</span> and{" "}
+            <span className="underline">Privacy Policy</span>.
+          </p>
+        </div>
+      </div>
     );
   }
 
@@ -207,7 +214,7 @@ function PayButton({
       <StripePayButton
         payload={payload}
         refresh={refresh}
-        clearCart={clearCart}
+        postPurchase={postPurchase}
       />
       <div className="text-sm text-gray-600 leading-[1.4] mt-6 mb-6">
         <p className="m-0">

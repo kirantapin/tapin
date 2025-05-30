@@ -1,7 +1,7 @@
 import { Bundle, BundleItem, Policy, Restaurant } from "@/types";
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { CheckIcon, CircleX, Wallet } from "lucide-react";
 import { MY_SPOT_PATH } from "@/constants";
 import { ItemUtils } from "@/utils/item_utils";
@@ -23,6 +23,7 @@ const BundleCard = ({
   isOwned: string | null;
   onCardClick: (bundle: Bundle) => void;
 }) => {
+  const location = useLocation();
   const { policyManager } = useRestaurant();
   const navigate = useNavigate();
   const [isFallback, setIsFallback] = useState(false);
@@ -35,9 +36,7 @@ const BundleCard = ({
   }
 
   const bundle: Bundle = bundleMenuItem.object;
-  if (!BundleUtils.isBundlePurchaseable(bundle)) {
-    return null;
-  }
+
   const childPolicyIds = bundleMenuItem.bundle_policies;
   const childPolicies: Policy[] = childPolicyIds
     .map((id) => {
@@ -57,14 +56,23 @@ const BundleCard = ({
     <div
       className="mt-1"
       onClick={() => {
-        onCardClick(bundle);
+        const onMySpot = location.pathname.includes(
+          MY_SPOT_PATH.split("/").slice(-1)[0]
+        );
+        if (isOwned && !onMySpot) {
+          navigate(MY_SPOT_PATH.replace(":id", restaurant?.id), {
+            state: { type: "My Bundles" },
+          });
+        } else {
+          onCardClick(bundle);
+        }
       }}
     >
       <div className="flex items-start p-3">
         <div className="w-full max-w-[340px] rounded-3xl overflow-hidden bg-white shadow-md border border-gray-400">
           <div className="relative w-full h-[140px]">
             <div
-              className={`${
+              className={`h-full ${
                 isFallback
                   ? "bg-gray-100 py-2 flex justify-center items-center"
                   : ""
@@ -77,10 +85,8 @@ const BundleCard = ({
                   setIsFallback(true);
                 }}
                 alt="Bundle"
-                className={`h-[140px] ${
-                  isFallback
-                    ? "w-[140px] object-contain"
-                    : "w-full object-cover"
+                className={`h-full ${
+                  isFallback ? " object-contain" : "w-full object-cover"
                 }`}
               />
             </div>
@@ -117,7 +123,11 @@ const BundleCard = ({
                         color: restaurant?.metadata.primaryColor as string,
                       }}
                     >
-                      ${bundle.fixed_credit.toFixed(2)} Credit
+                      $
+                      {bundle.fixed_credit >= 100
+                        ? bundle.fixed_credit.toFixed(0)
+                        : bundle.fixed_credit.toFixed(2)}{" "}
+                      Credit
                     </span>
                   </div>
                 </div>
@@ -206,7 +216,7 @@ const BundleCard = ({
                     }}
                   >
                     <CheckIcon size={20} className="mr-2" />
-                    <span>View your Bundle</span>
+                    <span className="font-semibold">View your Bundle</span>
                   </div>
                 ) : (
                   "View Bundle"

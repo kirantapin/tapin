@@ -3,11 +3,13 @@ import { useRestaurant } from "@/context/restaurant_context";
 import { ItemUtils } from "@/utils/item_utils";
 import { Bundle, BundleItem } from "@/types";
 import { useEffect, useState } from "react";
+import { Check } from "lucide-react";
 
 export default function BundleCTA() {
   const { restaurant, userOwnershipMap } = useRestaurant();
   const { openAllBundlesModal, state } = useBottomSheet();
   const [chosenBundle, setChosenBundle] = useState<Bundle | null>(null);
+  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
     if (
@@ -39,9 +41,26 @@ export default function BundleCTA() {
       <div className="border-t border-gray-200 -mx-4" />
       <div
         className="py-2 px-4 flex items-center gap-4 cursor-pointer"
-        onClick={() => openAllBundlesModal()}
+        onClick={() => {
+          setChecked(true);
+          setTimeout(() => {
+            openAllBundlesModal();
+          }, 300);
+          setTimeout(() => {
+            setChecked(false);
+          }, 2000);
+        }}
       >
-        <div className="w-5 h-5 border-2 border-gray-300 rounded flex-shrink-0" />
+        <div
+          className={`w-6 h-6 border-2 border-gray-300 rounded-lg flex-shrink-0 flex items-center justify-center transition-colors duration-300`}
+          style={{
+            backgroundColor: checked
+              ? (restaurant.metadata.primaryColor as string)
+              : "transparent",
+          }}
+        >
+          {checked && <Check strokeWidth={3} className="w-3 h-3 text-white" />}
+        </div>
         <span className="text-md">
           <span
             className="font-semibold"

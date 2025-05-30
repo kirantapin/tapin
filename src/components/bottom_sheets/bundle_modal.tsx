@@ -6,11 +6,11 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { X, Wallet, CircleX, Check } from "lucide-react";
-import { Bundle, Restaurant, Policy, BundleItem } from "@/types";
+import { Bundle, Restaurant, Policy, BundleItem, Transaction } from "@/types";
 import { GradientIcon } from "@/utils/gradient";
 import { useAuth } from "@/context/auth_context";
 import { SignInButton } from "../signin/signin_button";
-import ApplePayButton from "../pay_button";
+import PayButton from "../pay_button";
 import { useGlobalCartManager } from "@/hooks/useGlobalCartManager";
 import { useRestaurant } from "@/context/restaurant_context";
 import { ItemUtils } from "@/utils/item_utils";
@@ -23,6 +23,8 @@ import SmallPolicyCard from "../cards/small_policy_card";
 import { PolicyUtils } from "@/utils/policy_utils";
 import { titleCase } from "title-case";
 import GenericItemIcon from "../display_utils/generic_item_icons";
+import { RESTAURANT_PATH } from "@/constants";
+import { useNavigate } from "react-router-dom";
 interface BundleModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -37,9 +39,10 @@ const BundleModal: React.FC<BundleModalProps> = ({
   restaurant,
 }) => {
   const { userSession } = useAuth();
-  const { userOwnershipMap } = useRestaurant();
+  const navigate = useNavigate();
+  const { userOwnershipMap, fetchUserOwnership } = useRestaurant();
   const { refreshCart } = useBottomSheet();
-  const { handlePolicyClick } = useBottomSheet();
+  const { handlePolicyClick, triggerToast } = useBottomSheet();
   const { state, addPolicy, addToCart, removePolicy } = useGlobalCartManager(
     restaurant,
     userSession,
@@ -102,7 +105,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
   const { deals, freeItems } =
     BundleUtils.separateBundlePoliciesByType(bundlePolicies);
 
-  const savedBundleValue = BundleUtils.estimateBundleValue(
+  const estimatedBundleValue = BundleUtils.estimateBundleValue(
     bundle,
     restaurant,
     bundlePolicies
@@ -143,7 +146,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
               }}
             >
               <span className="text-md text-white font-semibold">
-                ${Math.round(savedBundleValue + bundle.price) - 0.01} value
+                ${Math.round(estimatedBundleValue) - 0.01} value
               </span>
             </div>
           </div>
@@ -316,7 +319,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
             ) : (
               state?.cartResults?.totalPrice &&
               state.cartResults.totalPrice > 0 && (
-                <ApplePayButton
+                <PayButton
                   payload={{
                     userAccessToken: userSession.access_token,
                     restaurant_id: restaurant.id,
@@ -327,11 +330,16 @@ const BundleModal: React.FC<BundleModalProps> = ({
                     connectedAccountId: restaurant?.stripe_account_id,
                   }}
                   refresh={refreshCart}
-                  clearCart={async () => {
+                  postPurchase={async (transactions: Transaction[]) => {
                     await refreshCart();
+                    await fetchUserOwnership(restaurant);
                     onClose();
-                    window.scrollTo(0, 0);
-                    window.location.reload();
+                    triggerToast(
+                      "Bundle purchased successfully, view items in My Spot",
+                      "success",
+                      5000
+                    );
+                    window.scrollTo({ top: 0, behavior: "smooth" });
                   }}
                 />
               )

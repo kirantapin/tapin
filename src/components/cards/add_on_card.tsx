@@ -59,7 +59,7 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
       {/* Image container with 1:1 aspect ratio */}
       <div className="relative aspect-square overflow-hidden rounded-lg">
         <ImageFallback
-          src={menuItem?.image_url || ""}
+          src={ImageUtils.getItemImageUrl(itemId, restaurant) || ""}
           alt={name}
           className="w-full h-full object-cover bg-gray-100"
           restaurant={restaurant}

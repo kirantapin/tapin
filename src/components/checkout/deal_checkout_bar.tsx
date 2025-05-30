@@ -15,7 +15,7 @@ export default function DealPreOrderBar({
 }: DealPreOrderBarProps) {
   const navigate = useNavigate();
   return (
-    <div className="flex items-center justify-between py-3 border-b mb-3">
+    <div className="flex items-center justify-between py-3">
       <div className="flex items-center gap-2">
         <Tag size={20} className="text-gray-800" />
         <span className="text-gray-800 text-md font-medium line-clamp-1 w-[100px]">

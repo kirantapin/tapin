@@ -1,7 +1,6 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { SearchEngine } from "@/utils/search_engine";
 import { ItemSpecification, Restaurant } from "@/types";
-import { rest } from "lodash";
 
 interface UseSearchProps {
   restaurant: Restaurant;

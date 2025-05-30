@@ -61,7 +61,11 @@ interface BottomSheetContextValue {
   openSignInModal: () => void;
   openProfileModal: () => void;
   openLockedPolicyModal: (policy: Policy) => void;
-  triggerToast: (message: string, type: "success" | "error" | "info") => void;
+  triggerToast: (
+    message: string,
+    type: "success" | "error" | "info",
+    duration?: number
+  ) => void;
   openAllBundlesModal: () => void;
 }
 

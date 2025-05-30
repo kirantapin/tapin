@@ -16,6 +16,7 @@ import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { PolicyUtils } from "@/utils/policy_utils";
 import { useRestaurant } from "@/context/restaurant_context";
 import CustomIcon from "../svg/custom_icon";
+import { PolicyDescriptionDisplay } from "../display_utils/policy_description_display";
 
 interface LockedPolicyModalProps {
   isOpen: boolean;
@@ -33,12 +34,6 @@ const LockedPolicyModal: React.FC<LockedPolicyModalProps> = ({
   const { userSession } = useAuth();
   const { restaurant } = useRestaurant();
   const { state, openBundleModal } = useBottomSheet();
-  const missingItemsResults = getMissingItemsForPolicy(
-    policy,
-    state.cart,
-    restaurant,
-    state.dealEffect
-  );
   const policyIsActive = PolicyManager.getActivePolicyIds(state.dealEffect).has(
     policy.policy_id
   );
@@ -60,6 +55,10 @@ const LockedPolicyModal: React.FC<LockedPolicyModalProps> = ({
         } to get ${flair}`
       : "";
 
+  if (!restaurant) {
+    return null;
+  }
+
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent
@@ -75,7 +74,7 @@ const LockedPolicyModal: React.FC<LockedPolicyModalProps> = ({
           This deal requires a bundle
           <CustomIcon circleColor={"white"} baseColor="white" size={16} />
         </div>
-        <SheetHeader className="flex-none px-6 pt-4 pb-4">
+        <SheetHeader className="flex-none px-6 pt-4 pb-0">
           <div className="flex justify-between items-start">
             <SheetTitle className="text-2xl font-bold pr-3 break-words text-left">
               {PolicyUtils.getPolicyName(policy, restaurant)}
@@ -88,6 +87,7 @@ const LockedPolicyModal: React.FC<LockedPolicyModalProps> = ({
             </button>
           </div>
         </SheetHeader>
+
         {/*Content*/}
         <div className="flex-1 overflow-y-auto px-6">
           <p className="text-gray-500 text-sm mt-1">{policy.header}</p>
@@ -104,10 +104,17 @@ const LockedPolicyModal: React.FC<LockedPolicyModalProps> = ({
               ? missingItemsText
               : `Apply to cart for ${flair}`}
           </p>
+          <div className="flex items-center mt-2 text-gray-500">
+            <PolicyDescriptionDisplay
+              policy={policy}
+              restaurant={restaurant}
+              showActionDescription={false}
+            />
+          </div>
         </div>
         {/*Button*/}
-        <div className="mt-4 mb-2 pt-4 fixed bottom-0 left-0 right-0 px-6 pb-4 bg-white border-t-0">
-          <p className="text-xs text-gray-400 mt-6 mb-4 px-2 leading-relaxed">
+        <div className="mt-2 mb-2 fixed bottom-0 left-0 right-0 px-6 pb-4 bg-white border-t-0">
+          <p className="text-xs text-gray-400 mt-2 mb-4 px-2 leading-relaxed">
             The Deal grants access to exclusive perks, discounts, and offers at
             the associated location.{" "}
             <span className="underline cursor-pointer text-gray-500">

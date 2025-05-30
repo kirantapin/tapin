@@ -48,7 +48,8 @@ export function useGlobalCartManager(
 
   const triggerToast = (
     message: string,
-    type: "success" | "error" | "info"
+    type: "success" | "error" | "info",
+    duration?: number
   ): void => {
     toast[type](message, {
       icon:
@@ -60,7 +61,7 @@ export function useGlobalCartManager(
           />
         ),
       className: "font-[Gilroy] font-semibold text-black",
-      autoClose: 2000,
+      autoClose: duration || 2000,
     });
   };
 
@@ -114,7 +115,7 @@ export function useGlobalCartManager(
     if (!cartManagerRef.current || !restaurant) return;
     const result = await cartManagerRef.current.addToCart(item);
     if (result) {
-      triggerToast(result, "error");
+      triggerToast(result, "error", 4000);
     } else {
       if (showToast) {
         triggerToast("Item added to cart", "success");
@@ -150,7 +151,7 @@ export function useGlobalCartManager(
 
     if (result) {
       if (global) {
-        triggerToast(result, "error");
+        triggerToast(result, "error", 4000);
       }
     } else {
       if (global) {

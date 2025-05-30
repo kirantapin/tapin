@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/auth_context.tsx";
 import { Restaurant, Transaction } from "../types.ts";
-import { HOUSE_MIXER_LABEL } from "../constants.ts";
+import { HOUSE_MIXER_LABEL, MAX_QR_TRANSACTIONS } from "../constants.ts";
 
 import { DrinkItem, DrinkList } from "@/components/menu_items.tsx";
 import GoToCartButton from "@/components/go_to_cart_button.tsx";
@@ -27,6 +27,7 @@ import LocationMarkerIcon from "@/components/svg/location_tag.tsx";
 import { isOpenNow } from "@/utils/time.ts";
 import LoadingPage from "@/components/skeletons/loading_page.tsx";
 import { titleCase } from "title-case";
+import { constant } from "lodash";
 
 export default function RestaurantPage() {
   const { userSession, transactions } = useAuth();
@@ -50,7 +51,7 @@ export default function RestaurantPage() {
 
   const handleLocation = () => {
     const qrFlag = location.state?.qr as boolean | undefined;
-    const message = location.state?.message as
+    let message = location.state?.message as
       | {
           type: "success" | "error" | "info";
           message: string;
@@ -58,10 +59,16 @@ export default function RestaurantPage() {
       | undefined;
     if (qrFlag) {
       const qrTransactions = location.state?.transactions as Transaction[];
-      openQrModal(qrTransactions);
+      if (qrTransactions.length > MAX_QR_TRANSACTIONS) {
+        message = {
+          type: "info",
+          message: `This QR code only represents ${MAX_QR_TRANSACTIONS} purchased items, your other items can be found in My Spot`,
+        };
+      }
+      openQrModal(qrTransactions.slice(0, MAX_QR_TRANSACTIONS));
     }
     if (message) {
-      triggerToast(message.message, message.type);
+      triggerToast(message.message, message.type, 5000);
     }
     navigate(location.pathname, { replace: true, state: null });
   };

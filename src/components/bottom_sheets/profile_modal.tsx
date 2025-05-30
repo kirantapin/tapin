@@ -14,6 +14,7 @@ import OrderHistory from "../display_utils/order_history";
 import { useRestaurant } from "@/context/restaurant_context";
 import CustomIcon from "../svg/custom_icon";
 import { useNavigate } from "react-router-dom";
+import { ImageFallback } from "../display_utils/image_fallback";
 interface ProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -77,6 +78,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
       }
     }
   }, [userSession, userData, transactions]);
+
+  if (!restaurant) {
+    return null;
+  }
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -153,10 +158,11 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
                           >
                             <div className="flex items-center gap-4">
                               <div className="w-16 h-16 rounded-full overflow-hidden">
-                                <img
+                                <ImageFallback
                                   src={`${project_url}/storage/v1/object/public/${RESTAURANT_IMAGE_BUCKET}/profile/${restaurantId}`}
                                   alt="Restaurant"
                                   className="w-full h-full object-cover"
+                                  restaurant={restaurant}
                                 />
                               </div>
                               <div className="flex flex-col gap-1 ml-auto text-right">

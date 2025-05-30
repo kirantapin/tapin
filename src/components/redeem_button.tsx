@@ -1,7 +1,5 @@
-import { RESTAURANT_PATH } from "@/constants";
 import { useAuth } from "@/context/auth_context";
 import { submitPurchase } from "@/utils/purchase";
-import { useNavigate } from "react-router-dom";
 import { Transaction, User } from "@/types";
 import { useRestaurant } from "@/context/restaurant_context";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
@@ -9,15 +7,14 @@ import { useState } from "react";
 const RedeemButton = ({
   payload,
   refresh,
-  clearCart,
+  postPurchase,
 }: {
   payload: any;
   refresh: () => Promise<string | null>;
-  clearCart: () => void;
+  postPurchase: (transactions: Transaction[]) => Promise<void>;
 }) => {
   const { setTransactions, setUserData } = useAuth();
   const { restaurant } = useRestaurant();
-  const navigate = useNavigate();
   const { triggerToast } = useBottomSheet();
   const [loading, setLoading] = useState(false);
   const handleTapInResponse = async (
@@ -34,14 +31,7 @@ const RedeemButton = ({
         ...prevTransactions,
         ...transactions,
       ]);
-      await clearCart();
-      navigate(RESTAURANT_PATH.replace(":id", payload.restaurant_id), {
-        state: {
-          transactions: transactions,
-          qr: true,
-          message: { type: "success", message: "Purchase successful" },
-        },
-      });
+      await postPurchase(transactions);
     }
   };
   return (

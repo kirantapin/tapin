@@ -243,7 +243,7 @@ const MySpotContent: React.FC = () => {
             >
               Redeem{" "}
               {selectedTransactions.length > 0
-                ? `(${selectedTransactions.length})`
+                ? `( ${selectedTransactions.length} )`
                 : ""}
             </button>
           </div>

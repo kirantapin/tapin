@@ -33,6 +33,32 @@ const CheckoutSummary: FC<CheckoutSummaryProps> = ({
     state.cart.length > 0 &&
     state.cartResults && (
       <div className={checkoutStyles.summaryContainer}>
+        {state.cartResults.discount > 0 && (
+          <div
+            className="rounded-xl p-4 mb-4 border border-gray-200"
+            style={{
+              backgroundColor: "white",
+            }}
+          >
+            <div
+              className="flex justify-center items-center"
+              style={{
+                color: "black",
+              }}
+            >
+              <span className="font-medium">
+                You saved{" "}
+                <span
+                  className="font-bold"
+                  style={{ color: restaurant?.metadata.primaryColor as string }}
+                >
+                  ${state.cartResults.discount.toFixed(2)}
+                </span>{" "}
+                at {restaurant?.name}
+              </span>
+            </div>
+          </div>
+        )}
         {state.cartResults.totalPointCost > 0 && (
           <div className={checkoutStyles.summaryRow}>
             <span>Point Cost</span>
@@ -131,32 +157,6 @@ const CheckoutSummary: FC<CheckoutSummaryProps> = ({
             ${(state.cartResults.totalPrice + tipAmount).toFixed(2)}
           </span>
         </div>
-        {state.cartResults.discount > 0 && (
-          <div
-            className="rounded-xl p-4 mt-4 border border-gray-200"
-            style={{
-              backgroundColor: "white",
-            }}
-          >
-            <div
-              className="flex justify-center items-center"
-              style={{
-                color: "black",
-              }}
-            >
-              <span className="font-medium">
-                You saved{" "}
-                <span
-                  className="font-bold"
-                  style={{ color: restaurant?.metadata.primaryColor as string }}
-                >
-                  ${state.cartResults.discount.toFixed(2)}
-                </span>{" "}
-                at {restaurant?.name}
-              </span>
-            </div>
-          </div>
-        )}
       </div>
     )
   );

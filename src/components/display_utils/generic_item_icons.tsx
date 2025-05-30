@@ -45,7 +45,7 @@ const GenericItemIcon: React.FC<GenericItemIconProps> = ({
   if (itemInfo.image_url) {
     return (
       <ImageFallback
-        src={itemInfo.image_url || ""}
+        src={ImageUtils.getItemImageUrl(itemId, restaurant) || ""}
         alt=""
         className="w-full h-full object-cover"
         style={{ width: size, height: size }}

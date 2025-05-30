@@ -55,3 +55,4 @@ export const STRIPE_MIN_AMOUNT = 50; //50 cents
 export const MAX_BUNDLE_DURATION = 90;
 
 export const RESERVED_MENU_KEYWORDS = ["name", "label"];
+export const MAX_QR_TRANSACTIONS = 4;

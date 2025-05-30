@@ -30,6 +30,7 @@ import { PolicyUtils } from "@/utils/policy_utils";
 import CustomIcon from "../svg/custom_icon";
 import { useRestaurant } from "@/context/restaurant_context";
 import { ImageFallback } from "../display_utils/image_fallback";
+import { ImageUtils } from "@/utils/image_utils";
 
 interface PolicyModalProps {
   isOpen: boolean;
@@ -276,7 +277,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                 right: "-24px",
               }}
             >
-              <div className="bg-white border border-t-gray-200 rounded-t-3xl px-6 py-3">
+              <div className="bg-white border border-t-gray-200 rounded-t-3xl px-6 py-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-semibold text-gray-900">Selected Item</h3>
                   <button
@@ -287,13 +288,13 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                   </button>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="h-14 w-14 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 p-2">
+                  <div className="h-14 w-14 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
                     <ImageFallback
                       src={
-                        ItemUtils.getMenuItemFromItemId(
-                          userPreference?.id || "",
+                        ImageUtils.getItemImageUrl(
+                          userPreference?.id,
                           restaurant
-                        )?.image_url || ""
+                        ) || ""
                       }
                       alt="Selected item"
                       className="h-full w-full object-cover"

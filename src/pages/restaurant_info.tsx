@@ -89,12 +89,93 @@ const RestaurantInfo: React.FC = () => {
       </div>
 
       {restaurant && (
-        <div className="flex justify-center mt-4 mb-2">
+        <div className="flex justify-center mt-4 mb-6">
           <img
             src={ImageUtils.getProfileImageUrl(restaurant) || ""}
             alt={`Profile`}
             className="w-32 h-32 rounded-full object-cover border border-gray-300"
           />
+        </div>
+      )}
+
+      {/* Social Media */}
+      {hasSocials && (
+        <div className="flex gap-3 mb-4 px-4 overflow-x-auto no-scrollbar">
+          {socials.facebookLink && (
+            <button
+              onClick={() => {
+                const url = socials.facebookLink.startsWith("http")
+                  ? socials.facebookLink
+                  : `http://${socials.facebookLink}`;
+                window.open(url, "_blank");
+              }}
+              className="flex-none flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
+            >
+              <GradientIcon
+                icon={Facebook}
+                primaryColor={restaurant?.metadata.primaryColor as string}
+                size={20}
+              />
+              <span className="text-sm font-medium">Facebook</span>
+            </button>
+          )}
+
+          {socials.twitterLink && (
+            <button
+              onClick={() => {
+                const url = socials.twitterLink.startsWith("http")
+                  ? socials.twitterLink
+                  : `http://${socials.twitterLink}`;
+                window.open(url, "_blank");
+              }}
+              className="flex-none flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
+            >
+              <GradientIcon
+                icon={Twitter}
+                primaryColor={restaurant?.metadata.primaryColor as string}
+                size={20}
+              />
+              <span className="text-sm font-medium">Twitter</span>
+            </button>
+          )}
+
+          {socials.instagramLink && (
+            <button
+              onClick={() => {
+                const url = socials.instagramLink.startsWith("http")
+                  ? socials.instagramLink
+                  : `http://${socials.instagramLink}`;
+                window.open(url, "_blank");
+              }}
+              className="flex-none flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
+            >
+              <GradientIcon
+                icon={Instagram}
+                primaryColor={restaurant?.metadata.primaryColor as string}
+                size={20}
+              />
+              <span className="text-sm font-medium">Instagram</span>
+            </button>
+          )}
+
+          {socials.tiktokLink && (
+            <button
+              onClick={() => {
+                const url = socials.tiktokLink.startsWith("http")
+                  ? socials.tiktokLink
+                  : `http://${socials.tiktokLink}`;
+                window.open(url, "_blank");
+              }}
+              className="flex-none flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
+            >
+              <GradientIcon
+                icon={Music}
+                primaryColor={restaurant?.metadata.primaryColor as string}
+                size={20}
+              />
+              <span className="text-sm font-medium">TikTok</span>
+            </button>
+          )}
         </div>
       )}
 
@@ -147,167 +228,170 @@ const RestaurantInfo: React.FC = () => {
             )}
           </div>
 
-          {openingHoursExpanded && (
-            <div className="px-12 pb-4">
-              <div className="grid grid-cols-2 gap-y-1">
-                {openingHours.monday && (
-                  <>
-                    <div>Monday</div>
-                    <div>
-                      {openingHours.monday[0] === openingHours.monday[1] ? (
-                        "Closed"
-                      ) : (
-                        <>
-                          {convertUTCMilitaryTimeTo12HourTime(
-                            openingHours.monday[0],
-                            restaurant.metadata.timezone as string
-                          )}{" "}
-                          -{" "}
-                          {convertUTCMilitaryTimeTo12HourTime(
-                            openingHours.monday[1],
-                            restaurant.metadata.timezone as string
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </>
-                )}
-                {openingHours.tuesday && (
-                  <>
-                    <div>Tuesday</div>
-                    <div>
-                      {openingHours.tuesday[0] === openingHours.tuesday[1] ? (
-                        "Closed"
-                      ) : (
-                        <>
-                          {convertUTCMilitaryTimeTo12HourTime(
-                            openingHours.tuesday[0],
-                            restaurant.metadata.timezone as string
-                          )}{" "}
-                          -{" "}
-                          {convertUTCMilitaryTimeTo12HourTime(
-                            openingHours.tuesday[1],
-                            restaurant.metadata.timezone as string
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </>
-                )}
-                {openingHours.wednesday && (
-                  <>
-                    <div>Wednesday</div>
-                    <div>
-                      {openingHours.wednesday[0] ===
-                      openingHours.wednesday[1] ? (
-                        "Closed"
-                      ) : (
-                        <>
-                          {convertUTCMilitaryTimeTo12HourTime(
-                            openingHours.wednesday[0],
-                            restaurant.metadata.timezone as string
-                          )}{" "}
-                          -{" "}
-                          {convertUTCMilitaryTimeTo12HourTime(
-                            openingHours.wednesday[1],
-                            restaurant.metadata.timezone as string
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </>
-                )}
-                {openingHours.thursday && (
-                  <>
-                    <div>Thursday</div>
-                    <div>
-                      {openingHours.thursday[0] === openingHours.thursday[1] ? (
-                        "Closed"
-                      ) : (
-                        <>
-                          {convertUTCMilitaryTimeTo12HourTime(
-                            openingHours.thursday[0],
-                            restaurant.metadata.timezone as string
-                          )}{" "}
-                          -{" "}
-                          {convertUTCMilitaryTimeTo12HourTime(
-                            openingHours.thursday[1],
-                            restaurant.metadata.timezone as string
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </>
-                )}
-                {openingHours.friday && (
-                  <>
-                    <div>Friday</div>
-                    <div>
-                      {openingHours.friday[0] === openingHours.friday[1] ? (
-                        "Closed"
-                      ) : (
-                        <>
-                          {convertUTCMilitaryTimeTo12HourTime(
-                            openingHours.friday[0],
-                            restaurant.metadata.timezone as string
-                          )}{" "}
-                          -{" "}
-                          {convertUTCMilitaryTimeTo12HourTime(
-                            openingHours.friday[1],
-                            restaurant.metadata.timezone as string
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </>
-                )}
-                {openingHours.saturday && (
-                  <>
-                    <div>Saturday</div>
-                    <div>
-                      {openingHours.saturday[0] === openingHours.saturday[1] ? (
-                        "Closed"
-                      ) : (
-                        <>
-                          {convertUTCMilitaryTimeTo12HourTime(
-                            openingHours.saturday[0],
-                            restaurant.metadata.timezone as string
-                          )}{" "}
-                          -{" "}
-                          {convertUTCMilitaryTimeTo12HourTime(
-                            openingHours.saturday[1],
-                            restaurant.metadata.timezone as string
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </>
-                )}
-                {openingHours.sunday && (
-                  <>
-                    <div>Sunday</div>
-                    <div>
-                      {openingHours.sunday[0] === openingHours.sunday[1] ? (
-                        "Closed"
-                      ) : (
-                        <>
-                          {convertUTCMilitaryTimeTo12HourTime(
-                            openingHours.sunday[0],
-                            restaurant.metadata.timezone as string
-                          )}{" "}
-                          -{" "}
-                          {convertUTCMilitaryTimeTo12HourTime(
-                            openingHours.sunday[1],
-                            restaurant.metadata.timezone as string
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
+          <div
+            className={`px-12 transition-all duration-300 ease-in-out overflow-hidden ${
+              openingHoursExpanded
+                ? "max-h-[500px] opacity-100 pb-4"
+                : "max-h-0 opacity-0 pb-0"
+            }`}
+          >
+            <div className="grid grid-cols-2 gap-y-1">
+              {openingHours.monday && (
+                <>
+                  <div>Monday</div>
+                  <div>
+                    {openingHours.monday[0] === openingHours.monday[1] ? (
+                      "Closed"
+                    ) : (
+                      <>
+                        {convertUTCMilitaryTimeTo12HourTime(
+                          openingHours.monday[0],
+                          restaurant.metadata.timezone as string
+                        )}{" "}
+                        -{" "}
+                        {convertUTCMilitaryTimeTo12HourTime(
+                          openingHours.monday[1],
+                          restaurant.metadata.timezone as string
+                        )}
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
+              {openingHours.tuesday && (
+                <>
+                  <div>Tuesday</div>
+                  <div>
+                    {openingHours.tuesday[0] === openingHours.tuesday[1] ? (
+                      "Closed"
+                    ) : (
+                      <>
+                        {convertUTCMilitaryTimeTo12HourTime(
+                          openingHours.tuesday[0],
+                          restaurant.metadata.timezone as string
+                        )}{" "}
+                        -{" "}
+                        {convertUTCMilitaryTimeTo12HourTime(
+                          openingHours.tuesday[1],
+                          restaurant.metadata.timezone as string
+                        )}
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
+              {openingHours.wednesday && (
+                <>
+                  <div>Wednesday</div>
+                  <div>
+                    {openingHours.wednesday[0] === openingHours.wednesday[1] ? (
+                      "Closed"
+                    ) : (
+                      <>
+                        {convertUTCMilitaryTimeTo12HourTime(
+                          openingHours.wednesday[0],
+                          restaurant.metadata.timezone as string
+                        )}{" "}
+                        -{" "}
+                        {convertUTCMilitaryTimeTo12HourTime(
+                          openingHours.wednesday[1],
+                          restaurant.metadata.timezone as string
+                        )}
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
+              {openingHours.thursday && (
+                <>
+                  <div>Thursday</div>
+                  <div>
+                    {openingHours.thursday[0] === openingHours.thursday[1] ? (
+                      "Closed"
+                    ) : (
+                      <>
+                        {convertUTCMilitaryTimeTo12HourTime(
+                          openingHours.thursday[0],
+                          restaurant.metadata.timezone as string
+                        )}{" "}
+                        -{" "}
+                        {convertUTCMilitaryTimeTo12HourTime(
+                          openingHours.thursday[1],
+                          restaurant.metadata.timezone as string
+                        )}
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
+              {openingHours.friday && (
+                <>
+                  <div>Friday</div>
+                  <div>
+                    {openingHours.friday[0] === openingHours.friday[1] ? (
+                      "Closed"
+                    ) : (
+                      <>
+                        {convertUTCMilitaryTimeTo12HourTime(
+                          openingHours.friday[0],
+                          restaurant.metadata.timezone as string
+                        )}{" "}
+                        -{" "}
+                        {convertUTCMilitaryTimeTo12HourTime(
+                          openingHours.friday[1],
+                          restaurant.metadata.timezone as string
+                        )}
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
+              {openingHours.saturday && (
+                <>
+                  <div>Saturday</div>
+                  <div>
+                    {openingHours.saturday[0] === openingHours.saturday[1] ? (
+                      "Closed"
+                    ) : (
+                      <>
+                        {convertUTCMilitaryTimeTo12HourTime(
+                          openingHours.saturday[0],
+                          restaurant.metadata.timezone as string
+                        )}{" "}
+                        -{" "}
+                        {convertUTCMilitaryTimeTo12HourTime(
+                          openingHours.saturday[1],
+                          restaurant.metadata.timezone as string
+                        )}
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
+              {openingHours.sunday && (
+                <>
+                  <div>Sunday</div>
+                  <div>
+                    {openingHours.sunday[0] === openingHours.sunday[1] ? (
+                      "Closed"
+                    ) : (
+                      <>
+                        {convertUTCMilitaryTimeTo12HourTime(
+                          openingHours.sunday[0],
+                          restaurant.metadata.timezone as string
+                        )}{" "}
+                        -{" "}
+                        {convertUTCMilitaryTimeTo12HourTime(
+                          openingHours.sunday[1],
+                          restaurant.metadata.timezone as string
+                        )}
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
-          )}
+          </div>
         </div>
       )}
 
@@ -347,136 +431,6 @@ const RestaurantInfo: React.FC = () => {
               window.open(url, "_blank");
             }}
           />
-        </div>
-      )}
-
-      {/* Social Media */}
-      {hasSocials && (
-        <div className="border-b">
-          <div
-            className="flex items-center justify-between p-4 cursor-pointer"
-            onClick={toggleSocialMedia}
-          >
-            <div className="flex items-center gap-3">
-              <GradientIcon
-                icon={UserSearch}
-                primaryColor={restaurant?.metadata.primaryColor as string}
-                size={20}
-              />
-              <span className="font-medium">Socials</span>
-            </div>
-            {socialMediaExpanded ? (
-              <ChevronUp size={20} className="text-gray-400" />
-            ) : (
-              <ChevronDown size={20} className="text-gray-400" />
-            )}
-          </div>
-
-          {socialMediaExpanded && (
-            <div className="px-4 pb-4">
-              <div className="space-y-3">
-                {socials.facebookLink && (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <GradientIcon
-                        icon={Facebook}
-                        primaryColor={
-                          restaurant?.metadata.primaryColor as string
-                        }
-                        size={20}
-                      />
-                      <span>Facebook</span>
-                    </div>
-                    <ExternalLink
-                      size={18}
-                      className="text-gray-400"
-                      onClick={() => {
-                        const url = socials.facebookLink.startsWith("http")
-                          ? socials.facebookLink
-                          : `http://${socials.facebookLink}`;
-                        window.open(url, "_blank");
-                      }}
-                    />
-                  </div>
-                )}
-
-                {socials.twitterLink && (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <GradientIcon
-                        icon={Twitter}
-                        primaryColor={
-                          restaurant?.metadata.primaryColor as string
-                        }
-                        size={20}
-                      />
-                      <span>Twitter</span>
-                    </div>
-                    <ExternalLink
-                      size={18}
-                      className="text-gray-400"
-                      onClick={() => {
-                        const url = socials.twitterLink.startsWith("http")
-                          ? socials.twitterLink
-                          : `http://${socials.twitterLink}`;
-                        window.open(url, "_blank");
-                      }}
-                    />
-                  </div>
-                )}
-
-                {socials.instagramLink && (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <GradientIcon
-                        icon={Instagram}
-                        primaryColor={
-                          restaurant?.metadata.primaryColor as string
-                        }
-                        size={20}
-                      />
-                      <span>Instagram</span>
-                    </div>
-                    <ExternalLink
-                      size={18}
-                      className="text-gray-400"
-                      onClick={() => {
-                        const url = socials.instagramLink.startsWith("http")
-                          ? socials.instagramLink
-                          : `http://${socials.instagramLink}`;
-                        window.open(url, "_blank");
-                      }}
-                    />
-                  </div>
-                )}
-
-                {socials.tiktokLink && (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <GradientIcon
-                        icon={Music}
-                        primaryColor={
-                          restaurant?.metadata.primaryColor as string
-                        }
-                        size={20}
-                      />
-                      <span>TikTok</span>
-                    </div>
-                    <ExternalLink
-                      size={18}
-                      className="text-gray-400"
-                      onClick={() => {
-                        const url = socials.tiktokLink.startsWith("http")
-                          ? socials.tiktokLink
-                          : `http://${socials.tiktokLink}`;
-                        window.open(url, "_blank");
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
         </div>
       )}
     </div>

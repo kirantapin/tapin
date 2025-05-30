@@ -141,7 +141,7 @@ const LiquorForm = ({
       <div className="flex-1 space-y-4 p-5 pt-4 rounded-2xl overflow-y-auto">
         {/* Liquor Buttons */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-md font-semibold text-gray-700 mb-2">
             Select Liquor
           </label>
           <div className="grid grid-cols-2 gap-2">
@@ -150,7 +150,7 @@ const LiquorForm = ({
                 key={liquor.id}
                 type="button"
                 onClick={() => setLiquorType(liquor)}
-                className="p-3 rounded-full text-sm font-medium transition-colors duration-200 border bg-transparent"
+                className="p-3 rounded-full text-md font-medium transition-colors duration-200 border bg-transparent"
                 style={{
                   borderColor:
                     liquorType?.id === liquor.id ? primaryColor : "#e5e7eb",
@@ -167,16 +167,16 @@ const LiquorForm = ({
         {/* Liquor Brand Buttons (shows only if a liquor is selected) */}
         {liquorType && liquorBrands.length > 0 && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
+            <label className="block text-md font-semibold text-gray-700 mb-2 mt-4">
               Select {titleCase(liquorType.name)} Brand
             </label>
-            <div className="flex gap-2 overflow-x-auto whitespace-nowrap pb-2">
+            <div className="flex gap-2 overflow-x-auto whitespace-nowrap pb-2 no-scrollbar">
               {liquorBrands.map((brand: { id: string; name: string }) => (
                 <button
                   key={brand.id}
                   type="button"
                   onClick={() => setLiquorBrand(brand)}
-                  className="flex-none p-3 rounded-full text-sm font-medium transition-colors duration-200 border bg-transparent"
+                  className="flex-none p-3 rounded-full text-md font-medium transition-colors duration-200 border bg-transparent"
                   style={{
                     borderColor:
                       liquorBrand?.id === brand.id ? primaryColor : "#e5e7eb",
@@ -194,7 +194,7 @@ const LiquorForm = ({
         {/* Mixer Buttons */}
         {type === HOUSE_MIXER_LABEL && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-md font-semibold text-gray-700 mb-2">
               Select Mixer
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -203,7 +203,7 @@ const LiquorForm = ({
                   key={mixer}
                   type="button"
                   onClick={() => setSelectedMixer(mixer)}
-                  className="p-3 rounded-full text-sm font-medium transition-colors duration-200 border bg-transparent"
+                  className="p-3 rounded-full text-md font-medium transition-colors duration-200 border bg-transparent"
                   style={{
                     borderColor:
                       selectedMixer === mixer ? primaryColor : "#e5e7eb",
@@ -220,7 +220,7 @@ const LiquorForm = ({
         {/* Modifiers Section */}
         {type === HOUSE_MIXER_LABEL && (
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-md font-semibold text-gray-700">
               Modifiers
             </label>
             <div className="flex gap-2 mt-2">
@@ -229,7 +229,7 @@ const LiquorForm = ({
                   key={option}
                   type="button"
                   onClick={() => toggleModifier("amount", option)}
-                  className={`px-4 py-2 text-black border bg-white rounded-full cursor-pointer transition font-medium text-sm`}
+                  className={`px-4 py-2 text-black border bg-white rounded-full cursor-pointer transition font-medium text-md`}
                   style={{
                     borderColor: modifiers.includes(option)
                       ? primaryColor

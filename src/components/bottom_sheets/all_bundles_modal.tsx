@@ -1,15 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { PhoneInputComponent } from "../signin/phone_input";
-import { Verification } from "../signin/verification";
-import { supabase } from "../../utils/supabase_client";
 import { X } from "lucide-react";
-import { useBottomSheet } from "@/context/bottom_sheet_context";
 import BundleSlider from "../sliders/bundle_slider";
 import { useRestaurant } from "@/context/restaurant_context";
 
@@ -27,26 +23,24 @@ const AllBundlesModal: React.FC<AllBundlesModalProps> = ({
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent
         side="bottom"
-        className="h-[75vh] rounded-t-3xl [&>button]:hidden p-0"
+        className="h-[80vh] rounded-t-3xl [&>button]:hidden p-0 flex flex-col gap-0"
       >
-        <div className="flex flex-col">
-          <SheetHeader className="flex-none px-6 pt-6 pb-4">
-            <div className="flex justify-between items-start">
-              <SheetTitle className="text-2xl font-bold">
-                {restaurant?.name} Bundles
-              </SheetTitle>
-              <button
-                onClick={() => {
-                  onClose();
-                }}
-                className="text-gray-500 bg-gray-200 rounded-full p-2 focus:outline-none"
-              >
-                <X size={20} />
-              </button>
-            </div>
-          </SheetHeader>
+        <SheetHeader className="flex-none px-6 pt-6 pb-4 border-b border-gray-200">
+          <div className="flex justify-between items-start">
+            <SheetTitle className="text-2xl font-bold">
+              {restaurant?.name} Bundles
+            </SheetTitle>
+            <button
+              onClick={onClose}
+              className="text-gray-500 bg-gray-200 rounded-full p-2 focus:outline-none"
+            >
+              <X size={20} />
+            </button>
+          </div>
+        </SheetHeader>
+        <div className="flex-1 overflow-y-auto px-4 pb-4">
+          <BundleSlider />
         </div>
-        <BundleSlider />
       </SheetContent>
     </Sheet>
   );

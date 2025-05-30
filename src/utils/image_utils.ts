@@ -1,12 +1,14 @@
-import { Bundle, Highlight, Restaurant } from "@/types";
+import { Bundle, Highlight, Item, NormalItem, Restaurant } from "@/types";
 
 import {
   BUNDLE_IMAGE_BUCKET,
   HIGHLIGHT_IMAGE_BUCKET,
+  ITEM_IMAGE_BUCKET,
   RESTAURANT_IMAGE_BUCKET,
 } from "@/constants";
 
 import { project_url, supabase } from "./supabase_client";
+import { ItemUtils } from "./item_utils";
 
 export class ImageUtils {
   static getHeroImageUrl = (restaurant: Restaurant | null) => {
@@ -28,5 +30,17 @@ export class ImageUtils {
       return `${project_url}/storage/v1/object/public/${HIGHLIGHT_IMAGE_BUCKET}/${imageUrl}`;
     }
     return null;
+  };
+
+  static getItemImageUrl = (
+    itemId: string | null | undefined,
+    restaurant: Restaurant
+  ): string | null => {
+    if (!itemId) return "";
+
+    const menuItem = ItemUtils.getMenuItemFromItemId(itemId, restaurant);
+    return `${project_url}/storage/v1/object/public/${ITEM_IMAGE_BUCKET}/${
+      menuItem?.image_url || ""
+    }`;
   };
 }

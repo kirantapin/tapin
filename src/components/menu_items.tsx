@@ -78,9 +78,9 @@ export function DrinkItem({
       }}
     >
       {/* Image */}
-      <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 p-3">
+      <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
         <ImageFallback
-          src={menuItem?.image_url || ""}
+          src={ImageUtils.getItemImageUrl(item.id, restaurant) || ""}
           alt={menuItem?.name}
           className="h-full w-full object-cover"
           restaurant={restaurant}
@@ -211,7 +211,7 @@ export function LoyaltyRewardItem({
     menuItem = ItemUtils.getMenuItemFromItemId(itemId, restaurant);
   }
 
-  if (!menuItem) {
+  if (!menuItem || !restaurant) {
     return null;
   }
   const isPass = itemId ? ItemUtils.isPassItem(itemId, restaurant) : false;
@@ -221,9 +221,9 @@ export function LoyaltyRewardItem({
       className={`flex-none flex items-stretch m-3 border p-3 rounded-3xl bg-white transition-colors duration-300 border-gray-200`}
     >
       {/* Image */}
-      <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 p-3">
+      <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
         <ImageFallback
-          src={menuItem?.image_url || ""}
+          src={ImageUtils.getItemImageUrl(itemId, restaurant) || ""}
           alt={menuItem?.name}
           className="h-full w-full object-cover"
           restaurant={restaurant}
@@ -311,9 +311,9 @@ export function PreviousTransactionItem({
   return (
     <div className="flex-none flex items-stretch m-3 border p-3 rounded-3xl bg-white">
       {/* Image */}
-      <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 p-3">
+      <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
         <ImageFallback
-          src={menuItem?.image_url || ""}
+          src={ImageUtils.getItemImageUrl(item.id, restaurant) || ""}
           alt={menuItem?.name || ""}
           className="h-full w-full object-cover"
           restaurant={restaurant}

@@ -3,14 +3,14 @@ import { ChevronLeft, Tag, X } from "lucide-react";
 import { checkoutStyles } from "../styles/checkout_styles.ts";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/auth_context.tsx";
-import ApplePayButton from "../components/pay_button.tsx";
+import PayButton from "../components/pay_button.tsx";
 import {
   LOYALTY_REWARD_TAG,
   NORMAL_DEAL_TAG,
   OFFERS_PAGE_PATH,
   RESTAURANT_PATH,
 } from "../constants.ts";
-import { CartItem, Policy, Restaurant } from "../types.ts";
+import { CartItem, Policy, Restaurant, Transaction } from "../types.ts";
 import { CheckoutItemCard } from "@/components/checkout/checkout_item_card.tsx";
 import AccessCardSlider from "../components/sliders/access_card_slider.tsx";
 import DealPreOrderBar from "@/components/checkout/deal_checkout_bar.tsx";
@@ -33,7 +33,7 @@ import { PolicyUtils } from "@/utils/policy_utils.ts";
 export default function CheckoutPage() {
   setThemeColor();
   const { userSession } = useAuth();
-  const { restaurant, policyManager, setCurrentRestaurantId } = useRestaurant();
+  const { restaurant, policyManager, fetchUserOwnership } = useRestaurant();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [tipAmount, setTipAmount] = useState<number>(0);
@@ -145,8 +145,8 @@ export default function CheckoutPage() {
             ))}
         </div>
       ) : (
-        <div className="flex justify-center">
-          <div className="text-gray-600 text-lg font-medium">
+        <div className="flex justify-center mt-12">
+          <div className="text-black text-xl font-bold">
             There are no items in your cart.
           </div>
         </div>
@@ -259,7 +259,7 @@ export default function CheckoutPage() {
               {userSession ? (
                 state.token &&
                 state.cartResults && (
-                  <ApplePayButton
+                  <PayButton
                     payload={{
                       userAccessToken: userSession.access_token,
                       restaurant_id: restaurant?.id,
@@ -270,7 +270,21 @@ export default function CheckoutPage() {
                       connectedAccountId: restaurant?.stripe_account_id,
                     }}
                     refresh={refreshCart}
-                    clearCart={clearCart}
+                    postPurchase={async (transactions: Transaction[]) => {
+                      await clearCart();
+                      await fetchUserOwnership(restaurant);
+                      navigate(RESTAURANT_PATH.replace(":id", restaurant.id), {
+                        state: {
+                          transactions: transactions,
+                          qr: true,
+                          message: {
+                            type: "success",
+                            message:
+                              "Purchase successful! You can redeem your items anytime.",
+                          },
+                        },
+                      });
+                    }}
                   />
                 )
               ) : (

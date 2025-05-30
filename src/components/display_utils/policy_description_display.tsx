@@ -5,17 +5,23 @@ import { PolicyUtils } from "@/utils/policy_utils";
 export function PolicyDescriptionDisplay({
   policy,
   restaurant,
+  showActionDescription = true,
+  showRequirements = true,
 }: {
   policy: Policy;
   restaurant: Restaurant;
+  showActionDescription?: boolean;
+  showRequirements?: boolean;
 }) {
   const { actionDescription, conditionDescriptions } =
     PolicyUtils.policyToStringDescription(policy, restaurant);
 
   return (
     <div>
-      <p className="text-lg font-normal text-black">{actionDescription}</p>
-      {conditionDescriptions.length > 0 && (
+      {showActionDescription && (
+        <p className="text-lg font-normal text-black">{actionDescription}</p>
+      )}
+      {showRequirements && conditionDescriptions.length > 0 && (
         <p className="font-normal text-lg text-black">Requirements :</p>
       )}
       <ul

@@ -47,7 +47,12 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
               <div className="w-[95%] flex-none" key={index}>
                 <DrinkItem
                   key={item?.id}
-                  item={item as Item}
+                  item={
+                    {
+                      id: item.id,
+                      modifiers: item.modifiers,
+                    } as Item
+                  }
                   purchaseDate={item.purchaseDate}
                 />
               </div>

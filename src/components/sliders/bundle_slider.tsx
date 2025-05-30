@@ -5,6 +5,7 @@ import BundleCard from "../cards/bundle_card";
 import { useRestaurant } from "@/context/restaurant_context";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { BundleUtils } from "@/utils/bundle_utils";
+import { AlertCircle } from "lucide-react";
 const BundleSlider = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { restaurant, userOwnershipMap } = useRestaurant();
@@ -91,15 +92,29 @@ const BundleSlider = () => {
 
   const bundlesToDisplay = Object.entries(userOwnershipMap)
     .filter(([bundleId, isOwned]) => {
-      if (isOwned) return false;
       const bundle = (restaurant?.menu[bundleId]?.info as BundleItem).object;
-      return bundle && BundleUtils.isBundlePurchaseable(bundle);
+      if (!bundle) return false;
+      if (!BundleUtils.isBundlePurchaseable(bundle) && !isOwned) return false;
+      return true;
+    })
+    .sort(([, isOwnedA], [, isOwnedB]) => {
+      if (isOwnedA && !isOwnedB) return 1;
+      if (!isOwnedA && isOwnedB) return -1;
+      return 0;
     })
     .map(([bundleId]) => bundleId);
 
   if (userOwnershipMap && bundlesToDisplay.length > 0) {
     return (
       <div className="-mx-4">
+        <div className="bg-green-100 mt-4 mx-4 mb-1 px-4 py-3 rounded-xl border border-1 border-green-800">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="text-green-800 w-5 h-5" />
+            <p className="text-green-800 text-md font-medium">
+              Bundles unlock various exclusive deals
+            </p>
+          </div>
+        </div>
         <div
           ref={scrollContainerRef}
           className="overflow-x-auto snap-x snap-mandatory no-scrollbar"

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Sheet, SheetContent, SheetHeader } from "@/components/ui/sheet";
 import { X } from "lucide-react";
-import { Transaction, Restaurant } from "@/types";
+import { Transaction, Restaurant, Item } from "@/types";
 import { useAuth } from "@/context/auth_context";
 import { supabase, supabase_local } from "@/utils/supabase_client";
 import QRCode from "react-qr-code";
@@ -9,6 +9,8 @@ import QRCode from "react-qr-code";
 import { ItemUtils } from "@/utils/item_utils";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import CustomLogo from "../svg/custom_logo";
+import { MAX_QR_TRANSACTIONS } from "@/constants";
+import { DrinkItem } from "../menu_items";
 
 interface QRModalProps {
   isOpen: boolean;
@@ -30,7 +32,7 @@ const QRModal: React.FC<QRModalProps> = ({
   const [verifyingState, setVerifyingState] = useState("");
   const [updatingTransactions, setUpdatingTransactions] = useState(false);
 
-  if (transactionsToRedeem.length > 4) {
+  if (transactionsToRedeem.length > MAX_QR_TRANSACTIONS) {
     triggerToast(
       "Please try to redeem again with a fewer number of items.",
       "error"
@@ -56,70 +58,70 @@ const QRModal: React.FC<QRModalProps> = ({
     return "H"; // very dense, highest correction
   }
 
-  const formatCode = () => {
-    const digitsOnly = codeEntered.replace(/\D/g, "");
+  // const formatCode = () => {
+  //   const digitsOnly = codeEntered.replace(/\D/g, "");
 
-    // Ensure it's at least 10 digits long (US phone numbers without country code)
-    if (digitsOnly.length === 10) {
-      return `1${digitsOnly}`; // Add US country code
-    } else if (digitsOnly.length === 11 && digitsOnly.startsWith("1")) {
-      return `${digitsOnly}`; // Ensure +1 format
-    }
-    return null;
-  };
+  //   // Ensure it's at least 10 digits long (US phone numbers without country code)
+  //   if (digitsOnly.length === 10) {
+  //     return `1${digitsOnly}`; // Add US country code
+  //   } else if (digitsOnly.length === 11 && digitsOnly.startsWith("1")) {
+  //     return `${digitsOnly}`; // Ensure +1 format
+  //   }
+  //   return null;
+  // };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    // Here you would typically validate the code and proceed accordingly
-    const employeeId = formatCode();
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   // Here you would typically validate the code and proceed accordingly
+  //   const employeeId = formatCode();
 
-    if (!employeeId) {
-      setRedeemError("Number provided is not valid");
-      return;
-    }
-    setVerifyingState("loading");
-    const response = await supabase_local.functions.invoke(
-      "redeem_transactions_client",
-      {
-        body: {
-          transactionIds: transactionsToRedeem.map(
-            (transaction) => transaction.transaction_id
-          ),
-          employeeId: employeeId,
-          userId: userData?.id,
-        },
-      }
-    );
-    const { updatedTransactions } = response.data;
-    if (response.error || response.data.error || !response.data.success) {
-      setRedeemError("Failed to Redeem Transactions");
-      setVerifyingState("");
-      return;
-    }
+  //   if (!employeeId) {
+  //     setRedeemError("Number provided is not valid");
+  //     return;
+  //   }
+  //   setVerifyingState("loading");
+  //   const response = await supabase_local.functions.invoke(
+  //     "redeem_transactions_client",
+  //     {
+  //       body: {
+  //         transactionIds: transactionsToRedeem.map(
+  //           (transaction) => transaction.transaction_id
+  //         ),
+  //         employeeId: employeeId,
+  //         userId: userData?.id,
+  //       },
+  //     }
+  //   );
+  //   const { updatedTransactions } = response.data;
+  //   if (response.error || response.data.error || !response.data.success) {
+  //     setRedeemError("Failed to Redeem Transactions");
+  //     setVerifyingState("");
+  //     return;
+  //   }
 
-    if (updatedTransactions.length !== transactionsToRedeem.length) {
-      setRedeemError(
-        "Error occurred while Redeeming Transactions. Reach out to TapIn."
-      );
-      setVerifyingState("");
-      return;
-    }
+  //   if (updatedTransactions.length !== transactionsToRedeem.length) {
+  //     setRedeemError(
+  //       "Error occurred while Redeeming Transactions. Reach out to TapIn."
+  //     );
+  //     setVerifyingState("");
+  //     return;
+  //   }
 
-    setVerifyingState("complete");
-    setTransactions((prevTransactions) =>
-      prevTransactions.map((transaction) =>
-        transactionsToRedeem.some(
-          (redeemTransaction) =>
-            redeemTransaction.transaction_id === transaction.transaction_id
-        )
-          ? { ...transaction, fulfilled_by: employeeId } // Mark as fulfilled
-          : transaction
-      )
-    );
-    //create component that shows a loader if loading, but a check mark if complete and a button to go back to home page.
-    //you might need to reretrieve transactions
-  };
-  const itemFrequencyMap: Record<string, number> = {};
+  //   setVerifyingState("complete");
+  //   setTransactions((prevTransactions) =>
+  //     prevTransactions.map((transaction) =>
+  //       transactionsToRedeem.some(
+  //         (redeemTransaction) =>
+  //           redeemTransaction.transaction_id === transaction.transaction_id
+  //       )
+  //         ? { ...transaction, fulfilled_by: employeeId } // Mark as fulfilled
+  //         : transaction
+  //     )
+  //   );
+  //   //create component that shows a loader if loading, but a check mark if complete and a button to go back to home page.
+  //   //you might need to reretrieve transactions
+  // };
+  const itemsToBeRedeemed: Item[] = [];
 
   if (transactionsToRedeem.length <= 0 || !restaurant) {
     return null;
@@ -141,15 +143,11 @@ const QRModal: React.FC<QRModalProps> = ({
   }
 
   transactionsToRedeem.forEach((transaction) => {
-    const itemDescription = ItemUtils.getItemName(
-      {
-        id: transaction.item,
-        modifiers: (transaction.metadata.modifiers as string[]) || [],
-      },
-      restaurant
-    );
-    itemFrequencyMap[itemDescription] =
-      (itemFrequencyMap[itemDescription] || 0) + 1;
+    const modifiers = (transaction.metadata.modifiers as string[]) || [];
+    itemsToBeRedeemed.push({
+      id: transaction.item,
+      modifiers: modifiers,
+    });
   });
 
   const modifiedOnClose = async () => {
@@ -208,7 +206,10 @@ const QRModal: React.FC<QRModalProps> = ({
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto px-6 pt-4">
-          <h1 className="text-3xl font-bold mb-4">Scan QR Code</h1>
+          <h1 className="text-3xl font-bold mb-2">Scan QR Code</h1>
+          <p className="text-gray-500 mb-2">
+            Having trouble? Ask a staff member for assistance.
+          </p>
           {/* <p className="text-xl text-gray-500">
             Or have an employee enter their code to redeem the purchase.
             Unredeemed Items will be saved to your account.
@@ -230,10 +231,15 @@ const QRModal: React.FC<QRModalProps> = ({
             />
           </div>
 
-          <div>
-            {Object.entries(itemFrequencyMap).map(([item, frequency]) => (
-              <div key={item} className="p-2 border-b">
-                <span className="font-normal">{frequency} x</span> {item}
+          <div className="flex flex-col">
+            {itemsToBeRedeemed.map((item) => (
+              <div key={item.id} className="w-full">
+                <DrinkItem
+                  item={item}
+                  purchaseDate={null}
+                  onSelect={() => {}}
+                  selected={null}
+                />
               </div>
             ))}
           </div>
@@ -284,10 +290,6 @@ const QRModal: React.FC<QRModalProps> = ({
           {verifyingState === "complete" && (
             <div onClick={onClose}>Go Back Home</div>
           )} */}
-
-          <p className="text-center text-black mb-6">
-            Having trouble? Ask a staff member for assistance.
-          </p>
         </div>
       </SheetContent>
     </Sheet>
