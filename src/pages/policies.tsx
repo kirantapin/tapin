@@ -17,7 +17,7 @@ import { useRestaurant } from "@/context/restaurant_context";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import React from "react";
 import { PolicyCard } from "@/components/cards/policy_card";
-import GoToCartButton from "@/components/go_to_cart_button";
+import GoToCartButton from "@/components/buttons/go_to_cart_button";
 import SpendGoalCard from "@/components/cards/spend_goal_card";
 import { PolicyUtils } from "@/utils/policy_utils";
 const tagMap: Record<string, { tag: string; icon: any }> = {

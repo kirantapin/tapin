@@ -5,13 +5,13 @@ import {
   useElements,
   ExpressCheckoutElement,
 } from "@stripe/react-stripe-js";
-import { supabase_local } from "../utils/supabase_client.ts";
-import { useAuth } from "../context/auth_context.tsx";
+import { supabase_local } from "../../utils/supabase_client.ts";
+import { useAuth } from "../../context/auth_context.tsx";
 
-import { Transaction, User } from "../types.ts";
-import { STRIPE_MIN_AMOUNT } from "../constants.ts";
+import { Transaction, User } from "../../types.ts";
+import { STRIPE_MIN_AMOUNT } from "../../constants.ts";
 import { submitPurchase } from "@/utils/purchase.ts";
-import RedeemButton from "./redeem_button.tsx";
+import RedeemButton from "@/components/buttons/redeem_button.tsx";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 
 const stripePublishableKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || "";

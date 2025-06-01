@@ -10,20 +10,19 @@ import { Bundle, Restaurant, Policy, BundleItem, Transaction } from "@/types";
 import { GradientIcon } from "@/utils/gradient";
 import { useAuth } from "@/context/auth_context";
 import { SignInButton } from "../signin/signin_button";
-import PayButton from "../pay_button";
+import PayButton from "@/components/buttons/pay_button";
 import { useGlobalCartManager } from "@/hooks/useGlobalCartManager";
 import { useRestaurant } from "@/context/restaurant_context";
 import { ItemUtils } from "@/utils/item_utils";
 import { BundleUtils } from "@/utils/bundle_utils";
 
-import CheckoutSummary from "../checkout/checkout_summary";
-import AddOnManager from "../sliders/add_on_manager";
+import CheckoutSummary from "@/components/checkout/checkout_summary";
+import AddOnManager from "@/components/sliders/add_on_manager";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
-import SmallPolicyCard from "../cards/small_policy_card";
+import SmallPolicyCard from "@/components/cards/small_policy_card";
 import { PolicyUtils } from "@/utils/policy_utils";
 import { titleCase } from "title-case";
-import GenericItemIcon from "../display_utils/generic_item_icons";
-import { RESTAURANT_PATH } from "@/constants";
+import GenericItemIcon from "@/components/display_utils/generic_item_icons";
 import { useNavigate } from "react-router-dom";
 interface BundleModalProps {
   isOpen: boolean;

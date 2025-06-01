@@ -9,7 +9,7 @@ import BundleSlider from "./sliders/bundle_slider";
 import { PolicyCard } from "./cards/policy_card";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { GradientIcon } from "@/utils/gradient";
-import GoToCartButton from "./go_to_cart_button";
+import GoToCartButton from "./buttons/go_to_cart_button";
 import { PolicyUtils } from "@/utils/policy_utils";
 interface ManageBundlesProps {
   restaurant: Restaurant;

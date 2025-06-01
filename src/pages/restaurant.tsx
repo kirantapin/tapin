@@ -7,8 +7,8 @@ import { Restaurant, Transaction } from "../types.ts";
 import { HOUSE_MIXER_LABEL, MAX_QR_TRANSACTIONS } from "../constants.ts";
 
 import { DrinkItem, DrinkList } from "@/components/menu_items.tsx";
-import GoToCartButton from "@/components/go_to_cart_button.tsx";
-import AccessCardSlider from "../components/sliders/access_card_slider.tsx";
+import GoToCartButton from "@/components/buttons/go_to_cart_button.tsx";
+import AccessCardSlider from "@/components/sliders/access_card_slider.tsx";
 import Rewards from "@/components/rewards.tsx";
 import { Sidebar } from "@/components/sidebar.tsx";
 import { useSearch } from "@/hooks/useSearch.tsx";
@@ -27,7 +27,6 @@ import LocationMarkerIcon from "@/components/svg/location_tag.tsx";
 import { isOpenNow } from "@/utils/time.ts";
 import LoadingPage from "@/components/skeletons/loading_page.tsx";
 import { titleCase } from "title-case";
-import { constant } from "lodash";
 
 export default function RestaurantPage() {
   const { userSession, transactions } = useAuth();
@@ -112,7 +111,7 @@ export default function RestaurantPage() {
         <div className="flex items-center gap-2">
           <h1
             ref={titleRefCallback} // Use the callback ref instead
-            className="text-2xl font-bold"
+            className="text-2xl font-bold truncate"
           >
             {restaurant?.name}
           </h1>

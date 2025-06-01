@@ -17,7 +17,7 @@ import DealPreOrderBar from "@/components/checkout/deal_checkout_bar";
 import { PolicyCard } from "@/components/cards/policy_card";
 import { Alert } from "@/components/display_utils/alert";
 import { SignInButton } from "@/components/signin/signin_button";
-import PayButton from "@/components/pay_button";
+import PayButton from "@/components/buttons/pay_button";
 import BundleCTA from "@/components/checkout/bundle_cta";
 import { CheckoutSkeleton } from "@/components/skeletons/checkout_skeleton";
 import {
@@ -27,6 +27,7 @@ import {
   RESTAURANT_PATH,
 } from "@/constants";
 import HighlightSlider from "@/components/sliders/highlight_slider";
+import ScrollDownIndicator from "@/components/buttons/scroll_down_indicator";
 
 export default function CheckoutPage() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -302,35 +303,6 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-function ScrollDownIndicator({
-  scrollTarget,
-  primaryColor,
-  size = "w-6 h-6",
-}: {
-  scrollTarget: React.RefObject<HTMLDivElement>;
-  primaryColor: string;
-  size?: string;
-}) {
-  const scrollToBottom = () => {
-    if (scrollTarget.current) {
-      scrollTarget.current.scrollTo({
-        top: scrollTarget.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
-  };
-
-  return (
-    <div className="flex justify-center mt-4">
-      <ChevronDown
-        className={`${size} animate-bounce-slow cursor-pointer`}
-        style={{ color: primaryColor }}
-        onClick={scrollToBottom}
-      />
     </div>
   );
 }

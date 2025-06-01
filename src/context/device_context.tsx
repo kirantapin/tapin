@@ -20,8 +20,7 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     if (!isMobile) {
-      //   navigate(DEVICE_NOT_SUPPORTED_PATH);
-    } else {
+      // navigate(DEVICE_NOT_SUPPORTED_PATH);
     }
   }, [navigate]);
 
