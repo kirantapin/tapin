@@ -2,7 +2,7 @@ import React, { Suspense, lazy, useEffect } from "react";
 import { Routes, Route, useParams } from "react-router-dom";
 import {
   BASE_PATH,
-  DRINK_CHECKOUT_PATH,
+  // DRINK_CHECKOUT_PATH,
   RESTAURANT_PATH,
   MY_SPOT_PATH,
   OFFERS_PAGE_PATH,
@@ -18,7 +18,7 @@ import LoadingPage from "./components/skeletons/loading_page.tsx";
 import { useRestaurant } from "./context/restaurant_context.tsx";
 // Lazy imports
 const Discovery = lazy(() => import("./pages/discovery.tsx"));
-const CheckoutPage = lazy(() => import("./pages/checkout.tsx"));
+// const CheckoutPage = lazy(() => import("./pages/checkout.tsx"));
 const NotFoundPage = lazy(() => import("./pages/not_found_page.tsx"));
 const MySpotContent = lazy(() => import("./pages/my_spot_content.tsx"));
 const PoliciesPage = lazy(() => import("./pages/policies.tsx"));
@@ -61,7 +61,7 @@ const App: React.FC = () => {
             </Suspense>
           }
         />
-        <Route
+        {/* <Route
           path={DRINK_CHECKOUT_PATH}
           element={
             <Suspense fallback={<CheckoutSkeleton />}>
@@ -70,7 +70,7 @@ const App: React.FC = () => {
               </RequireRestaurant>
             </Suspense>
           }
-        />
+        /> */}
         <Route
           path={OFFERS_PAGE_PATH}
           element={

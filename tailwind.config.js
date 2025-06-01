@@ -45,6 +45,9 @@ module.exports = {
         md: `calc(var(--radius) - 2px)`,
         sm: "calc(var(--radius) - 4px)",
       },
+      animation: {
+        "bounce-slow": "bounce 1.0s infinite",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

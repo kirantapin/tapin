@@ -30,6 +30,8 @@ import ProfileModal from "@/components/bottom_sheets/profile_modal";
 import SignInModal from "@/components/bottom_sheets/signin_modal";
 import LockedPolicyModal from "@/components/bottom_sheets/locked_policy_modal";
 import AllBundlesModal from "@/components/bottom_sheets/all_bundles_modal";
+import CheckoutModal from "@/components/bottom_sheets/checkout_modal";
+import { setThemeColor } from "@/utils/color";
 
 // Define the shape of your sheet registry: keys → sheet components
 type SheetMap = Record<string, FC<any>>;
@@ -67,6 +69,8 @@ interface BottomSheetContextValue {
     duration?: number
   ) => void;
   openAllBundlesModal: () => void;
+  openCheckoutModal: () => void;
+  closeCheckoutModal: () => void;
 }
 
 const BottomSheetContext = createContext<BottomSheetContextValue>({
@@ -97,6 +101,8 @@ const BottomSheetContext = createContext<BottomSheetContextValue>({
   openLockedPolicyModal: () => {},
   triggerToast: () => {},
   openAllBundlesModal: () => {},
+  openCheckoutModal: () => {},
+  closeCheckoutModal: () => {},
 });
 
 interface BottomSheetProviderProps {
@@ -139,7 +145,7 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
     bundle_id: string;
   } | null>(null);
   const [showAllBundlesModal, setShowAllBundlesModal] = useState(false);
-
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const handlePolicyClick = (
     policy: Policy,
     userOwnershipMap: Record<string, string | null>
@@ -219,6 +225,19 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
       setIsOpen(true);
     }, 200); // Wait for animation to complete
   };
+  const openCheckoutModal = () => {
+    if (isOpen) {
+      closeSheet();
+    }
+    setTimeout(() => {
+      setShowCheckoutModal(true);
+      setIsOpen(true);
+    }, 200); // Wait for animation to complete
+  };
+
+  const closeCheckoutModal = () => {
+    setShowCheckoutModal(false);
+  };
 
   const openProfileModal = () => {
     if (isOpen) {
@@ -283,6 +302,8 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
         openProfileModal,
         triggerToast,
         openAllBundlesModal,
+        openCheckoutModal,
+        closeCheckoutModal,
       }}
     >
       {children}
@@ -326,6 +347,7 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
 
       <ProfileModal isOpen={showProfile} onClose={closeSheet} />
       <AllBundlesModal isOpen={showAllBundlesModal} onClose={closeSheet} />
+      <CheckoutModal isOpen={showCheckoutModal} onClose={closeSheet} />
     </BottomSheetContext.Provider>
   );
 };

@@ -20,8 +20,6 @@ import { titleCase } from "title-case";
 import { PolicyDescriptionDisplay } from "@/components/display_utils/policy_description_display";
 import { getMissingItemsForPolicy } from "@/utils/item_recommender";
 import { PolicyManager } from "@/utils/policy_manager";
-import { DRINK_CHECKOUT_PATH } from "@/constants";
-import { useNavigate } from "react-router-dom";
 import { ItemUtils } from "@/utils/item_utils";
 import { useAuth } from "@/context/auth_context";
 import { SignInButton } from "../signin/signin_button";
@@ -50,7 +48,8 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
   restaurant,
 }) => {
   const { userSession } = useAuth();
-  const { addToCart, removeFromCart, addPolicy, state } = useBottomSheet();
+  const { addToCart, removeFromCart, addPolicy, state, openCheckoutModal } =
+    useBottomSheet();
   const [userPreference, setUserPreference] = useState<Item | null>(null);
   const [loading, setLoading] = useState(false);
   const missingItemsResults = getMissingItemsForPolicy(
@@ -67,7 +66,6 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
     policy,
     restaurant
   );
-  const navigate = useNavigate();
   const bundleObject = bundle_id
     ? (ItemUtils.getMenuItemFromItemId(bundle_id, restaurant) as BundleItem)
         .object
@@ -88,7 +86,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
             </SheetTitle>
             <button
               onClick={onClose}
-              className="text-gray-500 bg-gray-200 rounded-full p-2 focus:outline-none"
+              className="text-black bg-gray-200 rounded-full p-2 focus:outline-none"
             >
               <X size={20} />
             </button>
@@ -339,7 +337,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                 onClick={async () => {
                   setLoading(true);
                   if (policyIsActive) {
-                    navigate(DRINK_CHECKOUT_PATH.replace(":id", restaurant.id));
+                    openCheckoutModal();
                   } else if (!hasMissingItems) {
                     await addPolicy(
                       bundle_id,

@@ -54,7 +54,7 @@ export function CheckoutItemCard({
   return (
     <div className="flex items-center justify-between py-4">
       <div className="flex items-start">
-        <div className="w-24 h-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 p-3">
+        <div className="w-20 h-20 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
           <ImageFallback
             src={ImageUtils.getItemImageUrl(item.item.id, restaurant) || ""}
             alt={ItemUtils.getItemName(item.item, restaurant)}
@@ -81,12 +81,7 @@ export function CheckoutItemCard({
               <span
                 className="bg-[#cda852] text-xs text-white px-2 py-0.5 rounded font-semibold"
                 style={{
-                  background: restaurant?.metadata.primaryColor
-                    ? `linear-gradient(45deg, 
-    ${adjustColor(restaurant.metadata.primaryColor as string, -30)},
-    ${adjustColor(restaurant.metadata.primaryColor as string, 20)}
-  )`
-                    : undefined,
+                  background: restaurant?.metadata.primaryColor,
                 }}
               >
                 {discountDescription}

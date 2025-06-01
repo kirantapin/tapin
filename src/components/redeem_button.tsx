@@ -41,6 +41,7 @@ const RedeemButton = ({
         background: restaurant?.metadata.primaryColor as string,
       }}
       onClick={async () => {
+        setLoading(true);
         try {
           const potentialError = await refresh();
           if (potentialError) {
@@ -48,15 +49,14 @@ const RedeemButton = ({
             triggerToast(potentialError, "error");
             return;
           }
-          setLoading(true);
           const paymentData = {
             connectedAccountId: payload.connectedAccountId,
             paymentIntentId: null,
             additionalOrderData: {},
           };
           payload["paymentData"] = paymentData;
+          console.log("payload", payload);
           const tapInResponse = await submitPurchase(payload);
-          console.log("tapInResponse", tapInResponse);
           if (tapInResponse) {
             const { transactions, modifiedUserData } = tapInResponse;
             await handleTapInResponse(transactions, modifiedUserData);

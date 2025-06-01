@@ -32,7 +32,7 @@ const AllBundlesModal: React.FC<AllBundlesModalProps> = ({
             </SheetTitle>
             <button
               onClick={onClose}
-              className="text-gray-500 bg-gray-200 rounded-full p-2 focus:outline-none"
+              className="text-black bg-gray-200 rounded-full p-2 focus:outline-none"
             >
               <X size={20} />
             </button>

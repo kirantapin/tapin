@@ -105,7 +105,7 @@ export default function RestaurantPage() {
   return (
     <div className="min-h-screen bg-gray-25">
       {/* Hero Image */}
-      <Hero restaurant_id={id as string} setSidebarOpen={setSidebarOpen} />
+      <Hero setSidebarOpen={setSidebarOpen} />
 
       {/* Restaurant Info */}
       <div className="mt-10 px-5">
@@ -140,12 +140,7 @@ export default function RestaurantPage() {
         <ActionButtons scrollToOrderDrinks={scrollToOrderDrinks} />
         {/* Highlight Slider */}
 
-        <HighlightSlider
-          addToCart={async (itemId: string) => {
-            await addToCart({ id: itemId, modifiers: [] }, true);
-          }}
-          policies={policies || []}
-        />
+        <HighlightSlider policies={policies || []} displayOne={false} />
 
         {/* My Spot Section */}
         <MySpot userSession={userSession} transactions={transactions} />

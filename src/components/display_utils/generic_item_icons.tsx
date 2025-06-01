@@ -48,7 +48,7 @@ const GenericItemIcon: React.FC<GenericItemIconProps> = ({
         src={ImageUtils.getItemImageUrl(itemId, restaurant) || ""}
         alt=""
         className="w-full h-full object-cover"
-        style={{ width: size, height: size }}
+        style={{ width: size, height: size, padding: 0 }}
         restaurant={restaurant}
       />
     );

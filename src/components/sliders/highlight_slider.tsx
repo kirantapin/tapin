@@ -10,12 +10,13 @@ import { PolicyUtils } from "@/utils/policy_utils";
 import { BundleUtils } from "@/utils/bundle_utils";
 
 const HighlightSlider = ({
-  addToCart,
   policies,
+  displayOne = false,
 }: {
-  addToCart: (item_id: string) => Promise<void>;
   policies: Policy[];
+  displayOne?: boolean;
 }) => {
+  const { addToCart } = useBottomSheet();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [activePromo, setActivePromo] = useState(0);
@@ -25,29 +26,32 @@ const HighlightSlider = ({
   const { restaurant, policyManager, userOwnershipMap } = useRestaurant();
   const { triggerToast } = useBottomSheet();
   const [cardLoading, setCardLoading] = useState(false);
+
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) {
-          setAutoScrollEnabled(true);
-        }
-      },
-      { threshold: 0 }
-    );
+    if (!displayOne) {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry.isIntersecting) {
+            setAutoScrollEnabled(true);
+          }
+        },
+        { threshold: 0 }
+      );
 
-    if (scrollContainerRef.current) {
-      observer.observe(scrollContainerRef.current);
-    }
-
-    return () => {
       if (scrollContainerRef.current) {
-        observer.unobserve(scrollContainerRef.current);
+        observer.observe(scrollContainerRef.current);
       }
-    };
-  }, []);
+
+      return () => {
+        if (scrollContainerRef.current) {
+          observer.unobserve(scrollContainerRef.current);
+        }
+      };
+    }
+  }, [displayOne]);
 
   const handleUserInteraction = () => {
-    if (autoScrollEnabled) {
+    if (!displayOne && autoScrollEnabled) {
       setAutoScrollEnabled(false);
       if (autoScrollIntervalRef.current) {
         clearInterval(autoScrollIntervalRef.current);
@@ -56,14 +60,16 @@ const HighlightSlider = ({
   };
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const scrollPosition = e.currentTarget.scrollLeft;
-    const itemWidth = e.currentTarget.offsetWidth;
-    const newActivePromo = Math.round(scrollPosition / itemWidth);
-    setActivePromo(newActivePromo);
+    if (!displayOne) {
+      const scrollPosition = e.currentTarget.scrollLeft;
+      const itemWidth = e.currentTarget.offsetWidth;
+      const newActivePromo = Math.round(scrollPosition / itemWidth);
+      setActivePromo(newActivePromo);
+    }
   };
 
   const scrollToCard = (index: number) => {
-    if (!scrollContainerRef.current) return;
+    if (!scrollContainerRef.current || displayOne) return;
 
     const cardWidth = scrollContainerRef.current.clientWidth;
     scrollContainerRef.current.scrollTo({
@@ -73,7 +79,7 @@ const HighlightSlider = ({
   };
 
   useEffect(() => {
-    if (!autoScrollEnabled || highlights.length <= 1) return;
+    if (displayOne || !autoScrollEnabled || highlights.length <= 1) return;
 
     const startAutoScroll = () => {
       autoScrollIntervalRef.current = setInterval(() => {
@@ -92,7 +98,7 @@ const HighlightSlider = ({
         clearInterval(autoScrollIntervalRef.current);
       }
     };
-  }, [highlights.length, autoScrollEnabled]);
+  }, [highlights.length, autoScrollEnabled, displayOne]);
 
   useEffect(() => {
     const fetchHighlights = async () => {
@@ -127,17 +133,25 @@ const HighlightSlider = ({
         }
         return false;
       });
-      setHighlights(filteredHighlights);
+
+      if (displayOne && filteredHighlights.length > 0) {
+        const randomIndex = Math.floor(
+          Math.random() * filteredHighlights.length
+        );
+        setHighlights([filteredHighlights[randomIndex]]);
+      } else {
+        setHighlights(filteredHighlights);
+      }
     };
     fetchHighlights();
-  }, [restaurant]);
+  }, [restaurant, displayOne]);
 
   const handleHighlightClick = async (highlight: Highlight) => {
     setCardLoading(true);
     const content_pointer = highlight.content_pointer;
     if (!content_pointer) return;
     if (highlight.content_type === "item") {
-      await addToCart(content_pointer);
+      await addToCart({ id: content_pointer, modifiers: [] }, true);
     } else if (highlight.content_type === "bundle") {
       const bundle = ItemUtils.getMenuItemFromItemId(
         content_pointer,
@@ -168,18 +182,19 @@ const HighlightSlider = ({
     <div className="mt-3">
       <div
         ref={scrollContainerRef}
-        className="overflow-x-auto snap-x snap-mandatory no-scrollbar scrollbar-hide -mx-5 px-5"
+        className={`overflow-x-auto ${
+          !displayOne ? "snap-x snap-mandatory" : ""
+        } no-scrollbar scrollbar-hide -mx-5 px-5`}
         onScroll={handleScroll}
-        onWheel={() => {
-          handleUserInteraction();
-        }}
-        onTouchStart={() => {
-          handleUserInteraction();
-        }}
+        onWheel={handleUserInteraction}
+        onTouchStart={handleUserInteraction}
       >
         <div className="flex gap-4">
           {highlights.map((h, idx) => (
-            <div key={idx} className="snap-center shrink-0 w-full">
+            <div
+              key={idx}
+              className={`${!displayOne ? "snap-center" : ""} shrink-0 w-full`}
+            >
               <HighlightCard
                 highlight={h}
                 restaurant={restaurant}
@@ -190,26 +205,28 @@ const HighlightSlider = ({
               />
             </div>
           ))}
-          <div className="shrink-0 w-10" />
+          {!displayOne && <div className="shrink-0 w-10" />}
         </div>
       </div>
 
-      <div className="flex justify-center mt-4">
-        {highlights.map((_, index) => (
-          <button
-            key={index}
-            className={`h-2 mx-1 rounded-full transition-all duration-300 ${
-              activePromo === index ? "w-4" : "bg-gray-300 w-2"
-            }`}
-            style={{
-              backgroundColor:
-                activePromo === index
-                  ? (restaurant.metadata.primaryColor as string)
-                  : undefined,
-            }}
-          ></button>
-        ))}
-      </div>
+      {!displayOne && (
+        <div className="flex justify-center mt-4">
+          {highlights.map((_, index) => (
+            <button
+              key={index}
+              className={`h-2 mx-1 rounded-full transition-all duration-300 ${
+                activePromo === index ? "w-4" : "bg-gray-300 w-2"
+              }`}
+              style={{
+                backgroundColor:
+                  activePromo === index
+                    ? (restaurant.metadata.primaryColor as string)
+                    : undefined,
+              }}
+            ></button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

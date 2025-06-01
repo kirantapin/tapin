@@ -41,7 +41,7 @@ export const ImageFallback = ({
     <img
       src={hasError ? fallbackSrc : src}
       alt={alt}
-      className={`${className} ${hasError ? "rounded-full p-3" : ""}`}
+      className={`${hasError ? "rounded-full p-3" : ""} ${className} `}
       style={style}
       onError={() => {
         setHasError(true);

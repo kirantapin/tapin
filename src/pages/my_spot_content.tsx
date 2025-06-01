@@ -152,10 +152,8 @@ const MySpotContent: React.FC = () => {
         {Object.keys(tagMap).map((filter) => (
           <button
             key={tagMap[filter].tag}
-            className={`px-4 py-1.5 rounded-full text-sm whitespace-nowrap font-medium ${
-              activeFilter === tagMap[filter].tag
-                ? " border "
-                : "border text-gray-500"
+            className={`px-4 py-1.5 rounded-full text-sm whitespace-nowrap font-medium border ${
+              activeFilter === tagMap[filter].tag ? "" : "text-gray-500"
             }`}
             style={
               activeFilter === tagMap[filter].tag
@@ -163,7 +161,7 @@ const MySpotContent: React.FC = () => {
                     color: restaurant.metadata.primaryColor as string,
                     borderColor: restaurant.metadata.primaryColor as string,
                   }
-                : {}
+                : { backgroundColor: "#f6f8fa", borderColor: "#e5e7eb" }
             }
             onClick={() => {
               setType(tagMap[filter].tag);
@@ -178,9 +176,9 @@ const MySpotContent: React.FC = () => {
         ))}
       </div>
 
-      <div className="flex items-center gap-2 bg-amber-50 rounded-lg p-3 mx-4">
+      <div className="flex items-center gap-2 bg-amber-50 rounded-lg p-3 mx-4 border border-gray-200">
         <Info className="w-5 h-5 text-amber-600" />
-        <p className="text-gray-600 text-sm">
+        <p className="text-black text-sm font-semibold">
           Unredeemed transactions expire after 90 days.
         </p>
       </div>
@@ -225,7 +223,7 @@ const MySpotContent: React.FC = () => {
           </ul>
 
           {/* Redeem Button */}
-          <div className="fixed bottom-0 left-0 right-0 flex flex-col gap-2 bg-[rgba(255,255,255,0.9)] py-4 px-4 border-t rounded-t-3xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.2)]">
+          <div className="fixed bottom-0 left-0 right-0 flex flex-col gap-2 bg-white py-4 px-4 border-t rounded-t-3xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
             <button
               className={`w-full py-3 rounded-full text-white font-semibold ${
                 selectedTransactions.length > 0 ? "" : "bg-gray-400 "

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { DRINK_CHECKOUT_PATH } from "@/constants";
 import { Restaurant } from "@/types";
+import { useBottomSheet } from "@/context/bottom_sheet_context";
 
 const GoToCartButton = ({
   restaurant,
@@ -12,6 +12,7 @@ const GoToCartButton = ({
   cartCount: number;
 }) => {
   const navigate = useNavigate();
+  const { openCheckoutModal } = useBottomSheet();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -26,9 +27,7 @@ const GoToCartButton = ({
           ${isVisible ? "translate-y-0" : "translate-y-24"}`}
       />
       <button
-        onClick={() =>
-          navigate(DRINK_CHECKOUT_PATH.replace(":id", restaurant.id as string))
-        }
+        onClick={() => openCheckoutModal()}
         className={`fixed bottom-3 left-4 right-4 h-14 text-white rounded-2xl flex items-center justify-center gap-2
           shadow-2xl transition-all duration-300 z-50
           ${

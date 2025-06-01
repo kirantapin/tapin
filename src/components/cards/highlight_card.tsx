@@ -112,6 +112,7 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
         }),
         color: "white",
       }}
+      onClick={onClick}
     >
       {image_url_override && (
         <div className="absolute inset-0">
@@ -157,7 +158,6 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
           <button
             className="bg-white px-5 py-1 rounded-full text-sm self-start font-bold min-w-[100px] min-h-[30px] flex justify-center items-center"
             style={{ color: "black" }}
-            onClick={onClick}
           >
             {loading ? (
               <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />

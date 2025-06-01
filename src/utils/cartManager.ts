@@ -135,7 +135,6 @@ export class CartManager {
       );
       const returnData = data?.data;
       const errorMessage = data?.error || "";
-      console.log("returnData", returnData);
       if (error) {
         console.error("Supabase Error:", error);
         this.errorDisplay =

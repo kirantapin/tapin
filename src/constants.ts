@@ -3,7 +3,7 @@ import { DealEffectPayload } from "./types";
 
 //paths
 export const BASE_PATH = "/";
-export const DRINK_CHECKOUT_PATH = "/restaurant/:id/checkout";
+// export const DRINK_CHECKOUT_PATH = "/restaurant/:id/checkout";
 export const RESTAURANT_PATH = "/restaurant/:id";
 export const MY_SPOT_PATH = "/restaurant/:id/my_spot";
 export const OFFERS_PAGE_PATH = "/restaurant/:id/offers";

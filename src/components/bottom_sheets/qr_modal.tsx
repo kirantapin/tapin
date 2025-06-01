@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { Sheet, SheetContent, SheetHeader } from "@/components/ui/sheet";
-import { X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { Transaction, Restaurant, Item } from "@/types";
 import { useAuth } from "@/context/auth_context";
 import { supabase, supabase_local } from "@/utils/supabase_client";
 import QRCode from "react-qr-code";
+import OtpInput from "react-otp-input";
 
-import { ItemUtils } from "@/utils/item_utils";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import CustomLogo from "../svg/custom_logo";
 import { MAX_QR_TRANSACTIONS } from "@/constants";
@@ -27,10 +27,13 @@ const QRModal: React.FC<QRModalProps> = ({
 }) => {
   const [codeEntered, setCodeEntered] = useState("");
   const [redeemError, setRedeemError] = useState("");
-  const { userData, setTransactions } = useAuth();
+  const { setTransactions, userSession } = useAuth();
   const { triggerToast } = useBottomSheet();
-  const [verifyingState, setVerifyingState] = useState("");
+  const [verifyingState, setVerifyingState] = useState<
+    "loading" | "complete" | ""
+  >("");
   const [updatingTransactions, setUpdatingTransactions] = useState(false);
+  const [showCodeInput, setShowCodeInput] = useState(false);
 
   if (transactionsToRedeem.length > MAX_QR_TRANSACTIONS) {
     triggerToast(
@@ -58,69 +61,59 @@ const QRModal: React.FC<QRModalProps> = ({
     return "H"; // very dense, highest correction
   }
 
-  // const formatCode = () => {
-  //   const digitsOnly = codeEntered.replace(/\D/g, "");
+  const handleSubmit = async (e: React.FormEvent) => {
+    console.log("handleSubmit");
+    e.preventDefault();
+    console.log("codeEntered", codeEntered);
+    // Here you would typically validate the code and proceed accordingly
+    const employeeCode = codeEntered;
 
-  //   // Ensure it's at least 10 digits long (US phone numbers without country code)
-  //   if (digitsOnly.length === 10) {
-  //     return `1${digitsOnly}`; // Add US country code
-  //   } else if (digitsOnly.length === 11 && digitsOnly.startsWith("1")) {
-  //     return `${digitsOnly}`; // Ensure +1 format
-  //   }
-  //   return null;
-  // };
+    if (!employeeCode) {
+      setRedeemError("Number provided is not valid");
+      return;
+    }
+    setVerifyingState("loading");
+    const response = await supabase_local.functions.invoke(
+      "redeem_transactions_client",
+      {
+        body: {
+          transactionIds: transactionsToRedeem.map(
+            (transaction) => transaction.transaction_id
+          ),
+          employeeCode: employeeCode,
+          userAccessToken: userSession?.access_token,
+          restaurant_id: restaurant.id,
+        },
+      }
+    );
+    const { updatedTransactions } = response.data;
+    if (response.error || response.data.error || !response.data.success) {
+      setRedeemError(response.data.error || "Failed to Redeem Items");
+      setVerifyingState("");
+      return;
+    }
 
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   // Here you would typically validate the code and proceed accordingly
-  //   const employeeId = formatCode();
+    if (updatedTransactions.length !== transactionsToRedeem.length) {
+      setRedeemError(
+        "Error occurred while Redeeming Items. Reach out to Tap In."
+      );
+      setVerifyingState("");
+      return;
+    }
 
-  //   if (!employeeId) {
-  //     setRedeemError("Number provided is not valid");
-  //     return;
-  //   }
-  //   setVerifyingState("loading");
-  //   const response = await supabase_local.functions.invoke(
-  //     "redeem_transactions_client",
-  //     {
-  //       body: {
-  //         transactionIds: transactionsToRedeem.map(
-  //           (transaction) => transaction.transaction_id
-  //         ),
-  //         employeeId: employeeId,
-  //         userId: userData?.id,
-  //       },
-  //     }
-  //   );
-  //   const { updatedTransactions } = response.data;
-  //   if (response.error || response.data.error || !response.data.success) {
-  //     setRedeemError("Failed to Redeem Transactions");
-  //     setVerifyingState("");
-  //     return;
-  //   }
+    setTransactions((prevTransactions) =>
+      prevTransactions.map((transaction) =>
+        transactionsToRedeem.some(
+          (redeemTransaction) =>
+            redeemTransaction.transaction_id === transaction.transaction_id
+        )
+          ? { ...transaction, fulfilled_by: employeeCode } // Mark as fulfilled
+          : transaction
+      )
+    );
+    setVerifyingState("complete");
+  };
 
-  //   if (updatedTransactions.length !== transactionsToRedeem.length) {
-  //     setRedeemError(
-  //       "Error occurred while Redeeming Transactions. Reach out to TapIn."
-  //     );
-  //     setVerifyingState("");
-  //     return;
-  //   }
-
-  //   setVerifyingState("complete");
-  //   setTransactions((prevTransactions) =>
-  //     prevTransactions.map((transaction) =>
-  //       transactionsToRedeem.some(
-  //         (redeemTransaction) =>
-  //           redeemTransaction.transaction_id === transaction.transaction_id
-  //       )
-  //         ? { ...transaction, fulfilled_by: employeeId } // Mark as fulfilled
-  //         : transaction
-  //     )
-  //   );
-  //   //create component that shows a loader if loading, but a check mark if complete and a button to go back to home page.
-  //   //you might need to reretrieve transactions
-  // };
   const itemsToBeRedeemed: Item[] = [];
 
   if (transactionsToRedeem.length <= 0 || !restaurant) {
@@ -206,30 +199,118 @@ const QRModal: React.FC<QRModalProps> = ({
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto px-6 pt-4">
-          <h1 className="text-3xl font-bold mb-2">Scan QR Code</h1>
-          <p className="text-gray-500 mb-2">
-            Having trouble? Ask a staff member for assistance.
-          </p>
-          {/* <p className="text-xl text-gray-500">
-            Or have an employee enter their code to redeem the purchase.
-            Unredeemed Items will be saved to your account.
-          </p> */}
+          {verifyingState !== "complete" ? (
+            <div>
+              <div className="flex justify-between items-center gap-1">
+                <h1 className="text-3xl font-bold mb-2">Scan QR Code</h1>
+                <button
+                  onClick={() => setShowCodeInput(true)}
+                  className="text-xs text-white rounded-full px-3 py-2"
+                  style={{
+                    backgroundColor: restaurant?.metadata
+                      .primaryColor as string,
+                  }}
+                >
+                  Enter Employee Code
+                </button>
+              </div>
+              {redeemError && <div className="text-red-500">{redeemError}</div>}
+              <div
+                className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                  showCodeInput
+                    ? "max-h-[500px] opacity-100"
+                    : "max-h-0 opacity-0"
+                }`}
+              >
+                <form onSubmit={handleSubmit} className="mb-8 mt-4">
+                  <div className="relative">
+                    <OtpInput
+                      value={codeEntered}
+                      onChange={setCodeEntered}
+                      numInputs={4}
+                      inputType="number"
+                      shouldAutoFocus
+                      renderInput={(props) => (
+                        <input
+                          {...props}
+                          style={{
+                            ...props.style,
+                            width: "60px",
+                            height: "60px",
+                          }}
+                          className="text-4xl text-center border border-gray-300 rounded-lg focus:border-black focus:outline-none transition-colors"
+                        />
+                      )}
+                      containerStyle="flex gap-4 justify-center"
+                    />
+                    {codeEntered && (
+                      <button
+                        type="button"
+                        onClick={() => setCodeEntered("")}
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-black"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    )}
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full text-white py-4 rounded-full text-lg mt-6 font-semibold"
+                    style={{
+                      backgroundColor:
+                        codeEntered.length === 4
+                          ? (restaurant?.metadata.primaryColor as string)
+                          : "gray",
+                    }}
+                  >
+                    <div className="flex items-center justify-center gap-2 w-full">
+                      {verifyingState === "loading" ? (
+                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+                      ) : (
+                        <>
+                          <span className="font-semibold">Redeem Items</span>
+                          <img
+                            src="/tapin_icon_full_white.png"
+                            alt="Tap In Icon"
+                            className="h-5"
+                          />
+                        </>
+                      )}
+                    </div>
+                  </button>
+                </form>
+              </div>
 
-          <div className="w-full aspect-square flex items-center justify-center rounded-xl">
-            <QRCode
-              size={256}
-              style={{
-                height: "auto",
-                maxWidth: "100%",
-                width: "100%",
-                padding: "30px",
-              }}
-              value={formatTransactions()}
-              viewBox={`0 0 256 256`}
-              radius={15}
-              level={determineErrorCorrectionLevel(formatTransactions())}
-            />
-          </div>
+              <p className="text-gray-500 mb-2 pt-2">
+                Having trouble? Ask a staff member for assistance.
+              </p>
+
+              <div className="w-full aspect-square flex items-center justify-center rounded-xl">
+                <QRCode
+                  size={256}
+                  style={{
+                    height: "auto",
+                    maxWidth: "100%",
+                    width: "100%",
+                    padding: "30px",
+                  }}
+                  value={formatTransactions()}
+                  viewBox={`0 0 256 256`}
+                  radius={15}
+                  level={determineErrorCorrectionLevel(formatTransactions())}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col">
+              <div className="text-xl mb-2">
+                <span className="inline font-semibold">
+                  Items have been redeemed successfully and can be served.
+                  <Check className="inline-block ml-2 w-7 h-7 text-green-500 align-text-bottom" />
+                </span>
+              </div>
+            </div>
+          )}
 
           <div className="flex flex-col">
             {itemsToBeRedeemed.map((item) => (
@@ -243,53 +324,6 @@ const QRModal: React.FC<QRModalProps> = ({
               </div>
             ))}
           </div>
-
-          {redeemError && <div>{redeemError}</div>}
-
-          {/* <form onSubmit={handleSubmit} className="mb-8 mt-4">
-            <div className="relative">
-              <input
-                id="qr-code"
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={codeEntered}
-                onChange={(e) => setCodeEntered(e.target.value)}
-                className="w-full bg-[#FFFFFF] rounded-full p-4 pr-12 text-black placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-[#000000] border border-black"
-                placeholder="Or Ask For Employee Code To Redeem"
-              />
-              {codeEntered && (
-                <button
-                  type="button"
-                  onClick={() => setCodeEntered("")}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              )}
-            </div>
-            <button
-              type="submit"
-              className="w-full text-white py-4 rounded-full text-lg mt-4 font-semibold"
-              style={{
-                backgroundColor: restaurant?.metadata.primaryColor as string,
-              }}
-            >
-              <div className="flex items-center justify-center gap-2 w-full">
-                <span className="font-semibold">Submit Code</span>
-                <img
-                  src="/tapin_icon_full_white.png"
-                  alt="Tap In Icon"
-                  className="h-5"
-                />
-              </div>
-            </button>
-          </form> */}
-
-          {/* {verifyingState && <div>{verifyingState}</div>}
-          {verifyingState === "complete" && (
-            <div onClick={onClose}>Go Back Home</div>
-          )} */}
         </div>
       </SheetContent>
     </Sheet>

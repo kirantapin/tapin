@@ -198,34 +198,31 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
                   const diff = timeSinceLastUsed - timeRequired;
 
                   const tags = [];
-                  tags.push(
-                    diff >= 0
-                      ? "Ready to use"
-                      : (() => {
-                          const absDiff = Math.abs(diff);
-                          const days = Math.floor(
-                            absDiff / (24 * 60 * 60 * 1000)
-                          );
-                          const hours = Math.floor(
-                            (absDiff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000)
-                          );
-                          const minutes = Math.floor(
-                            (absDiff % (60 * 60 * 1000)) / (60 * 1000)
-                          );
+                  if (diff < 0) {
+                    const absDiff = Math.abs(diff);
+                    const days = Math.floor(absDiff / (24 * 60 * 60 * 1000));
+                    const hours = Math.floor(
+                      (absDiff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000)
+                    );
+                    const minutes = Math.floor(
+                      (absDiff % (60 * 60 * 1000)) / (60 * 1000)
+                    );
 
-                          if (days > 0) {
-                            return `Ready in ${days}d ${hours}h`;
-                          } else {
-                            return `Ready in ${hours}h ${minutes}m`;
-                          }
-                        })()
-                  );
+                    tags.push(
+                      days > 0
+                        ? `Ready in ${days}d ${hours}h`
+                        : `Ready in ${hours}h ${minutes}m`
+                    );
+                  }
                   if (policy.total_usages) {
                     tags.push(
                       `${policy.total_usages - numUsages} ${
                         policy.total_usages - numUsages === 1 ? "Use" : "Uses"
                       } Left`
                     );
+                  }
+                  if (tags.length === 0) {
+                    tags.push("Ready to use");
                   }
                   return (
                     <div key={index}>

@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
-import { Search } from "lucide-react";
 import { supabase } from "../utils/supabase_client";
 import { Restaurant } from "../types";
 import { useNavigate } from "react-router-dom";
 import { RESTAURANT_PATH } from "../constants.ts";
-import { project_url } from "../utils/supabase_client.ts";
 import { setThemeColor } from "../utils/color";
 import { ImageUtils } from "@/utils/image_utils.ts";
 export default function RestaurantDiscovery() {
@@ -63,7 +61,7 @@ export default function RestaurantDiscovery() {
             {restaurants.map((restaurant) => (
               <div
                 key={restaurant.id}
-                className="w-full max-w-md bg-white rounded-2xl shadow-md overflow-hidden cursor-pointer transition hover:shadow-lg mr-4"
+                className="w-full max-w-md bg-white rounded-2xl overflow-hidden cursor-pointer mr-4 border  border-gray-300"
                 onClick={() =>
                   navigate(RESTAURANT_PATH.replace(":id", restaurant.id))
                 }
@@ -79,7 +77,7 @@ export default function RestaurantDiscovery() {
                   />
 
                   {/* Profile Avatar */}
-                  <div className="absolute -bottom-6 left-4">
+                  <div className="absolute -bottom-4 left-4">
                     <img
                       src={
                         ImageUtils.getProfileImageUrl(
@@ -87,13 +85,13 @@ export default function RestaurantDiscovery() {
                         ) || ""
                       }
                       alt={restaurant.name}
-                      className="w-16 h-16 object-cover rounded-full border-3 border-white shadow-sm"
+                      className="w-16 h-16 object-cover rounded-full border border-1 border-white shadow-lg"
                     />
                   </div>
                 </div>
 
                 {/* Card Content */}
-                <div className="pt-8 px-4 pb-4">
+                <div className="pt-6 px-4 pb-4">
                   <h2 className="text-xl font-semibold text-gray-900">
                     {restaurant.name}
                   </h2>

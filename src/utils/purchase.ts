@@ -18,7 +18,14 @@ export const submitPurchase = async (payload: any) => {
         },
       }
     );
-    if (error || !data) return null;
+    if (error || !data) {
+      console.error("Error submitting purchase:", error);
+      return null;
+    }
+    if (data.error) {
+      return null;
+    }
+    console.log("hello3", typeof data);
     const { transactions, modifiedUserData } = data;
     return { transactions, modifiedUserData };
   } catch (error) {

@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Ticket, ChevronRight, GlassWater } from "lucide-react";
-import { Transaction, Restaurant, UserSession } from "@/types";
+import { Transaction, UserSession } from "@/types";
 import { GradientIcon } from "@/utils/gradient";
 import { PASS_MENU_TAG, MY_SPOT_PATH } from "@/constants";
 import { useRestaurant } from "@/context/restaurant_context";

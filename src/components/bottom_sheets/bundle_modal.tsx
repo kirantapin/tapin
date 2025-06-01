@@ -126,7 +126,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
             </SheetTitle>
             <button
               onClick={onClose}
-              className="text-gray-500 bg-gray-200 rounded-full p-2 focus:outline-none"
+              className="text-black bg-gray-200 rounded-full p-2 focus:outline-none"
             >
               <X size={20} />
             </button>
@@ -146,7 +146,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
               }}
             >
               <span className="text-md text-white font-semibold">
-                ${Math.round(estimatedBundleValue) - 0.01} value
+                ${Math.round(estimatedBundleValue)} value
               </span>
             </div>
           </div>
@@ -159,7 +159,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
               return (
                 <div
                   key={index}
-                  className="w-[220px] h-[160px] p-4 rounded-xl border border-gray-200 flex flex-col items-start flex-shrink-0"
+                  className="w-[220px] h-[160px] p-4 rounded-xl border border-gray-300 flex flex-col items-start flex-shrink-0"
                   onClick={() => {
                     handlePolicyClick(policy, userOwnershipMap);
                   }}
@@ -203,7 +203,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
               );
             })}
             {bundle.fixed_credit > 0 && (
-              <div className="w-[220px] h-[160px] p-4 rounded-xl border border-gray-200 flex flex-col items-start flex-shrink-0">
+              <div className="w-[220px] h-[160px] p-4 rounded-xl border border-gray-300 flex flex-col items-start flex-shrink-0">
                 <div className=" mb-4">
                   <GradientIcon
                     icon={Wallet}
@@ -222,7 +222,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
             )}
 
             {bundle.point_multiplier > 1 && (
-              <div className="w-[220px] h-[160px] p-4 rounded-xl border border-gray-200 flex flex-col items-start flex-shrink-0">
+              <div className="w-[220px] h-[160px] p-4 rounded-xl border border-gray-300 flex flex-col items-start flex-shrink-0">
                 <div className="text-[#E6C677] mb-4">
                   <GradientIcon
                     icon={CircleX}

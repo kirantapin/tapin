@@ -100,13 +100,13 @@ export function DrinkItem({
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-500 custom-line-clamp-1 show-at-400">
+          <p className="text-xs text-gray-500 custom-line-clamp-1 show-at-400">
             {(menuItem as NormalItem | PassItem)?.description}
           </p>
         </div>
 
         <div className="flex items-center justify-between mt-2">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <p className="font-bold text-base">
               ${ItemUtils.priceItem(item, restaurant)?.toFixed(2)}
             </p>

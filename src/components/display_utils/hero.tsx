@@ -1,23 +1,17 @@
-import { DRINK_CHECKOUT_PATH, RESTAURANT_IMAGE_BUCKET } from "@/constants";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { useRestaurant } from "@/context/restaurant_context";
 import { ImageUtils } from "@/utils/image_utils";
-import { project_url } from "@/utils/supabase_client";
 import { Menu, ShoppingBag, User } from "lucide-react";
 import { useState } from "react";
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 
 export function Hero({
-  restaurant_id,
   setSidebarOpen,
 }: {
-  restaurant_id: string;
   setSidebarOpen: (open: boolean) => void;
 }) {
   const { restaurant } = useRestaurant();
-  const { openProfileModal } = useBottomSheet();
-  const navigate = useNavigate();
+  const { openProfileModal, openCheckoutModal } = useBottomSheet();
 
   const [bgLoaded, setBgLoaded] = useState(false);
 
@@ -65,7 +59,7 @@ export function Hero({
             className=" p-2 rounded-full"
             style={{ backgroundColor: buttonColor }}
             onClick={() => {
-              navigate(DRINK_CHECKOUT_PATH.replace(":id", restaurant_id));
+              openCheckoutModal();
             }}
           >
             <ShoppingBag

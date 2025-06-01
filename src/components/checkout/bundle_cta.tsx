@@ -37,7 +37,7 @@ export default function BundleCTA() {
   if (!chosenBundle || !restaurant || !state.cartResults) return null;
 
   return (
-    <div className=" mb-4">
+    <div className="mb-0">
       <div className="border-t border-gray-200 -mx-4" />
       <div
         className="py-2 px-4 flex items-center gap-4 cursor-pointer"
