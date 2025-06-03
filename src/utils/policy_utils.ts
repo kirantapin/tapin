@@ -420,19 +420,11 @@ export class PolicyUtils {
           restaurant
         );
 
-        if (
-          itemIds
-            .map(
-              (id) =>
-                ItemUtils.isItemAvailable(
-                  { id, modifiers: [] },
-                  restaurant,
-                  [],
-                  0
-                ) !== null
-            )
-            .every(Boolean)
-        ) {
+        const itemAvailabilities = itemIds.map((id) =>
+          ItemUtils.isItemAvailable({ id, modifiers: [] }, restaurant, [], 0)
+        );
+
+        if (!itemAvailabilities.includes(null)) {
           return false;
         }
       }
@@ -459,23 +451,15 @@ export class PolicyUtils {
       }
     } else {
       if ("items" in action) {
-        const itemIds = PolicyUtils.getPotentialPreferencesForPolicy(
-          policy,
+        const itemIds = ItemUtils.policyItemSpecificationsToItemIds(
+          action.items,
           restaurant
         );
-        if (
-          itemIds
-            .map(
-              (id) =>
-                ItemUtils.isItemAvailable(
-                  { id, modifiers: [] },
-                  restaurant,
-                  [],
-                  0
-                ) !== null
-            )
-            .every(Boolean)
-        ) {
+
+        const itemAvailabilities = itemIds.map((id) =>
+          ItemUtils.isItemAvailable({ id, modifiers: [] }, restaurant, [], 0)
+        );
+        if (!itemAvailabilities.includes(null)) {
           return false;
         }
       }

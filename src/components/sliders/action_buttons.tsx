@@ -29,7 +29,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
     <div className="flex gap-2 sm:gap-3 mt-5 px-2 pb-2 overflow-x-auto no-scrollbar -mx-4 px-4">
       <button
         onClick={scrollToOrderDrinks}
-        className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-300 bg-white"
+        className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-2 sm:py-2 rounded-full border border-gray-300 bg-white"
       >
         <GradientIcon
           icon={Beer}
@@ -43,7 +43,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       </button>
 
       <button
-        className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-300 bg-white"
+        className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-2 sm:py-2 rounded-full border border-gray-300 bg-white"
         onClick={() =>
           navigate(OFFERS_PAGE_PATH.replace(":id", restaurant.id), {
             state: { tag: LOYALTY_REWARD_TAG },
@@ -61,7 +61,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       </button>
 
       <button
-        className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-300 bg-white"
+        className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-2 sm:py-2 rounded-full border border-gray-300 bg-white"
         onClick={() => openAllBundlesModal()}
       >
         <GradientIcon
@@ -74,7 +74,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
         </span>
       </button>
       <button
-        className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-300 bg-white"
+        className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-2 sm:py-2 rounded-full border border-gray-300 bg-white"
         onClick={() =>
           navigate(OFFERS_PAGE_PATH.replace(":id", restaurant.id), {
             state: { tag: NORMAL_DEAL_TAG },
@@ -91,7 +91,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
         </span>
       </button>
       <button
-        className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-300 bg-white"
+        className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-2 sm:py-2 rounded-full border border-gray-300 bg-white"
         onClick={() => {
           navigate(INFO_PAGE_PATH.replace(":id", restaurant.id));
         }}
@@ -107,7 +107,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       </button>
       {restaurant.info.address && (
         <button
-          className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-gray-300 bg-white"
+          className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-2 sm:py-2 rounded-full border border-gray-300 bg-white"
           onClick={() =>
             window.open(
               `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(

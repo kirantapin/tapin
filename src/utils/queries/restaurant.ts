@@ -16,6 +16,7 @@ const HistoryCacheTTL = 30000;
 export const fetchRestaurantById = async (
   restaurantId: string | undefined
 ): Promise<Restaurant | null> => {
+  console.log("fetching restaurant", restaurantId);
   if (!restaurantId) {
     return null;
   }

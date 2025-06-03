@@ -25,7 +25,6 @@ export const submitPurchase = async (payload: any) => {
     if (data.error) {
       return null;
     }
-    console.log("hello3", typeof data);
     const { transactions, modifiedUserData } = data;
     return { transactions, modifiedUserData };
   } catch (error) {

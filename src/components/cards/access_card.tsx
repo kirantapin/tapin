@@ -170,7 +170,6 @@ export default function Card({
               onClick={async () => {
                 if (!cartItem) return;
                 setLoading(true);
-                console.log("removing", cartItem.id);
                 await removeFromCart(cartItem.id);
                 setLoading(false);
               }}

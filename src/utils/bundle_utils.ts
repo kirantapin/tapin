@@ -68,6 +68,7 @@ export class BundleUtils {
     user_id: string | null,
     bundle: Bundle
   ): Promise<string | null> => {
+    console.log("hello");
     if (!user_id) return null;
     const duration = bundle.duration;
     const { data, error } = await supabase

@@ -59,7 +59,8 @@ export function Alert({
           <AlertDialogCancel
             className={cn(
               "w-full rounded-full px-3 py-2 text-sm border border-gray-300 font-gilroy",
-              cancelClassName
+              cancelClassName,
+              "focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:outline-none"
             )}
           >
             {cancelLabel}

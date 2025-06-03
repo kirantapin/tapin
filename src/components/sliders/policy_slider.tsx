@@ -8,18 +8,30 @@ interface PolicySliderProps {
   restaurant: Restaurant | null;
   policies: Policy[];
   state: any;
+  unlockedFirst?: boolean;
 }
 
 export const PolicySlider: React.FC<PolicySliderProps> = ({
   restaurant,
   policies,
   state,
+  unlockedFirst = false,
 }) => {
   const navigate = useNavigate();
 
   const dealPolicies = policies.filter(
     (policy) => policy.definition.tag === NORMAL_DEAL_TAG
   );
+
+  if (unlockedFirst) {
+    dealPolicies.sort((a, b) => {
+      const aLocked = a.locked;
+      const bLocked = b.locked;
+      if (aLocked && !bLocked) return 1;
+      if (!aLocked && bLocked) return -1;
+      return 0;
+    });
+  }
 
   if (!restaurant || dealPolicies.length === 0) {
     return null;
@@ -44,12 +56,6 @@ export const PolicySlider: React.FC<PolicySliderProps> = ({
         <div className="flex gap-4">
           {dealPolicies.map((policy, index) => (
             <div className="flex-none w-full" key={index}>
-              {/* <PolicyCard
-                cart={state.cart}
-                policy={policy}
-                restaurant={restaurant}
-                dealEffect={state.dealEffect}
-              /> */}
               <SmallPolicyCard
                 policy={policy}
                 restaurant={restaurant}

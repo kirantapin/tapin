@@ -222,7 +222,7 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
         </div>
       )}
       {loyaltyPolicies.length > 0 && viewAll && (
-        <div className="space-y-4 mt-8 mb-24">
+        <div className="space-y-4 mt-6 mb-24">
           {loyaltyPolicies.map((policy) => {
             if (
               policy.definition.action.type === "add_item" ||

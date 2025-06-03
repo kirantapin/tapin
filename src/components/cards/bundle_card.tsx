@@ -178,24 +178,17 @@ const BundleCard = ({
                       </p>
                     </div>
                   ))}
-                {childPolicies.length > NUM_POLICY_TO_SHOW && (
-                  <div className="flex items-center gap-2 h-[30px]">
-                    <CheckIcon
-                      size={20}
-                      strokeWidth={3}
-                      color={restaurant?.metadata.primaryColor as string}
-                      className="text-gray-700 mb-[6px]"
-                    />
-                    <p className="text-[15px] text-gray-700 h-[30px]">
-                      {`${childPolicies.length - NUM_POLICY_TO_SHOW} More
-                      ${
-                        childPolicies.length - NUM_POLICY_TO_SHOW === 1
-                          ? "Benefit"
-                          : "Benefits"
-                      }`}
-                    </p>
-                  </div>
-                )}
+                <div className="flex items-center gap-2 h-[30px]">
+                  <CheckIcon
+                    size={20}
+                    strokeWidth={3}
+                    color={restaurant?.metadata.primaryColor as string}
+                    className="text-gray-700 mb-[6px]"
+                  />
+                  <p className="text-[15px] text-gray-700 h-[30px]">
+                    Access to Exclusive Benefits
+                  </p>
+                </div>
               </div>
             </div>
 

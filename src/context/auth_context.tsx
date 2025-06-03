@@ -5,6 +5,7 @@ import React, {
   useContext,
   FC,
   ReactNode,
+  useRef,
 } from "react";
 import { Transaction, User } from "../types";
 import { supabase } from "../utils/supabase_client";
@@ -48,13 +49,16 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     return () => subscription.unsubscribe();
   }, []);
 
+  const lastFetchedUserId = useRef<string | null>(null);
+
   useEffect(() => {
-    fetchUserData(userSession?.user?.id ?? null);
-    TransactionUtils.fetchTransactionData(userSession?.user?.id ?? null).then(
-      (transactions) => {
-        setTransactions(transactions);
-      }
-    );
+    const currentUserId = userSession?.user?.id ?? null;
+    if (lastFetchedUserId.current === currentUserId) return;
+
+    lastFetchedUserId.current = currentUserId;
+
+    fetchUserData(currentUserId);
+    TransactionUtils.fetchTransactionData(currentUserId).then(setTransactions);
   }, [userSession]);
 
   // Fetch user data

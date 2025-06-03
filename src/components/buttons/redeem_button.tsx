@@ -55,7 +55,6 @@ const RedeemButton = ({
             additionalOrderData: {},
           };
           payload["paymentData"] = paymentData;
-          console.log("payload", payload);
           const tapInResponse = await submitPurchase(payload);
           if (tapInResponse) {
             const { transactions, modifiedUserData } = tapInResponse;

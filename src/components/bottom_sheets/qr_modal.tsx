@@ -62,9 +62,7 @@ const QRModal: React.FC<QRModalProps> = ({
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    console.log("handleSubmit");
     e.preventDefault();
-    console.log("codeEntered", codeEntered);
     // Here you would typically validate the code and proceed accordingly
     const employeeCode = codeEntered;
 

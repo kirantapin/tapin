@@ -35,11 +35,11 @@ export function Hero({
 
       {/* Background image layer */}
       <div
-        className={`absolute inset-0 bg-cover bg-center transition-opacity duration-200 ${
+        className={`absolute inset-0 bg-cover bg-center transition-opacity duration-2000 ${
           bgLoaded ? "opacity-100" : "opacity-0"
         }`}
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1)), url(${backgroundImageUrl})`,
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.0)), url(${backgroundImageUrl})`,
         }}
       />
       <div className="absolute w-full top-0 z-10 flex justify-between items-center px-4 py-3">

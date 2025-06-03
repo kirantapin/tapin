@@ -104,13 +104,6 @@ const LockedPolicyModal: React.FC<LockedPolicyModalProps> = ({
               ? missingItemsText
               : `Apply to cart for ${flair}`}
           </p>
-          <div className="flex items-center mt-2 text-gray-500">
-            <PolicyDescriptionDisplay
-              policy={policy}
-              restaurant={restaurant}
-              showActionDescription={false}
-            />
-          </div>
         </div>
         {/*Button*/}
         <div className="mt-2 mb-2 fixed bottom-0 left-0 right-0 px-6 pb-4 bg-white border-t-0">

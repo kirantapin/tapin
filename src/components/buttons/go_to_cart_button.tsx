@@ -43,7 +43,7 @@ const GoToCartButton = ({
         <span className="font-medium text-md flex items-center gap-2">
           View Cart
           <span
-            className="bg-white text-sm font-bold rounded-full w-6 h-6 flex items-center justify-center"
+            className="bg-white text-sm font-bold rounded-full w-6 h-6 flex items-center justify-center pt-[3px]"
             style={{ color: restaurant.metadata.primaryColor as string }}
           >
             {cartCount}

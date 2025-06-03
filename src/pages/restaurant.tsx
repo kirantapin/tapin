@@ -1,4 +1,4 @@
-import { Search, X } from "lucide-react";
+import { Plus, PlusIcon, Search, X } from "lucide-react";
 
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -25,9 +25,8 @@ import BundleSlider from "@/components/sliders/bundle_slider.tsx";
 import { useBottomSheet } from "@/context/bottom_sheet_context.tsx";
 import LocationMarkerIcon from "@/components/svg/location_tag.tsx";
 import { isOpenNow } from "@/utils/time.ts";
-import LoadingPage from "@/components/skeletons/loading_page.tsx";
 import { titleCase } from "title-case";
-
+import FollowButton from "@/components/buttons/follow_button.tsx";
 export default function RestaurantPage() {
   const { userSession, transactions } = useAuth();
   const navigate = useNavigate();
@@ -99,7 +98,7 @@ export default function RestaurantPage() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
-  if (!restaurant) return <LoadingPage />;
+  if (!restaurant) return null;
 
   return (
     <div className="min-h-screen bg-gray-25">
@@ -108,13 +107,16 @@ export default function RestaurantPage() {
 
       {/* Restaurant Info */}
       <div className="mt-10 px-5">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between gap-2">
           <h1
             ref={titleRefCallback} // Use the callback ref instead
             className="text-2xl font-bold truncate"
           >
             {restaurant?.name}
           </h1>
+
+          {/* White background mask to cover inner part */}
+          <FollowButton />
         </div>
         <div className="flex items-center gap-1 mt-1 mb-4">
           <LocationMarkerIcon fillColor="#6B7280" />
@@ -173,6 +175,7 @@ export default function RestaurantPage() {
             restaurant={restaurant}
             policies={policies || []}
             state={state}
+            unlockedFirst={true}
           />
 
           {userOwnershipMap &&
@@ -229,7 +232,7 @@ export default function RestaurantPage() {
                       buttonRefs.current.set(filter, el);
                     }
                   }}
-                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full whitespace-nowrap border transition-all duration-150 font-medium ${
+                  className={`px-3 sm:px-4 py-2 sm:py-2 rounded-full whitespace-nowrap border transition-all duration-150 font-medium ${
                     activeFilter === filter
                       ? "text-sm"
                       : "text-sm text-gray-500"

@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { BundleItem, Policy, Restaurant } from "@/types";
 import { PolicyManager } from "@/utils/policy_manager";
 import { useNavigate } from "react-router-dom";
@@ -31,6 +37,7 @@ export const RestaurantProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
+  const lastFetchedRestaurantId = useRef<string | null>(null);
   const [currentRestaurantId, setCurrentRestaurantId] = useState<string | null>(
     null
   );
@@ -88,20 +95,23 @@ export const RestaurantProvider = ({
   useEffect(() => {
     const fetchData = async () => {
       if (!currentRestaurantId) return;
-
       if (restaurant?.id === currentRestaurantId) return;
+      if (lastFetchedRestaurantId.current === currentRestaurantId) return;
+
+      lastFetchedRestaurantId.current = currentRestaurantId;
+
       resetState();
-      fetchRestaurantById(currentRestaurantId).then((restaurantData) => {
-        if (!restaurantData) {
-          navigate("/not_found");
-          return;
-        }
-        setRestaurant(restaurantData);
-      });
+
+      const restaurantData = await fetchRestaurantById(currentRestaurantId);
+      if (!restaurantData) {
+        navigate("/not_found");
+        return;
+      }
+      setRestaurant(restaurantData);
+
       const policyManager = new PolicyManager(currentRestaurantId);
-      policyManager.init().then(() => {
-        setPolicyManager(policyManager);
-      });
+      await policyManager.init();
+      setPolicyManager(policyManager);
     };
 
     fetchData();

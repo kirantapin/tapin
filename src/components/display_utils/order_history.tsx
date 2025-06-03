@@ -19,7 +19,6 @@ const OrderHistory = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       if (!userSession || !transactions.length) {
-        console.log("No user session or transactions");
         return;
       }
 

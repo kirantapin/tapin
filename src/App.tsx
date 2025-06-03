@@ -1,8 +1,7 @@
-import React, { Suspense, lazy, useEffect } from "react";
+import React, { Suspense, lazy, useEffect, useState } from "react";
 import { Routes, Route, useParams } from "react-router-dom";
 import {
   BASE_PATH,
-  // DRINK_CHECKOUT_PATH,
   RESTAURANT_PATH,
   MY_SPOT_PATH,
   OFFERS_PAGE_PATH,
@@ -11,14 +10,12 @@ import {
 } from "./constants.ts";
 import { Slide, ToastContainer } from "react-toastify";
 // import { RestaurantSkeleton } from "./components/skeletons/restaurant_skeleton.tsx";
-import { CheckoutSkeleton } from "./components/skeletons/checkout_skeleton.tsx";
 import { MySpotSkeleton } from "./components/skeletons/my_spot_skeleton.tsx";
 import { OffersSkeleton } from "./components/skeletons/offers_skeleton.tsx";
 import LoadingPage from "./components/skeletons/loading_page.tsx";
 import { useRestaurant } from "./context/restaurant_context.tsx";
 // Lazy imports
 const Discovery = lazy(() => import("./pages/discovery.tsx"));
-// const CheckoutPage = lazy(() => import("./pages/checkout.tsx"));
 const NotFoundPage = lazy(() => import("./pages/not_found_page.tsx"));
 const MySpotContent = lazy(() => import("./pages/my_spot_content.tsx"));
 const PoliciesPage = lazy(() => import("./pages/policies.tsx"));
@@ -61,16 +58,6 @@ const App: React.FC = () => {
             </Suspense>
           }
         />
-        {/* <Route
-          path={DRINK_CHECKOUT_PATH}
-          element={
-            <Suspense fallback={<CheckoutSkeleton />}>
-              <RequireRestaurant>
-                <CheckoutPage />
-              </RequireRestaurant>
-            </Suspense>
-          }
-        /> */}
         <Route
           path={OFFERS_PAGE_PATH}
           element={
@@ -128,12 +115,22 @@ const RequireRestaurant: React.FC<{ children: React.ReactNode }> = ({
   const { id } = useParams();
   const { restaurant, setCurrentRestaurantId, policyManager } = useRestaurant();
 
+  const [hasWaitedMinimum, setHasWaitedMinimum] = useState(false);
+
   useEffect(() => {
     if (id) setCurrentRestaurantId(id);
   }, [id]);
 
-  // Only show loading while restaurant is null
-  if (!restaurant || !policyManager) return <LoadingPage />;
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setHasWaitedMinimum(true);
+    }, 2000); // minimum delay in ms
+    return () => clearTimeout(timeout);
+  }, []);
+
+  if (!restaurant || !policyManager || !hasWaitedMinimum) {
+    return <LoadingPage />;
+  }
 
   return <>{children}</>;
 };

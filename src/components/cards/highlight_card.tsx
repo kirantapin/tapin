@@ -36,6 +36,7 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
     description_override,
     image_url_override,
   } = highlight;
+  console.log(image_url_override);
   const primaryColor = restaurant?.metadata.primaryColor as string;
   const [title, setTitle] = useState<string | null>(null);
   const [description, setDescription] = useState<string | null>(null);
@@ -49,7 +50,7 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
     if (!policy) return;
     setTitle(PolicyUtils.getPolicyName(policy, restaurant));
     setDescription(policy?.header);
-    setDefaultImageUrl(ImageUtils.getProfileImageUrl(restaurant) || "");
+    setDefaultImageUrl("fallback");
   };
   const setBundleInfo = async () => {
     const bundle = ItemUtils.getMenuItemFromItemId(
@@ -60,6 +61,7 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
     setDescription(
       `Receive amazing value at ${restaurant.name} with the ${bundle?.name}, exclusive on Tap In`
     );
+    setDefaultImageUrl("fallback");
   };
   useEffect(() => {
     if (content_type === "item") {
@@ -89,7 +91,7 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
       setBundleInfo();
     }
     if (content_type === "media") {
-      setDefaultImageUrl(ImageUtils.getProfileImageUrl(restaurant) || "");
+      setDefaultImageUrl("fallback");
     }
   }, []);
 
@@ -156,7 +158,7 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
 
         {content_pointer && (
           <button
-            className="bg-white px-5 py-1 rounded-full text-sm self-start font-bold min-w-[100px] min-h-[30px] flex justify-center items-center"
+            className="bg-white px-5 pt-[2px] rounded-full text-sm self-start font-bold min-w-[100px] min-h-[30px] flex justify-center items-center"
             style={{ color: "black" }}
           >
             {loading ? (
@@ -175,7 +177,7 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
       </div>
 
       {defaultImageUrl && !image_url_override && (
-        <div className="flex-shrink-0 p-3 bg-gray-200 h-full w-32">
+        <div className="flex-shrink-0 bg-gray-200 h-full w-32">
           <ImageFallback
             src={defaultImageUrl || ""}
             alt="name"

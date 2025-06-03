@@ -24,7 +24,6 @@ export default function RestaurantDiscovery() {
         .from("restaurants")
         .select("name,id,metadata");
 
-      console.log(data);
       if (error) console.error("Error fetching restaurants:", error.message);
       else setRestaurants(data as Restaurant[]);
       setLoading(false);
@@ -68,16 +67,21 @@ export default function RestaurantDiscovery() {
               >
                 {/* Hero Image */}
                 <div className="h-32 relative">
+                  <div className="absolute inset-0 bg-gray-200 animate-pulse" />
                   <img
                     src={
                       ImageUtils.getHeroImageUrl(restaurant as Restaurant) || ""
                     }
                     alt={`${restaurant.name} Hero`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover relative z-0 transition-opacity duration-300"
+                    onLoad={(e) => {
+                      e.currentTarget.style.opacity = "1";
+                    }}
+                    style={{ opacity: 0 }}
                   />
 
                   {/* Profile Avatar */}
-                  <div className="absolute -bottom-4 left-4">
+                  <div className="absolute -bottom-4 left-4 z-20">
                     <img
                       src={
                         ImageUtils.getProfileImageUrl(
