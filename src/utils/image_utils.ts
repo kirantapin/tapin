@@ -25,11 +25,7 @@ export class ImageUtils {
   };
   static getHighlightImageUrl = (highlight: Highlight | null) => {
     if (!highlight) return null;
-    const imageUrl = highlight.image_url_override;
-    if (imageUrl) {
-      return `${project_url}/storage/v1/object/public/${HIGHLIGHT_IMAGE_BUCKET}/${imageUrl}`;
-    }
-    return null;
+    return `${project_url}/storage/v1/object/public/${HIGHLIGHT_IMAGE_BUCKET}/${highlight.highlight_id}`;
   };
 
   static getItemImageUrl = (

@@ -34,6 +34,9 @@ const LockedPolicyModal: React.FC<LockedPolicyModalProps> = ({
   const { userSession } = useAuth();
   const { restaurant } = useRestaurant();
   const { state, openBundleModal } = useBottomSheet();
+  if (!restaurant) {
+    return null;
+  }
   const policyIsActive = PolicyManager.getActivePolicyIds(state.dealEffect).has(
     policy.policy_id
   );
@@ -54,10 +57,6 @@ const LockedPolicyModal: React.FC<LockedPolicyModalProps> = ({
           totalMissingQuantity === 1 ? "item" : "items"
         } to get ${flair}`
       : "";
-
-  if (!restaurant) {
-    return null;
-  }
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>

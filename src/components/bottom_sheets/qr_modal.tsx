@@ -285,7 +285,7 @@ const QRModal: React.FC<QRModalProps> = ({
 
               <div className="w-full aspect-square flex items-center justify-center rounded-xl">
                 <QRCode
-                  size={256}
+                  size={212}
                   style={{
                     height: "auto",
                     maxWidth: "100%",

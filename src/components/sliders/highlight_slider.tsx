@@ -147,6 +147,7 @@ const HighlightSlider = ({
   }, [restaurant, displayOne]);
 
   const handleHighlightClick = async (highlight: Highlight) => {
+    if (!restaurant) return;
     setCardLoading(true);
     const content_pointer = highlight.content_pointer;
     if (!content_pointer) return;

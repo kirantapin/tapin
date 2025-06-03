@@ -146,10 +146,14 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
   } | null>(null);
   const [showAllBundlesModal, setShowAllBundlesModal] = useState(false);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+
   const handlePolicyClick = (
     policy: Policy,
     userOwnershipMap: Record<string, string | null>
   ) => {
+    if (!restaurant) {
+      return;
+    }
     if (policy.locked) {
       //we're deal with a potential bundle here
       const relevantBundleIds = BundleUtils.getBundleIdFromChildPolicyId(
