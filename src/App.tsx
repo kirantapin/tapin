@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect, useState } from "react";
+import React, { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { Routes, Route, useParams } from "react-router-dom";
 import {
   BASE_PATH,
@@ -116,19 +116,40 @@ const RequireRestaurant: React.FC<{ children: React.ReactNode }> = ({
   const { restaurant, setCurrentRestaurantId, policyManager } = useRestaurant();
 
   const [hasWaitedMinimum, setHasWaitedMinimum] = useState(false);
+  const lastRestaurantId = useRef<string | null>(null);
 
+  // Update the current restaurant
   useEffect(() => {
     if (id) setCurrentRestaurantId(id);
   }, [id]);
 
+  // Trigger loading only if navigating to a *new* restaurant
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      setHasWaitedMinimum(true);
-    }, 2000); // minimum delay in ms
-    return () => clearTimeout(timeout);
-  }, []);
+    const isNavigatingToNewRestaurant = id && id !== lastRestaurantId.current;
 
-  if (!restaurant || !policyManager || !hasWaitedMinimum) {
+    if (isNavigatingToNewRestaurant) {
+      setHasWaitedMinimum(false);
+      const timeout = setTimeout(() => {
+        setHasWaitedMinimum(true);
+      }, 2000);
+
+      return () => clearTimeout(timeout);
+    } else {
+      setHasWaitedMinimum(true); // skip animation if same restaurant
+    }
+  }, [id]);
+
+  // Update last known restaurant id once restaurant has loaded
+  useEffect(() => {
+    if (restaurant?.id) {
+      lastRestaurantId.current = restaurant.id;
+    }
+  }, [restaurant?.id]);
+
+  const isLoading =
+    !restaurant || !policyManager || !hasWaitedMinimum || restaurant.id !== id;
+
+  if (isLoading) {
     return <LoadingPage />;
   }
 

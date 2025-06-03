@@ -119,7 +119,7 @@ export const Sidebar = ({ restaurant, isOpen, onClose }: SidebarProps) => {
               >
                 <div className="flex-shrink-0 w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200">
                   <img
-                    src={ImageUtils.getProfileImageUrl(restaurant)}
+                    src={ImageUtils.getProfileImageUrl(restaurant) || ""}
                     alt={restaurant.name}
                     className="w-full h-full object-cover"
                   />

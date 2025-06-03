@@ -39,7 +39,7 @@ export const ImageFallback = ({
 
   return (
     <img
-      src={hasError ? fallbackSrc : src}
+      src={(hasError ? fallbackSrc : src) || undefined}
       alt={alt}
       className={`${hasError ? "rounded-full p-3" : ""} ${className} `}
       style={style}

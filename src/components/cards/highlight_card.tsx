@@ -34,9 +34,7 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
     content_pointer,
     title_override,
     description_override,
-    image_url_override,
   } = highlight;
-  console.log(image_url_override);
   const primaryColor = restaurant?.metadata.primaryColor as string;
   const [title, setTitle] = useState<string | null>(null);
   const [description, setDescription] = useState<string | null>(null);
@@ -44,6 +42,7 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
   const { policyManager } = useRestaurant();
   const [bgLoaded, setBgLoaded] = useState(false);
   const [dontShow, setDontShow] = useState(false);
+  const [hasHighlightImage, setHasHighlightImage] = useState(true);
 
   const setPolicyInfo = async () => {
     const policy = policyManager?.getPolicyFromId(content_pointer || "");
@@ -52,6 +51,7 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
     setDescription(policy?.header);
     setDefaultImageUrl("fallback");
   };
+
   const setBundleInfo = async () => {
     const bundle = ItemUtils.getMenuItemFromItemId(
       content_pointer || "",
@@ -63,6 +63,7 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
     );
     setDefaultImageUrl("fallback");
   };
+
   useEffect(() => {
     if (content_type === "item") {
       const item = ItemUtils.getMenuItemFromItemId(
@@ -96,11 +97,16 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
   }, []);
 
   useEffect(() => {
-    if (!image_url_override) return;
     const img = new Image();
     img.src = ImageUtils.getHighlightImageUrl(highlight) || "";
-    img.onload = () => setBgLoaded(true);
-  }, [image_url_override]);
+    img.onload = () => {
+      setBgLoaded(true);
+      setHasHighlightImage(true);
+    };
+    img.onerror = () => {
+      setHasHighlightImage(false);
+    };
+  }, [highlight]);
 
   if (dontShow) return null;
 
@@ -109,14 +115,14 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
       key={content_pointer}
       className="snap-center flex-shrink-0 w-full max-w-md h-32 rounded-3xl overflow-hidden flex items-stretch mr-4 enhance-contrast relative"
       style={{
-        ...(!image_url_override && {
+        ...(!hasHighlightImage && {
           backgroundColor: primaryColor,
         }),
         color: "white",
       }}
       onClick={onClick}
     >
-      {image_url_override && (
+      {hasHighlightImage && (
         <div className="absolute inset-0">
           {!bgLoaded && (
             <div className="absolute inset-0 bg-gray-200 animate-pulse" />
@@ -134,6 +140,7 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
           />
         </div>
       )}
+
       {/* Left: Text Content */}
       <div className="flex-1 flex flex-col justify-between p-4 relative z-10">
         <div>
@@ -141,16 +148,16 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
             className={`text-lg font-bold ${
               content_pointer ? "line-clamp-1" : "line-clamp-2"
             }`}
-            style={{ width: image_url_override ? "70%" : "100%" }}
+            style={{ width: hasHighlightImage ? "70%" : "100%" }}
           >
             {titleCase(title_override || title || "")}
           </h3>
 
           <p
-            className={`text-xs  overflow-hidden ${
+            className={`text-xs overflow-hidden ${
               content_pointer ? "line-clamp-2" : "line-clamp-4"
             }`}
-            style={{ width: image_url_override ? "60%" : "100%" }}
+            style={{ width: hasHighlightImage ? "60%" : "100%" }}
           >
             {sentenceCase(description_override || description || "")}
           </p>
@@ -176,7 +183,7 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
         )}
       </div>
 
-      {defaultImageUrl && !image_url_override && (
+      {defaultImageUrl && !hasHighlightImage && (
         <div className="flex-shrink-0 bg-gray-200 h-full w-32">
           <ImageFallback
             src={defaultImageUrl || ""}

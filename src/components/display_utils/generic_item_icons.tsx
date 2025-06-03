@@ -42,7 +42,7 @@ const GenericItemIcon: React.FC<GenericItemIconProps> = ({
     return <GradientIcon icon={Ban} primaryColor={primaryColor} size={size} />;
   }
 
-  if (itemInfo.image_url) {
+  if ("image_url" in itemInfo && itemInfo.image_url) {
     return (
       <ImageFallback
         src={ImageUtils.getItemImageUrl(itemId, restaurant) || ""}

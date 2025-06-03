@@ -57,7 +57,8 @@ export function useWatcher({
         const passObject = restaurant.menu[passId].info as PassItem;
 
         if (
-          newAmount < passObject.amount_remaining ||
+          (passObject.amount_remaining &&
+            newAmount < passObject.amount_remaining) ||
           newAmount < uniquePassIds[passId]
         ) {
           amountUpdates.push({ passId, amount: newAmount });

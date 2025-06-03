@@ -3,7 +3,6 @@ import { Plus, Trash2, Minus, Check, Sparkles } from "lucide-react";
 import {
   HOUSE_MIXER_LABEL,
   LIQUOR_MENU_TAG,
-  PASS_MENU_TAG,
   SHOTS_SHOOTERS_LABEL,
 } from "@/constants";
 import { titleCase } from "title-case";
@@ -40,11 +39,14 @@ export function DrinkItem({
   selected?: Item | null;
 }) {
   const { restaurant } = useRestaurant();
+  const [loading, setLoading] = useState(false);
   const { state, addToCart, removeFromCart } = useBottomSheet();
+  if (!restaurant) {
+    return null;
+  }
   const cart = state.cart as Cart;
   const primaryColor = restaurant?.metadata.primaryColor as string;
   const menuItem = ItemUtils.getMenuItemFromItemId(item.id, restaurant);
-  const [loading, setLoading] = useState(false);
 
   const isPass = ItemUtils.isPassItem(item.id, restaurant);
 
