@@ -19,7 +19,6 @@ import { Alert } from "@/components/display_utils/alert";
 import { SignInButton } from "@/components/signin/signin_button";
 import PayButton from "@/components/buttons/pay_button";
 import BundleCTA from "@/components/checkout/bundle_cta";
-import { CheckoutSkeleton } from "@/components/skeletons/checkout_skeleton";
 import {
   LOYALTY_REWARD_TAG,
   NORMAL_DEAL_TAG,
@@ -77,7 +76,7 @@ export default function CheckoutPage() {
   }, [state.cart, policyManager, state.dealEffect]);
 
   if (!restaurant || !policyManager || !state) {
-    return <CheckoutSkeleton />;
+    return null;
   }
 
   const isPreEntry = state.cart.some((item) =>
@@ -92,7 +91,7 @@ export default function CheckoutPage() {
           <div className="flex items-center">
             <div className="absolute left-4">
               <button
-                className="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center"
+                className="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center focus:outline-none"
                 onClick={closeCheckoutModal}
               >
                 <X size={20} />
