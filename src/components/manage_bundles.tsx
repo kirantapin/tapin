@@ -227,6 +227,7 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
                   return (
                     <div key={index}>
                       <PolicyCard
+                        key={index}
                         policy={policy}
                         restaurant={restaurant}
                         dealEffect={state.dealEffect}

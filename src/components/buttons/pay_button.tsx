@@ -138,9 +138,7 @@ const StripePayButton = ({
               overflow: "auto",
             },
           }}
-          onReady={(event) => {
-            console.log("ExpressCheckoutElement is ready!");
-          }}
+          onReady={(event) => {}}
           onConfirm={onConfirm}
           onClick={(event) => {
             event.resolve();

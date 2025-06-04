@@ -112,8 +112,6 @@ export class CartManager {
           userPreference: Item | null;
         }
   ): Promise<void> {
-    console.log("verifyOrder", type, content);
-
     const payload: VerifyOrderPayload = {
       cart: this.cart,
       userDealEffect: this.dealEffect,
@@ -123,8 +121,6 @@ export class CartManager {
       request: { type: type, content: content },
       jwtToken: this.token,
     };
-
-    console.log("before verify order payload", payload);
 
     try {
       const { data, error } = await supabase_local.functions.invoke(
@@ -162,7 +158,6 @@ export class CartManager {
     policy_id: string,
     userPreference: Item | null = null
   ): Promise<string | null> {
-    console.log("adding policy", policy_id);
     await this.verifyOrder(ADD_POLICY, {
       policy_id: policy_id,
       bundle_id: bundle_id,
@@ -177,7 +172,6 @@ export class CartManager {
 
   public async removePolicy(policy_id: string): Promise<string | null> {
     await this.verifyOrder(REMOVE_POLICY, policy_id);
-    console.log("inside remove policy", this.getCartState());
     const errorMessage = this.handleErrorMessage();
     if (errorMessage) {
       return errorMessage;

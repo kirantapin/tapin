@@ -9,10 +9,10 @@ import OtpInput from "react-otp-input";
 
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import CustomLogo from "../svg/custom_logo";
-import { MAX_QR_TRANSACTIONS } from "@/constants";
 import { DrinkItem } from "../menu_items";
 import { Alert } from "../display_utils/alert";
 import { ItemUtils } from "@/utils/item_utils";
+import { useQRUtils } from "@/hooks/useQRUtils";
 
 interface QRModalProps {
   isOpen: boolean;
@@ -37,30 +37,23 @@ const QRModal: React.FC<QRModalProps> = ({
   const [updatingTransactions, setUpdatingTransactions] = useState(false);
   const [showCodeInput, setShowCodeInput] = useState(false);
 
-  if (transactionsToRedeem.length > MAX_QR_TRANSACTIONS) {
-    triggerToast(
-      "Please try to redeem again with a fewer number of items.",
-      "error"
-    );
+  const {
+    validateTransactions,
+    determineErrorCorrectionLevel,
+    formatTransactions,
+    getItemsFromTransactions,
+  } = useQRUtils();
+
+  const valid = validateTransactions(
+    transactionsToRedeem,
+    triggerToast,
+    onClose,
+    restaurant
+  );
+
+  if (!valid) {
     onClose();
-    return null;
-  }
-
-  const formatTransactions = (): string => {
-    const displayList = [];
-    for (const transaction of transactionsToRedeem) {
-      displayList.push(transaction.transaction_id);
-    }
-    return JSON.stringify(displayList);
-  };
-
-  function determineErrorCorrectionLevel(value: string): "L" | "M" | "Q" | "H" {
-    const length = value.length;
-
-    if (length <= 50) return "L"; // light data
-    if (length <= 100) return "M"; // moderate
-    if (length <= 200) return "Q"; // dense
-    return "H"; // very dense, highest correction
+    return;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -114,46 +107,21 @@ const QRModal: React.FC<QRModalProps> = ({
     setVerifyingState("complete");
   };
 
-  const itemsToBeRedeemed: Item[] = [];
-
-  if (transactionsToRedeem.length <= 0 || !restaurant) {
-    return null;
-  }
-
-  // Check if all transactions are from the same restaurant and unfulfilled
-  const allSameRestaurant = transactionsToRedeem.every(
-    (transaction) =>
-      transaction.restaurant_id === transactionsToRedeem[0].restaurant_id
-  );
-  const allUnfulfilled = transactionsToRedeem.every(
-    (transaction) => transaction.fulfilled_by === null
-  );
-
-  if (!allSameRestaurant || !allUnfulfilled) {
-    onClose();
-    triggerToast("Something went wrong. Please try again.", "error");
-    return;
-  }
-
-  transactionsToRedeem.forEach((transaction) => {
-    const modifiers = (transaction.metadata.modifiers as string[]) || [];
-    itemsToBeRedeemed.push({
-      id: transaction.item,
-      modifiers: modifiers,
-    });
-  });
+  const itemsToBeRedeemed: Item[] =
+    getItemsFromTransactions(transactionsToRedeem);
 
   const modifiedOnClose = async () => {
     setUpdatingTransactions(true);
     const { data: updatedTransactions } = await supabase
       .from("transactions")
       .select("transaction_id, fulfilled_by")
+      .not("fulfilled_by", "is", null)
       .in(
         "transaction_id",
         transactionsToRedeem.map((t) => t.transaction_id)
       );
 
-    if (updatedTransactions) {
+    if (updatedTransactions && updatedTransactions.length > 0) {
       setTransactions((prevTransactions) =>
         prevTransactions.map((transaction) => {
           const updatedTransaction = updatedTransactions.find(
@@ -168,6 +136,8 @@ const QRModal: React.FC<QRModalProps> = ({
           return transaction;
         })
       );
+    } else {
+      triggerToast("No Items were redeemed", "info");
     }
     setUpdatingTransactions(false);
     onClose();
@@ -212,7 +182,7 @@ const QRModal: React.FC<QRModalProps> = ({
 
       return {
         result: true,
-        title: `Alert: Have you received ${itemsText}?`,
+        title: `Confirm you will receive ${itemsText}`,
         description: `Once you exit, you will not be able to see a redemption history. Only proceed when ready`,
       };
     }
@@ -220,10 +190,23 @@ const QRModal: React.FC<QRModalProps> = ({
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={async () => await modifiedOnClose()}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          modifiedOnClose();
+        }
+      }}
+    >
       <SheetContent
         side="bottom"
         className="h-[80vh] rounded-t-3xl [&>button]:hidden p-0 flex flex-col gap-0"
+        onPointerDownOutside={(e) => {
+          e.preventDefault();
+        }}
+        onInteractOutside={(e) => {
+          e.preventDefault();
+        }}
       >
         <SheetHeader className="flex-none px-6 pt-6 pb-4 border-b">
           <div className="flex justify-between items-center">
@@ -353,10 +336,12 @@ const QRModal: React.FC<QRModalProps> = ({
                     width: "100%",
                     padding: "30px",
                   }}
-                  value={formatTransactions()}
+                  value={formatTransactions(transactionsToRedeem)}
                   viewBox={`0 0 256 256`}
                   radius={15}
-                  level={determineErrorCorrectionLevel(formatTransactions())}
+                  level={determineErrorCorrectionLevel(
+                    formatTransactions(transactionsToRedeem)
+                  )}
                 />
               </div>
             </div>

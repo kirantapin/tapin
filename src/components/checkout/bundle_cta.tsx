@@ -29,7 +29,11 @@ export default function BundleCTA() {
     if (!restaurant || !userOwnershipMap || !state.cartResults) {
       return;
     }
+    setChecked(false);
+    setAlreadyOwnedSavings(0);
+    setChosenBundle(null);
     const creditUsed = state.cartResults.credit.creditUsed;
+
     if (
       creditUsed / (state.cartResults.subtotal + state.cartResults.discount) >
       threshold

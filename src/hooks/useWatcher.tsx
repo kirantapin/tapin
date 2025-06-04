@@ -39,7 +39,6 @@ export function useWatcher({
     if (Object.keys(uniquePassIds).length === 0) return;
 
     const interval = setInterval(async () => {
-      console.log("checking");
       const amounts = await Promise.all(
         Object.keys(uniquePassIds).map(async (passId) => {
           const newAmount = await PassUtils.fetchPassAmountRemaining(passId);
