@@ -26,7 +26,6 @@ import { SignInButton } from "../signin/signin_button";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { PolicyUtils } from "@/utils/policy_utils";
 import CustomIcon from "../svg/custom_icon";
-import { useRestaurant } from "@/context/restaurant_context";
 import { ImageFallback } from "../display_utils/image_fallback";
 import { ImageUtils } from "@/utils/image_utils";
 
@@ -37,8 +36,6 @@ interface PolicyModalProps {
   bundle_id: string | null;
   restaurant: Restaurant;
 }
-
-const MAX_ITEMS_TO_SHOW = 5;
 
 const PolicyModal: React.FC<PolicyModalProps> = ({
   isOpen,

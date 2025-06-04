@@ -158,10 +158,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
               return (
                 <div
                   key={index}
-                  className="w-[220px] h-[160px] p-4 rounded-xl border border-gray-300 flex flex-col items-start flex-shrink-0"
-                  onClick={() => {
-                    handlePolicyClick(policy, userOwnershipMap);
-                  }}
+                  className="w-[220px] h-[160px] p-4 pb-2 rounded-xl border border-gray-300 flex flex-col items-start flex-shrink-0"
                 >
                   {(() => {
                     const itemId = PolicyUtils.getPotentialPreferencesForPolicy(
@@ -184,7 +181,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
                     {titleCase(PolicyUtils.getPolicyName(policy, restaurant))}
                   </h3>
                   <p
-                    className="m-0 text-xs text-gray-600 custom-line-clamp"
+                    className="m-0 text-sm text-gray-600 custom-line-clamp font-medium"
                     style={{
                       color: PolicyUtils.isPolicyUsable(policy, restaurant)
                         ? "inherit"
@@ -202,7 +199,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
               );
             })}
             {bundle.fixed_credit > 0 && (
-              <div className="w-[220px] h-[160px] p-4 rounded-xl border border-gray-300 flex flex-col items-start flex-shrink-0">
+              <div className="w-[220px] h-[160px] p-4 pb-2 rounded-xl border border-gray-300 flex flex-col items-start flex-shrink-0">
                 <div className=" mb-4">
                   <GradientIcon
                     icon={Wallet}
@@ -213,7 +210,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
                 <h3 className="m-0 mb-1 text-base font-bold text-gray-800">
                   ${bundle.fixed_credit.toFixed(2)} Credit
                 </h3>
-                <p className="m-0 text-xs text-gray-600 custom-line-clamp">
+                <p className="m-0 text-sm text-gray-600 custom-line-clamp font-medium">
                   Get ${bundle.fixed_credit.toFixed(2)} in Credit to spend
                   towards your next purchase at {restaurant.name}.
                 </p>
@@ -221,7 +218,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
             )}
 
             {bundle.point_multiplier > 1 && (
-              <div className="w-[220px] h-[160px] p-4 rounded-xl border border-gray-300 flex flex-col items-start flex-shrink-0">
+              <div className="w-[220px] h-[160px] p-4 pb-2 rounded-xl border border-gray-300 flex flex-col items-start flex-shrink-0">
                 <div className="text-[#E6C677] mb-4">
                   <GradientIcon
                     icon={CircleX}
@@ -232,7 +229,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
                 <h3 className="m-0 mb-1 text-base font-bold text-gray-800">
                   {bundle.point_multiplier}x Points
                 </h3>
-                <p className="m-0 text-xs text-gray-600 custom-line-clamp">
+                <p className="m-0 text-sm text-gray-600 custom-line-clamp font-medium">
                   {bundle.point_multiplier}x points on all purchases for the
                   duration of this bundle.
                 </p>
@@ -300,17 +297,19 @@ const BundleModal: React.FC<BundleModalProps> = ({
           {/* Payment section */}
           <div className="mt-6">
             {!userSession ? (
-              <SignInButton
-                onClose={onClose}
-                primaryColor={restaurant?.metadata.primaryColor as string}
-              />
+              <div className="fixed bottom-0 left-0 right-0 p-6 bg-white">
+                <SignInButton
+                  onClose={onClose}
+                  primaryColor={restaurant?.metadata.primaryColor as string}
+                />
+              </div>
             ) : isOwned ? (
               <div className="flex justify-center w-full">
                 <div className="relative">
                   <div className="absolute -left-8 top-1/2 -translate-y-1/2 text-[#40C4AA]">
                     <Check size={24} />
                   </div>
-                  <p className="text-lg text-gray-600 font-medium">
+                  <p className="text-xl text-black font-semibold">
                     You own this bundle.
                   </p>
                 </div>

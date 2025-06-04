@@ -1,4 +1,4 @@
-import { BundleItem, Policy } from "@/types";
+import { BundleItem, CartResultsPayload, Policy } from "@/types";
 
 import { Bundle, Restaurant } from "@/types";
 
@@ -6,6 +6,7 @@ import { BUNDLE_MENU_TAG, MAX_BUNDLE_DURATION } from "@/constants";
 
 import { supabase } from "./supabase_client";
 import { PolicyUtils } from "./policy_utils";
+import { ItemUtils } from "./item_utils";
 
 export class BundleUtils {
   static fetchBundles = async (
@@ -68,7 +69,6 @@ export class BundleUtils {
     user_id: string | null,
     bundle: Bundle
   ): Promise<string | null> => {
-    console.log("hello");
     if (!user_id) return null;
     const duration = bundle.duration;
     const { data, error } = await supabase
@@ -194,5 +194,32 @@ export class BundleUtils {
       return true;
     }
     return false;
+  };
+
+  static suggestBundle = (
+    restaurant: Restaurant,
+    userOwnershipMap: Record<string, string | null>,
+    cartResults: CartResultsPayload
+  ): Bundle | null => {
+    if (!cartResults) return null;
+    let bestBundle = null;
+    let smallestDifference = Infinity;
+    const totalPrice = cartResults.totalPrice;
+
+    for (const bundleId of Object.keys(userOwnershipMap)) {
+      if (!userOwnershipMap[bundleId]) {
+        const bundle = ItemUtils.getMenuItemFromItemId(
+          bundleId,
+          restaurant
+        ) as BundleItem;
+        const credit = bundle.object.fixed_credit;
+        const difference = Math.abs(credit - totalPrice);
+        if (difference < smallestDifference) {
+          smallestDifference = difference;
+          bestBundle = bundle.object;
+        }
+      }
+    }
+    return bestBundle;
   };
 }

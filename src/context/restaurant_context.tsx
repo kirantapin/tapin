@@ -9,7 +9,7 @@ import { BundleItem, Policy, Restaurant } from "@/types";
 import { PolicyManager } from "@/utils/policy_manager";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./auth_context";
-import { BUNDLE_MENU_TAG } from "@/constants";
+import { BUNDLE_MENU_TAG, NOT_FOUND_PATH } from "@/constants";
 import { fetchRestaurantById } from "@/utils/queries/restaurant";
 import { BundleUtils } from "@/utils/bundle_utils";
 type RestaurantContextType = {
@@ -104,7 +104,7 @@ export const RestaurantProvider = ({
 
       const restaurantData = await fetchRestaurantById(currentRestaurantId);
       if (!restaurantData) {
-        navigate("/not_found");
+        navigate(NOT_FOUND_PATH);
         return;
       }
       setRestaurant(restaurantData);

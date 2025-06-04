@@ -115,7 +115,7 @@ export default function Card({
       </div>
 
       {/* Bottom pinned price + buttons */}
-      <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end z-20">
+      <div className="absolute bottom-4 left-5 right-4 flex justify-between items-end z-20">
         <div>
           {inlineRecommendation &&
             inlineRecommendation?.cartId === cartItem?.id && (

@@ -1,5 +1,5 @@
 // ConfirmDialog.tsx
-import * as React from "react";
+import React, { useState } from "react";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -24,6 +24,8 @@ export function Alert({
   confirmClassName,
   cancelClassName,
   contentClassName,
+  condition,
+  onConditionFailed,
 }: {
   trigger: React.ReactNode;
   title: string;
@@ -34,11 +36,38 @@ export function Alert({
   confirmClassName?: string;
   cancelClassName?: string;
   contentClassName?: string;
+  condition?: () => Promise<{
+    result: boolean;
+    title?: string;
+    description?: string;
+  }>;
+  onConditionFailed?: () => Promise<void>;
 }) {
   const { restaurant } = useRestaurant();
+  const [open, setOpen] = useState(false);
+  const [modifiedDescription, setModifiedDescription] = useState(description);
+  const [modifiedTitle, setModifiedTitle] = useState(title);
+  const handleTrigger = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (condition) {
+      const shouldShow = await condition();
+      if (shouldShow.result) {
+        setOpen(true);
+        setModifiedDescription(shouldShow.description || description);
+        setModifiedTitle(shouldShow.title || title);
+      } else {
+        if (onConditionFailed) {
+          await onConditionFailed();
+        }
+      }
+    } else {
+      setOpen(true);
+    }
+  };
+
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <div onClick={handleTrigger}>{trigger}</div>
 
       <AlertDialogContent
         className={cn(
@@ -47,25 +76,17 @@ export function Alert({
         )}
       >
         <AlertDialogHeader>
-          <AlertDialogTitle className="font-gilroy">{title}</AlertDialogTitle>
-          {description && (
+          <AlertDialogTitle className="font-gilroy">
+            {modifiedTitle}
+          </AlertDialogTitle>
+          {modifiedDescription && (
             <AlertDialogDescription className="font-gilroy">
-              {description}
+              {modifiedDescription}
             </AlertDialogDescription>
           )}
         </AlertDialogHeader>
 
         <AlertDialogFooter className="flex-col gap-2">
-          <AlertDialogCancel
-            className={cn(
-              "w-full rounded-full px-3 py-2 text-sm border border-gray-300 font-gilroy",
-              cancelClassName,
-              "focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:outline-none"
-            )}
-          >
-            {cancelLabel}
-          </AlertDialogCancel>
-
           <AlertDialogAction
             onClick={onConfirm}
             className={cn(
@@ -78,6 +99,15 @@ export function Alert({
           >
             {confirmLabel}
           </AlertDialogAction>
+          <AlertDialogCancel
+            className={cn(
+              "w-full rounded-full px-3 py-2 text-sm border border-gray-300 font-gilroy",
+              cancelClassName,
+              "focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:outline-none"
+            )}
+          >
+            {cancelLabel}
+          </AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

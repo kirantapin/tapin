@@ -127,7 +127,6 @@ export function useGlobalCartManager(
   const removeFromCart = async (itemId: number): Promise<void> => {
     if (!cartManagerRef.current) return;
     const result = await cartManagerRef.current.removeFromCart(itemId);
-    console.log("after removing ", cartManagerRef.current.getCartState());
 
     if (result) {
       triggerToast(result, "error");
@@ -142,7 +141,6 @@ export function useGlobalCartManager(
     userPreference: Item | null
   ): Promise<void> => {
     if (!cartManagerRef.current) return;
-    console.log("adding policy", policy_id);
     const result = await cartManagerRef.current.addPolicy(
       bundle_id,
       policy_id,

@@ -16,7 +16,6 @@ import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { PolicyUtils } from "@/utils/policy_utils";
 import { useRestaurant } from "@/context/restaurant_context";
 import CustomIcon from "../svg/custom_icon";
-import { PolicyDescriptionDisplay } from "../display_utils/policy_description_display";
 
 interface LockedPolicyModalProps {
   isOpen: boolean;

@@ -106,7 +106,7 @@ const BundleSlider = () => {
 
   if (userOwnershipMap && bundlesToDisplay.length > 0) {
     return (
-      <div className="-mx-4">
+      <div className="-mx-5">
         <div className="bg-green-100 mt-4 mx-4 mb-1 px-4 py-3 rounded-xl border border-1 border-green-800">
           <div className="flex items-center gap-2">
             <AlertCircle className="text-green-800 w-5 h-5" />
@@ -117,14 +117,15 @@ const BundleSlider = () => {
         </div>
         <div
           ref={scrollContainerRef}
-          className="overflow-x-auto snap-x snap-mandatory no-scrollbar"
+          className="overflow-x-auto snap-x snap-mandatory no-scrollbar mt-4 mb-5"
           onScroll={handleScroll}
           onWheel={handleUserInteraction}
           onTouchStart={handleUserInteraction}
         >
-          <div className="flex justify-center gap-0 w-max px-[calc(7.5vw)]">
+          <div className="flex gap-4 px-4 -mx-5">
+            <div className="w-[50vw] flex-shrink-0" />
             {bundlesToDisplay.map((bundleId) => (
-              <div key={bundleId} className="snap-center w-[85vw] shrink-0">
+              <div key={bundleId} className="snap-center flex-shrink-0">
                 <BundleCard
                   restaurant={restaurant as Restaurant}
                   bundleId={bundleId}
@@ -133,6 +134,7 @@ const BundleSlider = () => {
                 />
               </div>
             ))}
+            <div className="w-[50vw] flex-shrink-0" />
           </div>
         </div>
 

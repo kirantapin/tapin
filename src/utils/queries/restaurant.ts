@@ -16,7 +16,6 @@ const HistoryCacheTTL = 30000;
 export const fetchRestaurantById = async (
   restaurantId: string | undefined
 ): Promise<Restaurant | null> => {
-  console.log("fetching restaurant", restaurantId);
   if (!restaurantId) {
     return null;
   }
@@ -55,14 +54,14 @@ export const fetchRestaurantById = async (
       .select("*")
       .eq("id", restaurantId)
       .eq("active", true)
-      .single();
+      .maybeSingle();
 
     data = response.data;
     error = response.error;
   }
 
-  if (error) {
-    console.error("Error fetching restaurant:", error.message);
+  if (error || !data) {
+    console.error("Error fetching restaurant:", error?.message);
     return null;
   }
 
@@ -176,7 +175,7 @@ export function indexMenu(menu: Record<string, any>): {
   return { menu: index, labelMap };
 }
 
-export function logVisit(restaurant: any) {
+export function logVisit(restaurant: Restaurant) {
   // Get existing history from localStorage or initialize empty array
   const historyStr = localStorage.getItem(HISTORY_KEY);
   const history = historyStr ? JSON.parse(historyStr) : [];

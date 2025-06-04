@@ -3,16 +3,13 @@ import {
   DealEffectPayload,
   Item,
   NormalItem,
-  PassItem,
   Policy,
   Restaurant,
 } from "@/types";
 import { modifiedItemFlair } from "@/utils/pricer";
-import { project_url } from "@/utils/supabase_client";
 import { ChevronRight, Minus, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { ItemUtils } from "@/utils/item_utils";
-import { adjustColor } from "@/utils/color";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { useRestaurant } from "@/context/restaurant_context";
 import { ImageFallback } from "../display_utils/image_fallback";
@@ -81,7 +78,7 @@ export function CheckoutItemCard({
               <span
                 className="bg-[#cda852] text-xs text-white px-2 py-0.5 rounded font-semibold"
                 style={{
-                  background: restaurant?.metadata.primaryColor,
+                  background: restaurant?.metadata.primaryColor as string,
                 }}
               >
                 {discountDescription}

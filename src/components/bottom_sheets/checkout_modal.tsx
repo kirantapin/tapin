@@ -1,7 +1,6 @@
 import React from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import CheckoutPage from "@/pages/checkout";
-import { X } from "lucide-react";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 
 interface CheckoutModalProps {

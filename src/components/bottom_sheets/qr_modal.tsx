@@ -11,6 +11,8 @@ import { useBottomSheet } from "@/context/bottom_sheet_context";
 import CustomLogo from "../svg/custom_logo";
 import { MAX_QR_TRANSACTIONS } from "@/constants";
 import { DrinkItem } from "../menu_items";
+import { Alert } from "../display_utils/alert";
+import { ItemUtils } from "@/utils/item_utils";
 
 interface QRModalProps {
   isOpen: boolean;
@@ -171,6 +173,52 @@ const QRModal: React.FC<QRModalProps> = ({
     onClose();
   };
 
+  const checkUpdatedTransactions = async (): Promise<{
+    result: boolean;
+    title?: string;
+    description?: string;
+  }> => {
+    const { data: updatedTransactions } = await supabase
+      .from("transactions")
+      .select("transaction_id, item, metadata")
+      .not("fulfilled_by", "is", null)
+      .in(
+        "transaction_id",
+        transactionsToRedeem.map((t) => t.transaction_id)
+      );
+    if (updatedTransactions && updatedTransactions.length > 0) {
+      // Count occurrences of each item
+      const itemCounts = updatedTransactions.reduce((acc, t) => {
+        const name = ItemUtils.getItemName(
+          { id: t.item, modifiers: t.metadata.modifiers || [] },
+          restaurant
+        );
+        acc[name] = (acc[name] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      // Format item names with quantities
+      const formattedItems = Object.entries(itemCounts).map(([name, count]) => {
+        return count > 1 ? `${count}x ${name}` : name;
+      });
+
+      // Join items with proper grammar
+      const itemsText =
+        formattedItems.length > 1
+          ? `${formattedItems
+              .slice(0, -1)
+              .join(", ")} and ${formattedItems.slice(-1)}`
+          : formattedItems[0];
+
+      return {
+        result: true,
+        title: `Alert: Have you received ${itemsText}?`,
+        description: `Once you exit, you will not be able to see a redemption history. Only proceed when ready`,
+      };
+    }
+    return { result: false, title: "", description: "" };
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={async () => await modifiedOnClose()}>
       <SheetContent
@@ -183,16 +231,28 @@ const QRModal: React.FC<QRModalProps> = ({
               primaryColor={restaurant?.metadata.primaryColor as string}
               size={124}
             />
-            <button
-              onClick={async () => await modifiedOnClose()}
-              className="text-black text-sm font-normal p-2 rounded-full bg-gray-200 flex items-center gap-1 focus:outline-none"
-            >
-              {updatingTransactions ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-2 border-black border-t-transparent" />
-              ) : (
-                <X size={20} />
-              )}
-            </button>
+            <Alert
+              trigger={
+                <button className="text-black text-sm font-normal p-2 rounded-full bg-gray-200 flex items-center gap-1 focus:outline-none">
+                  {updatingTransactions ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-black border-t-transparent" />
+                  ) : (
+                    <X size={20} />
+                  )}
+                </button>
+              }
+              title={`Confirm Redeemed Items`}
+              description={`Ensure that you have redeemed the items and confirm that you have received them. By continuing, you will not be able to undo this action.`}
+              onConfirm={async () => {
+                await modifiedOnClose();
+              }}
+              confirmLabel="Yes, I have received my order"
+              cancelLabel="No"
+              condition={checkUpdatedTransactions}
+              onConditionFailed={async () => {
+                await modifiedOnClose();
+              }}
+            />
           </div>
         </SheetHeader>
 
@@ -236,7 +296,8 @@ const QRModal: React.FC<QRModalProps> = ({
                             width: "60px",
                             height: "60px",
                           }}
-                          className="text-4xl text-center border border-gray-300 rounded-lg focus:border-black focus:outline-none transition-colors"
+                          className="text-4xl text-center border border-gray-300 rounded-lg focus:border-black focus:outline-none transition-colors select-none"
+                          onSelect={(e) => e.preventDefault()}
                         />
                       )}
                       containerStyle="flex gap-4 justify-center"

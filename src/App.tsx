@@ -7,6 +7,7 @@ import {
   OFFERS_PAGE_PATH,
   INFO_PAGE_PATH,
   DEVICE_NOT_SUPPORTED_PATH,
+  NOT_FOUND_PATH,
 } from "./constants.ts";
 import { Slide, ToastContainer } from "react-toastify";
 // import { RestaurantSkeleton } from "./components/skeletons/restaurant_skeleton.tsx";
@@ -85,6 +86,14 @@ const App: React.FC = () => {
               <RequireRestaurant>
                 <MySpotContent />
               </RequireRestaurant>
+            </Suspense>
+          }
+        />
+        <Route
+          path={NOT_FOUND_PATH}
+          element={
+            <Suspense fallback={null}>
+              <NotFoundPage />
             </Suspense>
           }
         />

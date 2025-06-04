@@ -12,6 +12,9 @@ interface Follow {
   follows: boolean;
 }
 
+const legalityCheck =
+  "By submitting this form and signing up for texts, you consent to receive marketing text messages (e.g. promos, cart reminders) from RESTAURANT_NAME at the number provided at sign up, including messages sent by autodialer. Consent is not a condition of purchase. Msg & data rates may apply. Msg frequency varies. Unsubscribe at any time by replying STOP or clicking the unsubscribe link (where available). Privacy Policy & Terms.";
+
 const followRestaurant = async (user_id: string, restaurant_id: string) => {
   // First check if a row exists
   const { data: existingData } = await supabase
@@ -175,7 +178,7 @@ const FollowButton: React.FC = () => {
           </div>
         }
         title={`Follow ${restaurant.name}?`}
-        description={`You will receive notifications for new deals, events, and updates at ${restaurant.name}.`}
+        description={legalityCheck.replace("RESTAURANT_NAME", restaurant.name)}
         onConfirm={async () => {
           await followRestaurant(userSession.user.id, restaurant.id);
           await doesUserFollowRestaurant(userSession.user.id, restaurant.id);

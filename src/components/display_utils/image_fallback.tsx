@@ -20,17 +20,23 @@ export const ImageFallback = ({
   postFunction,
 }: ImageFallbackProps) => {
   const [hasError, setHasError] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   const fallbackSrc = ImageUtils.getProfileImageUrl(restaurant);
 
   useEffect(() => {
     setHasError(false); // reset on src change
+    setIsLoaded(false); // reset loaded state
     if (!src) return;
 
     const img = new Image();
     img.src = src;
-    img.onload = () => setHasError(false);
+    img.onload = () => {
+      setHasError(false);
+      setIsLoaded(true);
+    };
     img.onerror = () => {
       setHasError(true);
+      setIsLoaded(true);
       postFunction?.();
     };
   }, [src]);
@@ -41,10 +47,15 @@ export const ImageFallback = ({
     <img
       src={(hasError ? fallbackSrc : src) || undefined}
       alt={alt}
-      className={`${hasError ? "rounded-full p-3" : ""} ${className} `}
+      className={`${
+        hasError ? "rounded-full p-3" : ""
+      } ${className} transition-opacity duration-300 ${
+        isLoaded ? "opacity-100" : "opacity-0"
+      }`}
       style={style}
       onError={() => {
         setHasError(true);
+        setIsLoaded(true);
         postFunction?.();
       }}
     />

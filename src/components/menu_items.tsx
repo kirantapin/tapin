@@ -391,7 +391,7 @@ export const DrinkList = ({
 }) => {
   const labelRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const isInitialMount = useRef(true);
-  const [showLiquorForm, setShowLiquorForm] = useState(false);
+  const [showLiquorForm, setShowLiquorForm] = useState<string[]>([]);
 
   const scrollToLabel = (menuLabel: string) => {
     const el = labelRefs.current.get(menuLabel);
@@ -493,7 +493,7 @@ export const DrinkList = ({
                         />
                       ))}
                       <div
-                        className="px-3 border rounded-2xl"
+                        className="px-3 rounded-2xl"
                         style={{
                           borderColor: restaurant.metadata
                             .primaryColor as string,
@@ -501,16 +501,22 @@ export const DrinkList = ({
                       >
                         <div
                           onClick={() => {
-                            setShowLiquorForm(!showLiquorForm);
+                            setShowLiquorForm(
+                              showLiquorForm.includes(menuLabel)
+                                ? showLiquorForm.filter(
+                                    (label) => label !== menuLabel
+                                  )
+                                : [...showLiquorForm, menuLabel]
+                            );
                           }}
                           className="w-full text-center text-md text-gray-500 rounded-2xl py-3 px-4 mx-auto block flex items-center justify-center font-semibold"
                           style={{
-                            color: restaurant.metadata.primaryColor as string,
-                            borderColor: restaurant.metadata
+                            color: "white",
+                            backgroundColor: restaurant.metadata
                               .primaryColor as string,
                           }}
                         >
-                          <Sparkles className="w-6 h-6 mr-2" />
+                          <Sparkles className="w-6 h-6 mr-2 text-white" />
                           Make A{" "}
                           {menuLabel === HOUSE_MIXER_LABEL
                             ? "House Mixer"
@@ -518,7 +524,7 @@ export const DrinkList = ({
                         </div>
                         <div
                           className={`transition-all duration-300 ease-in-out ${
-                            showLiquorForm
+                            showLiquorForm.includes(menuLabel)
                               ? "max-h-[1000px] opacity-100"
                               : "max-h-0 opacity-0 overflow-hidden"
                           }`}

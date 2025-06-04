@@ -3,12 +3,12 @@ import { DealEffectPayload } from "./types";
 
 //paths
 export const BASE_PATH = "/";
-// export const DRINK_CHECKOUT_PATH = "/restaurant/:id/checkout";
-export const RESTAURANT_PATH = "/restaurant/:id";
-export const MY_SPOT_PATH = "/restaurant/:id/my_spot";
-export const OFFERS_PAGE_PATH = "/restaurant/:id/offers";
-export const INFO_PAGE_PATH = "/restaurant/:id/info";
-export const DEVICE_NOT_SUPPORTED_PATH = "/device-not-supported";
+export const RESTAURANT_PATH = "/:id";
+export const MY_SPOT_PATH = "/:id/my_spot";
+export const OFFERS_PAGE_PATH = "/:id/offers";
+export const INFO_PAGE_PATH = "/:id/info";
+export const DEVICE_NOT_SUPPORTED_PATH = "/error/device-not-supported";
+export const NOT_FOUND_PATH = "/error/not_found";
 
 //objects
 export const emptyDealEffect: DealEffectPayload = {

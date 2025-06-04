@@ -7,11 +7,9 @@ import {
   Restaurant,
 } from "@/types";
 import { ItemUtils } from "@/utils/item_utils";
-import { project_url } from "@/utils/supabase_client";
 import { titleCase } from "title-case";
 import { sentenceCase } from "@/utils/parse";
 import { useRestaurant } from "@/context/restaurant_context";
-import { HIGHLIGHT_IMAGE_BUCKET } from "@/constants";
 import { PolicyUtils } from "@/utils/policy_utils";
 import { ImageUtils } from "@/utils/image_utils";
 import { ImageFallback } from "../display_utils/image_fallback";
@@ -117,8 +115,10 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
       style={{
         ...(!hasHighlightImage && {
           backgroundColor: primaryColor,
+          transition: "background-color 200ms ease-in-out",
         }),
         color: "white",
+        transition: "color 200ms ease-in-out",
       }}
       onClick={onClick}
     >
@@ -129,7 +129,7 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
           )}
 
           <div
-            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-300 ${
+            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-200 ${
               bgLoaded ? "opacity-100" : "opacity-0"
             }`}
             style={{

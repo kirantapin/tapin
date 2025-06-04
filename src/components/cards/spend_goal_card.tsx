@@ -1,9 +1,5 @@
 import { FC, useEffect, useState } from "react";
-import {
-  LOYALTY_REWARD_TAG,
-  OFFERS_PAGE_PATH,
-  POINTS_PER_DOLLAR,
-} from "@/constants";
+import { LOYALTY_REWARD_TAG, POINTS_PER_DOLLAR } from "@/constants";
 import { useRestaurant } from "@/context/restaurant_context";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { useAuth } from "@/context/auth_context";
@@ -123,8 +119,8 @@ const SpendGoalCard: FC<{
             style={{
               width: `${inbetweenProgress}%`,
               background: `linear-gradient(45deg, 
-              ${adjustColor(restaurant.metadata.primaryColor as string, 40)},
-              ${adjustColor(restaurant.metadata.primaryColor as string, -30)}
+              ${adjustColor(restaurant.metadata.primaryColor as string, 30)},
+              ${adjustColor(restaurant.metadata.primaryColor as string, -10)}
             )`,
             }}
           />

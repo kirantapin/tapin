@@ -35,7 +35,7 @@ export function Hero({
 
       {/* Background image layer */}
       <div
-        className={`absolute inset-0 bg-cover bg-center transition-opacity duration-2000 ${
+        className={`absolute inset-0 bg-cover bg-center transition-opacity duration-2000 rounded-b-2xl ${
           bgLoaded ? "opacity-100" : "opacity-0"
         }`}
         style={{
@@ -83,7 +83,7 @@ export function Hero({
       </div>
       {/* Profile Image */}
       {restaurant && (
-        <div className="absolute -bottom-5" style={{ left: "18px" }}>
+        <div className="absolute -bottom-6" style={{ left: "18px" }}>
           {/* Moved further down */}
           <div className="w-24 h-24 rounded-full border-2 border-white  overflow-hidden shadow-2xl">
             <img

@@ -54,7 +54,6 @@ const BundleCard = ({
 
   return (
     <div
-      className="mt-1"
       onClick={() => {
         const onMySpot = location.pathname.includes(
           MY_SPOT_PATH.split("/").slice(-1)[0]
@@ -68,8 +67,9 @@ const BundleCard = ({
         }
       }}
     >
-      <div className="flex items-start p-3">
-        <div className="w-full max-w-[340px] rounded-3xl overflow-hidden bg-white shadow-md border border-gray-400">
+      <div className="flex items-start p-1">
+        <div className="w-full w-[315px] rounded-3xl overflow-hidden bg-white shadow-md border border-gray-400">
+          {/* Image is a 2.25:1 aspect ratio width to height */}
           <div className="relative w-full h-[140px]">
             <div
               className={`h-full ${
@@ -123,11 +123,7 @@ const BundleCard = ({
                         color: restaurant?.metadata.primaryColor as string,
                       }}
                     >
-                      $
-                      {bundle.fixed_credit >= 100
-                        ? bundle.fixed_credit.toFixed(0)
-                        : bundle.fixed_credit.toFixed(2)}{" "}
-                      Credit
+                      ${bundle.fixed_credit.toFixed(0)} Credit
                     </span>
                   </div>
                 </div>

@@ -143,21 +143,12 @@ export default function PoliciesPage() {
           )}
         </div>
       )}
+      {activeTag === LOYALTY_REWARD_TAG && restaurant && (
+        <div className="px-4">
+          <Rewards viewAll={true} />
+        </div>
+      )}
 
-      {activeTag === LOYALTY_REWARD_TAG &&
-        restaurant &&
-        (userSession ? (
-          <div className="px-4">
-            <Rewards viewAll={true} />
-          </div>
-        ) : (
-          <div className="px-4">
-            <SignInButton
-              onClose={() => {}}
-              primaryColor={restaurant?.metadata.primaryColor as string}
-            />
-          </div>
-        ))}
       <GoToCartButton
         restaurant={restaurant}
         cartCount={

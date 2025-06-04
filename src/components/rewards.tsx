@@ -146,7 +146,7 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
                     return (
                       <div
                         key={idx}
-                        className={`absolute top-1/2 -translate-y-1/2 w-1 h-1 rounded-full z-10 ${
+                        className={`absolute top-1/2 -translate-y-1/2 w-1 h-1 rounded-full z-7 ${
                           userPoints > interval ? "bg-white" : "bg-gray-400"
                         }`}
                         style={{
@@ -172,7 +172,7 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
                     }
                     return (
                       <Gift
-                        className="absolute top-1/2 w-8 h-8 z-20 bg-white shadow-[-4px_0px_6px_rgba(0,0,0,0.1)] rounded-full p-1.5 -translate-y-1/2"
+                        className="absolute top-1/2 w-8 h-8 z-8 bg-white shadow-[-4px_0px_6px_rgba(0,0,0,0.1)] rounded-full p-1.5 -translate-y-1/2"
                         style={{
                           left: `${offset}%`,
                           transform: "translate(-50%, -50%)",

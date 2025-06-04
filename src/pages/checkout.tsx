@@ -109,7 +109,7 @@ export default function CheckoutPage() {
         ref={scrollContainerRef}
         className="flex-1 overflow-y-auto overflow-x-hidden"
       >
-        <div className="px-4 pb-16">
+        <div className="px-4 pb-8">
           <AccessCardSlider
             restaurant={restaurant}
             cart={state.cart}
@@ -225,11 +225,12 @@ export default function CheckoutPage() {
           )}
 
           <SpendGoalCard
-            onClick={() =>
+            onClick={() => {
+              closeCheckoutModal();
               navigate(OFFERS_PAGE_PATH.replace(":id", restaurant.id), {
                 state: { tag: LOYALTY_REWARD_TAG },
-              })
-            }
+              });
+            }}
           />
 
           <h2 className="text-2xl font-bold mt-6">Payment</h2>

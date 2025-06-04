@@ -98,16 +98,16 @@ export function Verification({
 
   return (
     <div className="min-h-screen bg-white text-black">
-      <div className="p-6">
+      <div className="p-6 pb-3">
         <h1 className="text-4xl font-bold mb-4">Verify it's you</h1>
         <p className="text-xl text-gray-600 mb-2">
           Please enter 6 digit verification code that have been sent to your
           mobile phone
         </p>
-        <p className="text-xl text-gray-600 mb-8">{phoneNumber}</p>
+        <p className="text-xl text-gray-600 mb-4">{phoneNumber}</p>
       </div>
 
-      <div className="flex gap-3 mb-8 justify-center px-6">
+      <div className="flex gap-2 mb-8 justify-center px-6">
         {code.map((digit, index) => (
           <div key={index} className="relative">
             <input
@@ -120,8 +120,8 @@ export function Verification({
               onKeyDown={(e) => handleKeyDown(index, e)}
               onPaste={handlePaste}
               className={`w-14 h-14 rounded-xl border text-center text-2xl bg-transparent
-                ${digit ? "border-[#CAA650] bg-gray-800" : "border-gray-700"}
-                focus:outline-none focus:border-[#CAA650] focus:ring-1 focus:ring-[#CAA650]`}
+                ${digit ? "border-black bg-gray-800" : "border-gray-600"}
+                focus:outline-none focus:border-black focus:ring-1 focus:ring-black`}
               aria-label={`Digit ${index + 1} of verification code`}
             />
           </div>

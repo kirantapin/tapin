@@ -32,7 +32,7 @@ export default function NotFound() {
     h-11 px-8
   "
       >
-        <Home className="mr-2 h-4 w-4" />
+        <Home className="mr-2 h-5 w-5" />
         Back to Home
       </button>
     </div>

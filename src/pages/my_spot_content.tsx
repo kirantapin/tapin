@@ -176,7 +176,7 @@ const MySpotContent: React.FC = () => {
         ))}
       </div>
 
-      <div className="flex items-center gap-2 bg-amber-50 rounded-lg p-3 mx-4 border border-gray-200">
+      <div className="flex items-center gap-2 bg-amber-50 rounded-lg p-3 mb-1 mx-4 border border-gray-200">
         <Info className="w-5 h-5 text-amber-600" />
         <p className="text-black text-sm font-semibold">
           Unredeemed transactions expire after 90 days.
