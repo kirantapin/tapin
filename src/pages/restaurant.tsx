@@ -48,15 +48,27 @@ export default function RestaurantPage() {
   );
 
   const handleLocation = () => {
-    const qrFlag = location.state?.qr as boolean | undefined;
-    let message = location.state?.message as
+    let state = location.state;
+
+    // If page was reloaded, check sessionStorage
+    if (!state) {
+      const raw = sessionStorage.getItem("postReloadState");
+      if (raw) {
+        state = JSON.parse(raw);
+        sessionStorage.removeItem("postReloadState");
+      }
+    }
+
+    const qrFlag = state?.qr as boolean | undefined;
+    let message = state?.message as
       | {
           type: "success" | "error" | "info";
           message: string;
         }
       | undefined;
+
     if (qrFlag) {
-      const qrTransactions = location.state?.transactions as Transaction[];
+      const qrTransactions = state?.transactions as Transaction[];
       if (qrTransactions.length > MAX_QR_TRANSACTIONS) {
         message = {
           type: "info",
@@ -65,9 +77,12 @@ export default function RestaurantPage() {
       }
       openQrModal(qrTransactions.slice(0, MAX_QR_TRANSACTIONS));
     }
+
     if (message) {
       triggerToast(message.message, message.type, 5000);
     }
+
+    // Clean up location.state to avoid re-triggering on internal nav
     navigate(location.pathname, { replace: true, state: null });
   };
 

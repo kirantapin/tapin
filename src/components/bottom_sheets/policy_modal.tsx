@@ -147,7 +147,9 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                 >
                   <RefreshCw size={16} />
                   <span className="font-semibold text-xs">
-                    {policy.days_since_last_use} Day Between Uses
+                    {policy.days_since_last_use}{" "}
+                    {policy.days_since_last_use === 1 ? "Day" : "Days"} Between
+                    Uses
                   </span>
                 </div>
               )}

@@ -34,6 +34,7 @@ const RedeemButton = ({
       await postPurchase(transactions);
     }
   };
+
   return (
     <button
       className="w-full py-3 px-4 rounded-full font-medium text-white"

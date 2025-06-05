@@ -1,10 +1,10 @@
 import { useEffect, useState, useRef } from "react";
-import { X, Tag, ChevronDown } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { X, Tag } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/auth_context";
 import { useRestaurant } from "@/context/restaurant_context";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
-import { CartItem, Policy, Restaurant, Transaction } from "@/types";
+import { Policy, Restaurant, Transaction } from "@/types";
 import { titleCase } from "title-case";
 import { ItemUtils } from "@/utils/item_utils";
 import { PolicyUtils } from "@/utils/policy_utils";
@@ -34,6 +34,7 @@ export default function CheckoutPage() {
   const { userSession } = useAuth();
   const { restaurant, policyManager, fetchUserOwnership } = useRestaurant();
   const navigate = useNavigate();
+  const location = useLocation();
   const {
     state,
     addPolicy,
@@ -269,18 +270,32 @@ export default function CheckoutPage() {
                     postPurchase={async (transactions: Transaction[]) => {
                       await clearCart();
                       await fetchUserOwnership(restaurant);
-                      navigate(RESTAURANT_PATH.replace(":id", restaurant.id), {
-                        state: {
-                          transactions,
-                          qr: true,
-                          message: {
-                            type: "success",
-                            message:
-                              "Purchase successful! You can redeem your items anytime.",
-                          },
+                      closeCheckoutModal();
+                      const targetPath = RESTAURANT_PATH.replace(
+                        ":id",
+                        restaurant.id
+                      );
+
+                      const postReloadState = {
+                        qr: true,
+                        transactions,
+                        message: {
+                          type: "success",
+                          message:
+                            "Purchase successful! You can redeem your items anytime in My Spot",
                         },
-                      });
-                      window.location.reload();
+                      };
+
+                      sessionStorage.setItem(
+                        "postReloadState",
+                        JSON.stringify(postReloadState)
+                      );
+
+                      if (location.pathname === targetPath) {
+                        window.location.reload();
+                      } else {
+                        navigate(targetPath);
+                      }
                     }}
                   />
                 ) : (

@@ -69,7 +69,7 @@ const StripePayButton = ({
         body: {
           amount: payload.totalWithTip,
           currency: "usd",
-          connectedAccountId: payload.connectedAccountId, // Pass connected account ID
+          connectedAccountId: payload.connectedAccountId,
           cartResults: payload.state.cartResults,
         },
       });

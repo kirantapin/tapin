@@ -8,7 +8,7 @@ import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { useRestaurant } from "@/context/restaurant_context";
 import { PolicyUtils } from "@/utils/policy_utils";
 import { BundleUtils } from "@/utils/bundle_utils";
-
+import { HighlightCardSkeleton } from "../skeletons/highlight_card_skeleton";
 const HighlightSlider = ({
   policies,
   displayOne = false,
@@ -26,7 +26,7 @@ const HighlightSlider = ({
   const { restaurant, policyManager, userOwnershipMap } = useRestaurant();
   const { triggerToast } = useBottomSheet();
   const [cardLoading, setCardLoading] = useState(false);
-
+  const [highlightsLoading, setHighlightsLoading] = useState(false);
   useEffect(() => {
     if (!displayOne) {
       const observer = new IntersectionObserver(
@@ -103,6 +103,7 @@ const HighlightSlider = ({
   useEffect(() => {
     const fetchHighlights = async () => {
       if (!restaurant) return;
+      setHighlightsLoading(true);
       const highlights = await fetch_highlights(restaurant.id);
       const filteredHighlights = highlights.filter((highlight) => {
         if (highlight.content_type === "item") {
@@ -133,7 +134,7 @@ const HighlightSlider = ({
         }
         return false;
       });
-
+      setHighlightsLoading(false);
       if (displayOne && filteredHighlights.length > 0) {
         const randomIndex = Math.floor(
           Math.random() * filteredHighlights.length
@@ -177,6 +178,14 @@ const HighlightSlider = ({
 
   if (highlights.length === 0 || !restaurant || !policyManager) {
     return null;
+  }
+
+  if (highlightsLoading) {
+    return (
+      <div className="mt-3">
+        <HighlightCardSkeleton />
+      </div>
+    );
   }
 
   return (
