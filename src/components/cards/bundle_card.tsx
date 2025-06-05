@@ -70,7 +70,7 @@ const BundleCard = ({
       <div className="flex items-start p-1">
         <div className="w-full w-[315px] rounded-3xl overflow-hidden bg-white shadow-md border border-gray-400">
           {/* Image is a 2.25:1 aspect ratio width to height */}
-          <div className="relative w-full h-[140px]">
+          <div className="relative w-full h-[140px] bg-gray-100">
             <div
               className={`relative w-full max-w-[350px] aspect-[2.25/1] overflow-hidden ${
                 isFallback ? "flex justify-center items-center p-3" : ""
