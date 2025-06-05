@@ -23,7 +23,7 @@ import SmallPolicyCard from "@/components/cards/small_policy_card";
 import { PolicyUtils } from "@/utils/policy_utils";
 import { titleCase } from "title-case";
 import GenericItemIcon from "@/components/display_utils/generic_item_icons";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { RESTAURANT_PATH } from "@/constants";
 interface BundleModalProps {
   isOpen: boolean;
@@ -42,7 +42,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
   const navigate = useNavigate();
   const { userOwnershipMap, fetchUserOwnership } = useRestaurant();
   const { refreshCart } = useBottomSheet();
-  const { handlePolicyClick, triggerToast } = useBottomSheet();
+  const location = useLocation();
   const { state, addPolicy, addToCart, removePolicy } = useGlobalCartManager(
     restaurant,
     userSession,
