@@ -97,7 +97,7 @@ export const PassAddOnCard: React.FC<PassAddOnCardProps> = ({
       {/* Checkbox */}
       {addOnIsActive ? (
         <button
-          className="mt-1 w-5 h-5 rounded border flex items-center justify-center"
+          className="mt-1 w-5 h-5 rounded border flex items-center justify-center transition-colors duration-400"
           style={{
             backgroundColor: restaurant.metadata.primaryColor as string,
             borderColor: restaurant.metadata.primaryColor as string,

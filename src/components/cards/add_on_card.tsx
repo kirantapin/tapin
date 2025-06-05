@@ -2,9 +2,8 @@ import { useRestaurant } from "@/context/restaurant_context";
 import { NormalItem, Policy, Restaurant } from "@/types";
 import { ImageUtils } from "@/utils/image_utils";
 import { ItemUtils } from "@/utils/item_utils";
-import { project_url } from "@/utils/supabase_client";
-import { Check } from "lucide-react";
-import React from "react";
+import { Check, Plus } from "lucide-react";
+import React, { useState } from "react";
 import { titleCase } from "title-case";
 import { ImageFallback } from "../display_utils/image_fallback";
 interface AddOnCardProps {
@@ -23,6 +22,7 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
   restaurant,
 }) => {
   const { policyManager } = useRestaurant();
+  const [loading, setLoading] = useState(false);
   if (policy.definition.action.type !== "add_item") {
     return null;
   }
@@ -55,13 +55,13 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
   const active = policies.some((p) => p.policy_id === policy.policy_id);
 
   return (
-    <div className="w-32">
+    <div className="w-28">
       {/* Image container with 1:1 aspect ratio */}
-      <div className="relative aspect-square overflow-hidden rounded-lg">
+      <div className="relative aspect-square overflow-hidden rounded-xl bg-gray-100">
         <ImageFallback
           src={ImageUtils.getItemImageUrl(itemId, restaurant)}
           alt={name}
-          className="w-full h-full object-cover bg-gray-100"
+          className="w-full h-full object-cover"
           restaurant={restaurant}
         />
 
@@ -71,13 +71,19 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
           </div>
         ) : (
           <button
-            className="absolute bottom-2 right-2 px-3 h-7 rounded-full flex items-center justify-center text-white text-xs font-semibold bg-white"
+            className="absolute bottom-2 right-2 w-7 h-7 rounded-full flex items-center justify-center bg-white shadow-md"
             style={{ color: "black" }}
             onClick={async () => {
+              setLoading(true);
               await addPolicy(policy);
+              setLoading(false);
             }}
           >
-            Add
+            {loading ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-black border-t-transparent" />
+            ) : (
+              <Plus className="w-4 h-4" />
+            )}
           </button>
         )}
       </div>

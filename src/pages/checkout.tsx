@@ -33,7 +33,6 @@ export default function CheckoutPage() {
 
   const { userSession } = useAuth();
   const { restaurant, policyManager, fetchUserOwnership } = useRestaurant();
-  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const {
     state,

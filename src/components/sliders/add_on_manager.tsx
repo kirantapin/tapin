@@ -128,7 +128,7 @@ const AddOnManager: FC<AddOnManagerProps> = ({
               {isPreEntry ? "Exclusive Pre-entry Deals" : "Exclusive Deals"}
             </h2>
           )}
-          {allowTimer && (
+          {/* {allowTimer && (
             <div className="text-md text-red-600 mb-4">
               {addOnTime > 0 ? (
                 <span>
@@ -139,7 +139,7 @@ const AddOnManager: FC<AddOnManagerProps> = ({
                 <span className="text-red-500">Expired</span>
               )}
             </div>
-          )}
+          )} */}
         </div>
       )}
       {allowNormalItems && (

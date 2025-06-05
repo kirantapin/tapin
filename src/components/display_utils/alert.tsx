@@ -1,8 +1,6 @@
-// ConfirmDialog.tsx
 import React, { useState } from "react";
 import {
   AlertDialog,
-  AlertDialogTrigger,
   AlertDialogContent,
   AlertDialogHeader,
   AlertDialogTitle,

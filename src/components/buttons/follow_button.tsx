@@ -151,41 +151,44 @@ const FollowButton: React.FC = () => {
         />
       </button>
     );
-  }
-
-  return (
-    <button
-      onClick={() => {}}
-      className="inline-flex justify-center items-center relative rounded-full px-3 py-1.5 border hover:opacity-80 transition-opacity"
-      style={{
-        borderColor: restaurant?.metadata.primaryColor as string,
-      }}
-    >
-      <Alert
-        trigger={
-          <div className="relative flex items-center gap-1">
-            <Plus
-              size={17}
-              className="pb-[1px]"
-              style={{ color: restaurant?.metadata.primaryColor as string }}
-            />
-            <p
-              className="text-sm font-semibold"
-              style={{ color: restaurant?.metadata.primaryColor as string }}
-            >
-              Follow
-            </p>
-          </div>
-        }
-        title={`Follow ${restaurant.name}?`}
-        description={legalityCheck.replace("RESTAURANT_NAME", restaurant.name)}
-        onConfirm={async () => {
-          await followRestaurant(userSession.user.id, restaurant.id);
-          await doesUserFollowRestaurant(userSession.user.id, restaurant.id);
+  } else {
+    return (
+      <button
+        onClick={() => {}}
+        className="inline-flex justify-center items-center relative rounded-full px-3 py-1.5 border hover:opacity-80 transition-opacity"
+        style={{
+          borderColor: restaurant?.metadata.primaryColor as string,
         }}
-      />
-    </button>
-  );
+      >
+        <Alert
+          trigger={
+            <div className="relative flex items-center gap-1">
+              <Plus
+                size={17}
+                className="pb-[1px]"
+                style={{ color: restaurant?.metadata.primaryColor as string }}
+              />
+              <p
+                className="text-sm font-semibold"
+                style={{ color: restaurant?.metadata.primaryColor as string }}
+              >
+                Follow
+              </p>
+            </div>
+          }
+          title={`Follow ${restaurant.name}?`}
+          description={legalityCheck.replace(
+            "RESTAURANT_NAME",
+            restaurant.name
+          )}
+          onConfirm={async () => {
+            await followRestaurant(userSession.user.id, restaurant.id);
+            await doesUserFollowRestaurant(userSession.user.id, restaurant.id);
+          }}
+        />
+      </button>
+    );
+  }
 };
 
 export default FollowButton;
