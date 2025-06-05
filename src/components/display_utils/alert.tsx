@@ -69,7 +69,7 @@ export function Alert({
 
       <AlertDialogContent
         className={cn(
-          "w-[90vw] max-w-xs rounded-2xl font-[Gilroy]",
+          "w-[90vw] max-w-xs rounded-[32px] font-[Gilroy]",
           contentClassName
         )}
       >

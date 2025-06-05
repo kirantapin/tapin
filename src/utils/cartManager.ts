@@ -12,7 +12,6 @@ import {
   CartResultsPayload,
   DealEffectPayload,
   Item,
-  Policy,
   UserSession,
   VerifyOrderPayload,
 } from "@/types";
@@ -35,8 +34,7 @@ export class CartManager {
     this.restaurant_id = restaurant_id;
     this.userSession = userSession;
     this.global = global;
-    const localStorageKey = `${localStorageCartTag}`;
-    this.localStorageKey = localStorageKey;
+    this.localStorageKey = localStorageCartTag;
 
     const storedCartData = this.global
       ? localStorage.getItem(this.localStorageKey)
