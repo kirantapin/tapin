@@ -53,7 +53,7 @@ export function CheckoutItemCard({
       <div className="flex items-start">
         <div className="w-20 h-20 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
           <ImageFallback
-            src={ImageUtils.getItemImageUrl(item.item.id, restaurant) || ""}
+            src={ImageUtils.getItemImageUrl(item.item.id, restaurant)}
             alt={ItemUtils.getItemName(item.item, restaurant)}
             className="w-full h-full  object-cover"
             restaurant={restaurant}

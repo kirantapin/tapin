@@ -93,7 +93,7 @@ const BundleCard = ({
               />
             </div>
 
-            <div className="absolute -bottom-6 right-4 bg-white rounded-full px-5 py-2 shadow-md">
+            <div className="absolute -bottom-5 right-4 bg-white rounded-full px-5 py-1.5 shadow-md">
               <span className="text-xl font-semibold text-gray-800">
                 ${Math.round(estimatedBundleValue)} Value
               </span>

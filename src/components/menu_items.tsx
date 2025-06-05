@@ -82,7 +82,7 @@ export function DrinkItem({
       {/* Image */}
       <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
         <ImageFallback
-          src={ImageUtils.getItemImageUrl(item.id, restaurant) || ""}
+          src={ImageUtils.getItemImageUrl(item.id, restaurant)}
           alt={menuItem?.name}
           className="h-full w-full object-cover"
           restaurant={restaurant}
@@ -225,7 +225,7 @@ export function LoyaltyRewardItem({
       {/* Image */}
       <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
         <ImageFallback
-          src={ImageUtils.getItemImageUrl(itemId, restaurant) || ""}
+          src={ImageUtils.getItemImageUrl(itemId, restaurant)}
           alt={menuItem?.name}
           className="h-full w-full object-cover"
           restaurant={restaurant}
@@ -315,7 +315,7 @@ export function PreviousTransactionItem({
       {/* Image */}
       <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
         <ImageFallback
-          src={ImageUtils.getItemImageUrl(item.id, restaurant) || ""}
+          src={ImageUtils.getItemImageUrl(item.id, restaurant)}
           alt={menuItem?.name || ""}
           className="h-full w-full object-cover"
           restaurant={restaurant}

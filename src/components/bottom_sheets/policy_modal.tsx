@@ -285,12 +285,10 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                 <div className="flex items-center gap-3">
                   <div className="h-14 w-14 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
                     <ImageFallback
-                      src={
-                        ImageUtils.getItemImageUrl(
-                          userPreference?.id,
-                          restaurant
-                        ) || ""
-                      }
+                      src={ImageUtils.getItemImageUrl(
+                        userPreference?.id,
+                        restaurant
+                      )}
                       alt="Selected item"
                       className="h-full w-full object-cover"
                       restaurant={restaurant}

@@ -247,7 +247,7 @@ const LiquorForm = ({
         )}
       </div>
 
-      <div className="flex-none p-5 border-t border-gray-300">
+      <div className="flex-none">
         <button
           type="submit"
           className="w-full text-white py-3 rounded-full transition"
