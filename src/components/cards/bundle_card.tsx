@@ -52,6 +52,12 @@ const BundleCard = ({
   const { deals, freeItems } =
     BundleUtils.separateBundlePoliciesByType(childPolicies);
 
+  const estimatedBundleValue = BundleUtils.estimateBundleValue(
+    bundle,
+    restaurant,
+    childPolicies
+  );
+
   return (
     <div
       onClick={() => {
@@ -68,12 +74,12 @@ const BundleCard = ({
       }}
     >
       <div className="flex items-start p-1">
-        <div className="w-full w-[315px] rounded-3xl overflow-hidden bg-white shadow-md border border-gray-400">
+        <div className=" w-[315px] rounded-3xl overflow-hidden bg-white shadow-md border border-gray-400">
           {/* Image is a 2.25:1 aspect ratio width to height */}
-          <div className="relative w-full h-[140px] bg-gray-100">
+          <div className="relative  h-[140px] bg-gray-100">
             <div
-              className={`relative w-full max-w-[350px] aspect-[2.25/1] overflow-hidden ${
-                isFallback ? "flex justify-center items-center p-3" : ""
+              className={`relative aspect-[2.25/1] overflow-hidden ${
+                isFallback ? "flex justify-center items-center" : ""
               }`}
             >
               <ImageFallback
@@ -82,24 +88,19 @@ const BundleCard = ({
                 postFunction={() => setIsFallback(true)}
                 alt="Bundle"
                 className={`h-full ${
-                  isFallback ? "object-contain" : "w-full object-cover"
+                  isFallback ? "p-3 object-contain" : "w-full object-cover"
                 }`}
-                style={{
-                  ...(isFallback && {
-                    padding: 0,
-                  }),
-                }}
               />
             </div>
 
             <div className="absolute -bottom-6 right-4 bg-white rounded-full px-5 py-2 shadow-md">
               <span className="text-xl font-semibold text-gray-800">
-                ${bundle.price.toFixed(2)}
+                ${Math.round(estimatedBundleValue)} Value
               </span>
             </div>
           </div>
 
-          <div className="p-4 pt-4">
+          <div className="p-4 pt-5">
             <div className="flex justify-between items-start mb-0 mt-2">
               <div className="flex-1">
                 <h2 className="text-xl font-bold m-0 text-gray-800">
@@ -209,7 +210,7 @@ const BundleCard = ({
                     <span className="font-semibold">View your Bundle</span>
                   </div>
                 ) : (
-                  "View Bundle"
+                  "View Bundle - $" + bundle.price.toFixed(2)
                 )}
               </button>
               <p className="text-sm text-gray-600 mt-4 text-center">
