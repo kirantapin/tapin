@@ -1,4 +1,5 @@
 import { OFFERS_PAGE_PATH } from "@/constants";
+import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { Policy, Restaurant } from "@/types";
 import { Tag, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +15,7 @@ export default function DealPreOrderBar({
   restaurant,
 }: DealPreOrderBarProps) {
   const navigate = useNavigate();
+  const { closeCheckoutModal } = useBottomSheet();
   return (
     <div className="flex items-center justify-between py-3">
       <div className="flex items-center gap-2">
@@ -26,6 +28,7 @@ export default function DealPreOrderBar({
         className="flex items-center gap-1"
         onClick={() => {
           navigate(OFFERS_PAGE_PATH.replace(":id", restaurant.id));
+          closeCheckoutModal();
         }}
       >
         <span className="text-gray-800 text-md font-medium line-clamp-1">
