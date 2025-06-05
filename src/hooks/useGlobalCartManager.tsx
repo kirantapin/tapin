@@ -60,7 +60,8 @@ export function useGlobalCartManager(
             style={{ width: 24, height: 24 }}
           />
         ),
-      className: "font-[Gilroy] font-semibold text-black",
+      className:
+        "font-[Gilroy] font-semibold text-black rounded-b-2xl rounded-t-none overflow-hidden shadow-lg",
       autoClose: duration || 2000,
     });
   };
