@@ -237,7 +237,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
             )}
           </div>
 
-          {bundlePolicies.length > 0 && (
+          {deals.length > 0 && (
             <h1 className="text-xl font-bold text-gray-800">
               Exclusive Access To:
             </h1>

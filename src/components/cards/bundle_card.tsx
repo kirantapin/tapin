@@ -72,22 +72,23 @@ const BundleCard = ({
           {/* Image is a 2.25:1 aspect ratio width to height */}
           <div className="relative w-full h-[140px]">
             <div
-              className={`h-full ${
-                isFallback
-                  ? "bg-gray-100 py-2 flex justify-center items-center"
-                  : ""
+              className={`relative w-full max-w-[350px] aspect-[2.25/1] overflow-hidden ${
+                isFallback ? "flex justify-center items-center p-3" : ""
               }`}
             >
               <ImageFallback
                 src={ImageUtils.getBundleImageUrl(bundle) || ""}
                 restaurant={restaurant}
-                postFunction={() => {
-                  setIsFallback(true);
-                }}
+                postFunction={() => setIsFallback(true)}
                 alt="Bundle"
                 className={`h-full ${
-                  isFallback ? " object-contain" : "w-full object-cover"
+                  isFallback ? "object-contain" : "w-full object-cover"
                 }`}
+                style={{
+                  ...(isFallback && {
+                    padding: 0,
+                  }),
+                }}
               />
             </div>
 
