@@ -320,7 +320,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
 
             {userSession ? (
               <button
-                className="w-full text-white py-3 rounded-full flex items-center justify-center gap-2 relative z-10"
+                className="w-full text-white py-3 rounded-full flex items-center justify-center gap-2 relative z-10 transition-colors duration-1000"
                 style={{
                   backgroundColor:
                     (hasMissingItems && !policyIsActive) ||

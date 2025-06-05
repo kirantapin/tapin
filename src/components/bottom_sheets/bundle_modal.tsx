@@ -24,6 +24,7 @@ import { PolicyUtils } from "@/utils/policy_utils";
 import { titleCase } from "title-case";
 import GenericItemIcon from "@/components/display_utils/generic_item_icons";
 import { useNavigate } from "react-router-dom";
+import { RESTAURANT_PATH } from "@/constants";
 interface BundleModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -332,12 +333,31 @@ const BundleModal: React.FC<BundleModalProps> = ({
                     await refreshCart();
                     await fetchUserOwnership(restaurant);
                     onClose();
-                    triggerToast(
-                      "Bundle purchased successfully, view items in My Spot",
-                      "success",
-                      5000
+                    const targetPath = RESTAURANT_PATH.replace(
+                      ":id",
+                      restaurant.id
                     );
-                    window.scrollTo({ top: 0, behavior: "smooth" });
+
+                    const postReloadState = {
+                      qr: true,
+                      transactions,
+                      message: {
+                        type: "success",
+                        message:
+                          "Bundle purchased successfully, view in My Spot",
+                      },
+                    };
+
+                    sessionStorage.setItem(
+                      "postReloadState",
+                      JSON.stringify(postReloadState)
+                    );
+
+                    if (location.pathname === targetPath) {
+                      window.location.reload();
+                    } else {
+                      navigate(targetPath);
+                    }
                   }}
                 />
               )
