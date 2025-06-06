@@ -85,7 +85,7 @@ export function Hero({
       {restaurant && (
         <div className="absolute -bottom-6" style={{ left: "18px" }}>
           {/* Moved further down */}
-          <div className="w-24 h-24 rounded-full border-2 border-white  overflow-hidden shadow-2xl">
+          <div className="w-24 h-24 rounded-full border-2 border-white overflow-hidden shadow-[0_20px_25px_-5px_rgba(0,0,0,0.3),0_10px_10px_-5px_rgba(0,0,0,0.2)]">
             <img
               src={ImageUtils.getProfileImageUrl(restaurant) || ""}
               alt="Profile"

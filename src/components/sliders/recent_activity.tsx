@@ -43,6 +43,9 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
       <div className="overflow-x-auto no-scrollbar -mx-4 pr-4">
         <div className="flex">
           {[...processedTransactionItems].slice(0, 3).map((item, index) => {
+            if (!ItemUtils.getMenuItemFromItemId(item.id, restaurant)) {
+              return null;
+            }
             return (
               <div className="w-[95%] flex-none" key={index}>
                 <DrinkItem

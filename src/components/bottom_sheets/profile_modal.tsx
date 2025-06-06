@@ -15,6 +15,7 @@ import { useRestaurant } from "@/context/restaurant_context";
 import CustomIcon from "../svg/custom_icon";
 import { useNavigate } from "react-router-dom";
 import { ImageFallback } from "../display_utils/image_fallback";
+import { ItemUtils } from "@/utils/item_utils";
 interface ProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -50,7 +51,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
           ) => {
             // Get all transactions for this restaurant
             const restaurantTransactions = transactions.filter(
-              (t) => t.restaurant_id === restaurantId
+              (t) =>
+                t.restaurant_id === restaurantId &&
+                t.fulfilled_by === null &&
+                (restaurantId === restaurant?.id
+                  ? ItemUtils.getMenuItemFromItemId(t.item, restaurant)
+                  : true)
             );
 
             // Calculate total points and credit for this restaurant

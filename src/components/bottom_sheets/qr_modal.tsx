@@ -251,7 +251,7 @@ const QRModal: React.FC<QRModalProps> = ({
                 <h1 className="text-3xl font-bold mb-2">Scan QR Code</h1>
                 <button
                   onClick={() => setShowCodeInput(true)}
-                  className="text-xs text-white rounded-full px-3 py-2"
+                  className="text-xs text-white rounded-full px-2 py-2 -mt-[8px]"
                   style={{
                     backgroundColor: restaurant?.metadata
                       .primaryColor as string,
@@ -365,8 +365,8 @@ const QRModal: React.FC<QRModalProps> = ({
             {itemsToBeRedeemed.map((item) => (
               <div key={item.id} className="w-full">
                 <DrinkItem
-                  item={item}
-                  purchaseDate={null}
+                  item={item.item}
+                  purchaseDate={item.purchaseDate}
                   onSelect={() => {}}
                   selected={null}
                 />

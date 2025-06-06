@@ -48,6 +48,7 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
       console.error("Error verifying OTP:", error.message);
       triggerToast("We couldn't verify your code. Please try again.", "error");
     } else if (session) {
+      triggerToast("Signed in successfully, Welcome to Tap In.", "success");
       onClose();
     }
   };

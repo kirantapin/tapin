@@ -61,13 +61,18 @@ export const useQRUtils = () => {
     return true;
   };
 
-  const getItemsFromTransactions = (transactions: Transaction[]): Item[] => {
-    const itemsToBeRedeemed: Item[] = [];
+  const getItemsFromTransactions = (
+    transactions: Transaction[]
+  ): { item: Item; purchaseDate: string }[] => {
+    const itemsToBeRedeemed: { item: Item; purchaseDate: string }[] = [];
     transactions.forEach((transaction) => {
       const modifiers = (transaction.metadata.modifiers as string[]) || [];
       itemsToBeRedeemed.push({
-        id: transaction.item,
-        modifiers: modifiers,
+        item: {
+          id: transaction.item,
+          modifiers: modifiers,
+        },
+        purchaseDate: transaction.created_at,
       });
     });
     return itemsToBeRedeemed;

@@ -60,7 +60,6 @@ export function DrinkItem({
   const highlight =
     (onSelect === null && quantity > 0) ||
     (onSelect && isEqual(selected, item));
-
   if (!restaurant || !menuItem || !menuItem.price) {
     return null;
   }
@@ -102,7 +101,7 @@ export function DrinkItem({
               </span>
             )}
           </div>
-          <p className="text-xs text-gray-500 custom-line-clamp-1 show-at-400">
+          <p className="text-sm text-gray-500 custom-line-clamp-1 show-at-400">
             {(menuItem as NormalItem | PassItem)?.description}
           </p>
         </div>
