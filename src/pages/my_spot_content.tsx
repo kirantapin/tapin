@@ -130,7 +130,7 @@ const MySpotContent: React.FC = () => {
   }
 
   return (
-    <div className="px-3 ">
+    <div className="px-3 overflow-x-hidden">
       <div className="flex items-center p-4 sticky top-0 bg-white shadow-sm border-b -mx-3 z-10">
         {/* Back button - absolute positioning to keep it in left corner */}
         <div className="absolute left-4">
@@ -148,7 +148,7 @@ const MySpotContent: React.FC = () => {
         <h1 className="flex-1 text-xl font-semibold text-center">My Spot</h1>
       </div>
 
-      <div className="flex gap-3 mb-2 overflow-x-auto pb-2 px-3 no-scrollbar mt-6">
+      <div className="flex gap-3 mb-2 overflow-x-auto pb-2 no-scrollbar mt-6">
         {Object.keys(tagMap).map((filter) => (
           <button
             key={tagMap[filter].tag}
@@ -176,7 +176,7 @@ const MySpotContent: React.FC = () => {
         ))}
       </div>
 
-      <div className="flex items-center gap-2 bg-amber-50 rounded-lg p-3 mb-1 mx-4 border border-gray-200">
+      <div className="flex items-center gap-2 bg-amber-50 rounded-lg p-3 mb-1 mx-3 border border-gray-200">
         <Info className="w-5 h-5 text-amber-600" />
         <p className="text-black text-sm font-semibold">
           Unredeemed Items expire after 90 days.
