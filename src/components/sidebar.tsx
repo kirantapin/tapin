@@ -142,7 +142,7 @@ export const Sidebar = ({ restaurant, isOpen, onClose }: SidebarProps) => {
             }}
           >
             <UserRound size={20} />
-            <span>Logout</span>
+            <span className="font-semibold">Logout</span>
           </button>
         ) : (
           <div className="flex justify-center w-full">

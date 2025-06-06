@@ -8,7 +8,7 @@ import React, {
   useRef,
 } from "react";
 import { Transaction, User } from "../types";
-import { project_url, supabase } from "../utils/supabase_client";
+import { project_ref, supabase } from "../utils/supabase_client";
 import { Session } from "@supabase/supabase-js";
 import { TransactionUtils } from "@/utils/transaction_utils";
 
@@ -37,21 +37,31 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUserSession(session);
-    });
+    const verifySession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const { data: user, error } = await supabase.auth.getUser();
+      if (!user || error) {
+        //invalid session
+        clearSessionState();
+      } else {
+        //valid or refreshed session
+        setUserSession(session);
+      }
+    };
+
+    verifySession();
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUserSession(session);
-
       if (!session) {
-        setUserData(null);
-        setTransactions([]);
-        lastFetchedUserId.current = null;
+        clearSessionState();
       }
     });
+
     return () => subscription.unsubscribe();
   }, []);
 
@@ -92,12 +102,16 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     try {
       await supabase.auth.signOut();
     } finally {
-      localStorage.removeItem(`sb-${project_url}-auth-token`);
-      setUserSession(null);
-      setUserData(null);
-      setTransactions([]);
-      lastFetchedUserId.current = null;
+      clearSessionState();
     }
+  };
+
+  const clearSessionState = () => {
+    setUserSession(null);
+    setUserData(null);
+    setTransactions([]);
+    lastFetchedUserId.current = null;
+    localStorage.removeItem(`sb-${project_ref}-auth-token`);
   };
 
   return (

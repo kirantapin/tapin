@@ -1,7 +1,8 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 //supabase client
 const supabase_key = process.env.REACT_APP_SUPABASE_ANON_KEY;
-export const project_url = process.env.REACT_APP_PROJECT_URL;
+export const project_ref = process.env.REACT_APP_PROJECT_REF;
+export const project_url = `https://${project_ref}.supabase.co`;
 
 let supabase_key_local = process.env.REACT_APP_SUPABASE_ANON_KEY_LOCAL || "";
 let project_url_local = process.env.REACT_APP_PROJECT_URL_LOCAL || "";
