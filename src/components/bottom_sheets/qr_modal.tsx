@@ -100,7 +100,11 @@ const QRModal: React.FC<QRModalProps> = ({
           (redeemTransaction) =>
             redeemTransaction.transaction_id === transaction.transaction_id
         )
-          ? { ...transaction, fulfilled_by: employeeCode } // Mark as fulfilled
+          ? {
+              ...transaction,
+              fulfilled_by: employeeCode,
+              fulfilled_at: new Date().toISOString(),
+            } // Mark as fulfilled
           : transaction
       )
     );
@@ -114,7 +118,7 @@ const QRModal: React.FC<QRModalProps> = ({
     setUpdatingTransactions(true);
     const { data: updatedTransactions } = await supabase
       .from("transactions")
-      .select("transaction_id, fulfilled_by")
+      .select("transaction_id, fulfilled_by, fulfilled_at")
       .not("fulfilled_by", "is", null)
       .in(
         "transaction_id",
@@ -131,6 +135,7 @@ const QRModal: React.FC<QRModalProps> = ({
             return {
               ...transaction,
               fulfilled_by: updatedTransaction.fulfilled_by,
+              fulfilled_at: updatedTransaction.fulfilled_at,
             };
           }
           return transaction;

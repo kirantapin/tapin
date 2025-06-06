@@ -213,6 +213,7 @@ export interface Transaction {
   transaction_id: string;
   created_at: string;
   fulfilled_by: string | null;
+  fulfilled_at: string | null;
   restaurant_id: string;
   user_id: string;
   item: string;
