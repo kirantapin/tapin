@@ -8,7 +8,7 @@ import React, {
   useRef,
 } from "react";
 import { Transaction, User } from "../types";
-import { supabase } from "../utils/supabase_client";
+import { project_url, supabase } from "../utils/supabase_client";
 import { Session } from "@supabase/supabase-js";
 import { TransactionUtils } from "@/utils/transaction_utils";
 
@@ -45,6 +45,12 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUserSession(session);
+
+      if (!session) {
+        setUserData(null);
+        setTransactions([]);
+        lastFetchedUserId.current = null;
+      }
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -83,7 +89,15 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } finally {
+      localStorage.removeItem(`sb-${project_url}-auth-token`);
+      setUserSession(null);
+      setUserData(null);
+      setTransactions([]);
+      lastFetchedUserId.current = null;
+    }
   };
 
   return (
