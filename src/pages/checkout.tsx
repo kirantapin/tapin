@@ -166,6 +166,8 @@ export default function CheckoutPage() {
                   title="Are you sure?"
                   description="You're about to remove a deal from your cart."
                   onConfirm={() => removePolicy(policy.policy_id)}
+                  confirmLabel="Remove"
+                  cancelLabel="Keep Deal"
                 />
               ))}
           </div>

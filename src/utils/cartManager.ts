@@ -241,6 +241,9 @@ export class CartManager {
       if (this.errorDisplay.toLowerCase().includes("2xx")) {
         return "Something went wrong. Please try again.";
       }
+      if (this.errorDisplay.toLowerCase().includes("verify user")) {
+        return "Something went wrong. Refresh the page or log out and log back in.";
+      }
       return this.errorDisplay;
     }
     return null;

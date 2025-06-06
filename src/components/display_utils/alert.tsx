@@ -9,7 +9,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import { cn } from "@/lib/utils"; // or use `clsx` / `classnames`
+import { cn } from "@/lib/utils";
 import { useRestaurant } from "@/context/restaurant_context";
 
 export function Alert({
@@ -45,6 +45,7 @@ export function Alert({
   const [open, setOpen] = useState(false);
   const [modifiedDescription, setModifiedDescription] = useState(description);
   const [modifiedTitle, setModifiedTitle] = useState(title);
+
   const handleTrigger = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (condition) {

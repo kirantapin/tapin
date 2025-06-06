@@ -13,7 +13,7 @@ interface Follow {
 }
 
 const legalityCheck =
-  "By submitting this form and signing up for texts, you consent to receive marketing text messages (e.g. promos, cart reminders) from RESTAURANT_NAME at the number provided at sign up, including messages sent by autodialer. Consent is not a condition of purchase. Msg & data rates may apply. Msg frequency varies. Unsubscribe at any time by replying STOP or clicking the unsubscribe link (where available). Privacy Policy & Terms.";
+  "By submitting this form and signing up for texts, you consent to receive marketing text messages (e.g. promos, cart reminders) from RESTAURANT_NAME at the number provided at sign up, including messages sent by autodialer. Consent is not a condition of purchase. Msg & data rates may apply. Msg frequency varies. Unsubscribe at any time by replying STOP or clicking the unsubscribe link (where available). Privacy Policy & Terms.";
 
 const followRestaurant = async (user_id: string, restaurant_id: string) => {
   // First check if a row exists
@@ -53,7 +53,7 @@ const unfollowRestaurant = async (user_id: string, restaurant_id: string) => {
 const FollowButton: React.FC = () => {
   const { restaurant } = useRestaurant();
   const { userSession } = useAuth();
-  const [isFollowing, setIsFollowing] = useState(false);
+  const [isFollowing, setIsFollowing] = useState<boolean>(false);
   const { openSignInModal } = useBottomSheet();
 
   useEffect(() => {
@@ -62,6 +62,7 @@ const FollowButton: React.FC = () => {
         try {
           await doesUserFollowRestaurant(userSession.user.id, restaurant.id);
         } catch (error) {
+          setIsFollowing(false);
           console.error("Error checking follow status:", error);
         }
       } else {
@@ -83,6 +84,7 @@ const FollowButton: React.FC = () => {
       .maybeSingle();
 
     if (error) {
+      setIsFollowing(false);
       throw error;
     }
     setIsFollowing(data?.follows ?? false);
@@ -130,6 +132,7 @@ const FollowButton: React.FC = () => {
         }}
       >
         <Alert
+          key={isFollowing ? "following" : "not following"}
           trigger={
             <div className="relative flex items-center gap-1">
               <CheckIcon
@@ -148,6 +151,8 @@ const FollowButton: React.FC = () => {
             await unfollowRestaurant(userSession.user.id, restaurant.id);
             await doesUserFollowRestaurant(userSession.user.id, restaurant.id);
           }}
+          confirmLabel="Unfollow"
+          cancelLabel="Keep Following"
         />
       </button>
     );
@@ -161,6 +166,7 @@ const FollowButton: React.FC = () => {
         }}
       >
         <Alert
+          key={isFollowing ? "following" : "not following"}
           trigger={
             <div className="relative flex items-center gap-1">
               <Plus
@@ -185,6 +191,8 @@ const FollowButton: React.FC = () => {
             await followRestaurant(userSession.user.id, restaurant.id);
             await doesUserFollowRestaurant(userSession.user.id, restaurant.id);
           }}
+          confirmLabel="Follow"
+          cancelLabel="Cancel"
         />
       </button>
     );
