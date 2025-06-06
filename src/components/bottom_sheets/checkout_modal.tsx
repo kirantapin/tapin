@@ -9,7 +9,6 @@ interface CheckoutModalProps {
 }
 
 const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose }) => {
-  const { closeCheckoutModal } = useBottomSheet();
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent
