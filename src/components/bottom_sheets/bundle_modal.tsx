@@ -392,7 +392,7 @@ const ShareButton = ({
       try {
         await navigator.share({
           text: `Here's something interesting at ${restaurant.name}!`,
-          url: `${window.location.origin}/restaurant/${restaurant.id}/?bundle=${bundle.bundle_id}`,
+          url: `${window.location.origin}/${restaurant.id}/?bundle=${bundle.bundle_id}`,
         });
         console.log("Shared successfully!");
       } catch (error) {
