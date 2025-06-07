@@ -23,8 +23,8 @@ export const PASS_MENU_TAG = "passes";
 export const BUNDLE_MENU_TAG = "bundles";
 export const LIQUOR_MENU_TAG = "liquors";
 export const SPECIALTY_DRINKS_TAG = "7";
-export const COCKTAILS_TAG = "6";
-export const BEER_AND_CIDER_TAG = "5";
+export const COCKTAILS_TAG = "cocktails";
+export const BEER_AND_CIDER_TAG = "beer_and_cider";
 
 export const HOUSE_MIXER_LABEL = "House Mixers";
 export const SHOTS_SHOOTERS_LABEL = "Shots or Shooters";

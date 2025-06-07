@@ -475,24 +475,8 @@ export const DrinkList = ({
                   {menuLabel === HOUSE_MIXER_LABEL ||
                   menuLabel === SHOTS_SHOOTERS_LABEL ? (
                     <div className="space-y-4">
-                      {getSuggestedMenuItems({
-                        type: menuLabel,
-                        filters:
-                          menuLabel === HOUSE_MIXER_LABEL
-                            ? houseMixerFilters
-                            : shotsShootersFilters,
-                        restaurant: restaurant,
-                      }).map((item) => (
-                        <DrinkItem
-                          key={item.id}
-                          item={item}
-                          purchaseDate={null}
-                          onSelect={onSelect}
-                          selected={selected}
-                        />
-                      ))}
                       <div
-                        className="px-3 rounded-2xl"
+                        className="px-3 mt-2 rounded-2xl"
                         style={{
                           borderColor: restaurant.metadata
                             .primaryColor as string,
@@ -544,6 +528,22 @@ export const DrinkList = ({
                           />
                         </div>
                       </div>
+                      {getSuggestedMenuItems({
+                        type: menuLabel,
+                        filters:
+                          menuLabel === HOUSE_MIXER_LABEL
+                            ? houseMixerFilters
+                            : shotsShootersFilters,
+                        restaurant: restaurant,
+                      }).map((item) => (
+                        <DrinkItem
+                          key={item.id}
+                          item={item}
+                          purchaseDate={null}
+                          onSelect={onSelect}
+                          selected={selected}
+                        />
+                      ))}
                     </div>
                   ) : (
                     drinksForLabel.map(({ id }) => (

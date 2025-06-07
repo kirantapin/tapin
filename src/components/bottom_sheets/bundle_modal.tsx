@@ -5,7 +5,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { X, Wallet, CircleX, Check } from "lucide-react";
+import { X, Wallet, CircleX, Check, Share } from "lucide-react";
 import { Bundle, Restaurant, Policy, BundleItem, Transaction } from "@/types";
 import { GradientIcon } from "@/utils/gradient";
 import { useAuth } from "@/context/auth_context";
@@ -135,20 +135,27 @@ const BundleModal: React.FC<BundleModalProps> = ({
 
         <div className="flex-1 overflow-y-auto px-6 pb-6 pt-4">
           {/* Price and time */}
-          <div className="flex items-center mb-2">
-            <span className="text-2xl font-semibold text-black">
-              ${bundle.price.toFixed(2)}
-            </span>
-            <div
-              className="flex items-center rounded-full ml-4 px-3 py-1"
-              style={{
-                backgroundColor: restaurant?.metadata.primaryColor as string,
-              }}
-            >
-              <span className="text-md text-white font-semibold">
-                ${Math.round(estimatedBundleValue)} value
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center">
+              <span className="text-2xl font-semibold text-black">
+                ${bundle.price.toFixed(2)}
               </span>
+              <div
+                className="flex items-center rounded-full ml-4 px-3 py-1"
+                style={{
+                  backgroundColor: restaurant?.metadata.primaryColor as string,
+                }}
+              >
+                <span className="text-md text-white font-semibold">
+                  ${Math.round(estimatedBundleValue)} value
+                </span>
+              </div>
             </div>
+            <ShareButton
+              primaryColor={restaurant?.metadata.primaryColor as string}
+              bundle={bundle}
+              restaurant={restaurant}
+            />
           </div>
           <div className="text-md font-bold text-gray-600 mt-1 mb-4">
             Lasts {bundle.duration} {bundle.duration > 1 ? "Days" : "Day"}
@@ -370,3 +377,40 @@ const BundleModal: React.FC<BundleModalProps> = ({
 };
 
 export default BundleModal;
+
+const ShareButton = ({
+  primaryColor,
+  bundle,
+  restaurant,
+}: {
+  primaryColor: string;
+  bundle: Bundle;
+  restaurant: Restaurant;
+}) => {
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Here's something interesting at ${restaurant.name}!`,
+          text: `Check out: ${bundle.name}`,
+          url: `${window.location.origin}/restaurant/${restaurant.id}/?bundle=${bundle.bundle_id}`,
+        });
+        console.log("Shared successfully!");
+      } catch (error) {
+        console.error("Share failed:", error);
+      }
+    } else {
+      alert("Sharing not supported on this browser.");
+    }
+  };
+
+  return (
+    <button
+      onClick={handleShare}
+      className="p-2 text-white rounded-full shadow"
+      style={{ backgroundColor: primaryColor }}
+    >
+      <Share size={18} />
+    </button>
+  );
+};

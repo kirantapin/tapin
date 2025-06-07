@@ -42,18 +42,6 @@ const GenericItemIcon: React.FC<GenericItemIconProps> = ({
     return <GradientIcon icon={Ban} primaryColor={primaryColor} size={size} />;
   }
 
-  if ("image_url" in itemInfo && itemInfo.image_url) {
-    return (
-      <ImageFallback
-        src={ImageUtils.getItemImageUrl(itemId, restaurant)}
-        alt=""
-        className="w-full h-full object-cover"
-        style={{ width: size, height: size, padding: 0 }}
-        restaurant={restaurant}
-      />
-    );
-  }
-
   const path = restaurant.menu[itemId].path || [];
 
   if (path.includes(FOOD_MENU_TAG)) {
@@ -87,8 +75,15 @@ const GenericItemIcon: React.FC<GenericItemIconProps> = ({
   if (path.includes(BEER_AND_CIDER_TAG)) {
     return <GradientIcon icon={Beer} primaryColor={primaryColor} size={size} />;
   }
-
-  return <GradientIcon icon={Beer} primaryColor={primaryColor} size={size} />;
+  return (
+    <ImageFallback
+      src={ImageUtils.getItemImageUrl(itemId, restaurant)}
+      alt=""
+      className="w-full h-full object-cover"
+      style={{ width: size, height: size, padding: 0 }}
+      restaurant={restaurant}
+    />
+  );
 };
 
 export default GenericItemIcon;
