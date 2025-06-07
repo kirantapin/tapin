@@ -1,4 +1,4 @@
-import { Plus, PlusIcon, Search, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -27,19 +27,24 @@ import LocationMarkerIcon from "@/components/svg/location_tag.tsx";
 import { isOpenNow } from "@/utils/time.ts";
 import { titleCase } from "title-case";
 import FollowButton from "@/components/buttons/follow_button.tsx";
+import { useUTMParams } from "@/hooks/useUTMParams.tsx";
 export default function RestaurantPage() {
   const { userSession, transactions } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { restaurant, policyManager, userOwnershipMap } = useRestaurant();
   const policies = policyManager?.policies;
-  const { id } = useParams<{ id: string }>();
   const [activeFilter, setActiveFilter] = useState(HOUSE_MIXER_LABEL);
   const orderDrinksRef = useRef<HTMLDivElement>(null);
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
-  const { state, addToCart, removeFromCart, triggerToast } = useBottomSheet();
+  const { state, addToCart, removeFromCart, triggerToast, openBundleModal } =
+    useBottomSheet();
   const { openQrModal } = useBottomSheet();
-
+  const utmParams = useUTMParams({
+    restaurant,
+    openBundleModal,
+    triggerToast,
+  });
   const { searchResults, searchQuery, setSearchQuery, clearSearch } = useSearch(
     {
       restaurant: restaurant as Restaurant,

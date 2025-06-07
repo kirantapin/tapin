@@ -111,7 +111,7 @@ const QRModal: React.FC<QRModalProps> = ({
     setVerifyingState("complete");
   };
 
-  const itemsToBeRedeemed: Item[] =
+  const itemsToBeRedeemed: { item: Item; purchaseDate: string }[] =
     getItemsFromTransactions(transactionsToRedeem);
 
   const modifiedOnClose = async () => {
@@ -363,7 +363,7 @@ const QRModal: React.FC<QRModalProps> = ({
 
           <div className="flex flex-col">
             {itemsToBeRedeemed.map((item) => (
-              <div key={item.id} className="w-full">
+              <div key={item.item.id} className="w-full">
                 <DrinkItem
                   item={item.item}
                   purchaseDate={item.purchaseDate}

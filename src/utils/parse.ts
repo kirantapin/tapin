@@ -46,6 +46,9 @@ export function keywordExtraction(
   const path = restaurant.menu[item].path;
   for (const segment of path) {
     const name = restaurant.menu[segment].info.name;
+    if (!name) {
+      continue;
+    }
     keywords.push(
       ...name
         .toLowerCase()

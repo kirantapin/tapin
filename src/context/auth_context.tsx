@@ -12,9 +12,8 @@ import { project_ref, supabase } from "../utils/supabase_client";
 import { Session } from "@supabase/supabase-js";
 import { TransactionUtils } from "@/utils/transaction_utils";
 
-// Create a context with default values (optional)
 interface AuthContextProps {
-  userSession: any; // Supabase session type
+  userSession: Session | null;
   login: () => void;
   logout: () => void;
   userData: User | null;
