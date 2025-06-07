@@ -391,8 +391,7 @@ const ShareButton = ({
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `Here's something interesting at ${restaurant.name}!`,
-          text: `Check out: ${bundle.name}`,
+          text: `Here's something interesting at ${restaurant.name}!`,
           url: `${window.location.origin}/restaurant/${restaurant.id}/?bundle=${bundle.bundle_id}`,
         });
         console.log("Shared successfully!");
