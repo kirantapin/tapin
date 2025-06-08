@@ -95,20 +95,37 @@ const SpendGoalCard: FC<{
     POINTS_PER_DOLLAR;
 
   return (
-    <div className="w-full mt-4" onClick={onClick}>
+    <div
+      className="w-full mt-4 border border-gray-200 rounded-xl p-4 pb-6"
+      onClick={onClick}
+    >
       <div className="flex flex-col gap-2">
-        <span className="text-lg font-semibold">
+        <span className="text-xl font-semibold">
           {dollarsAway <= 0 ? (
-            "Claim your reward after purchase!"
+            <>
+              Claim Reward after purchase!
+              {nextReward && (
+                <div className="text-gray-500 text-sm">
+                  {PolicyUtils.getPolicyName(nextReward, restaurant)}, applied
+                  on next purchase.
+                </div>
+              )}
+            </>
           ) : (
             <>
               <span
-                className="font-semibold"
+                className="font-semibold "
                 style={{ color: restaurant.metadata.primaryColor as string }}
               >
                 ${dollarsAway}
               </span>{" "}
               away from next reward
+              {nextReward && (
+                <div className="text-gray-500 text-sm">
+                  {PolicyUtils.getPolicyName(nextReward, restaurant)}, applied
+                  on next purchase.
+                </div>
+              )}
             </>
           )}
         </span>

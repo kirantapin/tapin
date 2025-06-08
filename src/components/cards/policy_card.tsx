@@ -52,7 +52,7 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({
       : "";
   return (
     <div
-      className="w-full bg-white rounded-3xl p-4  flex relative border border-gray-200 shadow-sm"
+      className="w-full bg-white rounded-xl p-4  flex relative border border-gray-200"
       onClick={() => {
         handlePolicyClick(policy, userOwnershipMap);
       }}
@@ -60,7 +60,7 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({
       <div className="flex flex-col gap-1 flex-grow pr-12">
         {/* Title */}
         <div className="flex items-center gap-2">
-          <h2 className="text-xl font-bold text-gray-900 line-clamp-2 leading-tight min-h-[3rem]">
+          <h2 className="text-xl font-semibold text-gray-900 line-clamp-2 leading-tight min-h-[3rem]">
             {titleCase(policy.name)}
           </h2>
         </div>

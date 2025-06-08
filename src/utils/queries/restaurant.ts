@@ -11,7 +11,7 @@ import {
 } from "@/constants";
 import { BundleUtils } from "../bundle_utils";
 import { PassUtils } from "../pass_utils";
-const HistoryCacheTTL = 3000;
+const HistoryCacheTTL = 180000;
 
 export const fetchRestaurantById = async (
   restaurantId: string | undefined

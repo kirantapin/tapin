@@ -197,7 +197,7 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
       {viewAll && (
         <div className="flex flex-col gap-4 mt-4">
           <h3 className="text-lg font-bold">Ways to earn rewards</h3>
-          <div className="bg-gray-50 rounded-xl p-4 w-48 h-40 relative border border-gray-200">
+          <div className="bg-gray-50 rounded-3xl p-4 w-48 h-40 relative border border-gray-200">
             <div className="flex justify-between">
               <div className="bg-gray-200 rounded-full p-2">
                 <GradientIcon
@@ -207,7 +207,7 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
                 />
               </div>
               <div className="flex items-center">
-                <span className="text-xs text-gray-600 mr-1">
+                <span className="text-sm text-gray-600 mr-1">
                   {POINTS_PER_DOLLAR} points per $1
                 </span>
               </div>
