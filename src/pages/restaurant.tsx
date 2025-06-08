@@ -175,7 +175,7 @@ export default function RestaurantPage() {
           state={state}
         />
         {/* Rewards Section */}
-        <div className="mt-6">
+        <div className="mt-2">
           <Rewards viewAll={false} />
 
           <div className="mt-8">
@@ -211,7 +211,7 @@ export default function RestaurantPage() {
             className="sticky top-0 z-10 bg-white border-b shadow-[0_4px_6px_-6px_rgba(0,0,0,0.1)] pt-1 -mx-4 px-4"
           >
             <div className="flex justify-between items-center mb-3 mt-3">
-              <h2 className="text-xl font-bold">Order Drinks</h2>
+              <h1 className="text-xl font-bold">Order Drinks</h1>
             </div>
 
             {/* Search Bar */}
