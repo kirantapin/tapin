@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { ItemUtils } from "@/utils/item_utils";
 import type { Restaurant, BundleItem } from "@/types";
 
-const UTM_PARAMS = ["bundle"];
+const UTM_PARAMS = ["bundle", "welcome"];
 
 interface UseUTMParamsOptions {
   restaurant: Restaurant | null;
@@ -28,11 +28,20 @@ export const useUTMParams = ({
     const utms: { [key: string]: string } = {};
 
     UTM_PARAMS.forEach((key) => {
-      const value = searchParams.get(key);
-      if (value) utms[key] = value;
+      if (searchParams.has(key)) {
+        utms[key] = searchParams.get(key) ?? "";
+      }
     });
 
     setUtmParams(utms);
+
+    if ("welcome" in utms) {
+      triggerToast(
+        `Welcome to ${restaurant?.name} on Tap In. Earn points, unlock exclusive deals & bundles, and skip the line—all in one spot.`,
+        "info",
+        3000
+      );
+    }
 
     if (utms.bundle && restaurant) {
       const bundle = ItemUtils.getMenuItemFromItemId(

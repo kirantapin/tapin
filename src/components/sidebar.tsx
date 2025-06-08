@@ -26,7 +26,6 @@ interface SidebarProps {
 export const Sidebar = ({ restaurant, isOpen, onClose }: SidebarProps) => {
   const { userSession, logout } = useAuth();
   const [isSignedIn, setIsSignedIn] = useState(false);
-  const [tabs, setTabs] = useState<string[]>(["Discover"]);
   const navigate = useNavigate();
   const [history, setHistory] = useState<any[]>([]);
 
