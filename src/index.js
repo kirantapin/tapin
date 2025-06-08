@@ -14,17 +14,19 @@ import {
 } from "./context/bottom_sheet_context.tsx";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <Router>
-    <DeviceProvider>
-      <AuthProvider>
-        <RestaurantProvider>
-          <BottomSheetProvider>
-            <App />
-          </BottomSheetProvider>
-        </RestaurantProvider>
-      </AuthProvider>
-    </DeviceProvider>
-  </Router>
+  <React.StrictMode>
+    <Router>
+      <DeviceProvider>
+        <AuthProvider>
+          <RestaurantProvider>
+            <BottomSheetProvider>
+              <App />
+            </BottomSheetProvider>
+          </RestaurantProvider>
+        </AuthProvider>
+      </DeviceProvider>
+    </Router>
+  </React.StrictMode>
 );
 serviceWorkerRegistration.register();
 // If you want to start measuring performance in your app, pass a function

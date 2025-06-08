@@ -52,16 +52,18 @@ const StripePayButton = ({
     }
 
     try {
-      // Submit payment details
       const potentialError = await refresh();
       if (potentialError) {
-        //handle response error
         triggerToast(potentialError, "error");
         return;
       }
       const { error: submitError } = await elements.submit();
       if (submitError) {
         console.error("Submit Error:", submitError.message);
+        triggerToast(
+          "Something went wrong. Please refresh the page and try again.",
+          "error"
+        );
         return;
       }
 
@@ -94,8 +96,16 @@ const StripePayButton = ({
         });
 
       if (confirmPaymentError) {
+        triggerToast(
+          "Something went wrong. Please refresh the page and try again.",
+          "error"
+        );
         console.error("Payment Confirmation Error:", confirmPaymentError);
       } else if (!paymentIntent) {
+        triggerToast(
+          "Something went wrong. Please refresh the page and try again.",
+          "error"
+        );
         console.error("No Payment Intent Generated");
       } else {
         const paymentData = {
@@ -109,10 +119,19 @@ const StripePayButton = ({
         if (tapInResponse) {
           const { transactions, modifiedUserData } = tapInResponse;
           handleTapInResponse(transactions, modifiedUserData);
+        } else {
+          triggerToast(
+            "Something went wrong. Please refresh the page and try again.",
+            "error"
+          );
         }
       }
     } catch (err) {
       console.error("Unexpected Error:", err);
+      triggerToast(
+        "Something went wrong. Please refresh the page and try again.",
+        "error"
+      );
     }
   };
   return payload ? (

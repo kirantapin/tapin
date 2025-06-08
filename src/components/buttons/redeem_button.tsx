@@ -46,7 +46,6 @@ const RedeemButton = ({
         try {
           const potentialError = await refresh();
           if (potentialError) {
-            //handle response error
             triggerToast(potentialError, "error");
             return;
           }
@@ -60,8 +59,17 @@ const RedeemButton = ({
           if (tapInResponse) {
             const { transactions, modifiedUserData } = tapInResponse;
             await handleTapInResponse(transactions, modifiedUserData);
+          } else {
+            triggerToast(
+              "Something went wrong. Please refresh the page and try again.",
+              "error"
+            );
           }
         } catch (err) {
+          triggerToast(
+            "Something went wrong. Please refresh the page and try again.",
+            "error"
+          );
           console.error("Unexpected Error:", err);
         } finally {
           setLoading(false);

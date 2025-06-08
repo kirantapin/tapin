@@ -10,6 +10,7 @@ import { BundleUtils } from "@/utils/bundle_utils";
 import { GradientIcon } from "@/utils/gradient";
 import { ImageUtils } from "@/utils/image_utils";
 import { ImageFallback } from "../display_utils/image_fallback";
+import { PolicyUtils } from "@/utils/policy_utils";
 const NUM_POLICY_TO_SHOW = 3;
 
 const BundleCard = ({
@@ -157,25 +158,39 @@ const BundleCard = ({
               <div className="flex flex-col gap-0">
                 {[...freeItems, ...deals]
                   .slice(0, NUM_POLICY_TO_SHOW)
-                  .map((policy) => (
-                    <div
-                      key={policy.policy_id}
-                      className="flex items-center gap-2 h-[30px]"
-                    >
-                      <CheckIcon
-                        size={20}
-                        strokeWidth={3}
-                        color={restaurant?.metadata.primaryColor as string}
-                        className="text-gray-700 mb-[6px]"
-                      />
-                      <p
+                  .map((policy) => {
+                    const usageDescription = PolicyUtils.getUsageDescription(
+                      policy,
+                      restaurant,
+                      "short"
+                    );
+                    return (
+                      <div
                         key={policy.policy_id}
-                        className="text-[15px] text-gray-700 h-[30px]"
+                        className="flex items-center gap-2 h-[30px]"
                       >
-                        {policy.name}
-                      </p>
-                    </div>
-                  ))}
+                        <CheckIcon
+                          size={20}
+                          strokeWidth={3}
+                          color={restaurant?.metadata.primaryColor as string}
+                          className="text-gray-700 mb-[6px] flex-shrink-0"
+                        />
+                        <p
+                          key={policy.policy_id}
+                          className="text-[15px] text-gray-700 h-[30px] flex items-center min-w-0"
+                        >
+                          <span className="whitespace-nowrap">
+                            {policy.name}
+                          </span>
+                          {usageDescription && (
+                            <span className="text-gray-500 text-xs whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px] inline-block ml-1">
+                              ({usageDescription})
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    );
+                  })}
                 <div className="flex items-center gap-2 h-[30px]">
                   <CheckIcon
                     size={20}

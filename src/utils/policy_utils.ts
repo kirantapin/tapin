@@ -384,27 +384,40 @@ export class PolicyUtils {
   };
   static getUsageDescription(
     policy: Policy,
-    restaurant: Restaurant
+    restaurant: Restaurant,
+    format: "short" | "long" = "long"
   ): string | null {
     if (!this.isPolicyUsable(policy, restaurant)) {
-      return "This Deal is not Currently Active";
+      return format === "short"
+        ? "Not Active"
+        : "This Deal is not Currently Active";
     }
     const { total_usages, days_since_last_use } = policy;
 
     if (total_usages && days_since_last_use) {
-      return `One use every${
-        days_since_last_use === 1 ? `day` : ` ${days_since_last_use} days`
-      } up to ${total_usages} ${total_usages === 1 ? "use" : "uses"}`;
+      return format === "short"
+        ? `Every${
+            days_since_last_use === 1 ? `Day` : ` ${days_since_last_use} Days`
+          }, ${total_usages} ${total_usages === 1 ? "Use" : "Uses"}`
+        : `One use every${
+            days_since_last_use === 1 ? `Day` : ` ${days_since_last_use} Days`
+          } up to ${total_usages} ${total_usages === 1 ? "Use" : "Uses"}`;
     }
 
     if (total_usages) {
-      return `Up to ${total_usages} ${total_usages === 1 ? "use" : "uses"}`;
+      return format === "short"
+        ? `${total_usages} ${total_usages === 1 ? "Use" : "Uses"}`
+        : `Up to ${total_usages} ${total_usages === 1 ? "Use" : "Uses"}`;
     }
 
     if (days_since_last_use) {
-      return `One use every${
-        days_since_last_use === 1 ? `day` : ` ${days_since_last_use} days`
-      }`;
+      return format === "short"
+        ? `Every${
+            days_since_last_use === 1 ? `Day` : ` ${days_since_last_use} Days`
+          }`
+        : `One use every${
+            days_since_last_use === 1 ? `Day` : ` ${days_since_last_use} Days`
+          }`;
     }
 
     return null;
