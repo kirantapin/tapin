@@ -306,16 +306,16 @@ export default function CheckoutPage() {
                     primaryColor={restaurant.metadata.primaryColor as string}
                   />
                 )}
-                <HighlightSlider
-                  policies={policyManager.getRecommendedDeals(
-                    state.cart,
-                    state.dealEffect,
-                    restaurant
-                  )}
-                  displayOne={true}
-                />
               </div>
             )}
+            <HighlightSlider
+              policies={policyManager.getRecommendedDeals(
+                state.cart,
+                state.dealEffect,
+                restaurant
+              )}
+              displayOne={true}
+            />
           </div>
         </div>
       </div>
