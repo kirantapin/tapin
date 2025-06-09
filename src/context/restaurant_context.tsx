@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { BundleItem, Policy, Restaurant } from "@/types";
+import { BundleItem, Restaurant } from "@/types";
 import { PolicyManager } from "@/utils/policy_manager";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./auth_context";

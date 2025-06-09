@@ -48,7 +48,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       setUserSession(session);
     }
   };
-  useTabVisibilityRefresh(refreshSession, 15000);
+  // useTabVisibilityRefresh(refreshSession, 15000);
 
   useEffect(() => {
     refreshSession();
