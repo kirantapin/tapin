@@ -11,6 +11,7 @@ import { Transaction, User } from "../types";
 import { project_ref, supabase } from "../utils/supabase_client";
 import { Session } from "@supabase/supabase-js";
 import { TransactionUtils } from "@/utils/transaction_utils";
+import { useTabVisibilityRefresh } from "@/hooks/useTabVisibilityRefresh";
 
 interface AuthContextProps {
   userSession: Session | null;
@@ -35,22 +36,22 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const [userData, setUserData] = useState<User | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
-  useEffect(() => {
-    const verifySession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const { data: user, error } = await supabase.auth.getUser();
-      if (!user || error) {
-        //invalid session
-        clearSessionState();
-      } else {
-        //valid or refreshed session
-        setUserSession(session);
-      }
-    };
+  const refreshSession = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const { data: user, error } = await supabase.auth.getUser();
 
-    verifySession();
+    if (!user || error) {
+      clearSessionState();
+    } else if (session?.access_token !== userSession?.access_token) {
+      setUserSession(session);
+    }
+  };
+  useTabVisibilityRefresh(refreshSession, 15000);
+
+  useEffect(() => {
+    refreshSession();
 
     const {
       data: { subscription },

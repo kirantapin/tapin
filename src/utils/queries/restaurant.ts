@@ -11,7 +11,7 @@ import {
 } from "@/constants";
 import { BundleUtils } from "../bundle_utils";
 import { PassUtils } from "../pass_utils";
-const HistoryCacheTTL = 180000;
+const HistoryCacheTTL = 300000; // 5 minutes
 
 export const fetchRestaurantById = async (
   restaurantId: string | undefined
@@ -24,6 +24,7 @@ export const fetchRestaurantById = async (
   const historyStr = localStorage.getItem(HISTORY_KEY);
   let data;
   let error;
+  let usingCache = false;
 
   if (historyStr) {
     try {
@@ -41,6 +42,7 @@ export const fetchRestaurantById = async (
         if (age < HistoryCacheTTL) {
           data = recentRestaurant.restaurant;
           error = null;
+          usingCache = true;
         }
       }
     } catch (error) {
@@ -65,7 +67,9 @@ export const fetchRestaurantById = async (
     return null;
   }
 
-  logVisit(data);
+  if (!usingCache) {
+    logVisit(data);
+  }
 
   const [passes, bundleObjects] = await Promise.all([
     PassUtils.fetchPasses(restaurantId),
