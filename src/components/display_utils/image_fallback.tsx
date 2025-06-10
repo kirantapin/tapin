@@ -49,7 +49,7 @@ export const ImageFallback = ({
       alt={alt}
       className={`${
         hasError ? "rounded-full p-3" : ""
-      } ${className} transition-opacity duration-200 ${
+      } ${className} transition-opacity duration-500 ${
         isLoaded ? "opacity-100" : "opacity-0"
       }`}
       style={style}

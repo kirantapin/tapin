@@ -92,9 +92,9 @@ export function DrinkItem({
       <div className="flex flex-1 flex-col justify-between">
         <div>
           <div className="flex justify-between items-start">
-            <h3 className="font-bold text-base">
+            <h4 className="font-bold text-base">
               {titleCase(ItemUtils.getItemName(item, restaurant))}
-            </h3>
+            </h4>
             {isPass && (
               <span className="text-xs text-gray-500 ml-2">
                 {(menuItem as PassItem)?.for_date}
@@ -106,7 +106,7 @@ export function DrinkItem({
           </p>
         </div>
 
-        <div className="flex items-center justify-between mt-2">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-1">
             <p className="font-bold text-base">
               ${ItemUtils.priceItem(item, restaurant)?.toFixed(2)}
@@ -235,9 +235,9 @@ export function LoyaltyRewardItem({
       <div className="flex flex-1 flex-col justify-between">
         <div>
           <div className="flex justify-between items-start">
-            <h3 className="font-bold text-base">
+            <h4 className="font-bold text-base">
               {titleCase(PolicyUtils.getPolicyName(policy, restaurant))}
-            </h3>
+            </h4>
             {isPass && (
               <span className="text-xs text-gray-500 ml-2">
                 {(menuItem as PassItem)?.for_date}
@@ -325,9 +325,9 @@ export function PreviousTransactionItem({
       <div className="flex flex-1 flex-col justify-between">
         <div>
           <div className="flex justify-between items-start">
-            <h3 className="font-bold text-base">
+            <h4 className="font-bold text-base">
               {titleCase(ItemUtils.getItemName(item, restaurant))}
-            </h3>
+            </h4>
             {isPass && (
               <span className="text-xs text-gray-500 ml-2">
                 {(menuItem as PassItem)?.for_date}

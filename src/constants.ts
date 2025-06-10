@@ -44,7 +44,7 @@ export const NEW_USER_SESSION = "new_user_session";
 
 export const HISTORY_KEY = "history";
 
-export const RESTAURANT_IMAGE_BUCKET = "restaurant_images";
+export const RESTAURANT_IMAGE_BUCKET = "restaurant-images";
 export const BUNDLE_IMAGE_BUCKET = "bundle-images";
 export const ITEM_IMAGE_BUCKET = "item-images";
 export const HIGHLIGHT_IMAGE_BUCKET = "highlight-images";
