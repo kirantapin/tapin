@@ -14,8 +14,10 @@ export function Hero({
   const { openProfileModal, openCheckoutModal } = useBottomSheet();
 
   const [bgLoaded, setBgLoaded] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
   const backgroundImageUrl = ImageUtils.getHeroImageUrl(restaurant);
+  const profileImageUrl = ImageUtils.getProfileImageUrl(restaurant);
 
   useEffect(() => {
     if (!backgroundImageUrl) return;
@@ -23,6 +25,13 @@ export function Hero({
     img.src = backgroundImageUrl;
     img.onload = () => setBgLoaded(true);
   }, [backgroundImageUrl]);
+
+  useEffect(() => {
+    if (!profileImageUrl) return;
+    const img = new Image();
+    img.src = profileImageUrl;
+    img.onload = () => setProfileLoaded(true);
+  }, [profileImageUrl]);
 
   const buttonBackgroundColor = "white";
   const buttonColor = "black";
@@ -84,12 +93,17 @@ export function Hero({
       {/* Profile Image */}
       {restaurant && (
         <div className="absolute -bottom-6" style={{ left: "18px" }}>
-          {/* Moved further down */}
           <div className="w-24 h-24 rounded-full border-2 border-white overflow-hidden shadow-[0_20px_25px_-5px_rgba(0,0,0,0.3),0_10px_10px_-5px_rgba(0,0,0,0.2)]">
+            {/* Shimmer placeholder */}
+            {!profileLoaded && (
+              <div className="w-full h-full bg-gray-200 animate-pulse" />
+            )}
             <img
-              src={ImageUtils.getProfileImageUrl(restaurant) || ""}
+              src={profileImageUrl || ""}
               alt="Profile"
-              className="w-full h-full object-cover"
+              className={`w-full h-full object-cover transition-opacity duration-2000 ${
+                profileLoaded ? "opacity-100" : "opacity-0"
+              }`}
             />
           </div>
         </div>
