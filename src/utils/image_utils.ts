@@ -21,11 +21,11 @@ export class ImageUtils {
   };
   static getBundleImageUrl = (bundle: Bundle | null) => {
     if (!bundle) return null;
-    return `${project_url}/storage/v1/object/public/${BUNDLE_IMAGE_BUCKET}/${bundle.bundle_id}`;
+    return `${project_url}/storage/v1/object/public/${BUNDLE_IMAGE_BUCKET}/${bundle.restaurant_id}/${bundle.bundle_id}`;
   };
   static getHighlightImageUrl = (highlight: Highlight | null) => {
     if (!highlight) return null;
-    return `${project_url}/storage/v1/object/public/${HIGHLIGHT_IMAGE_BUCKET}/${highlight.highlight_id}`;
+    return `${project_url}/storage/v1/object/public/${HIGHLIGHT_IMAGE_BUCKET}/${highlight.restaurant_id}/${highlight.highlight_id}`;
   };
 
   static getItemImageUrl = (

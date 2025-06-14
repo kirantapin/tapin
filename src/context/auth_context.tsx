@@ -11,7 +11,7 @@ import { Transaction, User } from "../types";
 import { project_ref, supabase } from "../utils/supabase_client";
 import { Session } from "@supabase/supabase-js";
 import { TransactionUtils } from "@/utils/transaction_utils";
-import { useTabVisibilityRefresh } from "@/hooks/useTabVisibilityRefresh";
+// import { useTabVisibilityRefresh } from "@/hooks/useTabVisibilityRefresh";
 
 interface AuthContextProps {
   userSession: Session | null;

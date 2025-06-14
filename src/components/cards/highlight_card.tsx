@@ -114,9 +114,9 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
       className="snap-center flex-shrink-0 w-full max-w-md h-32 rounded-3xl overflow-hidden flex items-stretch mr-4 enhance-contrast relative"
       style={{
         ...(!hasHighlightImage && {
-          backgroundColor: primaryColor,
           transition: "background-color 200ms ease-in-out",
         }),
+        backgroundColor: primaryColor,
         color: "white",
         transition: "color 200ms ease-in-out",
       }}
@@ -143,7 +143,7 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
 
       {/* Left: Text Content */}
       <div className="flex-1 flex flex-col justify-between p-4 relative z-10">
-        <div>
+        <div className="text-left">
           <h3
             className={`text-lg font-bold ${
               content_pointer ? "line-clamp-1" : "line-clamp-2"
@@ -165,7 +165,7 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
 
         {content_pointer && (
           <button
-            className="bg-white px-5 pt-[2px] rounded-full text-sm self-start font-bold min-w-[100px] min-h-[30px] flex justify-center items-center"
+            className="bg-white px-5 py-[2px] rounded-full text-sm self-start font-bold min-w-[100px] min-h-[30px] flex justify-center items-center"
             style={{ color: "black" }}
           >
             {loading ? (
