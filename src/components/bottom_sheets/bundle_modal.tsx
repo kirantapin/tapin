@@ -301,6 +301,34 @@ const BundleModal: React.FC<BundleModalProps> = ({
               fees={false}
             />
           )}
+          {estimatedBundleValue > bundle.price && (
+            <div
+              className="rounded-xl p-4 mb-4 border border-gray-200 mt-4"
+              style={{
+                backgroundColor: "white",
+              }}
+            >
+              <div
+                className="flex justify-center items-center"
+                style={{
+                  color: "black",
+                }}
+              >
+                <span className="font-medium">
+                  Saves an average of{" "}
+                  <span
+                    className="font-bold"
+                    style={{
+                      color: restaurant?.metadata.primaryColor as string,
+                    }}
+                  >
+                    ${(estimatedBundleValue - bundle.price).toFixed(2)}
+                  </span>{" "}
+                  {bundle.duration > 1 && `over ${bundle.duration} days`}
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Payment section */}
           <div className="mt-6">
