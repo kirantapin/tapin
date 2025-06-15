@@ -7,7 +7,7 @@
 ### Added
 
 - Feature A
-- Support for XYZ
+- Support for XY
 
 ### Changed
 
