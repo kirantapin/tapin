@@ -452,7 +452,7 @@ export const DrinkList = ({
   ];
 
   return (
-    <div className="space-y-4  overflow-y-auto scroll-smooth no-scrollbar">
+    <div className="space-y-4  overflow-y-auto scroll-smooth no-scrollbar -mx-5">
       <div className="pb-20">
         {Object.keys(restaurant.labelMap).map((menuLabel) => {
           const drinksForLabel = drinks.filter(
@@ -468,7 +468,7 @@ export const DrinkList = ({
                   }
                 }}
               >
-                <h3 className="text-xl font-bold ml-3 mt-4 pb-1 sticky top-0 bg-white z-5">
+                <h3 className="text-xl font-bold ml-6 mt-4 pb-1 sticky top-0 bg-white z-5">
                   {menuLabel.toUpperCase()}
                 </h3>
                 <div className="space-y-2">
@@ -476,7 +476,7 @@ export const DrinkList = ({
                   menuLabel === SHOTS_SHOOTERS_LABEL ? (
                     <div className="space-y-4">
                       <div
-                        className="px-3 mt-2 rounded-2xl"
+                        className="px-6 mt-2 rounded-2xl"
                         style={{
                           borderColor: restaurant.metadata
                             .primaryColor as string,

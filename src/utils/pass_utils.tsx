@@ -1,13 +1,19 @@
 import { ItemUtils } from "./item_utils";
 import { supabase } from "./supabase_client";
 import { Cart, CartItem, Pass, PassItem, Restaurant } from "@/types";
+
+const passDisplayThreshold = 14 * 24 * 60 * 60 * 1000; // 14 days
 export class PassUtils {
   static fetchPasses = async (restaurantId: string | null): Promise<Pass[]> => {
     const { data, error } = await supabase
       .from("passes")
       .select("*")
       .eq("restaurant_id", restaurantId)
-      .gte("end_time", new Date().toISOString());
+      .gte("end_time", new Date().toISOString())
+      .lte(
+        "end_time",
+        new Date(Date.now() + passDisplayThreshold).toISOString()
+      );
     if (error) {
       console.error("Error fetch temporary items.", error.message);
       return [];

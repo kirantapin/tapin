@@ -13,8 +13,6 @@ export const RecentActivity: React.FC<RecentActivityProps> = ({
   transactions,
   restaurant,
 }) => {
-  // Get unique transactions by item ID, keeping only the first occurrence
-
   const processedTransactionItems = TransactionUtils.getRecentTransactionItems(
     transactions,
     restaurant,
