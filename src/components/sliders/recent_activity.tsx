@@ -1,27 +1,17 @@
 import React from "react";
-import { Item, PassItem, Restaurant, Transaction } from "@/types";
+import { Item, Restaurant, Transaction } from "@/types";
 import { DrinkItem } from "../menu_items";
 import { ItemUtils } from "@/utils/item_utils";
-import { PASS_MENU_TAG } from "@/constants";
 import { TransactionUtils } from "@/utils/transaction_utils";
 
 interface RecentActivityProps {
   transactions: Transaction[];
   restaurant: Restaurant;
-  addToCart: (item: any) => Promise<void>;
-  removeFromCart: (item: any) => Promise<void>;
-  state: {
-    cart: any;
-    dealEffect: any;
-  };
 }
 
 export const RecentActivity: React.FC<RecentActivityProps> = ({
   transactions,
   restaurant,
-  addToCart,
-  removeFromCart,
-  state,
 }) => {
   // Get unique transactions by item ID, keeping only the first occurrence
 
