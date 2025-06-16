@@ -170,9 +170,6 @@ export default function RestaurantPage() {
         <RecentActivity
           transactions={transactions}
           restaurant={restaurant as Restaurant}
-          addToCart={addToCart}
-          removeFromCart={removeFromCart}
-          state={state}
         />
         {/* Rewards Section */}
         <div className="mt-2">

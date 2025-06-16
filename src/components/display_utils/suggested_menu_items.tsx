@@ -1,15 +1,21 @@
-import { Item, Restaurant } from "@/types";
+import { Item, ItemSpecification, Restaurant } from "@/types";
 import { ItemUtils } from "@/utils/item_utils";
-import { HOUSE_MIXER_LABEL } from "@/constants";
+import { HOUSE_MIXER_LABEL, LIQUOR_MENU_TAG } from "@/constants";
 
 const getItemByName = (
   name: string,
+  whiteListCategories: ItemSpecification[] | null = null,
   modifiers: string[] = [],
   restaurant: Restaurant
 ): Item | null => {
   const lowerName = name.toLowerCase();
-  const menuKey = Object.keys(restaurant.menu).find((key) =>
-    restaurant.menu[key].info?.name?.toLowerCase().includes(lowerName)
+  const menuKey = Object.keys(restaurant.menu).find(
+    (key) =>
+      restaurant.menu[key].info?.name?.toLowerCase().includes(lowerName) &&
+      (whiteListCategories === null ||
+        whiteListCategories.some((category) =>
+          restaurant.menu[key].path?.includes(category)
+        ))
   );
   if (!menuKey) return null;
   const allChildren = ItemUtils.getAllItemsInCategory(menuKey, restaurant);
@@ -24,10 +30,12 @@ export const getSuggestedMenuItems = ({
   type,
   filters,
   restaurant,
+  whiteListCategories,
 }: {
   type: string;
   filters: ((object: any) => boolean)[];
   restaurant: Restaurant;
+  whiteListCategories: ItemSpecification[] | null;
 }): Item[] => {
   const exampleItems: { liquorName: string; modifiers: string[] }[] = [
     {
@@ -53,9 +61,15 @@ export const getSuggestedMenuItems = ({
   ];
 
   const processedTransactionItems: Item[] = [];
-
   const processedSuggestedItems: Item[] = exampleItems
-    .map((item) => getItemByName(item.liquorName, item.modifiers, restaurant))
+    .map((item) =>
+      getItemByName(
+        item.liquorName,
+        whiteListCategories,
+        item.modifiers,
+        restaurant
+      )
+    )
     .filter((item): item is Item => item !== null);
 
   return [

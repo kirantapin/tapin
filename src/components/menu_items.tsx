@@ -535,6 +535,7 @@ export const DrinkList = ({
                             ? houseMixerFilters
                             : shotsShootersFilters,
                         restaurant: restaurant,
+                        whiteListCategories: [LIQUOR_MENU_TAG],
                       }).map((item) => (
                         <DrinkItem
                           key={item.id}
