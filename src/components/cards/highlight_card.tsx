@@ -125,7 +125,10 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
       {hasHighlightImage && (
         <div className="absolute inset-0">
           {!bgLoaded && (
-            <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+            <div
+              className="absolute inset-0  animate-pulse"
+              style={{ backgroundColor: primaryColor }}
+            />
           )}
 
           <div

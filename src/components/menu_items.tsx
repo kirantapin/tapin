@@ -370,20 +370,18 @@ export function PreviousTransactionItem({
 }
 
 export const DrinkList = ({
-  cart,
   label,
+  slideToFilter,
   restaurant,
   addToCart,
-  removeFromCart,
   itemSpecifications,
   selected = null,
   onSelect = null,
 }: {
-  cart: Cart;
   label: string | null;
+  slideToFilter: (filter: string) => void;
   restaurant: Restaurant;
   addToCart: (item: Item, showToast?: boolean) => Promise<void>;
-  removeFromCart: (id: number) => Promise<void>;
   itemSpecifications: ItemSpecification[];
   selected?: Item | null;
   onSelect?: ((item: Item) => Promise<void>) | null;
@@ -391,12 +389,41 @@ export const DrinkList = ({
   const labelRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const isInitialMount = useRef(true);
   const [showLiquorForm, setShowLiquorForm] = useState<string[]>([]);
+  const userScroll = useRef(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const label = entry.target.getAttribute("data-label");
+          if (entry.isIntersecting && label && !userScroll.current) {
+            slideToFilter(label);
+          }
+        });
+      },
+      {
+        root: null, // viewport
+        threshold: 0.01,
+        rootMargin: "100px 0px -100% 0px",
+      }
+    );
+    const elements = Array.from(labelRefs.current.values());
+    elements.forEach((el) => {
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   const scrollToLabel = (menuLabel: string) => {
+    userScroll.current = true;
     const el = labelRefs.current.get(menuLabel);
     if (el) {
       window.scrollTo({ top: el.offsetTop - 190, behavior: "smooth" });
     }
+    setTimeout(() => {
+      userScroll.current = false;
+    }, 1000);
   };
 
   const drinks: { id: string; label: string }[] = useMemo(() => {
@@ -460,14 +487,16 @@ export const DrinkList = ({
           );
           if (drinksForLabel.length > 0) {
             return (
-              <div
-                key={menuLabel}
-                ref={(el) => {
-                  if (el) {
-                    labelRefs.current.set(menuLabel, el);
-                  }
-                }}
-              >
+              <div key={menuLabel}>
+                <div
+                  data-label={menuLabel}
+                  ref={(el) => {
+                    if (el) {
+                      labelRefs.current.set(menuLabel, el);
+                    }
+                  }}
+                  style={{ height: 1 }}
+                />
                 <h3 className="text-xl font-bold ml-6 mt-4 pb-1 sticky top-0 bg-white z-5">
                   {menuLabel.toUpperCase()}
                 </h3>
