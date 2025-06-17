@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/auth_context.tsx";
 import { Restaurant, Transaction } from "../types.ts";
-import { HOUSE_MIXER_LABEL, MAX_QR_TRANSACTIONS } from "../constants.ts";
+import { MAX_QR_TRANSACTIONS } from "../constants.ts";
 
 import { DrinkItem, DrinkList } from "@/components/menu_items.tsx";
 import GoToCartButton from "@/components/buttons/go_to_cart_button.tsx";
@@ -28,13 +28,14 @@ import { isOpenNow } from "@/utils/time.ts";
 import { titleCase } from "title-case";
 import FollowButton from "@/components/buttons/follow_button.tsx";
 import { useUTMParams } from "@/hooks/useUTMParams.tsx";
+
 export default function RestaurantPage() {
   const { userSession, transactions } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { restaurant, policyManager, userOwnershipMap } = useRestaurant();
   const policies = policyManager?.policies;
-  const [activeFilter, setActiveFilter] = useState(HOUSE_MIXER_LABEL);
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const orderDrinksRef = useRef<HTMLDivElement>(null);
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const { state, addToCart, removeFromCart, triggerToast, openBundleModal } =
@@ -104,6 +105,18 @@ export default function RestaurantPage() {
     handleLocation();
   }, []);
 
+  const slideToFilter = (filter: string) => {
+    const button = buttonRefs.current.get(filter);
+    const container = scrollContainerRef.current;
+    if (button && container) {
+      const scrollLeft = button.offsetLeft - 10;
+      container.scrollTo({
+        left: scrollLeft,
+        behavior: "smooth",
+      });
+    }
+  };
+
   const [titleElement, setTitleElement] = useState<HTMLHeadingElement | null>(
     null
   );
@@ -112,7 +125,6 @@ export default function RestaurantPage() {
     setTitleElement(element); // This will trigger a re-render and useEffect
   };
 
-  // Now useBannerColor can use titleElement instead of ref
   useBannerColor(titleElement, restaurant);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -269,15 +281,7 @@ export default function RestaurantPage() {
                   onClick={() => {
                     setSearchQuery("");
                     setActiveFilter(filter);
-                    const button = buttonRefs.current.get(filter);
-                    const container = scrollContainerRef.current;
-                    if (button && container) {
-                      const scrollLeft = button.offsetLeft - 10;
-                      container.scrollTo({
-                        left: scrollLeft,
-                        behavior: "smooth",
-                      });
-                    }
+                    slideToFilter(filter);
                   }}
                 >
                   {titleCase(filter)}
@@ -306,11 +310,10 @@ export default function RestaurantPage() {
             </div>
           ) : (
             <DrinkList
-              cart={state.cart}
               label={activeFilter}
+              slideToFilter={slideToFilter}
               restaurant={restaurant}
               addToCart={addToCart}
-              removeFromCart={removeFromCart}
               itemSpecifications={[]}
             />
           )}

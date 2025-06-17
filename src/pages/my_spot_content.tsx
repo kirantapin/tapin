@@ -90,29 +90,37 @@ const MySpotContent: React.FC = () => {
 
   const addItem = (key: string) => {
     setGroupedTransactions((prev) => {
+      // Create a new object to avoid mutating the previous state
       const newGroupedTransactions = { ...prev };
-      if (
-        newGroupedTransactions[key].currentQuantity <
-        newGroupedTransactions[key].maxQuantity
-      ) {
-        newGroupedTransactions[key].currentQuantity += 1;
+      const currentGroup = { ...newGroupedTransactions[key] };
+
+      if (currentGroup.currentQuantity < currentGroup.maxQuantity) {
+        currentGroup.currentQuantity += 1;
+        newGroupedTransactions[key] = currentGroup;
       }
+
       return newGroupedTransactions;
     });
   };
+
   const removeItem = (key: string) => {
     setGroupedTransactions((prev) => {
+      // Create a new object to avoid mutating the previous state
       const newGroupedTransactions = { ...prev };
-      if (newGroupedTransactions[key].currentQuantity > 0) {
-        newGroupedTransactions[key].currentQuantity -= 1;
+      const currentGroup = { ...newGroupedTransactions[key] };
+
+      if (currentGroup.currentQuantity > 0) {
+        currentGroup.currentQuantity -= 1;
+        newGroupedTransactions[key] = currentGroup;
       }
+
       return newGroupedTransactions;
     });
   };
 
   const grabSelectedTransactions = () => {
     return Object.entries(groupedTransactions).reduce(
-      (acc, [key, { transactions, maxQuantity, currentQuantity }]) => {
+      (acc, [key, { transactions, currentQuantity }]) => {
         if (currentQuantity > 0) {
           // Sort transactions by created_at in ascending order (oldest first)
           const sortedTransactions = [...transactions].sort(
@@ -231,8 +239,8 @@ const MySpotContent: React.FC = () => {
             {/* Redeem Button */}
             <div className="fixed bottom-0 left-0 right-0 flex flex-col gap-2 bg-white py-4 px-4 border-t rounded-t-3xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
               <button
-                className={`w-full py-3 rounded-full text-white font-semibold ${
-                  selectedTransactions.length > 0 ? "" : "bg-gray-400 "
+                className={`w-full py-3 rounded-full text-white font-semibold transition-colors duration-400 ${
+                  selectedTransactions.length > 0 ? "" : "bg-gray-400"
                 }`}
                 style={
                   selectedTransactions.length > 0
@@ -240,7 +248,9 @@ const MySpotContent: React.FC = () => {
                         backgroundColor: restaurant.metadata
                           .primaryColor as string,
                       }
-                    : { backgroundColor: "#969292" }
+                    : {
+                        backgroundColor: "#969292",
+                      }
                 }
                 onClick={() => openQrModal(selectedTransactions)}
                 disabled={selectedTransactions.length === 0}

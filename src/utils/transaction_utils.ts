@@ -1,17 +1,18 @@
-import { ItemSpecification, PassItem, Policy, Transaction } from "@/types";
+import { PassItem, Transaction } from "@/types";
 import { Restaurant } from "@/types";
 import { supabase } from "./supabase_client";
-import { formatPoints, listItemsToStringDescription } from "./parse";
 import { ItemUtils } from "./item_utils";
-import { titleCase } from "title-case";
-import { LOYALTY_REWARD_TAG, PASS_MENU_TAG } from "@/constants";
-import { formatAvailabilityWindow } from "./time";
+import { PASS_MENU_TAG } from "@/constants";
 
 export class TransactionUtils {
   static getRecentTransactionItems = (
     transactions: Transaction[],
     restaurant: Restaurant | null,
-    filters: ((object: any) => boolean)[]
+    filters: ((object: {
+      id: string;
+      modifiers: string[];
+      purchaseDate: string;
+    }) => boolean)[]
   ): {
     id: string;
     modifiers: string[];
@@ -76,12 +77,16 @@ export class TransactionUtils {
           } else {
             return null;
           }
+        } else {
+          if (!ItemUtils.getMenuItemFromItemId(itemId, restaurant)) {
+            return null;
+          }
+          return {
+            id: itemId,
+            modifiers: modifiers,
+            purchaseDate: purchaseDate,
+          };
         }
-        return {
-          id: itemId,
-          modifiers: modifiers,
-          purchaseDate: purchaseDate,
-        };
       })
       .filter((item) => item !== null);
     const filteredTransactionItems = processedTransactionItems.filter((item) =>

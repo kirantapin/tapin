@@ -206,15 +206,14 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                       </div>
 
                       <DrinkList
-                        cart={state.cart}
                         restaurant={restaurant}
                         addToCart={addToCart}
-                        removeFromCart={removeFromCart}
                         itemSpecifications={ItemUtils.policyItemSpecificationsToItemIds(
                           result.missingItems,
                           restaurant
                         )}
                         label={null}
+                        slideToFilter={() => {}}
                         onSelect={null}
                         selected={null}
                       />
@@ -241,12 +240,11 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                   <div className="rounded-lg">
                     {!policyIsActive && userChoices.length > 1 && (
                       <DrinkList
-                        cart={state.cart}
                         restaurant={restaurant}
                         addToCart={addToCart}
-                        removeFromCart={removeFromCart}
                         itemSpecifications={userChoices}
                         label={null}
+                        slideToFilter={() => {}}
                         onSelect={async (item) => {
                           setUserPreference(item);
                         }}
