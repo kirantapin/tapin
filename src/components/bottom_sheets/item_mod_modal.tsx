@@ -34,7 +34,7 @@ const ItemModModal: React.FC<ItemModModalProps> = ({
         className="h-[65vh] rounded-t-3xl [&>button]:hidden p-0"
       >
         <div className="flex flex-col h-full">
-          <SheetHeader className="flex-none px-6 pt-6 pb-4">
+          <SheetHeader className="flex-none px-6 pt-6 pb-4 border-b border-gray-200">
             <div className="flex justify-between items-start">
               <SheetTitle className="text-2xl font-bold">
                 Make Your Drink

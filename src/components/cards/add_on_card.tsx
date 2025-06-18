@@ -2,7 +2,7 @@ import { useRestaurant } from "@/context/restaurant_context";
 import { NormalItem, Policy, Restaurant } from "@/types";
 import { ImageUtils } from "@/utils/image_utils";
 import { ItemUtils } from "@/utils/item_utils";
-import { Check, Plus } from "lucide-react";
+import { Check, Plus, X } from "lucide-react";
 import React, { useState } from "react";
 import { titleCase } from "title-case";
 import { ImageFallback } from "../display_utils/image_fallback";
@@ -12,6 +12,7 @@ interface AddOnCardProps {
   restaurant: Restaurant;
   addPolicy: (policy: Policy) => Promise<void>;
   itemId: string;
+  removePolicy: (policy_id: string) => Promise<void>;
 }
 
 const AddOnCard: React.FC<AddOnCardProps> = ({
@@ -19,6 +20,7 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
   policy,
   itemId,
   addPolicy,
+  removePolicy,
   restaurant,
 }) => {
   const { policyManager } = useRestaurant();
@@ -55,9 +57,9 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
   const active = policies.some((p) => p.policy_id === policy.policy_id);
 
   return (
-    <div className="w-28">
+    <div className="w-28 relative">
       {/* Image container with 1:1 aspect ratio */}
-      <div className="relative aspect-square overflow-hidden rounded-xl bg-gray-100">
+      <div className="aspect-square overflow-hidden rounded-xl bg-gray-100">
         <ImageFallback
           src={ImageUtils.getItemImageUrl(itemId, restaurant)}
           alt={name}
@@ -66,12 +68,16 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
         />
 
         {active ? (
-          <div className="absolute bottom-2 right-2 flex items-center justify-center bg-white h-7 w-7 rounded-full">
-            <Check className="w-4 h-4 text-[#40C4AA]" />
+          <div className="absolute bottom-16 right-2 flex items-center justify-center bg-white h-7 w-7 rounded-full border border-gray-200">
+            {loading ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-black border-t-transparent" />
+            ) : (
+              <Check className="w-4 h-4 text-[#40C4AA]" />
+            )}
           </div>
         ) : (
           <button
-            className="absolute bottom-2 right-2 w-7 h-7 rounded-full flex items-center justify-center bg-white shadow-md"
+            className="absolute bottom-16 right-2 w-7 h-7 rounded-full flex items-center justify-center bg-white shadow-md border border-gray-200"
             style={{ color: "black" }}
             onClick={async () => {
               setLoading(true);
@@ -87,6 +93,20 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
           </button>
         )}
       </div>
+
+      {/* X button positioned relative to outer container */}
+      {active && (
+        <div
+          className="absolute -top-2 -right-2 flex items-center justify-center bg-white h-6 w-6 rounded-full shadow-md border border-gray-200 z-10"
+          onClick={async () => {
+            setLoading(true);
+            await removePolicy(policy.policy_id);
+            setLoading(false);
+          }}
+        >
+          <X className="w-3 h-3 text-red-500" />
+        </div>
+      )}
 
       {/* Item Details */}
       <div className="mt-2">
