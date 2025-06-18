@@ -24,8 +24,8 @@ import { isEqual } from "lodash";
 import { PolicyUtils } from "@/utils/policy_utils";
 import { ImageUtils } from "@/utils/image_utils";
 import { ImageFallback } from "./display_utils/image_fallback";
-import LiquorForm from "./liquor_form";
 import { useRestaurant } from "@/context/restaurant_context";
+import ItemModModal from "./bottom_sheets/item_mod_modal";
 
 export function DrinkItem({
   item,
@@ -388,8 +388,9 @@ export const DrinkList = ({
 }) => {
   const labelRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const isInitialMount = useRef(true);
-  const [showLiquorForm, setShowLiquorForm] = useState<string[]>([]);
   const userScroll = useRef(false);
+  const [showItemModModal, setShowItemModModal] = useState(false);
+  const [itemModMenuLabel, setItemModMenuLabel] = useState<string | null>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -513,13 +514,8 @@ export const DrinkList = ({
                       >
                         <div
                           onClick={() => {
-                            setShowLiquorForm(
-                              showLiquorForm.includes(menuLabel)
-                                ? showLiquorForm.filter(
-                                    (label) => label !== menuLabel
-                                  )
-                                : [...showLiquorForm, menuLabel]
-                            );
+                            setShowItemModModal(true);
+                            setItemModMenuLabel(menuLabel);
                           }}
                           className="w-full text-center text-md text-gray-500 rounded-2xl py-3 px-4 mx-auto block flex items-center justify-center font-semibold"
                           style={{
@@ -533,28 +529,6 @@ export const DrinkList = ({
                           {menuLabel === HOUSE_MIXER_LABEL
                             ? "House Mixer"
                             : "Shot"}
-                        </div>
-                        <div
-                          className={`transition-all duration-300 ease-in-out ${
-                            showLiquorForm.includes(menuLabel)
-                              ? "max-h-[1000px] opacity-100"
-                              : "max-h-0 opacity-0 overflow-hidden"
-                          }`}
-                        >
-                          <LiquorForm
-                            type={menuLabel}
-                            restaurant={restaurant}
-                            primaryColor={
-                              restaurant.metadata.primaryColor as string
-                            }
-                            afterAdd={async (item) => {
-                              if (onSelect) {
-                                await onSelect(item);
-                              } else {
-                                await addToCart(item, true);
-                              }
-                            }}
-                          />
                         </div>
                       </div>
                       {getSuggestedMenuItems({
@@ -591,6 +565,13 @@ export const DrinkList = ({
           }
         })}
       </div>
+      <ItemModModal
+        isOpen={showItemModModal}
+        onClose={() => setShowItemModModal(false)}
+        menuLabel={itemModMenuLabel}
+        onSelect={onSelect ?? null}
+        addToCart={addToCart}
+      />
     </div>
   );
 };

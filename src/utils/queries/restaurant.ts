@@ -76,10 +76,14 @@ export const fetchRestaurantById = async (
     BundleUtils.fetchBundles(restaurantId),
   ]);
 
+  const passMenu = data.menu[PASS_MENU_TAG];
   for (const pass of passes) {
-    const passMenu = data.menu[PASS_MENU_TAG];
+    const item = passMenu[pass.itemId];
+
+    if (!item || !item.name) continue;
+
     passMenu[pass.itemId][pass.pass_id] = {
-      name: passMenu[pass.itemId].name,
+      name: item.name,
       price: pass.price,
       description: pass.item_description,
       amount_remaining: pass.amount_remaining,

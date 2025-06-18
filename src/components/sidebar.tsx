@@ -16,6 +16,7 @@ import { Restaurant } from "@/types.ts";
 import { SignInButton } from "./signin/signin_button.tsx";
 import CustomLogo from "./svg/custom_logo.tsx";
 import { ImageUtils } from "@/utils/image_utils.ts";
+import { useBottomSheet } from "@/context/bottom_sheet_context.tsx";
 
 interface SidebarProps {
   restaurant: Restaurant | null;
@@ -26,6 +27,7 @@ interface SidebarProps {
 export const Sidebar = ({ restaurant, isOpen, onClose }: SidebarProps) => {
   const { userSession, logout } = useAuth();
   const [isSignedIn, setIsSignedIn] = useState(false);
+  const { triggerToast } = useBottomSheet();
   const navigate = useNavigate();
   const [history, setHistory] = useState<any[]>([]);
 
@@ -137,6 +139,7 @@ export const Sidebar = ({ restaurant, isOpen, onClose }: SidebarProps) => {
             className="w-full bg-gray-200 text-black font-semibold py-3 px-4 rounded-full shadow-md transition-all duration-200 flex items-center justify-center gap-2 mb-4"
             onClick={() => {
               logout();
+              triggerToast("Logged out successfully", "info");
               onClose();
             }}
           >
