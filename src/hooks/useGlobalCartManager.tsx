@@ -45,6 +45,7 @@ export function useGlobalCartManager(
 ) {
   const cartManagerRef = useRef<CartManager | null>(null);
   const [state, dispatch] = useReducer(cartReducer, initialState);
+  const actionLock = useRef<boolean>(false);
 
   const triggerToast = (
     message: string,
@@ -113,7 +114,8 @@ export function useGlobalCartManager(
 
   // Cart operations
   const addToCart = async (item: Item, showToast?: boolean): Promise<void> => {
-    if (!cartManagerRef.current || !restaurant) return;
+    if (!cartManagerRef.current || !restaurant || actionLock.current) return;
+    actionLock.current = true;
     const result = await cartManagerRef.current.addToCart(item);
     if (result) {
       triggerToast(result, "error", 4000);
@@ -123,10 +125,12 @@ export function useGlobalCartManager(
       }
       dispatch(cartManagerRef.current.getCartState());
     }
+    actionLock.current = false;
   };
 
   const removeFromCart = async (itemId: number): Promise<void> => {
-    if (!cartManagerRef.current) return;
+    if (!cartManagerRef.current || actionLock.current) return;
+    actionLock.current = true;
     const result = await cartManagerRef.current.removeFromCart(itemId);
 
     if (result) {
@@ -134,6 +138,7 @@ export function useGlobalCartManager(
     } else {
       dispatch(cartManagerRef.current.getCartState());
     }
+    actionLock.current = false;
   };
 
   const addPolicy = async (
@@ -141,7 +146,8 @@ export function useGlobalCartManager(
     policy_id: string,
     userPreference: Item | null
   ): Promise<void> => {
-    if (!cartManagerRef.current) return;
+    if (!cartManagerRef.current || actionLock.current) return;
+    actionLock.current = true;
     const result = await cartManagerRef.current.addPolicy(
       bundle_id,
       policy_id,
@@ -158,10 +164,12 @@ export function useGlobalCartManager(
       }
       dispatch(cartManagerRef.current.getCartState());
     }
+    actionLock.current = false;
   };
 
   const removePolicy = async (policy_id: string): Promise<void> => {
-    if (!cartManagerRef.current) return;
+    if (!cartManagerRef.current || actionLock.current) return;
+    actionLock.current = true;
     const result = await cartManagerRef.current.removePolicy(policy_id);
 
     if (result) {
@@ -174,21 +182,26 @@ export function useGlobalCartManager(
       }
       dispatch(cartManagerRef.current.getCartState());
     }
+    actionLock.current = false;
   };
 
   const refreshCart = async (): Promise<string | null> => {
-    if (!cartManagerRef.current) return null;
+    if (!cartManagerRef.current || actionLock.current) return null;
+    actionLock.current = true;
     const result = await cartManagerRef.current.refresh();
     if (!result) {
       dispatch(cartManagerRef.current.getCartState());
     }
+    actionLock.current = false;
     return result;
   };
 
   const clearCart = async (): Promise<void> => {
-    if (!cartManagerRef.current) return;
+    if (!cartManagerRef.current || actionLock.current) return;
+    actionLock.current = true;
     cartManagerRef.current.clearCart();
     dispatch(cartManagerRef.current.getCartState());
+    actionLock.current = false;
   };
 
   const getActivePolicies = (): string[] => {

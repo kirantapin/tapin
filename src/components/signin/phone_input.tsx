@@ -4,10 +4,8 @@ import "react-phone-input-2/lib/style.css";
 
 export function PhoneInputComponent({
   onSubmit,
-  onClose,
 }: {
   onSubmit: (phone: string) => void;
-  onClose: () => void;
 }) {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [value, setValue] = useState<string>("+1"); //default to american dial code
@@ -98,12 +96,6 @@ export function PhoneInputComponent({
             Continue
           </button>
         </form>
-
-        <div className="absolute bottom-12 left-0 right-0 text-center">
-          <button onClick={onClose} className="text-gray-600 underline">
-            Browse as Guest
-          </button>
-        </div>
       </div>
     </div>
   );

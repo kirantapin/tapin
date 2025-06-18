@@ -2,7 +2,6 @@ import { FC, useState, useEffect } from "react";
 import { Restaurant } from "@/types";
 import { checkoutStyles } from "@/styles/checkout_styles";
 import { formatPoints } from "@/utils/parse";
-import { adjustColor } from "@/utils/color";
 import { motion } from "framer-motion";
 interface CheckoutSummaryProps {
   state: any;
@@ -10,6 +9,7 @@ interface CheckoutSummaryProps {
   tipAmount: number;
   setTipAmount: (tipAmount: number) => void;
   fees?: boolean;
+  showDiscount: boolean;
 }
 
 const CheckoutSummary: FC<CheckoutSummaryProps> = ({
@@ -18,6 +18,7 @@ const CheckoutSummary: FC<CheckoutSummaryProps> = ({
   tipAmount,
   setTipAmount,
   fees = true,
+  showDiscount,
 }) => {
   const [tipPercent, setTipPercent] = useState<number>(0.2);
 
@@ -33,7 +34,7 @@ const CheckoutSummary: FC<CheckoutSummaryProps> = ({
     state.cart.length > 0 &&
     state.cartResults && (
       <div className={checkoutStyles.summaryContainer}>
-        {state.cartResults.discount > 0 && (
+        {showDiscount && state.cartResults.discount > 0 && (
           <div
             className="rounded-xl p-4 mb-4 border border-gray-200"
             style={{

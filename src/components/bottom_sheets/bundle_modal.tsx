@@ -299,6 +299,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
               setTipAmount={() => {}}
               tipAmount={0}
               fees={false}
+              showDiscount={false}
             />
           )}
           {estimatedBundleValue > bundle.price && (
