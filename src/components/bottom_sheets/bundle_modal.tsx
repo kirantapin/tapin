@@ -279,7 +279,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
                 addPolicy={addPolicy}
                 removePolicy={removePolicy}
                 allowTimer={false}
-                allowNormalItems={false}
+                allowNormalItems={true}
               />
             ) : null
           ) : (

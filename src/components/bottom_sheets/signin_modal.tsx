@@ -50,6 +50,7 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
     } else if (session) {
       triggerToast("Signed in successfully, Welcome to Tap In.", "success");
       onClose();
+      setStep("phone");
     }
   };
 
