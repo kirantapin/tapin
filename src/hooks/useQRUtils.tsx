@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Item, Restaurant, Transaction } from "@/types";
-import { MAX_QR_TRANSACTIONS } from "@/constants";
+import { Item, Transaction } from "@/types";
 
 export const useQRUtils = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -21,45 +20,6 @@ export const useQRUtils = () => {
     if (length <= 200) return "Q"; // dense
     return "H"; // very dense, highest correction
   }
-
-  const validateTransactions = (
-    transactions: Transaction[],
-    triggerToast: (
-      message: string,
-      type: "error" | "success" | "info",
-      duration?: number
-    ) => void,
-    onClose: () => void,
-    restaurant: Restaurant
-  ): boolean => {
-    if (transactions.length <= 0 || !restaurant) {
-      return false;
-    }
-    if (transactions.length > MAX_QR_TRANSACTIONS) {
-      triggerToast(
-        "Please try to redeem again with a fewer number of items.",
-        "error"
-      );
-      onClose();
-      return false;
-    }
-
-    // Check if all transactions are from the same restaurant and unfulfilled
-    const allSameRestaurant = transactions.every(
-      (transaction) =>
-        transaction.restaurant_id === transactions[0].restaurant_id
-    );
-    const allUnfulfilled = transactions.every(
-      (transaction) => transaction.fulfilled_by === null
-    );
-
-    if (!allSameRestaurant || !allUnfulfilled) {
-      onClose();
-      triggerToast("Something went wrong. Please try again.", "error");
-      return false;
-    }
-    return true;
-  };
 
   const getItemsFromTransactions = (
     transactions: Transaction[]
@@ -85,7 +45,6 @@ export const useQRUtils = () => {
     setError,
     formatTransactions,
     determineErrorCorrectionLevel,
-    validateTransactions,
     getItemsFromTransactions,
   };
 };

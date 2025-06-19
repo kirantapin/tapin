@@ -3,15 +3,10 @@ import { supabase } from "@/utils/supabase_client";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 interface VerificationProps {
   phoneNumber: string;
-  onBack: () => void;
   onVerify: (code: string) => void;
 }
 
-export function Verification({
-  phoneNumber,
-  onBack,
-  onVerify,
-}: VerificationProps) {
+export function Verification({ phoneNumber, onVerify }: VerificationProps) {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [timeLeft, setTimeLeft] = useState(60);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);

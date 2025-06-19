@@ -121,29 +121,14 @@ const AddOnManager: FC<AddOnManagerProps> = ({
 
   return (
     <div className="mt-4">
-      {addOnPolicies.length > 0 && (
-        <div className="flex items-center gap-2">
-          {allowNormalItems && (
-            <h2 className="text-lg font-bold mb-4">
-              {isPreEntry ? "Exclusive Pre-entry Deals" : "Exclusive Deals"}
-            </h2>
-          )}
-          {/* {allowTimer && (
-            <div className="text-md text-red-600 mb-4">
-              {addOnTime > 0 ? (
-                <span>
-                  {Math.floor(addOnTime / 60)}:
-                  {(addOnTime % 60).toString().padStart(2, "0")} left to claim
-                </span>
-              ) : (
-                <span className="text-red-500">Expired</span>
-              )}
-            </div>
-          )} */}
-        </div>
-      )}
       {allowNormalItems && (
-        <div className="overflow-x-auto pb-2 mb-2 no-scrollbar -mx-4 px-4">
+        <h2 className="text-lg font-bold mb-1">
+          {isPreEntry ? "Exclusive Pre-entry Deals" : "Exclusive Deals"}
+        </h2>
+      )}
+
+      {allowNormalItems && (
+        <div className="overflow-x-auto pt-2 mb-2 no-scrollbar -mx-4 px-4">
           <div className="flex gap-4" style={{ minWidth: "max-content" }}>
             {addOnTime > 0 &&
               normalItems.map(({ policy, itemId }) => (
@@ -160,6 +145,7 @@ const AddOnManager: FC<AddOnManagerProps> = ({
                     });
                     pause();
                   }}
+                  removePolicy={removePolicy}
                 />
               ))}
           </div>

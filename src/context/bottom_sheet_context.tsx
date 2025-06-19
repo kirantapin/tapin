@@ -23,7 +23,7 @@ import { useAuth } from "./auth_context";
 import BundleModal from "@/components/bottom_sheets/bundle_modal";
 import QRModal from "@/components/bottom_sheets/qr_modal";
 import { BundleUtils } from "@/utils/bundle_utils";
-import { emptyDealEffect } from "@/constants";
+import { emptyDealEffect, MAX_QR_TRANSACTIONS } from "@/constants";
 import { ItemUtils } from "@/utils/item_utils";
 import { CartManager } from "@/utils/cartManager";
 import ProfileModal from "@/components/bottom_sheets/profile_modal";
@@ -31,7 +31,6 @@ import SignInModal from "@/components/bottom_sheets/signin_modal";
 import LockedPolicyModal from "@/components/bottom_sheets/locked_policy_modal";
 import AllBundlesModal from "@/components/bottom_sheets/all_bundles_modal";
 import CheckoutModal from "@/components/bottom_sheets/checkout_modal";
-import { setThemeColor } from "@/utils/color";
 
 // Define the shape of your sheet registry: keys → sheet components
 type SheetMap = Record<string, FC<any>>;
@@ -109,6 +108,41 @@ interface BottomSheetProviderProps {
   sheets: SheetMap;
   children: ReactNode;
 }
+
+const validateTransactions = (
+  transactions: Transaction[],
+  triggerToast: (
+    message: string,
+    type: "error" | "success" | "info",
+    duration?: number
+  ) => void,
+  restaurant: Restaurant | null
+): boolean => {
+  if (transactions.length <= 0 || !restaurant) {
+    return false;
+  }
+  if (transactions.length > MAX_QR_TRANSACTIONS) {
+    triggerToast(
+      "Please try to redeem again with a fewer number of items.",
+      "error"
+    );
+    return false;
+  }
+
+  // Check if all transactions are from the same restaurant and unfulfilled
+  const allSameRestaurant = transactions.every(
+    (transaction) => transaction.restaurant_id === transactions[0].restaurant_id
+  );
+  const allUnfulfilled = transactions.every(
+    (transaction) => transaction.fulfilled_by === null
+  );
+
+  if (!allSameRestaurant || !allUnfulfilled) {
+    triggerToast("Something went wrong. Please try again.", "error");
+    return false;
+  }
+  return true;
+};
 
 export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
   children,
@@ -211,6 +245,14 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
   };
 
   const openQrModal = (transactionsToRedeem: Transaction[]) => {
+    const valid = validateTransactions(
+      transactionsToRedeem,
+      triggerToast,
+      restaurant
+    );
+    if (!valid) {
+      return;
+    }
     if (isOpen) {
       closeSheet();
     }

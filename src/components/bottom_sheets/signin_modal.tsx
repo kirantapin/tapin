@@ -29,8 +29,8 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
     });
 
     if (error) {
-      console.error("Error sending OTP:", error.message);
-      triggerToast("Failed to send OTP. Please try again.", "error");
+      console.error("Error sending code:", error.message);
+      triggerToast("Failed to send code. Please try again.", "error");
     } else {
       setStep("verify");
     }
@@ -78,16 +78,9 @@ const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose }) => {
 
           <div className="flex-1 overflow-y-auto">
             {step === "phone" ? (
-              <PhoneInputComponent
-                onClose={onClose}
-                onSubmit={handlePhoneSubmit}
-              />
+              <PhoneInputComponent onSubmit={handlePhoneSubmit} />
             ) : (
-              <Verification
-                phoneNumber={phoneNumber}
-                onBack={() => setStep("phone")}
-                onVerify={handleVerify}
-              />
+              <Verification phoneNumber={phoneNumber} onVerify={handleVerify} />
             )}
           </div>
         </div>

@@ -38,23 +38,10 @@ const QRModal: React.FC<QRModalProps> = ({
   const [showCodeInput, setShowCodeInput] = useState(false);
 
   const {
-    validateTransactions,
     determineErrorCorrectionLevel,
     formatTransactions,
     getItemsFromTransactions,
   } = useQRUtils();
-
-  const valid = validateTransactions(
-    transactionsToRedeem,
-    triggerToast,
-    onClose,
-    restaurant
-  );
-
-  if (!valid) {
-    onClose();
-    return;
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
