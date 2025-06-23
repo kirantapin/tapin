@@ -76,3 +76,14 @@ export const formatPoints = (points: number) => {
   }
   return `${points}`;
 };
+
+export const formatBundleName = (name: string) => {
+  let formattedName = name;
+  if (!formattedName.toLowerCase().endsWith("bundle")) {
+    formattedName += " Bundle";
+  }
+  if (!formattedName.toLowerCase().startsWith("the ")) {
+    formattedName = "The " + formattedName;
+  }
+  return formattedName;
+};

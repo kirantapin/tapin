@@ -151,7 +151,14 @@ const MySpotContent: React.FC = () => {
           <button
             className="w-9 h-9 flex items-center justify-center rounded-full bg-black/10"
             onClick={() => {
-              navigate(RESTAURANT_PATH.replace(":id", restaurant.id));
+              if (
+                document.referrer &&
+                document.referrer.includes(window.location.origin)
+              ) {
+                navigate(-1);
+              } else {
+                navigate(RESTAURANT_PATH.replace(":id", restaurant.id));
+              }
             }}
           >
             <ChevronLeft className="w-6 h-6" />

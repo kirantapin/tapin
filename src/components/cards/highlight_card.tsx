@@ -13,6 +13,7 @@ import { useRestaurant } from "@/context/restaurant_context";
 import { PolicyUtils } from "@/utils/policy_utils";
 import { ImageUtils } from "@/utils/image_utils";
 import { ImageFallback } from "../display_utils/image_fallback";
+import { formatBundleName } from "@/utils/parse";
 
 interface HighlightCardProps {
   highlight: Highlight;
@@ -55,9 +56,11 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
       content_pointer || "",
       restaurant
     ) as BundleItem;
-    setTitle(bundle?.name);
+    setTitle(formatBundleName(bundle?.name));
     setDescription(
-      `Receive amazing value at ${restaurant.name} with the ${bundle?.name}, exclusive on Tap In`
+      `Receive amazing value at ${restaurant.name} with the ${formatBundleName(
+        bundle?.name
+      )}, exclusive on Tap In`
     );
     setDefaultImageUrl("fallback");
   };
