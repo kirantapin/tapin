@@ -14,7 +14,7 @@ import {
   RefreshCw,
   Lock,
 } from "lucide-react";
-import { Policy, Restaurant, CartState, BundleItem, Item } from "@/types";
+import { Policy, Restaurant, BundleItem, Item } from "@/types";
 import { DrinkList } from "@/components/menu_items";
 import { titleCase } from "title-case";
 import { PolicyDescriptionDisplay } from "@/components/display_utils/policy_description_display";
@@ -45,8 +45,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
   restaurant,
 }) => {
   const { userSession } = useAuth();
-  const { addToCart, removeFromCart, addPolicy, state, openCheckoutModal } =
-    useBottomSheet();
+  const { addToCart, addPolicy, state, openCheckoutModal } = useBottomSheet();
   const [userPreference, setUserPreference] = useState<Item | null>(null);
   const [loading, setLoading] = useState(false);
   const missingItemsResults = getMissingItemsForPolicy(
@@ -228,9 +227,9 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                       {policyIsActive
                         ? "This deal is active in your cart."
                         : `You're ready to add this deal.${
-                            userChoices.length > 1 ? ` ` : ""
+                            userChoices.length > 0 ? ` ` : ""
                           }`}
-                      {!policyIsActive && userChoices.length > 1 && (
+                      {!policyIsActive && userChoices.length > 0 && (
                         <span className="font-bold">
                           Select your preferred item.
                         </span>
@@ -238,7 +237,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                     </span>
                   </div>
                   <div className="rounded-lg">
-                    {!policyIsActive && userChoices.length > 1 && (
+                    {!policyIsActive && userChoices.length > 0 && (
                       <DrinkList
                         restaurant={restaurant}
                         addToCart={addToCart}
@@ -322,7 +321,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                 style={{
                   backgroundColor:
                     (hasMissingItems && !policyIsActive) ||
-                    (userChoices.length > 1 &&
+                    (userChoices.length > 0 &&
                       !userPreference &&
                       !policyIsActive) ||
                     !isUsable
@@ -344,7 +343,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                   onClose();
                 }}
                 disabled={
-                  (userChoices.length > 1 &&
+                  (userChoices.length > 0 &&
                     !userPreference &&
                     !policyIsActive) ||
                   (hasMissingItems && !policyIsActive) ||

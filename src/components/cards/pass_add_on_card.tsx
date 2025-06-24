@@ -118,7 +118,7 @@ export const PassAddOnCard: React.FC<PassAddOnCardProps> = ({
             backgroundColor: restaurant.metadata.primaryColor as string,
           }}
         >
-          EXCLUSIVE (SAVE ${originalPrice - newPrice})
+          EXCLUSIVE (SAVE ${(originalPrice - newPrice).toFixed(2)})
         </div>
 
         {/* Title / Price */}

@@ -8,14 +8,20 @@ export const listItemsToStringDescription = (
   restaurant: Restaurant
 ) => {
   if (items.length > 1) {
-    const itemNames = items
+    const itemsToShow = items.slice(0, 2);
+    const remainingCount = items.length - 3;
+
+    const itemNames = itemsToShow
       .map((item) =>
         ItemUtils.getItemName({ id: item, modifiers: [] }, restaurant)
       )
       .join(" or ");
+
+    const suffix = remainingCount > 0 ? ` or other select items` : "";
+
     return `${quantity} ${injectWord ? injectWord + " " : ""}${
       quantity > 1 ? "orders" : "order"
-    } of either ${itemNames}`;
+    } of either ${itemNames}${suffix}`;
   } else if (items.length === 1) {
     const itemName = ItemUtils.getItemName(
       { id: items[0], modifiers: [] },

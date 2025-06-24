@@ -175,7 +175,15 @@ export function DrinkItem({
   );
 }
 
-export function LoyaltyRewardItem({
+type LoyaltyRewardPolicyCard = {
+  name: string;
+  description: string;
+  price: number | null;
+  image_url: string;
+  numPoints: number;
+} | null;
+
+export function LoyaltyRewardPolicyCard({
   restaurant,
   policy,
   numPoints,
@@ -191,31 +199,52 @@ export function LoyaltyRewardItem({
   const { userData } = useAuth();
   const hasEnoughPoints = (userData?.points[restaurant.id] || 0) >= numPoints;
   const primaryColor = restaurant.metadata.primaryColor as string;
-  let itemId = null;
-  let menuItem = null;
+  let card: LoyaltyRewardPolicyCard = null;
   if (policy.definition.action.type === "add_to_user_credit") {
-    menuItem = {
-      name: `Earn  $${policy.definition.action.amount.toFixed(2)} of credit`,
-      description: `Earn  $${policy.definition.action.amount.toFixed(
-        2
-      )} of credit`,
+    card = {
+      name: PolicyUtils.getPolicyName(policy, restaurant),
+      description:
+        PolicyUtils.policyToStringDescription(policy, restaurant)
+          .actionDescription || "",
       price: policy.definition.action.amount,
-      image_url: ImageUtils.getProfileImageUrl(restaurant),
-    } as NormalItem;
-  }
-  if (policy.definition.action.type === "add_item") {
+      image_url: "fallback",
+      numPoints: numPoints,
+    };
+  } else if (policy.definition.action.type === "add_item") {
     const itemIds = ItemUtils.policyItemSpecificationsToItemIds(
       policy.definition.action.items,
       restaurant
     );
-    itemId = itemIds[0];
-    menuItem = ItemUtils.getMenuItemFromItemId(itemId, restaurant);
+    if (itemIds.length <= 0) {
+      return null;
+    }
+    const itemId = itemIds[0];
+    card = {
+      name: PolicyUtils.getPolicyName(policy, restaurant),
+      description:
+        PolicyUtils.policyToStringDescription(policy, restaurant)
+          .actionDescription || "",
+      price: null,
+      image_url: ImageUtils.getItemImageUrl(itemId, restaurant),
+      numPoints: numPoints,
+    };
+  } else {
+    card = {
+      name: PolicyUtils.getPolicyName(policy, restaurant),
+      description:
+        PolicyUtils.policyToStringDescription(policy, restaurant)
+          .actionDescription || "",
+      price: null,
+      image_url: "fallback",
+      numPoints: numPoints,
+    };
   }
 
-  if (!menuItem || !restaurant) {
+  const isUsable = PolicyUtils.isPolicyUsable(policy, restaurant);
+
+  if (!card || !restaurant || !isUsable) {
     return null;
   }
-  const isPass = itemId ? ItemUtils.isPassItem(itemId, restaurant) : false;
 
   return (
     <div
@@ -224,8 +253,8 @@ export function LoyaltyRewardItem({
       {/* Image */}
       <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
         <ImageFallback
-          src={ImageUtils.getItemImageUrl(itemId, restaurant)}
-          alt={menuItem?.name}
+          src={card.image_url}
+          alt={card.name}
           className="h-full w-full object-cover"
           restaurant={restaurant}
         />
@@ -235,17 +264,10 @@ export function LoyaltyRewardItem({
       <div className="flex flex-1 flex-col justify-between">
         <div>
           <div className="flex justify-between items-start">
-            <h4 className="font-bold text-base">
-              {titleCase(PolicyUtils.getPolicyName(policy, restaurant))}
-            </h4>
-            {isPass && (
-              <span className="text-xs text-gray-500 ml-2">
-                {(menuItem as PassItem)?.for_date}
-              </span>
-            )}
+            <h4 className="font-bold text-base">{card.name}</h4>
           </div>
-          <p className="text-sm text-gray-500 custom-line-clamp-1 show-at-400">
-            {(menuItem as NormalItem | PassItem)?.description}
+          <p className="text-sm text-gray-500 custom-line-clamp-2 show-at-400">
+            {card.description}
           </p>
         </div>
 
@@ -254,9 +276,11 @@ export function LoyaltyRewardItem({
             <p className="font-bold text-sm" style={{ color: primaryColor }}>
               {numPoints} points
             </p>
-            <p className="text-sm text-gray-500 line-through show-at-400">
-              ${menuItem?.price?.toFixed(2)}
-            </p>
+            {card.price && (
+              <p className="text-sm text-gray-500 line-through show-at-400">
+                ${card.price?.toFixed(2)}
+              </p>
+            )}
           </div>
           {hasEnoughPoints && (
             <button
