@@ -423,7 +423,6 @@ const ShareButton = ({
           text: `Here's something interesting at ${restaurant.name}!`,
           url: `${window.location.origin}/${restaurant.id}/?bundle=${bundle.bundle_id}`,
         });
-        console.log("Shared successfully!");
       } catch (error) {
         console.error("Share failed:", error);
       }
