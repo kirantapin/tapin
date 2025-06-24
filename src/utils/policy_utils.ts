@@ -320,36 +320,36 @@ export class PolicyUtils {
   static getPolicyName = (policy: Policy, restaurant: Restaurant): string => {
     if (policy.definition.tag === LOYALTY_REWARD_TAG) {
       if (policy.definition.action.type === "add_item") {
+        const items = policy.definition.action.items;
+        const itemName =
+          items.length > 1
+            ? "Select Items"
+            : titleCase(
+                ItemUtils.getMenuItemFromItemId(items[0], restaurant)?.name ||
+                  ""
+              );
         if (policy.definition.action.free) {
-          return `${titleCase(
-            ItemUtils.getMenuItemFromItemId(
-              policy.definition.action.items[0],
-              restaurant
-            )?.name || ""
-          )} for ${formatPoints(this.getLoyaltyRewardPoints(policy))} points!`;
+          return `${itemName} for ${formatPoints(
+            this.getLoyaltyRewardPoints(policy)
+          )} points!`;
         } else if (policy.definition.action.percentDiscount) {
           return `${(policy.definition.action.percentDiscount * 100).toFixed(
             0
-          )}% off on ${titleCase(
-            ItemUtils.getMenuItemFromItemId(
-              policy.definition.action.items[0],
-              restaurant
-            )?.name || ""
-          )} for ${formatPoints(this.getLoyaltyRewardPoints(policy))} points!`;
+          )}% off on ${itemName} for ${formatPoints(
+            this.getLoyaltyRewardPoints(policy)
+          )} points!`;
         } else if (policy.definition.action.fixedDiscount) {
           return `$${policy.definition.action.fixedDiscount.toFixed(
             2
-          )} off on ${titleCase(
-            ItemUtils.getMenuItemFromItemId(
-              policy.definition.action.items[0],
-              restaurant
-            )?.name || ""
-          )} for ${formatPoints(this.getLoyaltyRewardPoints(policy))} points!`;
+          )} off on ${itemName} for ${formatPoints(
+            this.getLoyaltyRewardPoints(policy)
+          )} points!`;
         }
       }
       if (policy.definition.action.type === "add_to_user_credit") {
         return `Earn $${policy.definition.action.amount.toFixed(2)} of credit`;
       }
+      return this.getPolicyFlair(policy) || "";
     }
     return titleCase(policy.name || "");
   };
@@ -397,10 +397,10 @@ export class PolicyUtils {
     if (total_usages && days_since_last_use) {
       return format === "short"
         ? `Every${
-            days_since_last_use === 1 ? `Day` : ` ${days_since_last_use} Days`
+            days_since_last_use === 1 ? `day` : ` ${days_since_last_use} Days`
           }, ${total_usages} ${total_usages === 1 ? "Use" : "Uses"}`
         : `One use every${
-            days_since_last_use === 1 ? `Day` : ` ${days_since_last_use} Days`
+            days_since_last_use === 1 ? `day` : ` ${days_since_last_use} Days`
           } up to ${total_usages} ${total_usages === 1 ? "Use" : "Uses"}`;
     }
 
@@ -413,10 +413,10 @@ export class PolicyUtils {
     if (days_since_last_use) {
       return format === "short"
         ? `Every${
-            days_since_last_use === 1 ? `Day` : ` ${days_since_last_use} Days`
+            days_since_last_use === 1 ? `day` : ` ${days_since_last_use} Days`
           }`
         : `One use every${
-            days_since_last_use === 1 ? `Day` : ` ${days_since_last_use} Days`
+            days_since_last_use === 1 ? `day` : ` ${days_since_last_use} Days`
           }`;
     }
 
@@ -440,6 +440,9 @@ export class PolicyUtils {
         if (!itemAvailabilities.includes(null)) {
           return false;
         }
+      }
+      if (condition.type === "time_range") {
+        continue;
       }
     }
 

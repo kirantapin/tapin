@@ -6,16 +6,7 @@ import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 import { titleCase } from "title-case";
 import { BundleUtils } from "@/utils/bundle_utils";
-const formatBundleName = (name: string) => {
-  let formattedName = name;
-  if (!formattedName.toLowerCase().endsWith("bundle")) {
-    formattedName += " Bundle";
-  }
-  if (!formattedName.toLowerCase().startsWith("the ")) {
-    formattedName = "The " + formattedName;
-  }
-  return formattedName;
-};
+import { formatBundleName } from "@/utils/parse";
 
 export default function BundleCTA() {
   const threshold = 0.4;

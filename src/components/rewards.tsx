@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Policy, Restaurant, User } from "@/types";
+import { Policy } from "@/types";
 import {
   LOYALTY_REWARD_TAG,
   OFFERS_PAGE_PATH,
   POINTS_PER_DOLLAR,
 } from "@/constants";
 import { formatPoints } from "@/utils/parse";
-import { adjustColor } from "@/utils/color";
 import { useRestaurant } from "@/context/restaurant_context";
-import { LoyaltyRewardItem } from "./menu_items";
+import { LoyaltyRewardPolicyCard } from "./menu_items";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { useAuth } from "@/context/auth_context";
-import { ChevronRight, Gift, ShoppingBag } from "lucide-react";
+import { Gift, ShoppingBag } from "lucide-react";
 import { PolicyUtils } from "@/utils/policy_utils";
 import { GradientIcon } from "@/utils/gradient";
 interface RewardsProps {
@@ -224,20 +223,15 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
       {loyaltyPolicies.length > 0 && viewAll && (
         <div className="space-y-4 mt-6 mb-24">
           {loyaltyPolicies.map((policy) => {
-            if (
-              policy.definition.action.type === "add_item" ||
-              policy.definition.action.type === "add_to_user_credit"
-            ) {
-              return (
-                <LoyaltyRewardItem
-                  restaurant={restaurant}
-                  policy={policy}
-                  numPoints={PolicyUtils.getLoyaltyRewardPoints(policy)}
-                  onRedeem={() => handlePolicyClick(policy, userOwnershipMap)}
-                  isActive={getActivePolicies().includes(policy.policy_id)}
-                />
-              );
-            }
+            return (
+              <LoyaltyRewardPolicyCard
+                restaurant={restaurant}
+                policy={policy}
+                numPoints={PolicyUtils.getLoyaltyRewardPoints(policy)}
+                onRedeem={() => handlePolicyClick(policy, userOwnershipMap)}
+                isActive={getActivePolicies().includes(policy.policy_id)}
+              />
+            );
           })}
         </div>
       )}

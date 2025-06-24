@@ -69,13 +69,19 @@ const RestaurantInfo: React.FC = () => {
     openingHours.thursday;
 
   return (
-    <div className="flex flex-col w-full max-w-md mx-auto bg-white min-h-screen">
-      {/* Header */}
+    <div className="flex flex-col w-full mx-auto bg-white min-h-screen">
       <div className="flex items-center p-4">
         <button
           className="w-9 h-9 flex items-center justify-center rounded-full bg-black/10"
           onClick={() => {
-            navigate(RESTAURANT_PATH.replace(":id", restaurant.id));
+            if (
+              document.referrer &&
+              document.referrer.includes(window.location.origin)
+            ) {
+              navigate(-1);
+            } else {
+              navigate(RESTAURANT_PATH.replace(":id", id || ""));
+            }
           }}
         >
           <ChevronLeft className="w-6 h-6" />
