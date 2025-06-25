@@ -118,4 +118,15 @@ export class TransactionUtils {
       return [];
     }
   };
+
+  static isTransactionRedeemable = (
+    transaction: Transaction,
+    restaurant: Restaurant
+  ): boolean => {
+    const item = {
+      id: transaction.item,
+      modifiers: transaction.metadata.modifiers || [],
+    };
+    return ItemUtils.isItemRedeemable(item, restaurant);
+  };
 }

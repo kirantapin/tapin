@@ -224,6 +224,7 @@ export interface Transaction {
   };
   tip_amount: number | null;
   price: number | null;
+  tax: number | null;
 }
 
 export interface Order {

@@ -25,6 +25,7 @@ import { titleCase } from "title-case";
 import GenericItemIcon from "@/components/display_utils/generic_item_icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import { RESTAURANT_PATH } from "@/constants";
+import { TransactionUtils } from "@/utils/transaction_utils";
 interface BundleModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -367,16 +368,23 @@ const BundleModal: React.FC<BundleModalProps> = ({
                   refresh={refreshCart}
                   postPurchase={async (transactions: Transaction[]) => {
                     await refreshCart();
-                    await fetchUserOwnership(restaurant);
                     onClose();
                     const targetPath = RESTAURANT_PATH.replace(
                       ":id",
                       restaurant.id
                     );
 
+                    const redeemableTransactions = transactions.filter(
+                      (transaction) =>
+                        TransactionUtils.isTransactionRedeemable(
+                          transaction,
+                          restaurant
+                        )
+                    );
+
                     const postReloadState = {
                       qr: true,
-                      transactions,
+                      transactions: redeemableTransactions,
                       message: {
                         type: "success",
                         message:

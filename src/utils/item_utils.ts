@@ -199,4 +199,11 @@ export class ItemUtils {
   static getCartItemFromId(id: number, cart: Cart): CartItem | null {
     return cart.find((item) => item.id === id) || null;
   }
+
+  static isItemRedeemable(item: Item, restaurant: Restaurant): boolean {
+    if (this.isBundleItem(item.id, restaurant)) {
+      return false;
+    }
+    return true;
+  }
 }

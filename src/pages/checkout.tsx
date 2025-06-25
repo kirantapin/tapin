@@ -27,12 +27,13 @@ import {
 } from "@/constants";
 import HighlightSlider from "@/components/sliders/highlight_slider";
 import ScrollDownIndicator from "@/components/buttons/scroll_down_indicator";
+import { TransactionUtils } from "@/utils/transaction_utils";
 
 export default function CheckoutPage() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const { userSession } = useAuth();
-  const { restaurant, policyManager, fetchUserOwnership } = useRestaurant();
+  const { restaurant, policyManager } = useRestaurant();
   const navigate = useNavigate();
   const location = useLocation();
   const {
@@ -272,16 +273,23 @@ export default function CheckoutPage() {
                     refresh={refreshCart}
                     postPurchase={async (transactions: Transaction[]) => {
                       await clearCart();
-                      await fetchUserOwnership(restaurant);
                       closeCheckoutModal();
                       const targetPath = RESTAURANT_PATH.replace(
                         ":id",
                         restaurant.id
                       );
 
+                      const redeemableTransactions = transactions.filter(
+                        (transaction) =>
+                          TransactionUtils.isTransactionRedeemable(
+                            transaction,
+                            restaurant
+                          )
+                      );
+
                       const postReloadState = {
                         qr: true,
-                        transactions,
+                        transactions: redeemableTransactions,
                         message: {
                           type: "success",
                           message:

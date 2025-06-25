@@ -51,20 +51,22 @@ export const RestaurantProvider = ({
   >({});
   const navigate = useNavigate();
 
-  const { userSession } = useAuth();
+  const { userSession, transactions } = useAuth();
 
-  const fetchUserOwnership = async (restaurantData: Restaurant) => {
+  const fetchUserOwnership = (restaurantData: Restaurant) => {
     const activeBundles = restaurantData.menu[BUNDLE_MENU_TAG].children;
     const userOwnershipMap: Record<string, string | null> = {};
 
-    const ownershipPromises = activeBundles.map((bundleId: string) => {
+    const ownershipResults = activeBundles.map((bundleId: string) => {
       const bundle = (restaurantData.menu[bundleId].info as BundleItem).object;
-      return BundleUtils.doesUserOwnBundle(userSession?.user?.id, bundle).then(
-        (ownership) => ({ bundleId, ownership })
+      const ownership = BundleUtils.doesUserOwnBundle(
+        transactions,
+        userSession?.user?.id || null,
+        bundle
       );
+      return { bundleId, ownership };
     });
 
-    const ownershipResults = await Promise.all(ownershipPromises);
     ownershipResults.forEach(
       ({
         bundleId,
@@ -84,7 +86,7 @@ export const RestaurantProvider = ({
     if (restaurant) {
       fetchUserOwnership(restaurant);
     }
-  }, [userSession, restaurant]);
+  }, [userSession, restaurant, transactions]);
 
   const resetState = () => {
     setRestaurant(null);
