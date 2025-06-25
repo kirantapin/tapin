@@ -11,6 +11,7 @@ import { setThemeColor } from "@/utils/color";
 import ManageBundles from "@/components/manage_bundles";
 import { MySpotSkeleton } from "@/components/skeletons/my_spot_skeleton";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
+import { TransactionUtils } from "@/utils/transaction_utils";
 
 const tagMap: Record<string, { tag: string; icon: any }> = {
   Passes: { tag: "Passes", icon: Ticket },
@@ -51,7 +52,8 @@ const MySpotContent: React.FC = () => {
         transaction.fulfilled_by === null &&
         ItemUtils.getMenuItemFromItemId(transaction.item, restaurant) &&
         ItemUtils.isPassItem(transaction.item, restaurant) ===
-          (activeFilter === "Passes" ? true : false)
+          (activeFilter === "Passes" ? true : false) &&
+        TransactionUtils.isTransactionRedeemable(transaction, restaurant)
     );
 
     // Group transactions by item ID + modifiers

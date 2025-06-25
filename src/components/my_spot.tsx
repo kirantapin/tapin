@@ -7,6 +7,7 @@ import { useRestaurant } from "@/context/restaurant_context";
 import { ItemUtils } from "@/utils/item_utils";
 import { useAuth } from "@/context/auth_context";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
+import { TransactionUtils } from "@/utils/transaction_utils";
 
 interface MySpotProps {
   transactions: Transaction[];
@@ -27,7 +28,8 @@ export const MySpot: React.FC<MySpotProps> = ({
       t.fulfilled_by === null &&
       t.metadata?.path?.includes(PASS_MENU_TAG) &&
       t.restaurant_id === restaurant?.id &&
-      ItemUtils.getMenuItemFromItemId(t.item, restaurant)
+      ItemUtils.getMenuItemFromItemId(t.item, restaurant) &&
+      TransactionUtils.isTransactionRedeemable(t, restaurant)
   );
 
   const activeOrdersCount = transactions.filter(
@@ -35,7 +37,8 @@ export const MySpot: React.FC<MySpotProps> = ({
       t.fulfilled_by === null &&
       !t.metadata?.path?.includes(PASS_MENU_TAG) &&
       t.restaurant_id === restaurant?.id &&
-      ItemUtils.getMenuItemFromItemId(t.item, restaurant)
+      ItemUtils.getMenuItemFromItemId(t.item, restaurant) &&
+      TransactionUtils.isTransactionRedeemable(t, restaurant)
   );
   const activeBundlesCount = Object.values(userOwnershipMap).filter(
     (value) => value !== null

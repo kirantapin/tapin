@@ -31,6 +31,7 @@ import SignInModal from "@/components/bottom_sheets/signin_modal";
 import LockedPolicyModal from "@/components/bottom_sheets/locked_policy_modal";
 import AllBundlesModal from "@/components/bottom_sheets/all_bundles_modal";
 import CheckoutModal from "@/components/bottom_sheets/checkout_modal";
+import { TransactionUtils } from "@/utils/transaction_utils";
 
 // Define the shape of your sheet registry: keys → sheet components
 type SheetMap = Record<string, FC<any>>;
@@ -137,7 +138,11 @@ const validateTransactions = (
     (transaction) => transaction.fulfilled_by === null
   );
 
-  if (!allSameRestaurant || !allUnfulfilled) {
+  const allRedeemable = transactions.every((transaction) =>
+    TransactionUtils.isTransactionRedeemable(transaction, restaurant)
+  );
+
+  if (!allSameRestaurant || !allUnfulfilled || !allRedeemable) {
     triggerToast("Something went wrong. Please try again.", "error");
     return false;
   }

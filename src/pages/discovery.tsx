@@ -89,7 +89,7 @@ export default function RestaurantDiscovery() {
                         ) || ""
                       }
                       alt={restaurant.name}
-                      className="w-16 h-16 object-cover rounded-full border border-1 border-white shadow-lg"
+                      className="w-16 h-16 object-cover rounded-full border border-1 border-white shadow-[0_20px_25px_-5px_rgba(0,0,0,0.3),0_10px_10px_-5px_rgba(0,0,0,0.2)]"
                     />
                   </div>
                 </div>

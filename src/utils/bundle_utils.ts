@@ -1,4 +1,4 @@
-import { BundleItem, CartResultsPayload, Policy } from "@/types";
+import { BundleItem, CartResultsPayload, Policy, Transaction } from "@/types";
 
 import { Bundle, Restaurant } from "@/types";
 
@@ -65,28 +65,32 @@ export class BundleUtils {
       bundlePolicies: policyMap[bundle.bundle_id] || [],
     }));
   };
-  static doesUserOwnBundle = async (
+  static doesUserOwnBundle = (
+    transactions: Transaction[],
     user_id: string | null,
     bundle: Bundle
-  ): Promise<string | null> => {
+  ): string | null => {
     if (!user_id) return null;
     const duration = bundle.duration;
-    const { data, error } = await supabase
-      .from("bundle_user")
-      .select("purchased_at")
-      .eq("user_id", user_id)
-      .eq("bundle_id", bundle.bundle_id)
-      .gte(
-        "purchased_at",
-        new Date(Date.now() - duration * 24 * 60 * 60 * 1000).toISOString()
-      )
-      .order("purchased_at", { ascending: false });
+    const earliestDate = new Date(
+      Date.now() - duration * 24 * 60 * 60 * 1000
+    ).toISOString();
 
-    if (error || data.length === 0) {
+    const bundleTransactions = transactions.filter(
+      (transaction) =>
+        transaction.created_at >= earliestDate &&
+        transaction.item === bundle.bundle_id
+    );
+
+    if (bundleTransactions.length === 0) {
       return null;
     }
 
-    return data[0].purchased_at;
+    // Sort transactions by created_at in descending order and return the latest timestamp
+    return bundleTransactions.sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    )[0].created_at;
   };
   static getUsersBundleUsageStats = async (
     user_id: string,
