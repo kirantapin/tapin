@@ -155,9 +155,7 @@ export function useGlobalCartManager(
     );
 
     if (result) {
-      if (global) {
-        triggerToast(result, "error", 4000);
-      }
+      triggerToast(result, "error", 4000);
     } else {
       if (global) {
         triggerToast("Deal added successfully", "success");

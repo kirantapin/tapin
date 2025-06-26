@@ -43,7 +43,6 @@ const BundleCard = ({
     .map((id) => {
       const policy = policyManager?.getPolicyFromId(id);
       if (!policy) {
-        console.error(`Policy with id ${id} not found`);
         return null;
       }
       return policy;
