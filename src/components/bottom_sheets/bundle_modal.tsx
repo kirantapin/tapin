@@ -41,7 +41,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
 }) => {
   const { userSession } = useAuth();
   const navigate = useNavigate();
-  const { userOwnershipMap, fetchUserOwnership } = useRestaurant();
+  const { userOwnershipMap } = useRestaurant();
   const { refreshCart } = useBottomSheet();
   const location = useLocation();
   const { state, addPolicy, addToCart, removePolicy } = useGlobalCartManager(
@@ -64,7 +64,6 @@ const BundleModal: React.FC<BundleModalProps> = ({
       if (
         !restaurant ||
         !isOpen ||
-        !userSession ||
         !policyManager ||
         !bundleMenuItem ||
         userOwnershipMap?.[bundle.bundle_id]
@@ -85,7 +84,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
     };
 
     initLocalCart();
-  }, [isOpen, userSession, policyManager, restaurant, state]);
+  }, [isOpen, userOwnershipMap, policyManager, restaurant, state]);
 
   if (!bundleMenuItem || !bundleMenuItem.price) {
     return null;
@@ -112,7 +111,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
     bundlePolicies
   );
 
-  const isOwned = userOwnershipMap && userOwnershipMap[bundle.bundle_id];
+  const isOwned = !!userOwnershipMap?.[bundle.bundle_id];
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -247,30 +246,32 @@ const BundleModal: React.FC<BundleModalProps> = ({
           </div>
 
           {deals.length > 0 && (
-            <h1 className="text-xl font-bold text-gray-800">
-              Exclusive Access To:
-            </h1>
+            <>
+              <h1 className="text-xl font-bold text-gray-800">
+                Exclusive Access To:
+              </h1>
+              <div className="mt-2">
+                <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar -mx-6 px-6">
+                  {deals.map((policy, index) => {
+                    return (
+                      policy && (
+                        <div key={index} className="flex-shrink-0 w-[95%]">
+                          <SmallPolicyCard
+                            policy={policy}
+                            restaurant={restaurant}
+                            bottomTongueText={PolicyUtils.getUsageDescription(
+                              policy,
+                              restaurant
+                            )}
+                          />
+                        </div>
+                      )
+                    );
+                  })}
+                </div>
+              </div>
+            </>
           )}
-          <div className="mt-2">
-            <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar -mx-6 px-6">
-              {deals.map((policy, index) => {
-                return (
-                  policy && (
-                    <div key={index} className="flex-shrink-0 w-[95%]">
-                      <SmallPolicyCard
-                        policy={policy}
-                        restaurant={restaurant}
-                        bottomTongueText={PolicyUtils.getUsageDescription(
-                          policy,
-                          restaurant
-                        )}
-                      />
-                    </div>
-                  )
-                );
-              })}
-            </div>
-          </div>
 
           {!loadingLocalCart ? (
             !isOwned ? (
@@ -335,7 +336,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
           {/* Payment section */}
           <div className="mt-6">
             {!userSession ? (
-              <div className="fixed bottom-0 left-0 right-0 p-6 bg-white">
+              <div className="mt-auto bg-white">
                 <SignInButton
                   onClose={onClose}
                   primaryColor={restaurant?.metadata.primaryColor as string}

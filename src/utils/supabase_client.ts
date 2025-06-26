@@ -3,14 +3,14 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 const environment_override = null;
 
 const supabase_key =
-  environment_override || process.env.NODE_ENV === "production"
+  (environment_override || process.env.NODE_ENV) === "production"
     ? process.env.REACT_APP_SUPABASE_ANON_KEY
     : process.env.NODE_ENV === "staging"
     ? process.env.REACT_APP_SUPABASE_ANON_KEY_STAGING
     : process.env.REACT_APP_SUPABASE_ANON_KEY_DEV;
 
 export const project_ref =
-  environment_override || process.env.NODE_ENV === "production"
+  (environment_override || process.env.NODE_ENV) === "production"
     ? process.env.REACT_APP_PROJECT_REF
     : process.env.NODE_ENV === "staging"
     ? process.env.REACT_APP_PROJECT_REF_STAGING
