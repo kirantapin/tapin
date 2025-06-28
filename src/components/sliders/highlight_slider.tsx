@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { BundleItem, Highlight, Policy } from "@/types";
-import { fetch_highlights } from "@/utils/queries/highlights";
+import { BundleItem, Highlight } from "@/types";
 import HighlightCard from "../cards/highlight_card";
 import { ItemUtils } from "@/utils/item_utils";
 import { NORMAL_DEAL_TAG } from "@/constants";
@@ -12,15 +11,15 @@ import { HighlightCardSkeleton } from "../skeletons/highlight_card_skeleton";
 const HighlightSlider = ({ displayOne = false }: { displayOne?: boolean }) => {
   const { addToCart } = useBottomSheet();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [activePromo, setActivePromo] = useState(0);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
   const autoScrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const { openBundleModal, handlePolicyClick } = useBottomSheet();
-  const { restaurant, policyManager, userOwnershipMap } = useRestaurant();
+  const { restaurant, policyManager, userOwnershipMap, highlights } =
+    useRestaurant();
   const { triggerToast } = useBottomSheet();
-  const [cardLoading, setCardLoading] = useState(false);
-  const [highlightsLoading, setHighlightsLoading] = useState(false);
+  const [clickLoading, setClickLoading] = useState(false);
+  const [filteredHighlights, setFilteredHighlights] = useState<Highlight[]>([]);
   useEffect(() => {
     if (!displayOne) {
       const observer = new IntersectionObserver(
@@ -73,7 +72,13 @@ const HighlightSlider = ({ displayOne = false }: { displayOne?: boolean }) => {
   };
 
   useEffect(() => {
-    if (displayOne || !autoScrollEnabled || highlights.length <= 1) return;
+    if (
+      displayOne ||
+      !autoScrollEnabled ||
+      highlights === null ||
+      highlights.length <= 1
+    )
+      return;
 
     const startAutoScroll = () => {
       autoScrollIntervalRef.current = setInterval(() => {
@@ -92,13 +97,11 @@ const HighlightSlider = ({ displayOne = false }: { displayOne?: boolean }) => {
         clearInterval(autoScrollIntervalRef.current);
       }
     };
-  }, [highlights.length, autoScrollEnabled, displayOne]);
+  }, [highlights, autoScrollEnabled, displayOne]);
 
   useEffect(() => {
-    const fetchHighlights = async () => {
-      if (!restaurant || !policyManager) return;
-      setHighlightsLoading(true);
-      const highlights = await fetch_highlights(restaurant.id);
+    const filterHighlights = async () => {
+      if (!restaurant || !policyManager || highlights === null) return;
       const filteredHighlights = highlights.filter((highlight) => {
         if (highlight.content_type === "item") {
           const menuItem = ItemUtils.getMenuItemFromItemId(
@@ -128,22 +131,21 @@ const HighlightSlider = ({ displayOne = false }: { displayOne?: boolean }) => {
         }
         return false;
       });
-      setHighlightsLoading(false);
       if (displayOne && filteredHighlights.length > 0) {
         const randomIndex = Math.floor(
           Math.random() * filteredHighlights.length
         );
-        setHighlights([filteredHighlights[randomIndex]]);
+        setFilteredHighlights([filteredHighlights[randomIndex]]);
       } else {
-        setHighlights(filteredHighlights);
+        setFilteredHighlights(filteredHighlights);
       }
     };
-    fetchHighlights();
-  }, [restaurant, displayOne, policyManager]);
+    filterHighlights();
+  }, [restaurant, displayOne, policyManager, highlights]);
 
   const handleHighlightClick = async (highlight: Highlight) => {
     if (!restaurant) return;
-    setCardLoading(true);
+    setClickLoading(true);
     const content_pointer = highlight.content_pointer;
     if (!content_pointer) return;
     if (highlight.content_type === "item") {
@@ -167,19 +169,19 @@ const HighlightSlider = ({ displayOne = false }: { displayOne?: boolean }) => {
         : `http://${content_pointer}`;
       window.open(url, "_blank");
     }
-    setCardLoading(false);
+    setClickLoading(false);
   };
 
-  if (highlights.length === 0 || !restaurant || !policyManager) {
-    return null;
-  }
-
-  if (highlightsLoading) {
+  if (highlights === null || !restaurant || !policyManager) {
     return (
       <div className="mt-3">
         <HighlightCardSkeleton />
       </div>
     );
+  }
+
+  if (highlights.length === 0) {
+    return null;
   }
 
   return (
@@ -194,7 +196,7 @@ const HighlightSlider = ({ displayOne = false }: { displayOne?: boolean }) => {
         onTouchStart={handleUserInteraction}
       >
         <div className="flex gap-4">
-          {highlights.map((h, idx) => (
+          {filteredHighlights.map((h, idx) => (
             <div
               key={idx}
               className={`${!displayOne ? "snap-center" : ""} shrink-0 w-full`}
@@ -205,7 +207,7 @@ const HighlightSlider = ({ displayOne = false }: { displayOne?: boolean }) => {
                 onClick={() => {
                   handleHighlightClick(h);
                 }}
-                loading={cardLoading}
+                loading={clickLoading}
               />
             </div>
           ))}
@@ -215,7 +217,7 @@ const HighlightSlider = ({ displayOne = false }: { displayOne?: boolean }) => {
 
       {!displayOne && (
         <div className="flex justify-center mt-4">
-          {highlights.map((_, index) => (
+          {filteredHighlights.map((_, index) => (
             <button
               key={index}
               className={`h-2 mx-1 rounded-full transition-all duration-300 ${

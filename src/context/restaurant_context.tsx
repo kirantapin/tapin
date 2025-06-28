@@ -5,13 +5,14 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { BundleItem, Restaurant } from "@/types";
+import { BundleItem, Highlight, Restaurant } from "@/types";
 import { PolicyManager } from "@/utils/policy_manager";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./auth_context";
 import { BUNDLE_MENU_TAG, NOT_FOUND_PATH } from "@/constants";
 import { fetchRestaurantById } from "@/utils/queries/restaurant";
 import { BundleUtils } from "@/utils/bundle_utils";
+import { fetch_highlights } from "@/utils/queries/highlights";
 type RestaurantContextType = {
   restaurant: Restaurant | null;
   setCurrentRestaurantId: (id: string | null) => void;
@@ -19,6 +20,7 @@ type RestaurantContextType = {
   policyManager: PolicyManager | null;
   userOwnershipMap: Record<string, string | null>;
   fetchUserOwnership: (restaurant: Restaurant) => void;
+  highlights: Highlight[] | null;
 };
 
 const RestaurantContext = createContext<RestaurantContextType>({
@@ -28,6 +30,7 @@ const RestaurantContext = createContext<RestaurantContextType>({
   policyManager: null,
   userOwnershipMap: {},
   fetchUserOwnership: () => {},
+  highlights: null,
 });
 
 export const useRestaurant = () => useContext(RestaurantContext);
@@ -45,6 +48,7 @@ export const RestaurantProvider = ({
   const [policyManager, setPolicyManager] = useState<PolicyManager | null>(
     null
   );
+  const [highlights, setHighlights] = useState<Highlight[] | null>(null);
 
   const [userOwnershipMap, setUserOwnershipMap] = useState<
     Record<string, string | null>
@@ -114,6 +118,9 @@ export const RestaurantProvider = ({
       const policyManager = new PolicyManager(currentRestaurantId);
       await policyManager.init();
       setPolicyManager(policyManager);
+
+      const highlights = await fetch_highlights(restaurantData.id);
+      setHighlights(highlights);
     };
 
     fetchData();
@@ -128,6 +135,7 @@ export const RestaurantProvider = ({
         policyManager,
         userOwnershipMap,
         fetchUserOwnership,
+        highlights,
       }}
     >
       {children}
