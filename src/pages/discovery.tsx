@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { RESTAURANT_PATH } from "../constants.ts";
 import { setThemeColor } from "../utils/color";
 import { ImageUtils } from "@/utils/image_utils.ts";
+import { ImageShimmer } from "@/components/display_utils/image_shimmer.tsx";
 export default function RestaurantDiscovery() {
   setThemeColor();
   const [restaurants, setRestaurants] = useState<
@@ -67,22 +68,17 @@ export default function RestaurantDiscovery() {
               >
                 {/* Hero Image */}
                 <div className="h-32 relative">
-                  <div className="absolute inset-0 bg-gray-200 animate-pulse" />
-                  <img
+                  <ImageShimmer
                     src={
                       ImageUtils.getHeroImageUrl(restaurant as Restaurant) || ""
                     }
                     alt={`${restaurant.name} Hero`}
-                    className="w-full h-full object-cover relative z-0 transition-opacity duration-300"
-                    onLoad={(e) => {
-                      e.currentTarget.style.opacity = "1";
-                    }}
-                    style={{ opacity: 0 }}
+                    className="w-full h-full object-cover relative z-0"
                   />
 
                   {/* Profile Avatar */}
                   <div className="absolute -bottom-4 left-4 z-20">
-                    <img
+                    <ImageShimmer
                       src={
                         ImageUtils.getProfileImageUrl(
                           restaurant as Restaurant

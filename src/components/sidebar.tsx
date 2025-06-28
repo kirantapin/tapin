@@ -17,6 +17,7 @@ import { SignInButton } from "./signin/signin_button.tsx";
 import CustomLogo from "./svg/custom_logo.tsx";
 import { ImageUtils } from "@/utils/image_utils.ts";
 import { useBottomSheet } from "@/context/bottom_sheet_context.tsx";
+import { ImageShimmer } from "./display_utils/image_shimmer.tsx";
 
 interface SidebarProps {
   restaurant: Restaurant | null;
@@ -119,7 +120,7 @@ export const Sidebar = ({ restaurant, isOpen, onClose }: SidebarProps) => {
                 onClick={() => handleRestaurantClick(restaurant.id)}
               >
                 <div className="flex-shrink-0 w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200">
-                  <img
+                  <ImageShimmer
                     src={ImageUtils.getProfileImageUrl(restaurant) || ""}
                     alt={restaurant.name}
                     className="w-full h-full object-cover"

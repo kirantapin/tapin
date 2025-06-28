@@ -204,6 +204,6 @@ export class ItemUtils {
     if (this.isBundleItem(item.id, restaurant)) {
       return false;
     }
-    return true;
+    return !!this.getMenuItemFromItemId(item.id, restaurant);
   }
 }

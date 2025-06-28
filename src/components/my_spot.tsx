@@ -28,7 +28,6 @@ export const MySpot: React.FC<MySpotProps> = ({
       t.fulfilled_by === null &&
       t.metadata?.path?.includes(PASS_MENU_TAG) &&
       t.restaurant_id === restaurant?.id &&
-      ItemUtils.getMenuItemFromItemId(t.item, restaurant) &&
       TransactionUtils.isTransactionRedeemable(t, restaurant)
   );
 
@@ -37,7 +36,6 @@ export const MySpot: React.FC<MySpotProps> = ({
       t.fulfilled_by === null &&
       !t.metadata?.path?.includes(PASS_MENU_TAG) &&
       t.restaurant_id === restaurant?.id &&
-      ItemUtils.getMenuItemFromItemId(t.item, restaurant) &&
       TransactionUtils.isTransactionRedeemable(t, restaurant)
   );
   const activeBundlesCount = Object.values(userOwnershipMap).filter(
