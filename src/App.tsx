@@ -6,7 +6,6 @@ import {
   MY_SPOT_PATH,
   OFFERS_PAGE_PATH,
   INFO_PAGE_PATH,
-  DEVICE_NOT_SUPPORTED_PATH,
   NOT_FOUND_PATH,
 } from "./constants.ts";
 import { Slide, ToastContainer } from "react-toastify";
@@ -21,9 +20,7 @@ const NotFoundPage = lazy(() => import("./pages/not_found_page.tsx"));
 const MySpotContent = lazy(() => import("./pages/my_spot_content.tsx"));
 const PoliciesPage = lazy(() => import("./pages/policies.tsx"));
 const RestaurantInfo = lazy(() => import("./pages/restaurant_info.tsx"));
-const DeviceNotSupported = lazy(
-  () => import("./pages/device_not_supported.tsx")
-);
+
 const RestaurantPage = lazy(() => import("./pages/restaurant.tsx"));
 
 const App: React.FC = () => {
@@ -102,14 +99,6 @@ const App: React.FC = () => {
           element={
             <Suspense fallback={null}>
               <NotFoundPage />
-            </Suspense>
-          }
-        />
-        <Route
-          path={DEVICE_NOT_SUPPORTED_PATH}
-          element={
-            <Suspense fallback={null}>
-              <DeviceNotSupported />
             </Suspense>
           }
         />

@@ -113,7 +113,10 @@ export function DrinkItem({
             </p>
             {purchaseDate && quantity === 0 && (
               <span className="text-xs text-gray-500 -mr-6 show-at-400">
-                {convertUtcToLocal(purchaseDate)}
+                {convertUtcToLocal(
+                  purchaseDate,
+                  restaurant.metadata.timezone as string
+                )}
               </span>
             )}
           </div>

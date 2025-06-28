@@ -23,7 +23,8 @@ export default function DeviceNotSupported() {
           Device not supported
         </h1>
         <p className="text-muted-foreground text-gray-600">
-          Please use a mobile browser to access Tap In.
+          Please use a mobile browser to access Tap In or rotate your mobile
+          device to portrait mode.
         </p>
       </div>
     </div>

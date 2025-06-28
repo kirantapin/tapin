@@ -9,13 +9,7 @@ import { useRestaurant } from "@/context/restaurant_context";
 import { PolicyUtils } from "@/utils/policy_utils";
 import { BundleUtils } from "@/utils/bundle_utils";
 import { HighlightCardSkeleton } from "../skeletons/highlight_card_skeleton";
-const HighlightSlider = ({
-  policies,
-  displayOne = false,
-}: {
-  policies: Policy[];
-  displayOne?: boolean;
-}) => {
+const HighlightSlider = ({ displayOne = false }: { displayOne?: boolean }) => {
   const { addToCart } = useBottomSheet();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [highlights, setHighlights] = useState<Highlight[]>([]);
@@ -102,7 +96,7 @@ const HighlightSlider = ({
 
   useEffect(() => {
     const fetchHighlights = async () => {
-      if (!restaurant) return;
+      if (!restaurant || !policyManager) return;
       setHighlightsLoading(true);
       const highlights = await fetch_highlights(restaurant.id);
       const filteredHighlights = highlights.filter((highlight) => {
@@ -113,8 +107,8 @@ const HighlightSlider = ({
           );
           return menuItem && menuItem?.price;
         } else if (highlight.content_type === "policy") {
-          const policy = policies.find(
-            (p) => p.policy_id === highlight.content_pointer
+          const policy = policyManager.getPolicyFromId(
+            highlight.content_pointer
           );
           return (
             policy?.definition?.tag === NORMAL_DEAL_TAG &&
@@ -145,7 +139,7 @@ const HighlightSlider = ({
       }
     };
     fetchHighlights();
-  }, [restaurant, displayOne]);
+  }, [restaurant, displayOne, policyManager]);
 
   const handleHighlightClick = async (highlight: Highlight) => {
     if (!restaurant) return;

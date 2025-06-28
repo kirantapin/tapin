@@ -31,7 +31,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(true);
   const { restaurant } = useRestaurant();
   useEffect(() => {
-    if (userSession && userData && transactions) {
+    if (userSession && userData && transactions && isOpen) {
       // Get unique restaurant IDs from transactions
       const uniqueRestaurantIds = [
         ...new Set(transactions.map((t) => t.restaurant_id)),
@@ -83,7 +83,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
         setLoading(false);
       }
     }
-  }, [userSession, userData, transactions]);
+  }, [userSession, userData, transactions, isOpen]);
 
   if (!restaurant) {
     return null;

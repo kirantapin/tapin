@@ -115,7 +115,12 @@ const AddOnManager: FC<AddOnManagerProps> = ({
         })
     );
   }, [restaurant, policyManager, state]);
-  if (!restaurant || !policyManager || state.cart.length === 0) {
+  if (
+    !restaurant ||
+    !policyManager ||
+    state.cart.length === 0 ||
+    normalItems.length + passItems.length === 0
+  ) {
     return null;
   }
 

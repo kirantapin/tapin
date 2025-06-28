@@ -7,7 +7,6 @@ export const RESTAURANT_PATH = "/:id";
 export const MY_SPOT_PATH = "/:id/my_spot";
 export const OFFERS_PAGE_PATH = "/:id/offers";
 export const INFO_PAGE_PATH = "/:id/info";
-export const DEVICE_NOT_SUPPORTED_PATH = "/error/device-not-supported";
 export const NOT_FOUND_PATH = "/error/not_found";
 
 //objects
