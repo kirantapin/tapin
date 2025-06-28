@@ -173,7 +173,7 @@ export default function RestaurantPage() {
         <ActionButtons scrollToOrderDrinks={scrollToOrderDrinks} />
         {/* Highlight Slider */}
 
-        <HighlightSlider policies={policies || []} displayOne={false} />
+        <HighlightSlider displayOne={false} />
 
         {/* My Spot Section */}
         <MySpot userSession={userSession} transactions={transactions} />

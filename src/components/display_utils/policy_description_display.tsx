@@ -38,7 +38,10 @@ export function PolicyDescriptionDisplay({
       <span className="text-xs">
         {policy.end_time &&
           "This Offer is valid until " +
-            convertUtcToLocal(policy.end_time) +
+            convertUtcToLocal(
+              policy.end_time,
+              restaurant.metadata.timezone as string
+            ) +
             "."}{" "}
         Items must be unmodified to be counted towards a deal.
       </span>

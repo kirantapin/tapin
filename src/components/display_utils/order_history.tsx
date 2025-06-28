@@ -4,6 +4,7 @@ import { useAuth } from "@/context/auth_context";
 import { project_url, supabase } from "@/utils/supabase_client";
 import { convertUtcToLocal } from "@/utils/time";
 import { RESTAURANT_IMAGE_BUCKET } from "@/constants";
+import { useRestaurant } from "@/context/restaurant_context";
 
 interface OrderWithTransactions extends Order {
   transactions: Transaction[];
@@ -11,6 +12,7 @@ interface OrderWithTransactions extends Order {
 
 const OrderHistory = () => {
   const { userSession, transactions } = useAuth();
+  const { restaurant } = useRestaurant();
   const [ordersWithTransactions, setOrdersWithTransactions] = useState<
     OrderWithTransactions[]
   >([]);
@@ -18,7 +20,7 @@ const OrderHistory = () => {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      if (!userSession || !transactions.length) {
+      if (!userSession || !transactions.length || !restaurant) {
         return;
       }
 
@@ -58,7 +60,7 @@ const OrderHistory = () => {
     };
 
     fetchOrders();
-  }, [userSession, transactions]);
+  }, [userSession, transactions, restaurant]);
 
   return (
     <div className="relative h-full flex flex-col">
@@ -87,7 +89,10 @@ const OrderHistory = () => {
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex flex-col h-full justify-between">
                         <p className="text-sm text-black">
-                          {convertUtcToLocal(order.created_at)}
+                          {convertUtcToLocal(
+                            order.created_at,
+                            restaurant?.metadata.timezone as string
+                          )}
                         </p>
                         {order.metadata?.discount &&
                           order.metadata?.discount > 0 && (

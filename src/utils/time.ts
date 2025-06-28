@@ -1,5 +1,7 @@
 //modify time func so that it is only meant to consume times in utc format
 
+import { titleCase } from "title-case";
+
 interface OpenHours {
   monday: string[];
   tuesday: string[];
@@ -26,53 +28,56 @@ const days = [
   "saturday",
 ] as const;
 
+type Weekday = (typeof days)[number];
+
 export function isOpenNow(
   hours: OpenHours,
+  timeZone: string,
   now: Date = new Date()
 ): boolean | undefined {
   if (!hours) return undefined;
 
-  // Convert current time to UTC
-  const utcFormatter = new Intl.DateTimeFormat("en-US", {
-    timeZone: "UTC",
-    hour12: false,
-    weekday: "long",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const currentZonedTime = new Date(now.toLocaleString("en-US", { timeZone }));
 
-  const parts = utcFormatter.formatToParts(now);
-  const currentDay = parts
-    .find((p) => p.type === "weekday")
-    ?.value.toLowerCase() as keyof OpenHours;
-  const hour = parts.find((p) => p.type === "hour")?.value;
-  const minute = parts.find((p) => p.type === "minute")?.value;
-  const timeStr = `${hour}:${minute}`; // "HH:mm" in UTC
+  const currentMinutes =
+    currentZonedTime.getHours() * 60 + currentZonedTime.getMinutes();
+  const currentDayIndex = currentZonedTime.getDay(); // 0 = Sunday
+  const currentDay = days[currentDayIndex];
+  const prevDay = days[(currentDayIndex + 6) % 7];
 
-  const dayIndex = days.indexOf(currentDay);
-  const prevDay = days[(dayIndex + 6) % 7] as keyof OpenHours;
+  const checkRange = (day: Weekday, isPreviousDay = false): boolean => {
+    const range = hours[day];
+    if (!range) return false;
 
-  const checkRanges = (day: keyof OpenHours, isPreviousDay = false) => {
-    const [open, close] = hours[day] || [];
-    if (!open || !close) return false;
+    const [open, close] = range;
+    const [openH, openM] = open.split(":").map(Number);
+    const [closeH, closeM] = close.split(":").map(Number);
 
-    if (open < close) {
-      return !isPreviousDay && open <= timeStr && timeStr < close;
+    const openMinutes = openH * 60 + openM;
+    const closeMinutes = closeH * 60 + closeM;
+
+    if (isNaN(openMinutes) || isNaN(closeMinutes)) return false;
+
+    if (openMinutes < closeMinutes) {
+      return (
+        !isPreviousDay &&
+        currentMinutes >= openMinutes &&
+        currentMinutes < closeMinutes
+      );
     } else {
-      // Cross-midnight case
-      return isPreviousDay ? timeStr < close : timeStr >= open;
+      return isPreviousDay
+        ? currentMinutes < closeMinutes
+        : currentMinutes >= openMinutes;
     }
   };
 
-  return checkRanges(currentDay) || checkRanges(prevDay, true);
+  return checkRange(currentDay) || checkRange(prevDay, true);
 }
 
-function getLocalTimeZone(): string {
-  return Intl.DateTimeFormat().resolvedOptions().timeZone;
-}
-
-export function convertUtcToLocal(utcTimestampz: string): string {
-  const timeZone = getLocalTimeZone();
+export function convertUtcToLocal(
+  utcTimestampz: string,
+  timeZone: string
+): string {
   const date = new Date(utcTimestampz);
   return new Intl.DateTimeFormat("en-US", {
     timeZone,
@@ -83,16 +88,6 @@ export function convertUtcToLocal(utcTimestampz: string): string {
     minute: "2-digit",
     second: undefined,
   }).format(date);
-}
-
-export function convertLocalToUtcTimestampz(localDateStr: string): string {
-  const timeZone = getLocalTimeZone();
-  const dateInLocal = new Date(
-    new Date(localDateStr).toLocaleString("en-US", { timeZone })
-  );
-  return new Date(
-    dateInLocal.getTime() - dateInLocal.getTimezoneOffset() * 60000
-  ).toISOString();
 }
 
 function getPreviousDay(day: string): string {
@@ -116,35 +111,33 @@ function timeToMinutes(timeStr: string): number {
 
 export function isAvailableNow(
   constraint: AvailabilityConstraint,
+  timeZone: string,
   now: Date = new Date()
 ): boolean {
-  if (!constraint) return false;
+  if (!constraint || !constraint.allowed_days?.length) return false;
 
   // Convert current time to UTC
-  const utcFormatter = new Intl.DateTimeFormat("en-US", {
-    timeZone: "UTC",
-    hour12: false,
-    weekday: "long",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const currentZonedTime = new Date(now.toLocaleString("en-US", { timeZone }));
+  const dayIndex = currentZonedTime.getDay(); // 0 = Sunday
+  const currentDay = [
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+  ][dayIndex];
 
-  const parts = utcFormatter.formatToParts(now);
-  const currentDay = parts
-    .find((p) => p.type === "weekday")
-    ?.value.toLowerCase();
-
-  // If we can't determine the current day, return false
   if (!currentDay) return false;
 
-  const hour = parts.find((p) => p.type === "hour")?.value;
-  const minute = parts.find((p) => p.type === "minute")?.value;
-  const timeStr = `${hour}:${minute}`; // "HH:mm" in UTC
-
   // Convert times to minutes since midnight for proper comparison
-  const currentMinutes = timeToMinutes(timeStr);
+  const currentMinutes =
+    currentZonedTime.getHours() * 60 + currentZonedTime.getMinutes();
   const beginMinutes = timeToMinutes(constraint.begin_time);
   const endMinutes = timeToMinutes(constraint.end_time);
+
+  if (isNaN(beginMinutes) || isNaN(endMinutes)) return false;
 
   // Handle time ranges that cross midnight
   if (beginMinutes > endMinutes) {
@@ -155,7 +148,10 @@ export function isAvailableNow(
       return constraint.allowed_days.includes(previousDay);
     } else {
       // We're in the evening hours, check if current day is allowed
-      return constraint.allowed_days.includes(currentDay);
+      return (
+        constraint.allowed_days.includes(currentDay) &&
+        currentMinutes >= beginMinutes
+      );
     }
   } else {
     // Normal time range within same day
@@ -167,7 +163,7 @@ export function isAvailableNow(
   }
 }
 
-const WEEKDAYS = [
+const WEEKDAYS_ORDER = [
   "sunday",
   "monday",
   "tuesday",
@@ -177,97 +173,36 @@ const WEEKDAYS = [
   "saturday",
 ];
 
-function formatTime(date: Date, timeZone: string) {
-  return new Intl.DateTimeFormat("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-    timeZone,
-  }).format(date);
-}
+export function format12Hour(time: string): string {
+  const [hourStr, minuteStr] = time.split(":");
+  const hour = parseInt(hourStr, 10);
 
-function getLocalDayName(date: Date, timeZone: string) {
-  return new Intl.DateTimeFormat("en-US", {
-    weekday: "long",
-    timeZone,
-  }).format(date);
+  const period = hour >= 12 ? "PM" : "AM";
+  const hour12 = hour % 12 || 12; // Convert 0 → 12, 13 → 1
+
+  return `${hour12}:${minuteStr.padStart(2, "0")} ${period}`;
 }
 
 export function formatAvailabilityWindow(
   begin_time: string,
   end_time: string,
-  allowed_days: string[],
-  timeZone: string
+  allowed_days: string[]
 ): string {
-  const timeGroups: Record<string, string[]> = {};
+  if (!begin_time || !end_time || !allowed_days.length) return "";
 
-  for (const day of allowed_days) {
-    const dayIndex = WEEKDAYS.indexOf(day);
-    if (dayIndex === -1) continue;
+  const formattedStart = format12Hour(begin_time);
+  const formattedEnd = format12Hour(end_time);
 
-    // Anchor to most recent Sunday
-    const now = new Date();
-    const sunday = new Date(
-      Date.UTC(
-        now.getUTCFullYear(),
-        now.getUTCMonth(),
-        now.getUTCDate() - now.getUTCDay()
-      )
-    );
+  const sortedDays = [...allowed_days].sort(
+    (a, b) => WEEKDAYS_ORDER.indexOf(a) - WEEKDAYS_ORDER.indexOf(b)
+  );
 
-    const baseDate = new Date(sunday);
-    baseDate.setUTCDate(baseDate.getUTCDate() + dayIndex);
+  const titledDays = sortedDays.map((day) => titleCase(day));
 
-    const [startHour, startMinute] = begin_time.split(":").map(Number);
-    const [endHour, endMinute] = end_time.split(":").map(Number);
+  const formattedDays =
+    titledDays.length === 1
+      ? titledDays[0]
+      : titledDays.slice(0, -1).join(", ") + " and " + titledDays.at(-1);
 
-    const utcStart = new Date(baseDate);
-    utcStart.setUTCHours(startHour, startMinute, 0, 0);
-
-    const utcEnd = new Date(baseDate);
-    utcEnd.setUTCHours(endHour, endMinute, 0, 0);
-    if (utcEnd <= utcStart) {
-      utcEnd.setUTCDate(utcEnd.getUTCDate() + 1);
-    }
-
-    const localStart = formatTime(utcStart, timeZone);
-    const localEnd = formatTime(utcEnd, timeZone);
-    const localDay = getLocalDayName(utcStart, timeZone);
-
-    const key = `from ${localStart} to ${localEnd}`;
-    if (!timeGroups[key]) timeGroups[key] = [];
-    timeGroups[key].push(localDay);
-  }
-
-  // Build readable strings
-  const output = Object.entries(timeGroups).map(([timeRange, days]) => {
-    const formattedDays =
-      days.length === 1
-        ? days[0]
-        : days.slice(0, -1).join(", ") + " and " + days[days.length - 1];
-    return `${timeRange} on ${formattedDays}`;
-  });
-
-  return output.join(", ");
+  return `from ${formattedStart} to ${formattedEnd} on ${formattedDays}`;
 }
-
-export const convertUTCMilitaryTimeTo12HourTime = (
-  time: string,
-  timeZone: string
-) => {
-  const [hours, minutes] = time.split(":");
-
-  // Create UTC date object with the given time
-  const date = new Date();
-  date.setUTCHours(parseInt(hours), parseInt(minutes), 0, 0);
-
-  // Convert to target timezone
-  const localTime = date.toLocaleTimeString("en-US", {
-    timeZone,
-    hour12: true,
-    hour: "numeric",
-    minute: "2-digit",
-  });
-
-  return localTime;
-};

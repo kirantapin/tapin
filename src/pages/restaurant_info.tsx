@@ -5,7 +5,6 @@ import {
   Clock,
   Phone,
   Globe,
-  ChevronRight,
   ChevronLeft,
   ChevronDown,
   ChevronUp,
@@ -14,23 +13,20 @@ import {
   Twitter,
   Instagram,
   Music,
-  UserSearch,
 } from "lucide-react";
 import { RESTAURANT_PATH } from "@/constants";
 import { useNavigate, useParams } from "react-router-dom";
-import { Restaurant } from "@/types";
-import { project_url } from "@/utils/supabase_client";
 import { GradientIcon } from "@/utils/gradient";
 import { useRestaurant } from "@/context/restaurant_context";
 import { ImageUtils } from "@/utils/image_utils";
-import { convertUTCMilitaryTimeTo12HourTime } from "@/utils/time";
+import { format12Hour } from "@/utils/time";
 
 const RestaurantInfo: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [openingHoursExpanded, setOpeningHoursExpanded] = useState(true);
   const [socialMediaExpanded, setSocialMediaExpanded] = useState(true);
 
-  const { restaurant, setCurrentRestaurantId } = useRestaurant();
+  const { restaurant } = useRestaurant();
 
   const navigate = useNavigate();
 
@@ -250,15 +246,8 @@ const RestaurantInfo: React.FC = () => {
                       "Closed"
                     ) : (
                       <>
-                        {convertUTCMilitaryTimeTo12HourTime(
-                          openingHours.monday[0],
-                          restaurant.metadata.timezone as string
-                        )}{" "}
-                        -{" "}
-                        {convertUTCMilitaryTimeTo12HourTime(
-                          openingHours.monday[1],
-                          restaurant.metadata.timezone as string
-                        )}
+                        {format12Hour(openingHours.monday[0])} -{" "}
+                        {format12Hour(openingHours.monday[1])}
                       </>
                     )}
                   </div>
@@ -272,15 +261,8 @@ const RestaurantInfo: React.FC = () => {
                       "Closed"
                     ) : (
                       <>
-                        {convertUTCMilitaryTimeTo12HourTime(
-                          openingHours.tuesday[0],
-                          restaurant.metadata.timezone as string
-                        )}{" "}
-                        -{" "}
-                        {convertUTCMilitaryTimeTo12HourTime(
-                          openingHours.tuesday[1],
-                          restaurant.metadata.timezone as string
-                        )}
+                        {format12Hour(openingHours.tuesday[0])} -{" "}
+                        {format12Hour(openingHours.tuesday[1])}
                       </>
                     )}
                   </div>
@@ -294,15 +276,8 @@ const RestaurantInfo: React.FC = () => {
                       "Closed"
                     ) : (
                       <>
-                        {convertUTCMilitaryTimeTo12HourTime(
-                          openingHours.wednesday[0],
-                          restaurant.metadata.timezone as string
-                        )}{" "}
-                        -{" "}
-                        {convertUTCMilitaryTimeTo12HourTime(
-                          openingHours.wednesday[1],
-                          restaurant.metadata.timezone as string
-                        )}
+                        {format12Hour(openingHours.wednesday[0])} -{" "}
+                        {format12Hour(openingHours.wednesday[1])}
                       </>
                     )}
                   </div>
@@ -316,15 +291,8 @@ const RestaurantInfo: React.FC = () => {
                       "Closed"
                     ) : (
                       <>
-                        {convertUTCMilitaryTimeTo12HourTime(
-                          openingHours.thursday[0],
-                          restaurant.metadata.timezone as string
-                        )}{" "}
-                        -{" "}
-                        {convertUTCMilitaryTimeTo12HourTime(
-                          openingHours.thursday[1],
-                          restaurant.metadata.timezone as string
-                        )}
+                        {format12Hour(openingHours.thursday[0])} -{" "}
+                        {format12Hour(openingHours.thursday[1])}
                       </>
                     )}
                   </div>
@@ -338,15 +306,8 @@ const RestaurantInfo: React.FC = () => {
                       "Closed"
                     ) : (
                       <>
-                        {convertUTCMilitaryTimeTo12HourTime(
-                          openingHours.friday[0],
-                          restaurant.metadata.timezone as string
-                        )}{" "}
-                        -{" "}
-                        {convertUTCMilitaryTimeTo12HourTime(
-                          openingHours.friday[1],
-                          restaurant.metadata.timezone as string
-                        )}
+                        {format12Hour(openingHours.friday[0])} -{" "}
+                        {format12Hour(openingHours.friday[1])}
                       </>
                     )}
                   </div>
@@ -360,15 +321,8 @@ const RestaurantInfo: React.FC = () => {
                       "Closed"
                     ) : (
                       <>
-                        {convertUTCMilitaryTimeTo12HourTime(
-                          openingHours.saturday[0],
-                          restaurant.metadata.timezone as string
-                        )}{" "}
-                        -{" "}
-                        {convertUTCMilitaryTimeTo12HourTime(
-                          openingHours.saturday[1],
-                          restaurant.metadata.timezone as string
-                        )}
+                        {format12Hour(openingHours.saturday[0])} -{" "}
+                        {format12Hour(openingHours.saturday[1])}
                       </>
                     )}
                   </div>
@@ -382,15 +336,8 @@ const RestaurantInfo: React.FC = () => {
                       "Closed"
                     ) : (
                       <>
-                        {convertUTCMilitaryTimeTo12HourTime(
-                          openingHours.sunday[0],
-                          restaurant.metadata.timezone as string
-                        )}{" "}
-                        -{" "}
-                        {convertUTCMilitaryTimeTo12HourTime(
-                          openingHours.sunday[1],
-                          restaurant.metadata.timezone as string
-                        )}
+                        {format12Hour(openingHours.sunday[0])} -{" "}
+                        {format12Hour(openingHours.sunday[1])}
                       </>
                     )}
                   </div>

@@ -5,7 +5,7 @@ import { formatPoints, listItemsToStringDescription } from "./parse";
 import { ItemUtils } from "./item_utils";
 import { titleCase } from "title-case";
 import { LOYALTY_REWARD_TAG, MAX_BUNDLE_DURATION } from "@/constants";
-import { formatAvailabilityWindow } from "./time";
+import { formatAvailabilityWindow, isAvailableNow } from "./time";
 
 export class PolicyUtils {
   static async fetchPoliciesByRestaurantId(
@@ -109,8 +109,7 @@ export class PolicyUtils {
               `Available from ${formatAvailabilityWindow(
                 condition.begin_time,
                 condition.end_time,
-                condition.allowed_days,
-                restaurant.metadata.timeZone as string
+                condition.allowed_days
               )}`
             );
             break;
@@ -388,9 +387,7 @@ export class PolicyUtils {
     format: "short" | "long" = "long"
   ): string | null {
     if (!this.isPolicyUsable(policy, restaurant)) {
-      return format === "short"
-        ? "Not Active"
-        : "This Deal is not Currently Active";
+      return format === "short" ? "Not Active" : "Not Currently Active";
     }
     const { total_usages, days_since_last_use } = policy;
 
@@ -442,7 +439,11 @@ export class PolicyUtils {
         }
       }
       if (condition.type === "time_range") {
-        continue;
+        if (
+          !isAvailableNow(condition, restaurant.metadata.timezone as string)
+        ) {
+          return false;
+        }
       }
     }
 

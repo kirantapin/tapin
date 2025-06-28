@@ -20,6 +20,7 @@ import { SignInButton } from "@/components/signin/signin_button";
 import PayButton from "@/components/buttons/pay_button";
 import BundleCTA from "@/components/checkout/bundle_cta";
 import {
+  ADD_ON_TAG,
   LOYALTY_REWARD_TAG,
   NORMAL_DEAL_TAG,
   OFFERS_PAGE_PATH,
@@ -151,7 +152,7 @@ export default function CheckoutPage() {
           <div className="flex flex-wrap gap-2 mt-4">
             {policyManager
               .getActivePolicies(state.dealEffect)
-              .filter((p) => p.definition.tag === NORMAL_DEAL_TAG)
+              .filter((p) => p.definition.tag !== ADD_ON_TAG)
               .map((policy) => (
                 <Alert
                   key={policy.policy_id}
@@ -159,7 +160,9 @@ export default function CheckoutPage() {
                     <button className="px-2 py-2 bg-gray-100 rounded-full text-xs flex items-center gap-1">
                       <Tag size={13} className="text-gray-800" />
                       <span className="text-gray-800 text-md font-semibold">
-                        {titleCase(policy.name)}
+                        {titleCase(
+                          PolicyUtils.getPolicyName(policy, restaurant)
+                        )}
                       </span>
                       <X className="text-gray-800 h-4 w-4" />
                     </button>
@@ -317,14 +320,7 @@ export default function CheckoutPage() {
                 )}
               </div>
             )}
-            <HighlightSlider
-              policies={policyManager.getRecommendedDeals(
-                state.cart,
-                state.dealEffect,
-                restaurant
-              )}
-              displayOne={true}
-            />
+            <HighlightSlider displayOne={true} />
           </div>
         </div>
       </div>

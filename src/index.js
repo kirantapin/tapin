@@ -8,10 +8,7 @@ import { AuthProvider } from "./context/auth_context.tsx";
 import { DeviceProvider } from "./context/device_context.tsx";
 import { BrowserRouter as Router } from "react-router-dom";
 import { RestaurantProvider } from "./context/restaurant_context.tsx";
-import {
-  BottomSheetProvider,
-  sheetRegistry,
-} from "./context/bottom_sheet_context.tsx";
+import { BottomSheetProvider } from "./context/bottom_sheet_context.tsx";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>

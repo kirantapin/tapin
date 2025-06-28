@@ -1,6 +1,6 @@
-import { DEVICE_NOT_SUPPORTED_PATH } from "@/constants";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import DeviceNotSupported from "@/pages/device_not_supported";
 
 interface DeviceContextType {
   isMobileDevice: boolean;
@@ -22,10 +22,6 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
     const checkScreenWidth = () => {
       const isMobile = window.innerWidth <= 500;
       setIsMobileDevice(isMobile);
-
-      if (!isMobile) {
-        navigate(DEVICE_NOT_SUPPORTED_PATH);
-      }
     };
 
     // Check on mount
@@ -43,6 +39,13 @@ export const DeviceProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   return (
-    <DeviceContext.Provider value={value}>{children}</DeviceContext.Provider>
+    <DeviceContext.Provider value={value}>
+      {children}
+      {!isMobileDevice && (
+        <div className="fixed inset-0 z-50 bg-white">
+          <DeviceNotSupported />
+        </div>
+      )}
+    </DeviceContext.Provider>
   );
 };
