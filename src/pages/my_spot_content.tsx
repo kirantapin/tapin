@@ -50,7 +50,6 @@ const MySpotContent: React.FC = () => {
       (transaction) =>
         transaction.restaurant_id === restaurant.id &&
         transaction.fulfilled_by === null &&
-        ItemUtils.getMenuItemFromItemId(transaction.item, restaurant) &&
         ItemUtils.isPassItem(transaction.item, restaurant) ===
           (activeFilter === "Passes" ? true : false) &&
         TransactionUtils.isTransactionRedeemable(transaction, restaurant)
