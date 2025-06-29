@@ -51,7 +51,7 @@ const CheckoutSummary: FC<CheckoutSummaryProps> = ({
                 You saved{" "}
                 <span
                   className="font-bold"
-                  style={{ color: restaurant?.metadata.primaryColor as string }}
+                  style={{ color: restaurant?.metadata.primaryColor }}
                 >
                   ${state.cartResults.discount.toFixed(2)}
                 </span>{" "}
@@ -130,8 +130,7 @@ const CheckoutSummary: FC<CheckoutSummaryProps> = ({
                         100
                       }%`,
                       width: `${100 / tipAmounts.length}%`,
-                      backgroundColor: restaurant?.metadata
-                        .primaryColor as string,
+                      backgroundColor: restaurant?.metadata.primaryColor,
                     }}
                   />
 

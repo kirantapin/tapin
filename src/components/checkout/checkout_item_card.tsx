@@ -78,7 +78,7 @@ export function CheckoutItemCard({
               <span
                 className="bg-[#cda852] text-xs text-white px-2 py-0.5 rounded font-semibold"
                 style={{
-                  background: restaurant?.metadata.primaryColor as string,
+                  background: restaurant?.metadata.primaryColor,
                 }}
               >
                 {discountDescription}
@@ -97,7 +97,7 @@ export function CheckoutItemCard({
             >
               <span
                 className="text-sm font-medium text-gray-900 rounded-full py-1 flex items-center gap-1"
-                style={{ color: restaurant?.metadata.primaryColor as string }}
+                style={{ color: restaurant?.metadata.primaryColor }}
               >
                 {inlineRecommendation.flair}
                 <ChevronRight className="w-4 h-4 -ml-1" />
@@ -119,7 +119,7 @@ export function CheckoutItemCard({
           {item.quantity === 1 ? (
             <Trash2
               className="w-5 h-5"
-              style={{ color: restaurant.metadata.primaryColor as string }}
+              style={{ color: restaurant.metadata.primaryColor }}
             />
           ) : (
             <Minus className="w-5 h-5 text-black" />

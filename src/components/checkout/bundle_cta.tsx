@@ -93,10 +93,10 @@ export default function BundleCTA() {
           className={`w-6 h-6 border-2 rounded-lg flex-shrink-0 flex items-center justify-center transition-colors duration-300`}
           style={{
             backgroundColor: checked
-              ? (restaurant.metadata.primaryColor as string)
+              ? restaurant.metadata.primaryColor
               : "transparent",
             border: checked
-              ? `solid ${restaurant.metadata.primaryColor as string}`
+              ? `solid ${restaurant.metadata.primaryColor}`
               : "solid #9CA3AF",
           }}
         >
@@ -108,7 +108,7 @@ export default function BundleCTA() {
               You're{" "}
               <span
                 className="font-semibold"
-                style={{ color: restaurant.metadata.primaryColor as string }}
+                style={{ color: restaurant.metadata.primaryColor }}
               >
                 saving ${alreadyOwnedSavings.toFixed(2)}
               </span>{" "}
@@ -119,7 +119,7 @@ export default function BundleCTA() {
             <>
               <span
                 className="font-semibold"
-                style={{ color: restaurant.metadata.primaryColor as string }}
+                style={{ color: restaurant.metadata.primaryColor }}
               >
                 Save $
                 {Math.min(

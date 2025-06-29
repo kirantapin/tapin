@@ -149,7 +149,7 @@ const BundleSlider = () => {
                 style={{
                   backgroundColor:
                     activeBundle === index
-                      ? (restaurant?.metadata.primaryColor as string)
+                      ? restaurant?.metadata.primaryColor
                       : undefined,
                 }}
               ></button>

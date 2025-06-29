@@ -36,7 +36,7 @@ const GenericItemIcon: React.FC<GenericItemIconProps> = ({
   size = 30,
 }) => {
   const itemInfo = ItemUtils.getMenuItemFromItemId(itemId, restaurant);
-  const primaryColor = restaurant?.metadata.primaryColor as string;
+  const primaryColor = restaurant?.metadata.primaryColor;
 
   if (!itemInfo) {
     return <GradientIcon icon={Ban} primaryColor={primaryColor} size={size} />;

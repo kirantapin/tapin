@@ -102,18 +102,18 @@ const FollowButton: React.FC = () => {
         }}
         className="inline-flex justify-center items-center relative rounded-full px-3 py-1.5 border hover:opacity-80 transition-opacity"
         style={{
-          borderColor: restaurant?.metadata.primaryColor as string,
+          borderColor: restaurant?.metadata.primaryColor,
         }}
       >
         <div className="relative flex items-center gap-1">
           <Plus
             size={17}
             className="pb-[1px]"
-            style={{ color: restaurant?.metadata.primaryColor as string }}
+            style={{ color: restaurant?.metadata.primaryColor }}
           />
           <p
             className="text-sm font-semibold"
-            style={{ color: restaurant?.metadata.primaryColor as string }}
+            style={{ color: restaurant?.metadata.primaryColor }}
           >
             Follow
           </p>
@@ -128,7 +128,7 @@ const FollowButton: React.FC = () => {
         onClick={() => {}}
         className="inline-flex justify-center items-center relative rounded-full px-3 py-1.5   transition-opacity"
         style={{
-          backgroundColor: restaurant?.metadata.primaryColor as string,
+          backgroundColor: restaurant?.metadata.primaryColor,
         }}
       >
         <Alert
@@ -162,7 +162,7 @@ const FollowButton: React.FC = () => {
         onClick={() => {}}
         className="inline-flex justify-center items-center relative rounded-full px-3 py-1.5 border hover:opacity-80 transition-opacity"
         style={{
-          borderColor: restaurant?.metadata.primaryColor as string,
+          borderColor: restaurant?.metadata.primaryColor,
         }}
       >
         <Alert
@@ -172,11 +172,11 @@ const FollowButton: React.FC = () => {
               <Plus
                 size={17}
                 className="pb-[1px]"
-                style={{ color: restaurant?.metadata.primaryColor as string }}
+                style={{ color: restaurant?.metadata.primaryColor }}
               />
               <p
                 className="text-sm font-semibold"
-                style={{ color: restaurant?.metadata.primaryColor as string }}
+                style={{ color: restaurant?.metadata.primaryColor }}
               >
                 Follow
               </p>

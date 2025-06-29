@@ -21,7 +21,7 @@ const SmallPolicyCard: React.FC<SmallPolicyCardProps> = ({
 }) => {
   const { userOwnershipMap } = useRestaurant();
   const { handlePolicyClick } = useBottomSheet();
-  const primaryColor = restaurant.metadata.primaryColor as string;
+  const primaryColor = restaurant.metadata.primaryColor;
 
   return (
     <div className="relative w-full pb-6">

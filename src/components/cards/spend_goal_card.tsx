@@ -96,7 +96,7 @@ const SpendGoalCard: FC<{
 
   return (
     <div
-      className="w-full mt-4 border border-gray-200 rounded-xl p-4 pb-6"
+      className="w-full border border-gray-200 rounded-xl p-4 pb-6"
       onClick={onClick}
     >
       <div className="flex flex-col gap-2">
@@ -114,8 +114,8 @@ const SpendGoalCard: FC<{
           ) : (
             <>
               <span
-                className="font-semibold "
-                style={{ color: restaurant.metadata.primaryColor as string }}
+                className="font-bold text-2xl"
+                style={{ color: restaurant.metadata.primaryColor }}
               >
                 ${dollarsAway}
               </span>{" "}
@@ -136,8 +136,8 @@ const SpendGoalCard: FC<{
             style={{
               width: `${inbetweenProgress}%`,
               background: `linear-gradient(45deg, 
-              ${adjustColor(restaurant.metadata.primaryColor as string, 30)},
-              ${adjustColor(restaurant.metadata.primaryColor as string, -10)}
+              ${adjustColor(restaurant.metadata.primaryColor, 30)},
+              ${adjustColor(restaurant.metadata.primaryColor, -10)}
             )`,
             }}
           />

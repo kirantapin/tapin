@@ -226,7 +226,7 @@ const HighlightSlider = ({ displayOne = false }: { displayOne?: boolean }) => {
               style={{
                 backgroundColor:
                   activePromo === index
-                    ? (restaurant.metadata.primaryColor as string)
+                    ? restaurant.metadata.primaryColor
                     : undefined,
               }}
             ></button>

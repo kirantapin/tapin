@@ -152,7 +152,7 @@ const AccessCardSlider = ({
               style={{
                 backgroundColor:
                   activeIndex === index
-                    ? (restaurant.metadata.primaryColor as string)
+                    ? restaurant.metadata.primaryColor
                     : undefined,
               }}
             ></button>

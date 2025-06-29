@@ -66,7 +66,7 @@ const LockedPolicyModal: React.FC<LockedPolicyModalProps> = ({
         <div
           className="w-full text-white text-sm font-medium text-center py-1 rounded-t-3xl flex items-center justify-center gap-2"
           style={{
-            backgroundColor: restaurant?.metadata.primaryColor as string,
+            backgroundColor: restaurant?.metadata.primaryColor,
           }}
         >
           This deal requires a bundle
@@ -117,7 +117,7 @@ const LockedPolicyModal: React.FC<LockedPolicyModalProps> = ({
             <button
               className="w-full text-white py-3 rounded-full flex items-center justify-center gap-2"
               style={{
-                backgroundColor: restaurant?.metadata.primaryColor as string,
+                backgroundColor: restaurant?.metadata.primaryColor,
               }}
               onClick={async () => {
                 onClose();
@@ -133,7 +133,7 @@ const LockedPolicyModal: React.FC<LockedPolicyModalProps> = ({
           ) : (
             <SignInButton
               onClose={onClose}
-              primaryColor={restaurant?.metadata.primaryColor as string}
+              primaryColor={restaurant?.metadata.primaryColor}
             />
           )}
         </div>

@@ -99,8 +99,8 @@ export const PassAddOnCard: React.FC<PassAddOnCardProps> = ({
         <button
           className="mt-1 w-5 h-5 rounded border flex items-center justify-center transition-colors duration-400"
           style={{
-            backgroundColor: restaurant.metadata.primaryColor as string,
-            borderColor: restaurant.metadata.primaryColor as string,
+            backgroundColor: restaurant.metadata.primaryColor,
+            borderColor: restaurant.metadata.primaryColor,
           }}
         >
           <Check className="w-3 h-3 text-white" />
@@ -115,7 +115,7 @@ export const PassAddOnCard: React.FC<PassAddOnCardProps> = ({
         <div
           className="inline-block text-white text-xs font-semibold rounded px-2 py-1 mb-1"
           style={{
-            backgroundColor: restaurant.metadata.primaryColor as string,
+            backgroundColor: restaurant.metadata.primaryColor,
           }}
         >
           EXCLUSIVE (SAVE ${(originalPrice - newPrice).toFixed(2)})

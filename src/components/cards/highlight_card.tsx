@@ -34,7 +34,7 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
     title_override,
     description_override,
   } = highlight;
-  const primaryColor = restaurant?.metadata.primaryColor as string;
+  const primaryColor = restaurant?.metadata.primaryColor;
   const [title, setTitle] = useState<string | null>(null);
   const [description, setDescription] = useState<string | null>(null);
   const [defaultImageUrl, setDefaultImageUrl] = useState<string | null>(null);

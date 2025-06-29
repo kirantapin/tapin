@@ -43,7 +43,7 @@ export const PolicySlider: React.FC<PolicySliderProps> = ({
         <h1 className="text-xl font-bold">Awesome Deals</h1>
         <button
           className="text-md font-semibold"
-          style={{ color: restaurant.metadata.primaryColor as string }}
+          style={{ color: restaurant.metadata.primaryColor }}
           onClick={() => {
             navigate(OFFERS_PAGE_PATH.replace(":id", restaurant.id));
           }}

@@ -2,7 +2,6 @@ import { FC, useEffect, useState } from "react";
 import { Restaurant, Policy, PassItem, DealEffectPayload, Item } from "@/types";
 import { PassAddOnCard } from "../cards/pass_add_on_card";
 import { useRestaurant } from "@/context/restaurant_context";
-import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { useTimer } from "@/hooks/useTimer";
 import AddOnCard from "../cards/add_on_card";
 import { ItemUtils } from "@/utils/item_utils";

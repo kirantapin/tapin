@@ -85,7 +85,7 @@ export const Sidebar = ({ restaurant, isOpen, onClose }: SidebarProps) => {
       {/* Header with logo + close button */}
       <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <CustomLogo
-          primaryColor={restaurant?.metadata.primaryColor as string}
+          primaryColor={restaurant?.metadata.primaryColor}
           size={124}
         />
         <IconButton onClick={onClose} aria-label="Close" sx={{ padding: 1 }}>
@@ -97,7 +97,7 @@ export const Sidebar = ({ restaurant, isOpen, onClose }: SidebarProps) => {
         <button
           className="w-full  text-white font-semibold py-3 px-4 rounded-full shadow-md flex items-center justify-center gap-2"
           style={{
-            backgroundColor: restaurant?.metadata.primaryColor as string,
+            backgroundColor: restaurant?.metadata.primaryColor,
           }}
           onClick={() => {
             navigate(BASE_PATH);
@@ -153,7 +153,7 @@ export const Sidebar = ({ restaurant, isOpen, onClose }: SidebarProps) => {
               onClose={() => {
                 onClose();
               }}
-              primaryColor={restaurant?.metadata.primaryColor as string}
+              primaryColor={restaurant?.metadata.primaryColor}
             />
           </div>
         )}

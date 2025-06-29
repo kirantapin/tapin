@@ -93,7 +93,7 @@ export function Alert({
               confirmClassName
             )}
             style={{
-              backgroundColor: restaurant?.metadata.primaryColor as string,
+              backgroundColor: restaurant?.metadata.primaryColor,
             }}
           >
             {confirmLabel}

@@ -54,7 +54,7 @@ const ItemModModal: React.FC<ItemModModalProps> = ({
             <LiquorForm
               type={menuLabel ?? ""}
               restaurant={restaurant}
-              primaryColor={restaurant.metadata.primaryColor as string}
+              primaryColor={restaurant.metadata.primaryColor}
               afterAdd={async (item) => {
                 if (onSelect) {
                   await onSelect(item);

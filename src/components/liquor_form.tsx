@@ -252,7 +252,7 @@ const LiquorForm = ({
           type="submit"
           className="w-full text-white py-3 rounded-full transition"
           style={{
-            background: restaurant?.metadata.primaryColor as string,
+            background: restaurant?.metadata.primaryColor,
           }}
         >
           {loading ? (

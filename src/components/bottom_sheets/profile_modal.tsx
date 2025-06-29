@@ -106,7 +106,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
                   Your Profile
                 </SheetTitle>
                 <CustomIcon
-                  circleColor={restaurant?.metadata.primaryColor as string}
+                  circleColor={restaurant?.metadata.primaryColor}
                   size={26}
                 />
               </div>
@@ -130,7 +130,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
                   <div className="absolute bottom-0 left-0 right-0 p-6">
                     <SignInButton
                       onClose={onClose}
-                      primaryColor={restaurant?.metadata.primaryColor as string}
+                      primaryColor={restaurant?.metadata.primaryColor}
                     />
                   </div>
                 </div>

@@ -13,6 +13,7 @@ import {
   Twitter,
   Instagram,
   Music,
+  SquareArrowOutUpRight,
 } from "lucide-react";
 import { RESTAURANT_PATH } from "@/constants";
 import { useNavigate, useParams } from "react-router-dom";
@@ -101,85 +102,103 @@ const RestaurantInfo: React.FC = () => {
       )}
 
       {/* Social Media */}
-      {hasSocials && (
-        <div className="flex gap-3 mb-4 px-4 overflow-x-auto no-scrollbar">
-          {socials.facebookLink && (
-            <button
-              onClick={() => {
-                const url = socials.facebookLink.startsWith("http")
-                  ? socials.facebookLink
-                  : `http://${socials.facebookLink}`;
-                window.open(url, "_blank");
-              }}
-              className="flex-none flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
-            >
-              <GradientIcon
-                icon={Facebook}
-                primaryColor={restaurant?.metadata.primaryColor as string}
-                size={20}
-              />
-              <span className="text-sm font-medium">Facebook</span>
-            </button>
-          )}
+      <div className="flex gap-3 mb-4 px-4 flex-wrap">
+        {socials.facebookLink && (
+          <button
+            onClick={() => {
+              const url = socials.facebookLink.startsWith("http")
+                ? socials.facebookLink
+                : `http://${socials.facebookLink}`;
+              window.open(url, "_blank");
+            }}
+            className="flex-none flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
+          >
+            <GradientIcon
+              icon={Facebook}
+              primaryColor={restaurant?.metadata.primaryColor}
+              size={20}
+            />
+            <span className="text-sm font-medium">Facebook</span>
+          </button>
+        )}
 
-          {socials.twitterLink && (
-            <button
-              onClick={() => {
-                const url = socials.twitterLink.startsWith("http")
-                  ? socials.twitterLink
-                  : `http://${socials.twitterLink}`;
-                window.open(url, "_blank");
-              }}
-              className="flex-none flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
-            >
-              <GradientIcon
-                icon={Twitter}
-                primaryColor={restaurant?.metadata.primaryColor as string}
-                size={20}
-              />
-              <span className="text-sm font-medium">Twitter</span>
-            </button>
-          )}
+        {socials.twitterLink && (
+          <button
+            onClick={() => {
+              const url = socials.twitterLink.startsWith("http")
+                ? socials.twitterLink
+                : `http://${socials.twitterLink}`;
+              window.open(url, "_blank");
+            }}
+            className="flex-none flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
+          >
+            <GradientIcon
+              icon={Twitter}
+              primaryColor={restaurant?.metadata.primaryColor}
+              size={20}
+            />
+            <span className="text-sm font-medium">Twitter</span>
+          </button>
+        )}
 
-          {socials.instagramLink && (
-            <button
-              onClick={() => {
-                const url = socials.instagramLink.startsWith("http")
-                  ? socials.instagramLink
-                  : `http://${socials.instagramLink}`;
-                window.open(url, "_blank");
-              }}
-              className="flex-none flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
-            >
-              <GradientIcon
-                icon={Instagram}
-                primaryColor={restaurant?.metadata.primaryColor as string}
-                size={20}
-              />
-              <span className="text-sm font-medium">Instagram</span>
-            </button>
-          )}
+        {socials.instagramLink && (
+          <button
+            onClick={() => {
+              const url = socials.instagramLink.startsWith("http")
+                ? socials.instagramLink
+                : `http://${socials.instagramLink}`;
+              window.open(url, "_blank");
+            }}
+            className="flex-none flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
+          >
+            <GradientIcon
+              icon={Instagram}
+              primaryColor={restaurant?.metadata.primaryColor}
+              size={20}
+            />
+            <span className="text-sm font-medium">Instagram</span>
+          </button>
+        )}
 
-          {socials.tiktokLink && (
+        {socials.tiktokLink && (
+          <button
+            onClick={() => {
+              const url = socials.tiktokLink.startsWith("http")
+                ? socials.tiktokLink
+                : `http://${socials.tiktokLink}`;
+              window.open(url, "_blank");
+            }}
+            className="flex-none flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
+          >
+            <GradientIcon
+              icon={Music}
+              primaryColor={restaurant?.metadata.primaryColor}
+              size={20}
+            />
+            <span className="text-sm font-medium">TikTok</span>
+          </button>
+        )}
+        {(restaurant.info?.customLinks || []).map((customLink: any) => {
+          return (
             <button
               onClick={() => {
-                const url = socials.tiktokLink.startsWith("http")
-                  ? socials.tiktokLink
-                  : `http://${socials.tiktokLink}`;
+                const url = customLink.url.startsWith("http")
+                  ? customLink.url
+                  : `http://${customLink.url}`;
                 window.open(url, "_blank");
               }}
               className="flex-none flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
             >
               <GradientIcon
-                icon={Music}
-                primaryColor={restaurant?.metadata.primaryColor as string}
+                icon={SquareArrowOutUpRight}
+                primaryColor={restaurant?.metadata.primaryColor}
                 size={20}
               />
-              <span className="text-sm font-medium">TikTok</span>
+              <span className="text-sm font-medium">{customLink.name}</span>
             </button>
-          )}
-        </div>
-      )}
+          );
+        })}
+      </div>
 
       {/* Address */}
       {address && (
@@ -187,7 +206,7 @@ const RestaurantInfo: React.FC = () => {
           <div className="flex items-start gap-3">
             <GradientIcon
               icon={MapPin}
-              primaryColor={restaurant?.metadata.primaryColor as string}
+              primaryColor={restaurant?.metadata.primaryColor}
               size={20}
             />
             <div>
@@ -218,7 +237,7 @@ const RestaurantInfo: React.FC = () => {
             <div className="flex items-center gap-3">
               <GradientIcon
                 icon={Clock}
-                primaryColor={restaurant?.metadata.primaryColor as string}
+                primaryColor={restaurant?.metadata.primaryColor}
                 size={20}
               />
               <span className="font-medium">Opening Hours</span>
@@ -354,7 +373,7 @@ const RestaurantInfo: React.FC = () => {
           <div className="flex items-center gap-3">
             <GradientIcon
               icon={Phone}
-              primaryColor={restaurant?.metadata.primaryColor as string}
+              primaryColor={restaurant?.metadata.primaryColor}
               size={20}
             />
             <span>{contactNumber}</span>
@@ -368,7 +387,7 @@ const RestaurantInfo: React.FC = () => {
           <div className="flex items-center gap-3">
             <GradientIcon
               icon={Globe}
-              primaryColor={restaurant?.metadata.primaryColor as string}
+              primaryColor={restaurant?.metadata.primaryColor}
               size={20}
             />
             <span>{website}</span>
