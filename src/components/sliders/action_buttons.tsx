@@ -17,6 +17,7 @@ import {
 } from "@/constants";
 import { useRestaurant } from "@/context/restaurant_context";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
+import { Alert } from "../display_utils/alert";
 
 interface ActionButtonsProps {
   scrollToOrderDrinks: () => void;
@@ -84,19 +85,26 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
 
       {(restaurant.info?.customLinks || []).map((customLink: any) => {
         return (
-          <button
-            className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-2 sm:py-2 rounded-full border border-gray-300 bg-white"
-            onClick={() => window.open(customLink.url, "_blank")}
-          >
-            <GradientIcon
-              icon={SquareArrowOutUpRight}
-              primaryColor={restaurant?.metadata.primaryColor}
-              size={17}
-            />
-            <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
-              {customLink.name}
-            </span>
-          </button>
+          <Alert
+            key={customLink.url}
+            trigger={
+              <button className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-2 sm:py-2 rounded-full border border-gray-300 bg-white">
+                <GradientIcon
+                  icon={SquareArrowOutUpRight}
+                  primaryColor={restaurant?.metadata.primaryColor}
+                  size={17}
+                />
+                <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
+                  {customLink.name}
+                </span>
+              </button>
+            }
+            title={`Go to ${restaurant.name} ${customLink.name}?`}
+            description={`You are about to leave Tap In.`}
+            onConfirm={() => window.open(customLink.url, "_blank")}
+            confirmLabel="Go"
+            cancelLabel="Cancel"
+          />
         );
       })}
       <button
@@ -132,25 +140,31 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
         </span>
       </button>
       {restaurant.info.address && (
-        <button
-          className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-2 sm:py-2 rounded-full border border-gray-300 bg-white"
-          onClick={() =>
+        <Alert
+          trigger={
+            <button className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-2 sm:py-2 rounded-full border border-gray-300 bg-white">
+              <GradientIcon
+                icon={MapPin}
+                primaryColor={restaurant?.metadata.primaryColor}
+                size={17}
+              />
+              <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
+                Directions
+              </span>
+            </button>
+          }
+          title={`Go to ${restaurant.name} Directions?`}
+          description={`You are about to leave Tap In.`}
+          onConfirm={() =>
             window.open(
               `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
                 restaurant.info.address
               )}`
             )
           }
-        >
-          <GradientIcon
-            icon={MapPin}
-            primaryColor={restaurant?.metadata.primaryColor}
-            size={17}
-          />
-          <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
-            Directions
-          </span>
-        </button>
+          confirmLabel="Go"
+          cancelLabel="Cancel"
+        />
       )}
     </div>
   );

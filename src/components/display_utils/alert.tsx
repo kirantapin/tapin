@@ -85,7 +85,7 @@ export function Alert({
           )}
         </AlertDialogHeader>
 
-        <AlertDialogFooter className="flex-col gap-2">
+        <AlertDialogFooter className="flex-col">
           <AlertDialogAction
             onClick={onConfirm}
             className={cn(
