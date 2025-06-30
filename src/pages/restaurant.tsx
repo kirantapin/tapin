@@ -1,15 +1,10 @@
-import { Search, Sparkles, X } from "lucide-react";
+import { Search, Sparkles, X, ArrowUp } from "lucide-react";
 
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/auth_context.tsx";
 import { Restaurant, Transaction } from "../types.ts";
-import {
-  HOUSE_MIXER_LABEL,
-  LIQUOR_MENU_TAG,
-  MAX_QR_TRANSACTIONS,
-  SHOTS_SHOOTERS_LABEL,
-} from "../constants.ts";
+import { LIQUOR_MENU_TAG, MAX_QR_TRANSACTIONS } from "../constants.ts";
 
 import { DrinkItem, DrinkList } from "@/components/menu_items.tsx";
 import GoToCartButton from "@/components/buttons/go_to_cart_button.tsx";
@@ -43,6 +38,7 @@ export default function RestaurantPage() {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const orderDrinksRef = useRef<HTMLDivElement>(null);
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
   const { state, addToCart, removeFromCart, triggerToast, openBundleModal } =
     useBottomSheet();
   const { openQrModal } = useBottomSheet();
@@ -105,6 +101,18 @@ export default function RestaurantPage() {
       block: "start",
     });
   };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (orderDrinksRef.current) {
+        const orderDrinksTop = orderDrinksRef.current.offsetTop;
+        const scrollTop = window.scrollY;
+        setShowScrollToTop(scrollTop >= orderDrinksTop);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     handleLocation();
@@ -335,6 +343,29 @@ export default function RestaurantPage() {
             />
           )}
         </div>
+
+        {/* Scroll to Top Button */}
+        {showScrollToTop && (
+          <button
+            onClick={() => {
+              window.scrollTo({
+                top: 0,
+                behavior: "smooth",
+              });
+            }}
+            className={`fixed z-40 w-14 h-14 bg-white rounded-full shadow-[0_20px_25px_-5px_rgba(0,0,0,0.3),0_10px_10px_-5px_rgba(0,0,0,0.2)] border border-gray-200 flex items-center justify-center left-3 mb-5`}
+            style={{
+              color: restaurant?.metadata.primaryColor,
+              bottom:
+                state.cart.reduce((total, item) => total + item.quantity, 0) > 0
+                  ? "74px" // 20 (h-20) + 4 spacing = 24 spacing from bottom
+                  : "0px", // Just 4 spacing from bottom
+            }}
+          >
+            <ArrowUp className="w-7 h-7" />
+          </button>
+        )}
+
         <GoToCartButton
           restaurant={restaurant}
           cartCount={
