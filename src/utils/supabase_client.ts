@@ -1,6 +1,6 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 //supabase client
-const environment_override = null;
+const environment_override = "production";
 
 const supabase_key =
   (environment_override || process.env.NODE_ENV) === "production"
