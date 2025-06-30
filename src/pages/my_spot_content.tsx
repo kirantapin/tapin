@@ -180,8 +180,8 @@ const MySpotContent: React.FC = () => {
               style={
                 activeFilter === tagMap[filter].tag
                   ? {
-                      color: restaurant.metadata.primaryColor as string,
-                      borderColor: restaurant.metadata.primaryColor as string,
+                      color: restaurant.metadata.primaryColor,
+                      borderColor: restaurant.metadata.primaryColor,
                     }
                   : { backgroundColor: "#f6f8fa", borderColor: "#e5e7eb" }
               }
@@ -253,8 +253,7 @@ const MySpotContent: React.FC = () => {
                 style={
                   selectedTransactions.length > 0
                     ? {
-                        backgroundColor: restaurant.metadata
-                          .primaryColor as string,
+                        backgroundColor: restaurant.metadata.primaryColor,
                       }
                     : {
                         backgroundColor: "#969292",

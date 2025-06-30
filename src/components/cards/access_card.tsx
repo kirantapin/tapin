@@ -35,11 +35,9 @@ export default function Card({
   modifiedFlair,
   inlineRecommendation = null,
 }: CardProps) {
-  const colors = generateGradientColors(
-    restaurant.metadata.primaryColor as string
-  );
+  const colors = generateGradientColors(restaurant.metadata.primaryColor);
 
-  const primaryColor = restaurant.metadata.primaryColor as string;
+  const primaryColor = restaurant.metadata.primaryColor;
   let itemInfo = null;
   let quantity = 0;
   let name = null;
@@ -70,7 +68,6 @@ export default function Card({
       <div
         style={{
           background: `linear-gradient(to right, ${colors.via}, ${colors.from})`,
-          // backgroundColor: restaurant?.metadata.primaryColor as string,
         }}
         className="absolute inset-0"
       />

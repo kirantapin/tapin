@@ -133,7 +133,7 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
                 </div>
                 <button
                   className="text-md font-semibold"
-                  style={{ color: restaurant?.metadata.primaryColor as string }}
+                  style={{ color: restaurant?.metadata.primaryColor }}
                   onClick={() => {
                     openBundleModal(bundle);
                   }}
@@ -150,7 +150,7 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
                     </span>
                     <GradientIcon
                       icon={CircleX}
-                      primaryColor={restaurant?.metadata.primaryColor as string}
+                      primaryColor={restaurant?.metadata.primaryColor}
                       size={24}
                     />
                   </div>
@@ -167,7 +167,7 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
                     </span>
                     <GradientIcon
                       icon={Wallet}
-                      primaryColor={restaurant?.metadata.primaryColor as string}
+                      primaryColor={restaurant?.metadata.primaryColor}
                       size={24}
                     />
                   </div>

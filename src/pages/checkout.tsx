@@ -194,7 +194,7 @@ export default function CheckoutPage() {
                 <h2 className="text-2xl font-bold">Save More</h2>
                 <ScrollDownIndicator
                   scrollTarget={scrollContainerRef}
-                  primaryColor={restaurant.metadata.primaryColor as string}
+                  primaryColor={restaurant.metadata.primaryColor}
                   size="w-8 h-8"
                 />
               </div>
@@ -229,15 +229,16 @@ export default function CheckoutPage() {
               </div>
             </div>
           )}
-
-          <SpendGoalCard
-            onClick={() => {
-              closeCheckoutModal();
-              navigate(OFFERS_PAGE_PATH.replace(":id", restaurant.id), {
-                state: { tag: LOYALTY_REWARD_TAG },
-              });
-            }}
-          />
+          <div className="mt-4">
+            <SpendGoalCard
+              onClick={() => {
+                closeCheckoutModal();
+                navigate(OFFERS_PAGE_PATH.replace(":id", restaurant.id), {
+                  state: { tag: LOYALTY_REWARD_TAG },
+                });
+              }}
+            />
+          </div>
 
           <h2 className="text-2xl font-bold mt-6">Payment</h2>
 
@@ -315,7 +316,7 @@ export default function CheckoutPage() {
                 ) : (
                   <SignInButton
                     onClose={() => {}}
-                    primaryColor={restaurant.metadata.primaryColor as string}
+                    primaryColor={restaurant.metadata.primaryColor}
                   />
                 )}
               </div>

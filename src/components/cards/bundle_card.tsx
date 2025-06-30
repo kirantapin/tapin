@@ -116,13 +116,13 @@ const BundleCard = ({
                   <div className="flex items-center gap-2 h-full">
                     <GradientIcon
                       icon={Wallet}
-                      primaryColor={restaurant?.metadata.primaryColor as string}
+                      primaryColor={restaurant?.metadata.primaryColor}
                       size={20}
                     />
                     <span
                       className="text-sm font-bold"
                       style={{
-                        color: restaurant?.metadata.primaryColor as string,
+                        color: restaurant?.metadata.primaryColor,
                       }}
                     >
                       ${bundle.fixed_credit.toFixed(0)} Credit
@@ -135,13 +135,13 @@ const BundleCard = ({
                   <div className="flex items-center gap-2 h-full">
                     <GradientIcon
                       icon={CircleX}
-                      primaryColor={restaurant?.metadata.primaryColor as string}
+                      primaryColor={restaurant?.metadata.primaryColor}
                       size={20}
                     />
                     <span
                       className="text-sm font-bold"
                       style={{
-                        color: restaurant?.metadata.primaryColor as string,
+                        color: restaurant?.metadata.primaryColor,
                       }}
                     >
                       {bundle.point_multiplier}x Points
@@ -171,7 +171,7 @@ const BundleCard = ({
                         <CheckIcon
                           size={20}
                           strokeWidth={3}
-                          color={restaurant?.metadata.primaryColor as string}
+                          color={restaurant?.metadata.primaryColor}
                           className="text-gray-700 mb-[6px] flex-shrink-0"
                         />
                         <p
@@ -194,7 +194,7 @@ const BundleCard = ({
                   <CheckIcon
                     size={20}
                     strokeWidth={3}
-                    color={restaurant?.metadata.primaryColor as string}
+                    color={restaurant?.metadata.primaryColor}
                     className="text-gray-700 mb-[6px]"
                   />
                   <p className="text-[15px] text-gray-700 h-[30px]">
@@ -208,7 +208,7 @@ const BundleCard = ({
               <button
                 className="w-full text-white border-none rounded-full py-[12px] text-base font-semibold enhance-contrast"
                 style={{
-                  background: restaurant?.metadata.primaryColor as string,
+                  background: restaurant?.metadata.primaryColor,
                 }}
               >
                 {isOwned ? (

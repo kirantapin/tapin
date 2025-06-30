@@ -98,8 +98,8 @@ export default function PoliciesPage() {
             style={
               activeTag === tagMap[tagLabel].tag
                 ? {
-                    color: restaurant?.metadata.primaryColor as string,
-                    borderColor: restaurant?.metadata.primaryColor as string,
+                    color: restaurant?.metadata.primaryColor,
+                    borderColor: restaurant?.metadata.primaryColor,
                   }
                 : {
                     backgroundColor: "#f6f8fa",
@@ -145,7 +145,7 @@ export default function PoliciesPage() {
             ))
           ) : (
             <p className="text-2xl text-black text-center font-bold flex justify-center items-center min-h-[200px]">
-              No active Deals.
+              No Active Deals.
             </p>
           )}
         </div>

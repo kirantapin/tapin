@@ -120,15 +120,51 @@ export interface Item {
 export interface Restaurant {
   id: string;
   name: string;
-  //how to do location
   menu: Menu;
   labelMap: Record<string, string>;
   stripe_account_id: string;
   active: boolean;
-  metadata: Record<string, string | boolean>;
-  info: Record<string, any>;
+  metadata: RestaurantMetadata;
+  info: RestaurantInfo;
 }
 
+interface RestaurantMetadata {
+  salesTax: number;
+  timeZone: string;
+  itemCharge: number;
+  passCharge: number;
+  locationTag: string;
+  bundleCharge: number;
+  primaryColor: string;
+  enableLoyaltyProgram: boolean;
+}
+
+interface RestaurantInfo {
+  address: string;
+  socials: {
+    tiktokLink: string | null;
+    twitterLink: string | null;
+    facebookLink: string | null;
+    instagramLink: string | null;
+  };
+  website: string;
+  openingHours: OpenHours;
+  contactNumber: string;
+  customLinks?: {
+    name: string;
+    url: string;
+  }[];
+}
+
+export interface OpenHours {
+  monday: string[];
+  tuesday: string[];
+  wednesday: string[];
+  thursday: string[];
+  friday: string[];
+  saturday: string[];
+  sunday: string[];
+}
 export interface DrinkForm {
   restaurant: Restaurant;
   onUpdate: (values: Record<string, string>) => void;

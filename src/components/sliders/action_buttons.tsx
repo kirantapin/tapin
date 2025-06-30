@@ -1,4 +1,12 @@
-import { Beer, Info, Gift, Star, MapPin, HandCoins } from "lucide-react";
+import {
+  Beer,
+  Info,
+  Gift,
+  Star,
+  MapPin,
+  HandCoins,
+  SquareArrowOutUpRight,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { GradientIcon } from "@/utils/gradient";
 import {
@@ -33,7 +41,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       >
         <GradientIcon
           icon={Beer}
-          primaryColor={restaurant?.metadata.primaryColor as string}
+          primaryColor={restaurant?.metadata.primaryColor}
           size={17}
         />
         {/* <Info className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" /> */}
@@ -52,7 +60,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       >
         <GradientIcon
           icon={Gift}
-          primaryColor={restaurant?.metadata.primaryColor as string}
+          primaryColor={restaurant?.metadata.primaryColor}
           size={17}
         />
         <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
@@ -66,13 +74,31 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       >
         <GradientIcon
           icon={HandCoins}
-          primaryColor={restaurant?.metadata.primaryColor as string}
+          primaryColor={restaurant?.metadata.primaryColor}
           size={17}
         />
         <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
           Bundles
         </span>
       </button>
+
+      {(restaurant.info?.customLinks || []).map((customLink: any) => {
+        return (
+          <button
+            className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-2 sm:py-2 rounded-full border border-gray-300 bg-white"
+            onClick={() => window.open(customLink.url, "_blank")}
+          >
+            <GradientIcon
+              icon={SquareArrowOutUpRight}
+              primaryColor={restaurant?.metadata.primaryColor}
+              size={17}
+            />
+            <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
+              {customLink.name}
+            </span>
+          </button>
+        );
+      })}
       <button
         className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-2 sm:py-2 rounded-full border border-gray-300 bg-white"
         onClick={() =>
@@ -83,7 +109,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       >
         <GradientIcon
           icon={Star}
-          primaryColor={restaurant?.metadata.primaryColor as string}
+          primaryColor={restaurant?.metadata.primaryColor}
           size={17}
         />
         <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
@@ -98,7 +124,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       >
         <GradientIcon
           icon={Info}
-          primaryColor={restaurant?.metadata.primaryColor as string}
+          primaryColor={restaurant?.metadata.primaryColor}
           size={17}
         />
         <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">
@@ -118,7 +144,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
         >
           <GradientIcon
             icon={MapPin}
-            primaryColor={restaurant?.metadata.primaryColor as string}
+            primaryColor={restaurant?.metadata.primaryColor}
             size={17}
           />
           <span className="text-sm sm:text-sm text-gray-600 whitespace-nowrap">

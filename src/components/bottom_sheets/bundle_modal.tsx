@@ -143,7 +143,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
               <div
                 className="flex items-center rounded-full ml-4 px-3 py-1"
                 style={{
-                  backgroundColor: restaurant?.metadata.primaryColor as string,
+                  backgroundColor: restaurant?.metadata.primaryColor,
                 }}
               >
                 <span className="text-md text-white font-semibold">
@@ -152,7 +152,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
               </div>
             </div>
             <ShareButton
-              primaryColor={restaurant?.metadata.primaryColor as string}
+              primaryColor={restaurant?.metadata.primaryColor}
               bundle={bundle}
               restaurant={restaurant}
             />
@@ -193,7 +193,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
                     style={{
                       color: PolicyUtils.isPolicyUsable(policy, restaurant)
                         ? "inherit"
-                        : (restaurant?.metadata.primaryColor as string),
+                        : restaurant?.metadata.primaryColor,
                       fontWeight: PolicyUtils.isPolicyUsable(policy, restaurant)
                         ? "normal"
                         : "bold",
@@ -211,7 +211,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
                 <div className=" mb-4">
                   <GradientIcon
                     icon={Wallet}
-                    primaryColor={restaurant?.metadata.primaryColor as string}
+                    primaryColor={restaurant?.metadata.primaryColor}
                     size={30}
                   />
                 </div>
@@ -230,7 +230,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
                 <div className="text-[#E6C677] mb-4">
                   <GradientIcon
                     icon={CircleX}
-                    primaryColor={restaurant?.metadata.primaryColor as string}
+                    primaryColor={restaurant?.metadata.primaryColor}
                     size={30}
                   />
                 </div>
@@ -289,7 +289,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
               <div
                 className="animate-spin rounded-full h-8 w-8 border-4 border-gray-200"
                 style={{
-                  borderTopColor: restaurant?.metadata.primaryColor as string,
+                  borderTopColor: restaurant?.metadata.primaryColor,
                 }}
               ></div>
             </div>
@@ -322,7 +322,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
                   <span
                     className="font-bold"
                     style={{
-                      color: restaurant?.metadata.primaryColor as string,
+                      color: restaurant?.metadata.primaryColor,
                     }}
                   >
                     ${(estimatedBundleValue - bundle.price).toFixed(2)}
@@ -339,7 +339,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
               <div className="mt-auto bg-white">
                 <SignInButton
                   onClose={onClose}
-                  primaryColor={restaurant?.metadata.primaryColor as string}
+                  primaryColor={restaurant?.metadata.primaryColor}
                 />
               </div>
             ) : isOwned ? (

@@ -39,7 +39,7 @@ const RedeemButton = ({
     <button
       className="w-full py-3 px-4 rounded-full font-medium text-white"
       style={{
-        background: restaurant?.metadata.primaryColor as string,
+        background: restaurant?.metadata.primaryColor,
       }}
       onClick={async () => {
         setLoading(true);

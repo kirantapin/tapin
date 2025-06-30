@@ -96,11 +96,11 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                 <div
                   className="bg-white text-black px-3 py-2 rounded-full flex items-center gap-1 border"
                   style={{
-                    borderColor: restaurant?.metadata.primaryColor as string,
+                    borderColor: restaurant?.metadata.primaryColor,
                   }}
                 >
                   <CustomIcon
-                    circleColor={restaurant?.metadata.primaryColor as string}
+                    circleColor={restaurant?.metadata.primaryColor}
                     baseColor="black"
                     size={16}
                   />
@@ -112,8 +112,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                 <div
                   className="relative text-white px-3 py-2 rounded-full flex items-center gap-1"
                   style={{
-                    backgroundColor: restaurant?.metadata
-                      .primaryColor as string,
+                    backgroundColor: restaurant?.metadata.primaryColor,
                   }}
                 >
                   <Clock size={16} />
@@ -126,7 +125,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
               <div
                 className="relative text-white px-3 py-2 rounded-full flex items-center gap-1"
                 style={{
-                  backgroundColor: restaurant?.metadata.primaryColor as string,
+                  backgroundColor: restaurant?.metadata.primaryColor,
                 }}
               >
                 <span className="font-semibold text-xs">
@@ -140,8 +139,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                 <div
                   className="relative text-white px-3 py-2 rounded-full flex items-center gap-1"
                   style={{
-                    backgroundColor: restaurant?.metadata
-                      .primaryColor as string,
+                    backgroundColor: restaurant?.metadata.primaryColor,
                   }}
                 >
                   <RefreshCw size={16} />
@@ -157,8 +155,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                 <div
                   className="relative text-white px-3 py-2 rounded-full flex items-center gap-1"
                   style={{
-                    backgroundColor: restaurant?.metadata
-                      .primaryColor as string,
+                    backgroundColor: restaurant?.metadata.primaryColor,
                   }}
                 >
                   <Lock size={16} />
@@ -326,7 +323,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                       !policyIsActive) ||
                     !isUsable
                       ? "#969292"
-                      : (restaurant?.metadata.primaryColor as string),
+                      : restaurant?.metadata.primaryColor,
                 }}
                 onClick={async () => {
                   setLoading(true);
@@ -362,7 +359,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
             ) : (
               <SignInButton
                 onClose={onClose}
-                primaryColor={restaurant?.metadata.primaryColor as string}
+                primaryColor={restaurant?.metadata.primaryColor}
               />
             )}
           </div>

@@ -91,7 +91,7 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
             }
             className="flex items-center justify-left gap-2 text-white w-fit max-w-sm py-2.5 text-md font-semibold"
             style={{
-              color: restaurant?.metadata.primaryColor as string,
+              color: restaurant?.metadata.primaryColor,
             }}
           >
             View Rewards
@@ -103,7 +103,7 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
         <div className="mt-4 text-left">
           <h3
             className="text-4xl font-bold mb-1"
-            style={{ color: restaurant.metadata.primaryColor as string }}
+            style={{ color: restaurant.metadata.primaryColor }}
           >
             {formatPoints(userPoints)} Points
           </h3>
@@ -130,8 +130,7 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
                     className="h-full rounded-full transition-all duration-300 enhance-contrast"
                     style={{
                       width: `${widthPercentage}%`,
-                      backgroundColor: restaurant.metadata
-                        .primaryColor as string,
+                      backgroundColor: restaurant.metadata.primaryColor,
                     }}
                   ></div>
 
@@ -175,7 +174,7 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
                         style={{
                           left: `${offset}%`,
                           transform: "translate(-50%, -50%)",
-                          color: restaurant.metadata.primaryColor as string,
+                          color: restaurant.metadata.primaryColor,
                         }}
                       />
                     );
@@ -201,7 +200,7 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
               <div className="bg-gray-200 rounded-full p-2">
                 <GradientIcon
                   icon={ShoppingBag}
-                  primaryColor={restaurant.metadata.primaryColor as string}
+                  primaryColor={restaurant.metadata.primaryColor}
                   size={20}
                 />
               </div>

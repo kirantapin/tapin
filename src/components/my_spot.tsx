@@ -92,7 +92,7 @@ export const MySpot: React.FC<MySpotProps> = ({
               <p
                 className="font-18 font-semibold text-gray-900"
                 style={{
-                  color: restaurant?.metadata.primaryColor as string,
+                  color: restaurant?.metadata.primaryColor,
                 }}
               >
                 ${userData?.next_purchase_credit[restaurant?.id].toFixed(2)}
@@ -121,7 +121,7 @@ export const MySpot: React.FC<MySpotProps> = ({
             <div className="p-1">
               <GradientIcon
                 icon={Ticket}
-                primaryColor={restaurant?.metadata.primaryColor as string}
+                primaryColor={restaurant?.metadata.primaryColor}
                 size={28}
               />
             </div>
@@ -155,7 +155,7 @@ export const MySpot: React.FC<MySpotProps> = ({
             <div className="p-1">
               <GradientIcon
                 icon={GlassWater}
-                primaryColor={restaurant?.metadata.primaryColor as string}
+                primaryColor={restaurant?.metadata.primaryColor}
                 size={28}
               />
             </div>

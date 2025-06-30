@@ -62,6 +62,10 @@ const OrderHistory = () => {
     fetchOrders();
   }, [userSession, transactions, restaurant]);
 
+  if (!restaurant) {
+    return null;
+  }
+
   return (
     <div className="relative h-full flex flex-col">
       <div className="flex-1 overflow-y-auto pt-4 pb-40">
@@ -91,7 +95,7 @@ const OrderHistory = () => {
                         <p className="text-sm text-black">
                           {convertUtcToLocal(
                             order.created_at,
-                            restaurant?.metadata.timezone as string
+                            restaurant.metadata.timeZone
                           )}
                         </p>
                         {order.metadata?.discount &&

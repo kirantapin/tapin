@@ -36,7 +36,7 @@ const GoToCartButton = ({
               : "translate-y-24 opacity-0 pointer-events-none"
           }`}
         style={{
-          backgroundColor: restaurant.metadata.primaryColor as string,
+          backgroundColor: restaurant.metadata.primaryColor,
         }}
       >
         <ShoppingCart className="w-5 h-5" />
@@ -44,7 +44,7 @@ const GoToCartButton = ({
           View Cart
           <span
             className="bg-white text-sm font-bold rounded-full w-6 h-6 flex items-center justify-center pt-[2px]"
-            style={{ color: restaurant.metadata.primaryColor as string }}
+            style={{ color: restaurant.metadata.primaryColor }}
           >
             {cartCount}
           </span>

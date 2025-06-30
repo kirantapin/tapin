@@ -27,7 +27,7 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({
   dealEffect,
   extraTags = [],
 }) => {
-  const primaryColor = restaurant?.metadata.primaryColor as string;
+  const primaryColor = restaurant?.metadata.primaryColor;
   const { userOwnershipMap } = useRestaurant();
   const { handlePolicyClick } = useBottomSheet();
   const policyIsActive = PolicyManager.getActivePolicyIds(dealEffect).has(

@@ -1,17 +1,7 @@
 //modify time func so that it is only meant to consume times in utc format
 
 import { titleCase } from "title-case";
-
-interface OpenHours {
-  monday: string[];
-  tuesday: string[];
-  wednesday: string[];
-  thursday: string[];
-  friday: string[];
-  saturday: string[];
-  sunday: string[];
-}
-
+import { OpenHours } from "../types";
 interface AvailabilityConstraint {
   begin_time: string;
   end_time: string;

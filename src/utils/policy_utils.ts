@@ -439,9 +439,7 @@ export class PolicyUtils {
         }
       }
       if (condition.type === "time_range") {
-        if (
-          !isAvailableNow(condition, restaurant.metadata.timezone as string)
-        ) {
+        if (!isAvailableNow(condition, restaurant.metadata.timeZone)) {
           return false;
         }
       }

@@ -45,7 +45,7 @@ export function DrinkItem({
     return null;
   }
   const cart = state.cart as Cart;
-  const primaryColor = restaurant?.metadata.primaryColor as string;
+  const primaryColor = restaurant?.metadata.primaryColor;
   const menuItem = ItemUtils.getMenuItemFromItemId(item.id, restaurant);
 
   const isPass = ItemUtils.isPassItem(item.id, restaurant);
@@ -112,11 +112,8 @@ export function DrinkItem({
               ${ItemUtils.priceItem(item, restaurant)?.toFixed(2)}
             </p>
             {purchaseDate && quantity === 0 && (
-              <span className="text-xs text-gray-500 -mr-6 show-at-400">
-                {convertUtcToLocal(
-                  purchaseDate,
-                  restaurant.metadata.timezone as string
-                )}
+              <span className="text-xs text-gray-500 -mr-6 show-at-400 z-10">
+                {convertUtcToLocal(purchaseDate, restaurant.metadata.timeZone)}
               </span>
             )}
           </div>
@@ -201,7 +198,7 @@ export function LoyaltyRewardPolicyCard({
 }) {
   const { userData } = useAuth();
   const hasEnoughPoints = (userData?.points[restaurant.id] || 0) >= numPoints;
-  const primaryColor = restaurant.metadata.primaryColor as string;
+  const primaryColor = restaurant.metadata.primaryColor;
   let card: LoyaltyRewardPolicyCard = null;
   if (policy.definition.action.type === "add_to_user_credit") {
     card = {
@@ -332,7 +329,7 @@ export function PreviousTransactionItem({
   decrement: () => void;
   item: Item;
 }) {
-  const primaryColor = restaurant.metadata.primaryColor as string;
+  const primaryColor = restaurant.metadata.primaryColor;
   const menuItem = ItemUtils.getMenuItemFromItemId(item.id, restaurant);
   const isPass = ItemUtils.isPassItem(item.id, restaurant);
 
@@ -535,8 +532,7 @@ export const DrinkList = ({
                       <div
                         className="px-6 mt-2 rounded-2xl"
                         style={{
-                          borderColor: restaurant.metadata
-                            .primaryColor as string,
+                          borderColor: restaurant.metadata.primaryColor,
                         }}
                       >
                         <div
@@ -547,8 +543,7 @@ export const DrinkList = ({
                           className="w-full text-center text-md text-gray-500 rounded-2xl py-3 px-4 mx-auto block flex items-center justify-center font-semibold"
                           style={{
                             color: "white",
-                            backgroundColor: restaurant.metadata
-                              .primaryColor as string,
+                            backgroundColor: restaurant.metadata.primaryColor,
                           }}
                         >
                           <Sparkles className="w-6 h-6 mr-2 text-white" />

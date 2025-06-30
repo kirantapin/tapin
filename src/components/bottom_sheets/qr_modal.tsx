@@ -203,7 +203,7 @@ const QRModal: React.FC<QRModalProps> = ({
         <SheetHeader className="flex-none px-6 pt-6 pb-4 border-b">
           <div className="flex justify-between items-center">
             <CustomLogo
-              primaryColor={restaurant?.metadata.primaryColor as string}
+              primaryColor={restaurant?.metadata.primaryColor}
               size={124}
             />
             <Alert
@@ -240,8 +240,7 @@ const QRModal: React.FC<QRModalProps> = ({
                   onClick={() => setShowCodeInput(true)}
                   className="text-xs text-white rounded-full px-2 py-2 -mt-[8px]"
                   style={{
-                    backgroundColor: restaurant?.metadata
-                      .primaryColor as string,
+                    backgroundColor: restaurant?.metadata.primaryColor,
                   }}
                 >
                   Enter Employee Code
@@ -293,7 +292,7 @@ const QRModal: React.FC<QRModalProps> = ({
                     style={{
                       backgroundColor:
                         codeEntered.length === 4
-                          ? (restaurant?.metadata.primaryColor as string)
+                          ? restaurant?.metadata.primaryColor
                           : "gray",
                     }}
                   >
