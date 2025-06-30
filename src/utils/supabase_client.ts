@@ -2,6 +2,8 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 //supabase client
 const environment_override = null;
 
+console.log(process.env);
+
 const supabase_key =
   (environment_override || process.env.VERCEL_ENV) === "production"
     ? process.env.REACT_APP_SUPABASE_ANON_KEY
