@@ -2,19 +2,17 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 //supabase client
 const environment_override = null;
 
-console.log(process.env);
-
 const supabase_key =
-  (environment_override || process.env.VERCEL_ENV) === "production"
+  (environment_override || process.env.REACT_APP_VERCEL_ENV) === "production"
     ? process.env.REACT_APP_SUPABASE_ANON_KEY
-    : process.env.VERCEL_ENV === "preview"
+    : process.env.REACT_APP_VERCEL_ENV === "preview"
     ? process.env.REACT_APP_SUPABASE_ANON_KEY_STAGING
     : process.env.REACT_APP_SUPABASE_ANON_KEY_DEV;
 
 export const project_ref =
-  (environment_override || process.env.VERCEL_ENV) === "production"
+  (environment_override || process.env.REACT_APP_VERCEL_ENV) === "production"
     ? process.env.REACT_APP_PROJECT_REF
-    : process.env.VERCEL_ENV === "preview"
+    : process.env.REACT_APP_VERCEL_ENV === "preview"
     ? process.env.REACT_APP_PROJECT_REF_STAGING
     : process.env.REACT_APP_PROJECT_REF_DEV;
 export const project_url = `https://${project_ref}.supabase.co`;
