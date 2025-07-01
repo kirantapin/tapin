@@ -353,9 +353,10 @@ export default function RestaurantPage() {
                 behavior: "smooth",
               });
             }}
-            className={`fixed z-40 w-14 h-14 bg-white rounded-full shadow-[0_20px_25px_-5px_rgba(0,0,0,0.3),0_10px_10px_-5px_rgba(0,0,0,0.2)] border border-gray-200 flex items-center justify-center left-3 mb-5`}
+            className={`fixed z-40 w-14 h-14 bg-white rounded-full shadow-[0_20px_25px_-5px_rgba(0,0,0,0.3),0_10px_10px_-5px_rgba(0,0,0,0.2)] flex items-center justify-center left-3 mb-5`}
             style={{
-              color: restaurant?.metadata.primaryColor,
+              color: "white",
+              backgroundColor: restaurant?.metadata.primaryColor,
               bottom:
                 state.cart.reduce((total, item) => total + item.quantity, 0) > 0
                   ? "74px" // 20 (h-20) + 4 spacing = 24 spacing from bottom

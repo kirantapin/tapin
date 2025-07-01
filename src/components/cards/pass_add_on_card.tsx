@@ -38,22 +38,26 @@ export const PassAddOnCard: React.FC<PassAddOnCardProps> = ({
   ) {
     return null;
   }
+  const { quantity, free, percentDiscount, fixedDiscount } =
+    policy.definition.action;
+  if (quantity === 0) {
+    return null;
+  }
   const passItem = ItemUtils.getMenuItemFromItemId(
     itemId,
     restaurant
   ) as PassItem;
-  const name = passItem.name;
+
+  const name =
+    quantity > 1 ? `${quantity} ${passItem.name}s` : `a ${passItem.name}`;
   const originalPrice = passItem.price;
   const newPrice = (() => {
-    const action = policy.definition.action;
-    if (action.free) {
+    if (free) {
       return 0;
-    } else if (action.percentDiscount) {
-      return parseFloat(
-        (originalPrice * (1 - action.percentDiscount)).toFixed(2)
-      );
-    } else if (action.fixedDiscount) {
-      return Math.max(0, originalPrice - action.fixedDiscount);
+    } else if (percentDiscount) {
+      return parseFloat((originalPrice * (1 - percentDiscount)).toFixed(2));
+    } else if (fixedDiscount) {
+      return Math.max(0, originalPrice - fixedDiscount);
     }
     return originalPrice;
   })();
@@ -123,18 +127,16 @@ export const PassAddOnCard: React.FC<PassAddOnCardProps> = ({
 
         {/* Title / Price */}
         <h3 className="text-lg font-bold text-gray-900">
-          Add {name} (+${newPrice.toFixed(2)}){" "}
-          {for_date ? (
-            <span className="text-sm text-gray-500">({for_date})</span>
-          ) : (
-            ""
-          )}
+          Add {name} (+${newPrice.toFixed(2)})
         </h3>
 
         {/* Description */}
         <p className="text-sm text-gray-600 mt-1">
+          {for_date && (
+            <span className="text-sm text-gray-600">For {for_date}. </span>
+          )}
           Valued at ${originalPrice.toFixed(2)}. Enjoy this temporary offer
-          before it expires! Redeem after purchase.
+          before it expires!
         </p>
       </div>
     </div>

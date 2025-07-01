@@ -35,18 +35,21 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
   if (!menuItem) {
     return null;
   }
-  const name = menuItem.name;
+  const { quantity, free, percentDiscount, fixedDiscount } =
+    policy.definition.action;
+  if (quantity === 0) {
+    return null;
+  }
+  const name =
+    quantity > 1 ? `${quantity} ${menuItem.name}s` : `${menuItem.name}`;
   const originalPrice = menuItem.price;
   const newPrice = (() => {
-    const action = policy.definition.action;
-    if (action.free) {
+    if (free) {
       return 0;
-    } else if (action.percentDiscount) {
-      return parseFloat(
-        (originalPrice * (1 - action.percentDiscount)).toFixed(2)
-      );
-    } else if (action.fixedDiscount) {
-      return Math.max(0, originalPrice - action.fixedDiscount);
+    } else if (percentDiscount) {
+      return parseFloat((originalPrice * (1 - percentDiscount)).toFixed(2));
+    } else if (fixedDiscount) {
+      return Math.max(0, originalPrice - fixedDiscount);
     }
     return originalPrice;
   })();

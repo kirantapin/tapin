@@ -2,7 +2,6 @@ import { FC, useEffect, useState } from "react";
 import { Restaurant, Policy, PassItem, DealEffectPayload, Item } from "@/types";
 import { PassAddOnCard } from "../cards/pass_add_on_card";
 import { useRestaurant } from "@/context/restaurant_context";
-import { useTimer } from "@/hooks/useTimer";
 import AddOnCard from "../cards/add_on_card";
 import { ItemUtils } from "@/utils/item_utils";
 
@@ -15,7 +14,6 @@ interface AddOnManagerProps {
     userPreference: Item | null
   ) => Promise<void>;
   removePolicy: (policy_id: string) => Promise<void>;
-  allowTimer?: boolean;
   allowPassItems?: boolean;
   allowNormalItems?: boolean;
 }
@@ -25,17 +23,9 @@ const AddOnManager: FC<AddOnManagerProps> = ({
   isPreEntry,
   addPolicy,
   removePolicy,
-  allowTimer = true,
   allowPassItems = true,
   allowNormalItems = true,
 }) => {
-  const {
-    timeRemaining: addOnTime,
-    isRunning,
-    start,
-    pause,
-    reset,
-  } = useTimer(180);
   const { restaurant, policyManager } = useRestaurant();
   const [addOnPolicies, setAddOnPolicies] = useState<Policy[]>([]);
   const [normalItems, setNormalItems] = useState<
@@ -81,13 +71,21 @@ const AddOnManager: FC<AddOnManagerProps> = ({
       });
     }
     for (const policy of addOns) {
+      if (policy.definition.action.type !== "add_item") {
+        continue;
+      }
       const itemSpecs = policy.definition.action.items || [];
       const itemIds = ItemUtils.policyItemSpecificationsToItemIds(
         itemSpecs,
         restaurant
       );
       for (const itemId of itemIds) {
-        addOnItems.push({ policy, itemId });
+        if (
+          (ItemUtils.priceItem({ id: itemId, modifiers: [] }, restaurant) ||
+            Infinity) < (policy.definition.action.priceLimit || Infinity)
+        ) {
+          addOnItems.push({ policy, itemId });
+        }
       }
     }
     setNormalItems(
@@ -134,24 +132,22 @@ const AddOnManager: FC<AddOnManagerProps> = ({
       {allowNormalItems && (
         <div className="overflow-x-auto pt-2 mb-2 no-scrollbar -mx-4 px-4">
           <div className="flex gap-4" style={{ minWidth: "max-content" }}>
-            {addOnTime > 0 &&
-              normalItems.map(({ policy, itemId }) => (
-                <AddOnCard
-                  key={policy.policy_id}
-                  state={state}
-                  policy={policy}
-                  itemId={itemId}
-                  restaurant={restaurant}
-                  addPolicy={async () => {
-                    await addPolicy(null, policy.policy_id, {
-                      id: itemId,
-                      modifiers: [],
-                    });
-                    pause();
-                  }}
-                  removePolicy={removePolicy}
-                />
-              ))}
+            {normalItems.map(({ policy, itemId }) => (
+              <AddOnCard
+                key={policy.policy_id}
+                state={state}
+                policy={policy}
+                itemId={itemId}
+                restaurant={restaurant}
+                addPolicy={async () => {
+                  await addPolicy(null, policy.policy_id, {
+                    id: itemId,
+                    modifiers: [],
+                  });
+                }}
+                removePolicy={removePolicy}
+              />
+            ))}
           </div>
         </div>
       )}
@@ -165,7 +161,6 @@ const AddOnManager: FC<AddOnManagerProps> = ({
                   id: itemId,
                   modifiers: [],
                 });
-                pause();
               }}
               removePolicy={removePolicy}
               restaurant={restaurant as Restaurant}

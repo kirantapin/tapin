@@ -15,6 +15,7 @@ import { useRestaurant } from "@/context/restaurant_context";
 export function Alert({
   trigger,
   title,
+  middleComponent,
   description,
   onConfirm,
   confirmLabel = "Continue",
@@ -27,10 +28,11 @@ export function Alert({
 }: {
   trigger: React.ReactNode;
   title: string;
+  middleComponent?: React.ReactNode;
   description: string;
   onConfirm: () => void;
-  confirmLabel?: string;
-  cancelLabel?: string;
+  confirmLabel?: string | null;
+  cancelLabel?: string | null;
   confirmClassName?: string;
   cancelClassName?: string;
   contentClassName?: string;
@@ -78,6 +80,7 @@ export function Alert({
           <AlertDialogTitle className="font-gilroy">
             {modifiedTitle}
           </AlertDialogTitle>
+
           {modifiedDescription && (
             <AlertDialogDescription className="font-gilroy">
               {modifiedDescription}
@@ -85,28 +88,34 @@ export function Alert({
           )}
         </AlertDialogHeader>
 
+        {middleComponent && middleComponent}
+
         <AlertDialogFooter className="flex-col">
-          <AlertDialogAction
-            onClick={onConfirm}
-            className={cn(
-              "w-full rounded-full px-3 py-2 text-sm text-white font-gilroy ",
-              confirmClassName
-            )}
-            style={{
-              backgroundColor: restaurant?.metadata.primaryColor,
-            }}
-          >
-            {confirmLabel}
-          </AlertDialogAction>
-          <AlertDialogCancel
-            className={cn(
-              "w-full rounded-full px-3 py-2 text-sm border border-gray-300 font-gilroy",
-              cancelClassName,
-              "focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:outline-none"
-            )}
-          >
-            {cancelLabel}
-          </AlertDialogCancel>
+          {confirmLabel && (
+            <AlertDialogAction
+              onClick={onConfirm}
+              className={cn(
+                "w-full rounded-full px-3 py-2 text-sm text-white font-gilroy ",
+                confirmClassName
+              )}
+              style={{
+                backgroundColor: restaurant?.metadata.primaryColor,
+              }}
+            >
+              {confirmLabel}
+            </AlertDialogAction>
+          )}
+          {cancelLabel && (
+            <AlertDialogCancel
+              className={cn(
+                "w-full rounded-full px-3 py-2 text-sm border border-gray-300 font-gilroy",
+                cancelClassName,
+                "focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 active:outline-none"
+              )}
+            >
+              {cancelLabel}
+            </AlertDialogCancel>
+          )}
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
