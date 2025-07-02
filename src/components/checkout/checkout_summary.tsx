@@ -3,12 +3,13 @@ import { Restaurant } from "@/types";
 import { checkoutStyles } from "@/styles/checkout_styles";
 import { formatPoints } from "@/utils/parse";
 import { motion } from "framer-motion";
+import { Info } from "lucide-react";
+import { Alert } from "../display_utils/alert";
 interface CheckoutSummaryProps {
   state: any;
   restaurant: Restaurant;
   tipAmount: number;
   setTipAmount: (tipAmount: number) => void;
-  fees?: boolean;
   showDiscount: boolean;
 }
 
@@ -17,7 +18,6 @@ const CheckoutSummary: FC<CheckoutSummaryProps> = ({
   state,
   tipAmount,
   setTipAmount,
-  fees = true,
   showDiscount,
 }) => {
   const [tipPercent, setTipPercent] = useState<number>(0.2);
@@ -30,6 +30,9 @@ const CheckoutSummary: FC<CheckoutSummaryProps> = ({
       setTipAmount(itemPrice * tipPercent);
     }
   }, [state, restaurant, tipPercent]);
+
+  const fees = (state?.cartResults?.customerServiceFee || 0) > 0;
+
   return (
     state.cart.length > 0 &&
     state.cartResults && (
@@ -98,7 +101,41 @@ const CheckoutSummary: FC<CheckoutSummaryProps> = ({
           <span>${state.cartResults.subtotal.toFixed(2)}</span>
         </div>
         <div className={checkoutStyles.summaryRow}>
-          <span>{fees ? "Fees & Tax" : "Tax"}</span>
+          <div className="flex items-center gap-3">
+            <span>{fees ? "Fees & Tax" : "Tax"}</span>
+            {fees && (
+              <Alert
+                trigger={<Info className="w-4 h-4 text-gray-500" />}
+                title="Why is there a service fee?"
+                description="This small service fee helps us keep Tap In running — powering exclusive deals, loyalty rewards, and a seamless experience for you. You’re always welcome to purchase items directly at the venue, but Tap In-exclusive discounts and rewards won’t apply."
+                onConfirm={() => {}}
+                confirmLabel="Got it"
+                cancelLabel={null}
+                middleComponent={
+                  <div className="flex flex-col gap-2">
+                    <div
+                      className={
+                        checkoutStyles.summaryRow + " text-black text-md"
+                      }
+                    >
+                      <span className="">Tap In Fee</span>
+                      <span>
+                        ${state.cartResults.customerServiceFee.toFixed(2)}
+                      </span>
+                    </div>
+                    <div
+                      className={
+                        checkoutStyles.summaryRow + " text-black text-md"
+                      }
+                    >
+                      <span className="">Tax</span>
+                      <span>${state.cartResults.tax.toFixed(2)}</span>
+                    </div>
+                  </div>
+                }
+              />
+            )}
+          </div>
           <span>
             $
             {(

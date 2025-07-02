@@ -35,13 +35,7 @@ export default function RestaurantDiscovery() {
 
   return (
     <div className="min-h-screen flex flex-col items-center gap-8 px-4 py-8 bg-white">
-      <img
-        src="/tapin_logo_black.png"
-        alt="Tap In Logo"
-        width={120}
-        height={40}
-        className=""
-      />
+      <img src="/tapin_logo_black.png" alt="Tap In Logo" width={140} />
 
       <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl text-gray-900 self-start">
         Discover Bars & Restaurants

@@ -26,6 +26,7 @@ import GenericItemIcon from "@/components/display_utils/generic_item_icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import { RESTAURANT_PATH } from "@/constants";
 import { TransactionUtils } from "@/utils/transaction_utils";
+import { CheckoutItemCard } from "../checkout/checkout_item_card";
 interface BundleModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -44,11 +45,8 @@ const BundleModal: React.FC<BundleModalProps> = ({
   const { userOwnershipMap } = useRestaurant();
   const { refreshCart } = useBottomSheet();
   const location = useLocation();
-  const { state, addPolicy, addToCart, removePolicy } = useGlobalCartManager(
-    restaurant,
-    userSession,
-    false
-  );
+  const { state, addPolicy, addToCart, removePolicy, removeFromCart } =
+    useGlobalCartManager(restaurant, userSession, false);
   const { policyManager } = useRestaurant();
   const [loadingLocalCart, setLoadingLocalCart] = useState(false);
 
@@ -273,6 +271,24 @@ const BundleModal: React.FC<BundleModalProps> = ({
             </>
           )}
 
+          <div className="mt-4">
+            {state.cart
+              .filter((item) =>
+                ItemUtils.isItemRedeemable(item.item, restaurant)
+              )
+              .map((item) => (
+                <CheckoutItemCard
+                  key={item.id}
+                  item={item}
+                  restaurant={restaurant}
+                  dealEffect={state.dealEffect}
+                  addToCart={addToCart}
+                  removeFromCart={removeFromCart}
+                  inlineRecommendation={null}
+                />
+              ))}
+          </div>
+
           {!loadingLocalCart ? (
             !isOwned ? (
               <AddOnManager
@@ -280,7 +296,6 @@ const BundleModal: React.FC<BundleModalProps> = ({
                 isPreEntry={false}
                 addPolicy={addPolicy}
                 removePolicy={removePolicy}
-                allowTimer={false}
                 allowNormalItems={true}
               />
             ) : null
@@ -294,13 +309,13 @@ const BundleModal: React.FC<BundleModalProps> = ({
               ></div>
             </div>
           )}
+
           {!isOwned && (
             <CheckoutSummary
               state={state}
               restaurant={restaurant as Restaurant}
               setTipAmount={() => {}}
               tipAmount={0}
-              fees={false}
               showDiscount={false}
             />
           )}

@@ -139,7 +139,7 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
               bgLoaded ? "opacity-100" : "opacity-0"
             }`}
             style={{
-              backgroundImage: `linear-gradient(90deg, rgba(0, 0, 0, 0.45) 45%, rgba(0, 0, 0, 0) 75%), url(${ImageUtils.getHighlightImageUrl(
+              backgroundImage: `linear-gradient(90deg, rgba(0, 0, 0, 0.5) 45%, rgba(0, 0, 0, 0) 75%), url(${ImageUtils.getHighlightImageUrl(
                 highlight
               )})`,
             }}

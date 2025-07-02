@@ -96,6 +96,7 @@ export const RestaurantProvider = ({
     setRestaurant(null);
     setPolicyManager(null);
     setUserOwnershipMap({});
+    setHighlights(null);
   };
 
   useEffect(() => {
