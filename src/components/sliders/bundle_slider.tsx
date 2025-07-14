@@ -6,7 +6,11 @@ import { useRestaurant } from "@/context/restaurant_context";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { BundleUtils } from "@/utils/bundle_utils";
 import { AlertCircle } from "lucide-react";
-const BundleSlider = () => {
+const BundleSlider = ({
+  fallbackDisplay = false,
+}: {
+  fallbackDisplay?: boolean;
+}) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { restaurant, userOwnershipMap } = useRestaurant();
   const { openBundleModal } = useBottomSheet();
@@ -159,7 +163,17 @@ const BundleSlider = () => {
       </div>
     );
   } else {
-    return null;
+    if (fallbackDisplay) {
+      return (
+        <div className="mt-4 mb-4 flex justify-center items-center min-h-[200px]">
+          <h1 className="text-lg font-semibold">
+            No Bundles currently available
+          </h1>
+        </div>
+      );
+    } else {
+      return null;
+    }
   }
 };
 

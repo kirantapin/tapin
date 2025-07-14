@@ -24,6 +24,7 @@ export const LIQUOR_MENU_TAG = "liquors";
 export const SPECIALTY_DRINKS_TAG = "7";
 export const COCKTAILS_TAG = "cocktails";
 export const BEER_AND_CIDER_TAG = "beer_and_cider";
+export const WINE_TAG = "wine";
 
 export const HOUSE_MIXER_LABEL = "House Mixers";
 export const SHOTS_SHOOTERS_LABEL = "Shots or Shooters";
