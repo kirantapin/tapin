@@ -50,7 +50,7 @@ const RedeemButton = ({
             return;
           }
           const paymentData = {
-            connectedAccountId: payload.connectedAccountId,
+            accountId: payload.accountId,
             paymentIntentId: null,
             additionalOrderData: {},
           };

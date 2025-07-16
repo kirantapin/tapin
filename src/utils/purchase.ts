@@ -1,6 +1,7 @@
+import { PaymentPayLoad } from "@/types";
 import { supabase_local } from "./supabase_client";
 
-export const submitPurchase = async (payload: any) => {
+export const submitPurchase = async (payload: PaymentPayLoad) => {
   try {
     const { data, error } = await supabase_local.functions.invoke(
       "submit_order",
@@ -11,7 +12,6 @@ export const submitPurchase = async (payload: any) => {
           totalWithTip: payload.totalWithTip,
           cart: payload.state.cart,
           userDealEffect: payload.state.dealEffect,
-          userPolicy: payload.state.selectedPolicy,
           userCartResults: payload.state.cartResults,
           token: payload.state.token,
           paymentData: payload.paymentData,

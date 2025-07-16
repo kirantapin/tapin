@@ -246,7 +246,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
           {deals.length > 0 && (
             <>
               <h1 className="text-xl font-bold text-gray-800">
-                Exclusive Access To:
+                Bundle Exclusive Deals:
               </h1>
               <div className="mt-2">
                 <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar -mx-6 px-6">
@@ -372,6 +372,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
               state?.cartResults?.totalPrice &&
               state.cartResults.totalPrice > 0 && (
                 <PayButton
+                  paymentProvider={restaurant.payment_provider}
                   payload={{
                     userAccessToken: userSession.access_token,
                     restaurant_id: restaurant.id,
@@ -379,7 +380,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
                     totalWithTip: Math.round(
                       state.cartResults.totalPrice * 100
                     ),
-                    connectedAccountId: restaurant?.stripe_account_id,
+                    accountId: restaurant.account_id,
                   }}
                   refresh={refreshCart}
                   postPurchase={async (transactions: Transaction[]) => {

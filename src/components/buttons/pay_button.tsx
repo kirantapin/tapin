@@ -8,11 +8,12 @@ import {
 import { supabase_local } from "../../utils/supabase_client.ts";
 import { useAuth } from "../../context/auth_context.tsx";
 
-import { Transaction, User } from "../../types.ts";
+import { PaymentPayLoad, Transaction, User } from "../../types.ts";
 import { STRIPE_MIN_AMOUNT } from "../../constants.ts";
 import { submitPurchase } from "@/utils/purchase.ts";
 import RedeemButton from "@/components/buttons/redeem_button.tsx";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
+import { SquarePayButton } from "./square_button.tsx";
 
 const stripePublishableKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || "";
 const stripePromise = loadStripe(stripePublishableKey);
@@ -22,7 +23,7 @@ const StripePayButton = ({
   refresh,
   postPurchase,
 }: {
-  payload: any;
+  payload: PaymentPayLoad;
   refresh: () => Promise<string | null>;
   postPurchase: (transactions: Transaction[]) => Promise<void>;
 }) => {
@@ -71,12 +72,13 @@ const StripePayButton = ({
         body: {
           amount: payload.totalWithTip,
           currency: "usd",
-          connectedAccountId: payload.connectedAccountId,
+          accountId: payload.accountId,
           cartResults: payload.state.cartResults,
         },
       });
 
       if (response.error) {
+        console.log("response.error", response.error);
         triggerToast(
           "Something went wrong. Please refresh the page and try again.",
           "error"
@@ -109,7 +111,7 @@ const StripePayButton = ({
         console.error("No Payment Intent Generated");
       } else {
         const paymentData = {
-          connectedAccountId: payload.connectedAccountId,
+          accountId: payload.accountId,
           paymentIntentId: paymentIntent.id,
           additionalOrderData: {},
         };
@@ -176,10 +178,12 @@ function PayButton({
   payload,
   refresh,
   postPurchase,
+  paymentProvider,
 }: {
-  payload: any;
+  payload: PaymentPayLoad;
   refresh: () => Promise<string | null>;
   postPurchase: (transactions: Transaction[]) => Promise<void>;
+  paymentProvider: "stripe" | "square";
 }) {
   if (payload.totalWithTip <= 0) {
     return (
@@ -217,34 +221,59 @@ function PayButton({
     );
   }
 
-  return (
-    <Elements
-      key={payload.totalWithTip}
-      stripe={stripePromise}
-      options={{
-        mode: "payment",
-        amount: payload.totalWithTip,
-        currency: "usd",
-        appearance: {},
-      }}
-    >
-      <StripePayButton
-        payload={payload}
-        refresh={refresh}
-        postPurchase={postPurchase}
-      />
-      <div className="text-sm text-gray-600 leading-[1.4] mt-6 mb-6">
-        <p className="m-0">
-          By completing this purchase, you confirm that you are 21 years of age
-          or older and will present a valid government-issued ID upon
-          redemption. All sales are final, and subject to venue rules and
-          availability. By purchasing, you agree to Tapin’s{" "}
-          <span className="underline">Terms & Conditions</span> and{" "}
-          <span className="underline">Privacy Policy</span>.
-        </p>
+  if (paymentProvider === "stripe") {
+    return (
+      <Elements
+        key={payload.totalWithTip}
+        stripe={stripePromise}
+        options={{
+          mode: "payment",
+          amount: payload.totalWithTip,
+          currency: "usd",
+          appearance: {},
+        }}
+      >
+        <StripePayButton
+          payload={payload}
+          refresh={refresh}
+          postPurchase={postPurchase}
+        />
+        <div className="text-sm text-gray-600 leading-[1.4] mt-6 mb-6">
+          <p className="m-0">
+            By completing this purchase, you confirm that you are 21 years of
+            age or older and will present a valid government-issued ID upon
+            redemption. All sales are final, and subject to venue rules and
+            availability. By purchasing, you agree to Tapin’s{" "}
+            <span className="underline">Terms & Conditions</span> and{" "}
+            <span className="underline">Privacy Policy</span>.
+          </p>
+        </div>
+      </Elements>
+    );
+  }
+
+  if (paymentProvider === "square") {
+    return (
+      <div>
+        <SquarePayButton
+          key={payload.totalWithTip}
+          payload={payload}
+          refresh={refresh}
+          postPurchase={postPurchase}
+        />
+        <div className="text-sm text-gray-600 leading-[1.4] mt-6 mb-6">
+          <p className="m-0">
+            By completing this purchase, you confirm that you are 21 years of
+            age or older and will present a valid government-issued ID upon
+            redemption. All sales are final, and subject to venue rules and
+            availability. By purchasing, you agree to Tapin’s{" "}
+            <span className="underline">Terms & Conditions</span> and{" "}
+            <span className="underline">Privacy Policy</span>.
+          </p>
+        </div>
       </div>
-    </Elements>
-  );
+    );
+  }
 }
 
 export default PayButton;

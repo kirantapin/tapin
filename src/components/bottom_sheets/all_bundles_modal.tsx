@@ -39,7 +39,7 @@ const AllBundlesModal: React.FC<AllBundlesModalProps> = ({
           </div>
         </SheetHeader>
         <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4 w-full">
-          <BundleSlider />
+          <BundleSlider fallbackDisplay={true} />
         </div>
       </SheetContent>
     </Sheet>
