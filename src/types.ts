@@ -30,7 +30,7 @@ export interface VerifyOrderReturnPayload {
   jwtToken: string;
 }
 
-export interface JWTPayloadType extends Record<string, unknown> {
+export interface JWTPayloadType {
   cart: Cart;
   dealEffectPayload: DealEffectPayload;
   cartResultsPayload: CartResultsPayload;
@@ -122,10 +122,11 @@ export interface Restaurant {
   name: string;
   menu: Menu;
   labelMap: Record<string, string>;
-  stripe_account_id: string;
   active: boolean;
   metadata: RestaurantMetadata;
   info: RestaurantInfo;
+  payment_provider: "square" | "stripe";
+  account_id: string;
 }
 
 interface RestaurantMetadata {
@@ -156,6 +157,18 @@ interface RestaurantInfo {
   }[];
 }
 
+export interface PaymentPayLoad {
+  totalWithTip: number;
+  state: CartState;
+  restaurant_id: string;
+  userAccessToken: string;
+  paymentData?: {
+    [key: string]: unknown;
+    additionalOrderData: Record<string, unknown>;
+  };
+  accountId: string;
+}
+
 export interface OpenHours {
   monday: string[];
   tuesday: string[];
@@ -164,11 +177,6 @@ export interface OpenHours {
   friday: string[];
   saturday: string[];
   sunday: string[];
-}
-export interface DrinkForm {
-  restaurant: Restaurant;
-  onUpdate: (values: Record<string, string>) => void;
-  transaction: Transaction;
 }
 
 export interface CreateTransactionsPayload {

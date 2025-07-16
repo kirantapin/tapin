@@ -178,7 +178,11 @@ export class BundleUtils {
 
     for (const policy of policies) {
       const { conditions, action } = policy.definition;
-      if (conditions.length === 0 && action.type === "add_item") {
+      if (
+        conditions.length === 0 &&
+        action.type === "add_item" &&
+        action.free
+      ) {
         freeItems.push(policy);
       } else {
         deals.push(policy);

@@ -314,8 +314,12 @@ const QRModal: React.FC<QRModalProps> = ({
                 </form>
               </div>
 
-              <p className="text-gray-500 mb-2 pt-2">
-                Having trouble? Ask a staff member for assistance.
+              <p className="text-gray-500 mb-0 pt-1 text-sm">
+                Having trouble? Ask a staff member for assistance. If you would
+                rather redeem your items later, then just click out of this
+                page. Items will be saved in{" "}
+                <span className="font-semibold text-black">"My Spot"</span> for
+                up to 90 days.
               </p>
 
               <div className="w-full aspect-square flex items-center justify-center rounded-xl">

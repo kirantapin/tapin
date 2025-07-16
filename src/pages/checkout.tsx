@@ -106,6 +106,15 @@ export default function CheckoutPage() {
         </div>
       </div>
 
+      {/* <div
+        className="w-full z-50 h-8 rounded-b-2xl text-center text-xs font-semibold text-white flex items-center justify-center shadow-[0_20px_25px_-5px_rgba(0,0,0,0.15),0_10px_10px_-5px_rgba(0,0,0,0.08)]"
+        style={{
+          backgroundColor: restaurant.metadata.primaryColor,
+        }}
+      >
+        How are items redeemed at {restaurant.name}?
+      </div> */}
+
       {/* Scrollable Content */}
       <div
         ref={scrollContainerRef}
@@ -265,6 +274,7 @@ export default function CheckoutPage() {
               <div className="mt-4">
                 {userSession && state.token && state.cartResults ? (
                   <PayButton
+                    paymentProvider={restaurant.payment_provider}
                     payload={{
                       userAccessToken: userSession.access_token,
                       restaurant_id: restaurant.id,
@@ -272,7 +282,7 @@ export default function CheckoutPage() {
                       totalWithTip: Math.round(
                         (state.cartResults.totalPrice + tipAmount) * 100
                       ),
-                      connectedAccountId: restaurant.stripe_account_id,
+                      accountId: restaurant.account_id,
                     }}
                     refresh={refreshCart}
                     postPurchase={async (transactions: Transaction[]) => {
