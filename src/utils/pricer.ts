@@ -36,9 +36,9 @@ export function modifiedItemFlair(
     } else if (cartItem.price == 0) {
       temp["discountDescription"] = "Free Item";
     } else {
-      temp["discountDescription"] = `$${
+      temp["discountDescription"] = `$${(
         ItemUtils.priceItem(cartItem.item, restaurant) - cartItem.price
-      } off`;
+      ).toFixed(2)} Off`;
     }
     return temp;
   }
@@ -54,7 +54,7 @@ export function modifiedItemFlair(
   switch (modifiedItem.type) {
     case "apply_fixed_discount":
       // Add logic for fixed discount
-      temp["discountDescription"] = `$${modifiedItem.amount} off`;
+      temp["discountDescription"] = `$${modifiedItem.amount.toFixed(2)} Off`;
       break;
     case "apply_point_multiplier":
       // Add logic for point multiplier
@@ -63,10 +63,12 @@ export function modifiedItemFlair(
     case "apply_percent_discount":
       temp["discountDescription"] = `%${(modifiedItem.amount * 100).toFixed(
         0
-      )} off`;
+      )} Off`;
       break;
     case "apply_blanket_price":
-      temp["discountDescription"] = `$${temp.oldPrice - temp.currentPrice} off`;
+      temp["discountDescription"] = `$${(
+        temp.oldPrice - temp.currentPrice
+      ).toFixed(2)} Off`;
       break;
   }
 
