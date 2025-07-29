@@ -32,3 +32,46 @@ export const submitPurchase = async (payload: PaymentPayLoad) => {
     return null;
   }
 };
+
+// export const createRedemptionCode = async (
+//   accessToken: string,
+//   transactionIds: string[],
+//   restaurantId: string
+// ): Promise<{ success: boolean; error: string | null; code: string | null }> => {
+//   try {
+//     const { data, error } = await supabase_local.functions.invoke(
+//       "handle_code_redemption",
+//       {
+//         body: {
+//           userAccessToken: accessToken,
+//           restaurant_id: restaurantId,
+//           transaction_ids: transactionIds,
+//           type: "create",
+//         },
+//       }
+//     );
+//     if (error || !data) {
+//       console.error("Error creating redemption code:", error);
+//       return {
+//         success: false,
+//         error: "Error creating redemption code",
+//         code: null,
+//       };
+//     }
+//     if (data.error || !data.success || !data.code) {
+//       return {
+//         success: false,
+//         error: data.error || "Error creating redemption code",
+//         code: null,
+//       };
+//     }
+//     return { success: true, error: null, code: data.code };
+//   } catch (error) {
+//     console.error("Error creating redemption code:", error);
+//     return {
+//       success: false,
+//       error: "Error creating redemption code",
+//       code: null,
+//     };
+//   }
+// };
