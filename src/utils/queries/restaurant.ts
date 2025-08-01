@@ -141,7 +141,7 @@ export function indexMenu(menu: Record<string, any>): {
 
     let activeLabel = false;
 
-    if (nodeObj.price) {
+    if (nodeObj.price != null) {
       for (const [key, value] of Object.entries(nodeObj)) {
         info[key] = value;
       }

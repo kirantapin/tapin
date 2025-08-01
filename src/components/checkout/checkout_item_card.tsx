@@ -69,7 +69,7 @@ export function CheckoutItemCard({
             <span className="text-md text-gray-600 font-medium">
               ${currentPrice.toFixed(2)}
             </span>
-            {oldPrice && (
+            {oldPrice != null && (
               <span className="text-md font-medium text-gray-400 line-through">
                 ${oldPrice?.toFixed(2)}
               </span>

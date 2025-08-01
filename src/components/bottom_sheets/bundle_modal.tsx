@@ -85,7 +85,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
     initLocalCart();
   }, [isOpen, userOwnershipMap, policyManager, restaurant, state]);
 
-  if (!bundleMenuItem || !bundleMenuItem.price) {
+  if (!bundleMenuItem || bundleMenuItem.price == null) {
     return null;
   }
 
@@ -370,8 +370,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
                 </div>
               </div>
             ) : (
-              state?.cartResults?.totalPrice &&
-              state.cartResults.totalPrice > 0 && (
+              state?.cartResults?.totalPrice != null && (
                 <PayButton
                   paymentProvider={restaurant.payment_provider}
                   payload={{

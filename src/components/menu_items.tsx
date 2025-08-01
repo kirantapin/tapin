@@ -60,7 +60,7 @@ export function DrinkItem({
   const highlight =
     (onSelect === null && quantity > 0) ||
     (onSelect && isEqual(selected, item));
-  if (!restaurant || !menuItem || !menuItem.price) {
+  if (!restaurant || !menuItem || menuItem.price == null) {
     return null;
   }
 
@@ -276,7 +276,7 @@ export function LoyaltyRewardPolicyCard({
             <p className="font-bold text-sm" style={{ color: primaryColor }}>
               {numPoints} points
             </p>
-            {card.price && (
+            {card.price != null && (
               <p className="text-sm text-gray-500 line-through show-at-400">
                 ${card.price?.toFixed(2)}
               </p>

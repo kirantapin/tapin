@@ -57,7 +57,7 @@ export class PassUtils {
       restaurant
     ) as PassItem;
 
-    if (!passItem || !passItem.price) {
+    if (!passItem || passItem.price == null) {
       return { available: false, amount_to_remove: 0 };
     }
 

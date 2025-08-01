@@ -364,11 +364,12 @@ export class PolicyUtils {
           restaurant
         );
 
-        return itemIds.filter(
-          (id) =>
-            (ItemUtils.priceItem({ id, modifiers: [] }, restaurant) ||
-              Infinity) < (action.priceLimit || Infinity)
-        );
+        return itemIds.filter((id) => {
+          const price = ItemUtils.priceItem({ id, modifiers: [] }, restaurant);
+          // Only include if price is not null/undefined and less than priceLimit
+          return price != null && price < (action.priceLimit ?? Infinity);
+        });
+
       default:
         return [];
     }

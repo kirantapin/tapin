@@ -33,7 +33,7 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
             bundleId,
             restaurant as Restaurant
           ) as BundleItem;
-          if (bundleMenuItem && bundleMenuItem.price) {
+          if (bundleMenuItem && bundleMenuItem.price != null) {
             const bundle = bundleMenuItem.object;
             const stats = await BundleUtils.getUsersBundleUsageStats(
               userSession.user.id,
@@ -99,7 +99,7 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
           bundleId,
           restaurant
         ) as BundleItem;
-        if (!bundleMenuItem || !bundleMenuItem.price) {
+        if (!bundleMenuItem || bundleMenuItem.price == null) {
           return null;
         }
 
