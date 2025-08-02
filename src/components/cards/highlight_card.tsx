@@ -14,6 +14,7 @@ import { PolicyUtils } from "@/utils/policy_utils";
 import { ImageUtils } from "@/utils/image_utils";
 import { ImageFallback } from "../display_utils/image_fallback";
 import { formatBundleName } from "@/utils/parse";
+import { HighlightCardSkeleton } from "../skeletons/highlight_card_skeleton";
 
 interface HighlightCardProps {
   highlight: Highlight;
@@ -109,6 +110,10 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
     };
   }, [highlight]);
 
+  if (hasHighlightImage && !bgLoaded) {
+    return <HighlightCardSkeleton />;
+  }
+
   if (dontShow) return null;
 
   return (
@@ -127,17 +132,8 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
     >
       {hasHighlightImage && (
         <div className="absolute inset-0">
-          {!bgLoaded && (
-            <div
-              className="absolute inset-0  animate-pulse"
-              style={{ backgroundColor: primaryColor }}
-            />
-          )}
-
           <div
-            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-200 ${
-              bgLoaded ? "opacity-100" : "opacity-0"
-            }`}
+            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-200 opacity-100`}
             style={{
               backgroundImage: `linear-gradient(90deg, rgba(0, 0, 0, 0.5) 45%, rgba(0, 0, 0, 0) 75%), url(${ImageUtils.getHighlightImageUrl(
                 highlight
