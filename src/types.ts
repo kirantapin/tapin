@@ -132,12 +132,13 @@ export interface Restaurant {
 interface RestaurantMetadata {
   salesTax: number;
   timeZone: string;
-  itemCharge: number;
-  passCharge: number;
   locationTag: string;
-  bundleCharge: number;
   primaryColor: string;
   enableLoyaltyProgram: boolean;
+  tip?: {
+    enabled?: boolean;
+    minimumPercentage?: number;
+  };
 }
 
 interface RestaurantInfo {
@@ -207,6 +208,7 @@ export interface NormalItem {
   price: number;
   description?: string;
   image_url?: string;
+  sourceId?: string | null;
 }
 export interface PassItem {
   name: string;

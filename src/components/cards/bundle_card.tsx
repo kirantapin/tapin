@@ -32,7 +32,7 @@ const BundleCard = ({
     bundleId,
     restaurant
   ) as BundleItem;
-  if (!bundleMenuItem || !bundleMenuItem.price) {
+  if (!bundleMenuItem || bundleMenuItem.price == null) {
     return null;
   }
 

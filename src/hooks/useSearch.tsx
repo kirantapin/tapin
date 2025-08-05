@@ -20,7 +20,7 @@ function getAllItemIds(menu: any): ItemSpecification[] {
   // Loop through menu object keys
   for (const key in menu) {
     // If item has a price, it's a leaf node (actual menu item)
-    if (menu[key].info.price) {
+    if (menu[key].info.price != null) {
       paths.push(key);
     }
   }

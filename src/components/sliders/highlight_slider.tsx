@@ -123,7 +123,8 @@ const HighlightSlider = ({ displayOne = false }: { displayOne?: boolean }) => {
             restaurant
           ) as BundleItem;
           return (
-            bundle?.price && BundleUtils.isBundlePurchaseable(bundle.object)
+            bundle?.price != null &&
+            BundleUtils.isBundlePurchaseable(bundle.object)
           );
         } else if (highlight.content_type === "media") {
           const { title_override, description_override } = highlight;

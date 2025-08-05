@@ -169,7 +169,10 @@ export class PolicyManager {
       cart,
       dealEffect,
       restaurant
-    ).filter((policy) => !policy.locked);
+    ).filter(
+      (policy) =>
+        !policy.locked && PolicyUtils.isPolicyUsable(policy, restaurant)
+    );
     if (potentialPolicies.length === 0) {
       return null;
     }

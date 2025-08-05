@@ -229,9 +229,9 @@ export class PolicyUtils {
       case "apply_order_point_multiplier":
         return `${action.amount}x Points on Whole Order`;
       case "apply_fixed_order_discount":
-        return `$${action.amount} Off Whole Order`;
+        return `$${action.amount.toFixed(2)} Off Whole Order`;
       case "apply_blanket_price":
-        return `$${action.amount} Total on Select Items`;
+        return `$${action.amount.toFixed(2)} Total on Select Items`;
       case "apply_order_percent_discount":
         return `${(action.amount * 100).toFixed(0)}% Off Whole Order`;
       case "add_to_user_credit":
@@ -364,11 +364,12 @@ export class PolicyUtils {
           restaurant
         );
 
-        return itemIds.filter(
-          (id) =>
-            (ItemUtils.priceItem({ id, modifiers: [] }, restaurant) ||
-              Infinity) < (action.priceLimit || Infinity)
-        );
+        return itemIds.filter((id) => {
+          const price = ItemUtils.priceItem({ id, modifiers: [] }, restaurant);
+          // Only include if price is not null/undefined and less than priceLimit
+          return price != null && price < (action.priceLimit ?? Infinity);
+        });
+
       default:
         return [];
     }

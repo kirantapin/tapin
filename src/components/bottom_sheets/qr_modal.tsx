@@ -322,6 +322,56 @@ const QRModal: React.FC<QRModalProps> = ({
                 up to 90 days.
               </p>
 
+              {/* {!redemptionCode && (
+                <button
+                  onClick={async () => {
+                    if (!userSession?.access_token) {
+                      setRedeemError("Error creating redemption code");
+                      return;
+                    }
+                    setGeneratingCodeLoading(true);
+                    const { success, error, code } = await createRedemptionCode(
+                      userSession?.access_token,
+                      transactionsToRedeem.map((t) => t.transaction_id),
+                      restaurant.id
+                    );
+                    console.log(success, error, code);
+                    if (success) {
+                      setRedemptionCode(code);
+                    } else {
+                      setRedeemError(error || "Error creating redemption code");
+                    }
+                    setGeneratingCodeLoading(false);
+                  }}
+                  className="w-full text-white py-3 rounded-full text-md font-semibold mt-4"
+                  style={{
+                    backgroundColor: restaurant?.metadata.primaryColor,
+                  }}
+                >
+                  {generatingCodeLoading ? (
+                    <div className="flex justify-center items-center w-full">
+                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+                    </div>
+                  ) : (
+                    "Generate Redemption Code"
+                  )}
+                </button>
+              )}
+              {redemptionCode && (
+                <>
+                  <h1
+                    className="text-4xl w-full text-center text-black font-bold mt-6 tracking-wider"
+                    style={{ letterSpacing: "0.6em" }}
+                  >
+                    {redemptionCode}
+                  </h1>
+                  <p className="text-sm text-gray-500 mt-2 text-center">
+                    Show this code to a staff member to redeem your items. This
+                    code will expire in 5 minutes.
+                  </p>
+                </>
+              )} */}
+
               <div className="w-full aspect-square flex items-center justify-center rounded-xl">
                 <QRCode
                   size={212}

@@ -23,7 +23,8 @@ export default function RestaurantDiscovery() {
       setLoading(true);
       const { data, error } = await supabase
         .from("restaurants")
-        .select("name,id,metadata");
+        .select("name,id,metadata")
+        .eq("active", true);
 
       if (error) console.error("Error fetching restaurants:", error.message);
       else setRestaurants(data as Restaurant[]);

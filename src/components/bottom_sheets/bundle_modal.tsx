@@ -5,7 +5,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { X, Wallet, CircleX, Check, Share } from "lucide-react";
+import { X, Wallet, CircleX, Check } from "lucide-react";
 import { Bundle, Restaurant, Policy, BundleItem, Transaction } from "@/types";
 import { GradientIcon } from "@/utils/gradient";
 import { useAuth } from "@/context/auth_context";
@@ -27,6 +27,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { RESTAURANT_PATH } from "@/constants";
 import { TransactionUtils } from "@/utils/transaction_utils";
 import { CheckoutItemCard } from "../checkout/checkout_item_card";
+import { ShareButton } from "../buttons/share_button";
 interface BundleModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -84,7 +85,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
     initLocalCart();
   }, [isOpen, userOwnershipMap, policyManager, restaurant, state]);
 
-  if (!bundleMenuItem || !bundleMenuItem.price) {
+  if (!bundleMenuItem || bundleMenuItem.price == null) {
     return null;
   }
 
@@ -150,8 +151,8 @@ const BundleModal: React.FC<BundleModalProps> = ({
               </div>
             </div>
             <ShareButton
-              primaryColor={restaurant?.metadata.primaryColor}
-              bundle={bundle}
+              objectType="bundle"
+              object={bundle}
               restaurant={restaurant}
             />
           </div>
@@ -369,8 +370,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
                 </div>
               </div>
             ) : (
-              state?.cartResults?.totalPrice &&
-              state.cartResults.totalPrice > 0 && (
+              state?.cartResults?.totalPrice != null && (
                 <PayButton
                   paymentProvider={restaurant.payment_provider}
                   payload={{
@@ -431,38 +431,3 @@ const BundleModal: React.FC<BundleModalProps> = ({
 };
 
 export default BundleModal;
-
-const ShareButton = ({
-  primaryColor,
-  bundle,
-  restaurant,
-}: {
-  primaryColor: string;
-  bundle: Bundle;
-  restaurant: Restaurant;
-}) => {
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          text: `Here's something interesting at ${restaurant.name}!`,
-          url: `${window.location.origin}/${restaurant.id}/?bundle=${bundle.bundle_id}`,
-        });
-      } catch (error) {
-        console.error("Share failed:", error);
-      }
-    } else {
-      alert("Sharing not supported on this browser.");
-    }
-  };
-
-  return (
-    <button
-      onClick={handleShare}
-      className="p-2 text-white rounded-full shadow"
-      style={{ backgroundColor: primaryColor }}
-    >
-      <Share size={18} />
-    </button>
-  );
-};

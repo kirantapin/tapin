@@ -117,7 +117,7 @@ const SpendGoalCard: FC<{
                 className="font-semibold text-2xl"
                 style={{ color: restaurant.metadata.primaryColor }}
               >
-                ${dollarsAway}
+                ${Math.ceil(dollarsAway)}
               </span>{" "}
               away from next reward
               {nextReward && (

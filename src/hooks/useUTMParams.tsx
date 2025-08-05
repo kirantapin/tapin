@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { ItemUtils } from "@/utils/item_utils";
 import type { Restaurant, BundleItem } from "@/types";
+import { useBottomSheet } from "@/context/bottom_sheet_context";
+import { useRestaurant } from "@/context/restaurant_context";
+import { PolicyManager } from "@/utils/policy_manager";
 
-const UTM_PARAMS = ["bundle", "welcome"];
+const UTM_PARAMS = ["bundle", "welcome", "policy"];
 
 interface UseUTMParamsOptions {
   restaurant: Restaurant | null;
@@ -21,9 +24,15 @@ export const useUTMParams = ({
   triggerToast,
 }: UseUTMParamsOptions) => {
   const location = useLocation();
+  const { handlePolicyClick } = useBottomSheet();
+  const { policyManager } = useRestaurant();
   const [utmParams, setUtmParams] = useState<{ [key: string]: string }>({});
 
-  const handleUTMParams = (search: string) => {
+  const handleUTMParams = (
+    search: string,
+    restaurant: Restaurant,
+    policyManager: PolicyManager
+  ) => {
     const searchParams = new URLSearchParams(search);
     const utms: { [key: string]: string } = {};
 
@@ -43,7 +52,7 @@ export const useUTMParams = ({
       );
     }
 
-    if (utms.bundle && restaurant) {
+    if (utms.bundle) {
       const bundle = ItemUtils.getMenuItemFromItemId(
         utms.bundle,
         restaurant
@@ -59,13 +68,34 @@ export const useUTMParams = ({
         );
       }
     }
+
+    if (utms.policy) {
+      const policy = policyManager.getPolicyFromId(utms.policy);
+
+      if (policy) {
+        handlePolicyClick(policy, {});
+      } else {
+        triggerToast(
+          "The Offer you're looking for could not be found",
+          "error",
+          3000
+        );
+      }
+    }
   };
+  const hasHandledRef = useRef(false);
 
   useEffect(() => {
-    if (location.search) {
-      handleUTMParams(location.search);
+    if (
+      location.search &&
+      restaurant &&
+      policyManager &&
+      !hasHandledRef.current
+    ) {
+      hasHandledRef.current = true;
+      handleUTMParams(location.search, restaurant, policyManager);
     }
-  }, [location.search, restaurant]);
+  }, [location.search, restaurant, policyManager]);
 
   return utmParams;
 };

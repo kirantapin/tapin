@@ -28,6 +28,7 @@ import { PolicyUtils } from "@/utils/policy_utils";
 import CustomIcon from "../svg/custom_icon";
 import { ImageFallback } from "../display_utils/image_fallback";
 import { ImageUtils } from "@/utils/image_utils";
+import { ShareButton } from "../buttons/share_button";
 
 interface PolicyModalProps {
   isOpen: boolean;
@@ -91,77 +92,88 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
 
         <div className="flex-1 overflow-y-auto pb-28 pt-4">
           <div className="px-6">
-            <div className="flex flex-wrap gap-2 mb-4">
-              {bundleObject && policy.locked && (
-                <div
-                  className="bg-white text-black px-3 py-2 rounded-full flex items-center gap-1 border"
-                  style={{
-                    borderColor: restaurant?.metadata.primaryColor,
-                  }}
-                >
-                  <CustomIcon
-                    circleColor={restaurant?.metadata.primaryColor}
-                    baseColor="black"
-                    size={16}
-                  />
-                  <span className="font-bold text-xs">{bundleObject.name}</span>
-                </div>
-              )}
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex flex-wrap gap-2">
+                {bundleObject && policy.locked && (
+                  <div
+                    className="bg-white text-black px-3 py-2 rounded-full flex items-center gap-1 border"
+                    style={{
+                      borderColor: restaurant?.metadata.primaryColor,
+                    }}
+                  >
+                    <CustomIcon
+                      circleColor={restaurant?.metadata.primaryColor}
+                      baseColor="black"
+                      size={16}
+                    />
+                    <span className="font-bold text-xs">
+                      {bundleObject.name}
+                    </span>
+                  </div>
+                )}
 
-              {policy.end_time && !policy.locked && (
+                {policy.end_time && !policy.locked && (
+                  <div
+                    className="relative text-white px-3 py-2 rounded-full flex items-center gap-1"
+                    style={{
+                      backgroundColor: restaurant?.metadata.primaryColor,
+                    }}
+                  >
+                    <Clock size={16} />
+                    <span className="font-semibold text-xs">
+                      Limited Time Offer
+                    </span>
+                  </div>
+                )}
+
                 <div
                   className="relative text-white px-3 py-2 rounded-full flex items-center gap-1"
                   style={{
                     backgroundColor: restaurant?.metadata.primaryColor,
                   }}
                 >
-                  <Clock size={16} />
                   <span className="font-semibold text-xs">
-                    Limited Time Offer
+                    {policy.total_usages
+                      ? `${policy.total_usages} Uses`
+                      : "Unlimited Uses"}
                   </span>
                 </div>
-              )}
 
-              <div
-                className="relative text-white px-3 py-2 rounded-full flex items-center gap-1"
-                style={{
-                  backgroundColor: restaurant?.metadata.primaryColor,
-                }}
-              >
-                <span className="font-semibold text-xs">
-                  {policy.total_usages
-                    ? `${policy.total_usages} Uses`
-                    : "Unlimited Uses"}
-                </span>
+                {policy.days_since_last_use && (
+                  <div
+                    className="relative text-white px-3 py-2 rounded-full flex items-center gap-1"
+                    style={{
+                      backgroundColor: restaurant?.metadata.primaryColor,
+                    }}
+                  >
+                    <RefreshCw size={16} />
+                    <span className="font-semibold text-xs">
+                      {policy.days_since_last_use}{" "}
+                      {policy.days_since_last_use === 1 ? "Day" : "Days"}{" "}
+                      Between Uses
+                    </span>
+                  </div>
+                )}
+
+                {policy.count_as_deal && (
+                  <div
+                    className="relative text-white px-3 py-2 rounded-full flex items-center gap-1"
+                    style={{
+                      backgroundColor: restaurant?.metadata.primaryColor,
+                    }}
+                  >
+                    <Lock size={16} />
+                    <span className="font-semibold text-xs">
+                      Counts As Deal
+                    </span>
+                  </div>
+                )}
               </div>
-
-              {policy.days_since_last_use && (
-                <div
-                  className="relative text-white px-3 py-2 rounded-full flex items-center gap-1"
-                  style={{
-                    backgroundColor: restaurant?.metadata.primaryColor,
-                  }}
-                >
-                  <RefreshCw size={16} />
-                  <span className="font-semibold text-xs">
-                    {policy.days_since_last_use}{" "}
-                    {policy.days_since_last_use === 1 ? "Day" : "Days"} Between
-                    Uses
-                  </span>
-                </div>
-              )}
-
-              {policy.count_as_deal && (
-                <div
-                  className="relative text-white px-3 py-2 rounded-full flex items-center gap-1"
-                  style={{
-                    backgroundColor: restaurant?.metadata.primaryColor,
-                  }}
-                >
-                  <Lock size={16} />
-                  <span className="font-semibold text-xs">Counts As Deal</span>
-                </div>
-              )}
+              <ShareButton
+                objectType="policy"
+                object={policy}
+                restaurant={restaurant}
+              />
             </div>
 
             <p className="text-xl text-black whitespace-normal break-words font-bold">
