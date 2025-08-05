@@ -135,6 +135,10 @@ interface RestaurantMetadata {
   locationTag: string;
   primaryColor: string;
   enableLoyaltyProgram: boolean;
+  tip?: {
+    enabled?: boolean;
+    minimumPercentage?: number;
+  };
 }
 
 interface RestaurantInfo {

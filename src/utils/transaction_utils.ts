@@ -1,8 +1,8 @@
-import { PassItem, Transaction } from "@/types";
+import { Item, PassItem, Transaction } from "@/types";
 import { Restaurant } from "@/types";
 import { supabase } from "./supabase_client";
 import { ItemUtils } from "./item_utils";
-import { PASS_MENU_TAG } from "@/constants";
+import { BUNDLE_MENU_TAG, PASS_MENU_TAG } from "@/constants";
 
 export class TransactionUtils {
   static getRecentTransactionItems = (
@@ -129,4 +129,44 @@ export class TransactionUtils {
     };
     return ItemUtils.isItemRedeemable(item, restaurant);
   };
+
+  static getTransactionHistory = (
+    transactions: Transaction[],
+    restaurant: Restaurant
+  ): {
+    item: Item;
+    fulfilled_at: string;
+  }[] => {
+    const redeemedTransactions = transactions.filter(
+      (transaction) =>
+        transaction.restaurant_id === restaurant.id &&
+        transaction.fulfilled_by != null &&
+        transaction.fulfilled_at != null &&
+        !transaction.metadata.path?.includes(BUNDLE_MENU_TAG)
+    );
+    const transactionHistory = redeemedTransactions.map((transaction) => {
+      const item = this.getTransactionItem(transaction);
+      return {
+        item: item,
+        fulfilled_at: transaction.fulfilled_at as string,
+      };
+    });
+    return transactionHistory;
+  };
+
+  static getTransactionItem(transaction: Transaction): {
+    id: string;
+    modifiers: string[];
+    path: string[];
+  } {
+    const item = {
+      id: transaction.item,
+      modifiers: transaction.metadata.modifiers || [],
+      path: (transaction.metadata.path || []) as string[],
+    };
+    if (item.path.includes(PASS_MENU_TAG)) {
+      item.id = item.path[1];
+    }
+    return item;
+  }
 }

@@ -175,6 +175,72 @@ export function DrinkItem({
   );
 }
 
+export function RedeemedTransaction({
+  item,
+  purchaseDate = null,
+}: {
+  item: Item;
+  purchaseDate?: string | null;
+}) {
+  const { restaurant } = useRestaurant();
+  if (!restaurant) {
+    return null;
+  }
+  const menuItem = ItemUtils.getMenuItemFromItemId(item.id, restaurant);
+
+  if (!restaurant || !menuItem || menuItem.price == null) {
+    return null;
+  }
+
+  return (
+    <div
+      className={`flex-none flex items-stretch m-3 border p-3 rounded-3xl bg-white transition-colors duration-300 border-gray-200`}
+    >
+      {/* Image */}
+      <div className="h-24 w-24 mr-4 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+        <ImageFallback
+          src={ImageUtils.getItemImageUrl(item.id, restaurant)}
+          alt={menuItem?.name}
+          className="h-full w-full object-cover"
+          restaurant={restaurant}
+        />
+      </div>
+
+      {/* Text + Price + Button */}
+      <div className="flex flex-1 flex-col justify-between">
+        <div>
+          <div className="flex justify-between items-start">
+            <h4 className="font-bold text-base">
+              {titleCase(ItemUtils.getItemName(item, restaurant))}
+            </h4>
+          </div>
+          <p className="text-sm text-gray-500 custom-line-clamp-1 show-at-400">
+            {(menuItem as NormalItem | PassItem)?.description}
+          </p>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1">
+            {purchaseDate && (
+              <span className="text-sm text-gray-500 -mr-6 show-at-400  flex items-center gap-1">
+                <span className="font-semibold text-gray-500">
+                  Redeemed at:{" "}
+                </span>
+                <span className="font-semibold text-black">
+                  {convertUtcToLocal(
+                    purchaseDate,
+                    restaurant.metadata.timeZone
+                  )}
+                </span>
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 type LoyaltyRewardPolicyCard = {
   name: string;
   description: string;

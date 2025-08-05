@@ -20,9 +20,18 @@ const CheckoutSummary: FC<CheckoutSummaryProps> = ({
   setTipAmount,
   showDiscount,
 }) => {
-  const [tipPercent, setTipPercent] = useState<number>(0.2);
-
-  const tipAmounts = [0.1, 0.15, 0.2];
+  const tipAmounts =
+    restaurant.metadata.tip?.enabled &&
+    restaurant.metadata.tip?.minimumPercentage
+      ? [
+          Math.round(restaurant.metadata.tip.minimumPercentage) / 100,
+          Math.round(restaurant.metadata.tip.minimumPercentage) / 100 + 0.05,
+          Math.round(restaurant.metadata.tip.minimumPercentage) / 100 + 0.1,
+        ]
+      : [0.1, 0.15, 0.2];
+  const [tipPercent, setTipPercent] = useState<number>(
+    tipAmounts[tipAmounts.length - 1]
+  );
 
   useEffect(() => {
     if (state.cart.length > 0 && restaurant) {
@@ -180,7 +189,7 @@ const CheckoutSummary: FC<CheckoutSummaryProps> = ({
                       className={`relative z-10 flex-1 py-2 text-sm font-medium transition-colors 
                     ${tipPercent === tip ? "text-white" : "text-gray-600"}`}
                     >
-                      {tip * 100}%
+                      {Math.round(tip * 100)}%
                     </button>
                   ))}
                 </div>
