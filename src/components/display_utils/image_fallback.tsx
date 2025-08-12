@@ -3,7 +3,7 @@ import { Restaurant } from "@/types";
 import { ImageUtils } from "@/utils/image_utils";
 
 interface ImageFallbackProps {
-  src: string;
+  src: string | null;
   alt?: string;
   className?: string;
   style?: React.CSSProperties;
@@ -26,10 +26,9 @@ export const ImageFallback = ({
   useEffect(() => {
     setHasError(false); // reset on src change
     setIsLoaded(false); // reset loaded state
-    if (!src) return;
 
     const img = new Image();
-    img.src = src;
+    img.src = src || "";
     img.onload = () => {
       setHasError(false);
       setIsLoaded(true);

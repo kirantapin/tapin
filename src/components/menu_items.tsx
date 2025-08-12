@@ -245,7 +245,7 @@ type LoyaltyRewardPolicyCard = {
   name: string;
   description: string;
   price: number | null;
-  image_url: string;
+  image_url: string | null;
   numPoints: number;
 } | null;
 
@@ -273,7 +273,7 @@ export function LoyaltyRewardPolicyCard({
         PolicyUtils.policyToStringDescription(policy, restaurant)
           .actionDescription || "",
       price: policy.definition.action.amount,
-      image_url: "fallback",
+      image_url: null,
       numPoints: numPoints,
     };
   } else if (policy.definition.action.type === "add_item") {
