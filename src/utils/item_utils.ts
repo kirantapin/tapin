@@ -14,7 +14,6 @@ import {
   KNOWN_MODIFIERS,
   BUNDLE_MENU_TAG,
   LIQUOR_MENU_TAG,
-  HOUSE_MIXER_LABEL,
 } from "@/constants";
 import { titleCase } from "title-case";
 import { PassUtils } from "./pass_utils";

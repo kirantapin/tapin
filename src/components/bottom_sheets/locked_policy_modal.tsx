@@ -117,7 +117,7 @@ const LockedPolicyModal: React.FC<LockedPolicyModalProps> = ({
         </div>
         {/*Button*/}
         <div className="mt-2 mb-2 fixed bottom-0 left-0 right-0 px-6 pb-4 bg-white border-t-0">
-          <p className="text-xs text-gray-400 mt-2 mb-4 px-2 leading-relaxed">
+          <p className="text-xs text-gray-400 mt-2 mb-4 leading-relaxed">
             The Deal grants access to exclusive perks, discounts, and offers at
             the associated location.{" "}
             <span className="underline cursor-pointer text-gray-500">

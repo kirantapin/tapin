@@ -253,6 +253,7 @@ export interface Highlight {
   description_override: string | null;
   active: boolean;
   end_time: string | null;
+  modified_at: string;
 }
 
 export interface Transaction {
@@ -321,6 +322,7 @@ export interface Policy {
   locked: boolean;
   active: boolean;
   definition: PolicyDefinition;
+  modified_at: string;
 }
 
 export interface Bundle {
@@ -332,6 +334,7 @@ export interface Bundle {
   name: string;
   price: number;
   deactivated_at: string | null;
+  modified_at: string;
 }
 
 export type ItemSpecification = string;

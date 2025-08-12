@@ -31,12 +31,14 @@ export class ImageUtils {
   static getItemImageUrl = (
     itemId: string | null | undefined,
     restaurant: Restaurant
-  ): string => {
-    if (!itemId) return "fallback";
+  ): string | null => {
+    if (!itemId) return null;
 
     const menuItem = ItemUtils.getMenuItemFromItemId(itemId, restaurant);
+
+    if (!menuItem?.image_url) return null;
     return `${project_url}/storage/v1/object/public/${ITEM_IMAGE_BUCKET}/${
-      menuItem?.image_url || "fallback"
+      menuItem?.image_url || ""
     }`;
   };
 }
