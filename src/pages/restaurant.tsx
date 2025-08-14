@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/auth_context.tsx";
 import { Restaurant, Transaction } from "../types.ts";
-import { LIQUOR_MENU_TAG, MAX_QR_TRANSACTIONS } from "../constants.ts";
+import { MAX_QR_TRANSACTIONS } from "../constants.ts";
 
 import { DrinkItem, DrinkList } from "@/components/menu_items.tsx";
 import GoToCartButton from "@/components/buttons/go_to_cart_button.tsx";
@@ -302,14 +302,7 @@ export default function RestaurantPage() {
                     slideToFilter(filter);
                   }}
                 >
-                  {restaurant.labelMap[filter] === LIQUOR_MENU_TAG ? (
-                    <span className="flex items-center gap-1">
-                      <Sparkles className="h-4 w-4" />
-                      {titleCase(filter)}
-                    </span>
-                  ) : (
-                    titleCase(filter)
-                  )}
+                  {titleCase(filter)}
                 </button>
               ))}
             </div>

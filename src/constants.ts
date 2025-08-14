@@ -20,7 +20,6 @@ export const DRINK_MENU_TAG = "drink";
 export const FOOD_MENU_TAG = "food";
 export const PASS_MENU_TAG = "passes";
 export const BUNDLE_MENU_TAG = "bundles";
-export const LIQUOR_MENU_TAG = "liquors";
 export const SPECIALTY_DRINKS_TAG = "7";
 export const COCKTAILS_TAG = "cocktails";
 export const BEER_AND_CIDER_TAG = "beer_and_cider";
@@ -32,8 +31,6 @@ export const SHOTS_SHOOTERS_LABEL = "Shots or Shooters";
 export const LOYALTY_REWARD_TAG = "loyalty_reward";
 export const NORMAL_DEAL_TAG = "deal";
 export const ADD_ON_TAG = "add_on";
-
-export const KNOWN_MODIFIERS: Record<string, number> = { double: 2, triple: 3 };
 
 export const ADD_ITEM = "add_item";
 export const REMOVE_ITEM = "remove_item";
