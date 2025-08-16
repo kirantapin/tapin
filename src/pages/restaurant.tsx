@@ -226,13 +226,12 @@ export default function RestaurantPage() {
             unlockedFirst={true}
           />
 
-          {userOwnershipMap &&
-            Object.values(userOwnershipMap).some((isOwned) => !isOwned) && (
-              <div className="mt-2">
-                <h1 className="text-xl font-bold">Great Value</h1>
-                <BundleSlider />
-              </div>
-            )}
+          {userOwnershipMap && (
+            <div className="mt-2">
+              <h1 className="text-xl font-bold">Great Value</h1>
+              <BundleSlider />
+            </div>
+          )}
 
           <div
             ref={orderDrinksRef}
