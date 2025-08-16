@@ -56,6 +56,10 @@ export function DrinkItem({
   if (!restaurant || !menuItem || menuItem.price == null) {
     return null;
   }
+  let unavailable = false;
+  if ("archived" in menuItem && menuItem.archived) {
+    unavailable = true;
+  }
 
   return (
     <div
@@ -111,7 +115,7 @@ export function DrinkItem({
             )}
           </div>
 
-          {!onSelect && (
+          {!onSelect && !unavailable && (
             <div className="flex items-center bg-white rounded-full px-1 py-1 relative">
               <div
                 className={`flex items-center transition-all duration-300 ${
@@ -516,7 +520,12 @@ export const DrinkList = ({
         labelMap[key],
         restaurant
       );
-      itemIds.forEach((id) => allItemIds.push({ id: id, label: key }));
+      itemIds.forEach((id) => {
+        if (ItemUtils.isItemAvailable({ id: id, modifiers: [] }, restaurant)) {
+          return;
+        }
+        allItemIds.push({ id: id, label: key });
+      });
     }
     if (itemSpecifications.length > 0) {
       allItemIds = allItemIds.filter(({ id }) => {
@@ -537,28 +546,6 @@ export const DrinkList = ({
       scrollToLabel(label);
     }
   }, [label]);
-
-  // const houseMixerFilters = [
-  //   (object: any) => {
-  //     return object.modifiers?.some((modifier: string) =>
-  //       modifier.toLowerCase().includes("with")
-  //     );
-  //   },
-  //   (object: any) => {
-  //     return restaurant.menu[object.id].path.includes(LIQUOR_MENU_TAG);
-  //   },
-  // ];
-
-  // const shotsShootersFilters = [
-  //   (object: any) => {
-  //     return !object.modifiers?.some((modifier: string) =>
-  //       modifier.toLowerCase().includes("with")
-  //     );
-  //   },
-  //   (object: any) => {
-  //     return restaurant.menu[object.id].path.includes(LIQUOR_MENU_TAG);
-  //   },
-  // ];
 
   return (
     <div className="space-y-4  overflow-y-auto scroll-smooth no-scrollbar -mx-5">

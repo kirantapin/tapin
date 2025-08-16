@@ -130,12 +130,15 @@ export class ItemUtils {
   static isItemAvailable(
     item: Item,
     restaurant: Restaurant,
-    cart: Cart,
+    cart: Cart = [],
     offset: number = 0
   ): string | null {
     const itemInfo = this.getMenuItemFromItemId(item.id, restaurant);
-    if (!itemInfo) {
+    if (!itemInfo || !("price" in itemInfo)) {
       return "This item is not available";
+    }
+    if ("archived" in itemInfo && itemInfo.archived) {
+      return "This item is no longer available";
     }
     if (this.isBundleItem(item.id, restaurant)) {
       const bundleItem = itemInfo as BundleItem;

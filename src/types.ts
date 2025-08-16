@@ -209,6 +209,7 @@ export interface NormalItem {
   description?: string;
   image_url?: string;
   sourceId?: string | null;
+  archived?: boolean | null;
 }
 export interface PassItem {
   name: string;
