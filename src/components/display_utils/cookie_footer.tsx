@@ -1,15 +1,18 @@
 import { useRestaurant } from "@/context/restaurant_context";
 import React from "react";
 import { ImageUtils } from "@/utils/image_utils";
+import { useBottomSheet } from "@/context/bottom_sheet_context";
 
 const CookieFooter: React.FC = () => {
   const { restaurant } = useRestaurant();
+  const { state } = useBottomSheet();
+  const bottomPadding = state.cart.length > 0 ? "pb-28" : "pb-8";
   if (!restaurant) return null;
 
   const profileImageUrl = ImageUtils.getProfileImageUrl(restaurant);
 
   return (
-    <div className="w-full bg-white py-8 px-4 pb-28">
+    <div className={`w-full bg-white py-8 px-4 ${bottomPadding}`}>
       <div className="max-w-md mx-auto text-center">
         {/* 1. Profile Picture */}
         {profileImageUrl && (
@@ -47,14 +50,35 @@ const CookieFooter: React.FC = () => {
         {/* 5. Terms of Service and Privacy Statement */}
         <div className="space-y-2 mb-10">
           <p className="text-xs text-gray-500 space-x-2">
-            <span className="underline cursor-pointer">Terms of Service</span>
-            <span className="underline cursor-pointer">Privacy Statement</span>
+            <a
+              href="https://go.tapin.app/terms-and-conditions"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline cursor-pointer"
+            >
+              Terms of Service
+            </a>
+            <a
+              href="https://go.tapin.app/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline cursor-pointer"
+            >
+              Privacy Policy
+            </a>
           </p>
           <p className="text-xs text-gray-500 space-x-2">
             <span className="underline cursor-pointer">
               CA Privacy Statement
             </span>
-            <span className="underline cursor-pointer">Cookie Preferences</span>
+            <a
+              href="https://go.tapin.app/cookie-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline cursor-pointer"
+            >
+              Cookie Preferences
+            </a>
           </p>
         </div>
 
