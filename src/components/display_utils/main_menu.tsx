@@ -165,6 +165,7 @@ const MainMenu: React.FC<MainMenuProps> = ({
           restaurant={restaurant}
           addToCart={addToCart}
           itemSpecifications={[]}
+          padBottom={false}
         />
       )}
     </div>

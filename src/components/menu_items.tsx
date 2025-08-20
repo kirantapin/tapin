@@ -464,6 +464,7 @@ export const DrinkList = ({
   itemSpecifications,
   selected = null,
   onSelect = null,
+  padBottom = true,
 }: {
   label: string | null;
   slideToFilter: (filter: string) => void;
@@ -472,6 +473,7 @@ export const DrinkList = ({
   itemSpecifications: ItemSpecification[];
   selected?: Item | null;
   onSelect?: ((item: Item) => Promise<void>) | null;
+  padBottom?: boolean;
 }) => {
   const labelRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const isInitialMount = useRef(true);
@@ -549,7 +551,7 @@ export const DrinkList = ({
 
   return (
     <div className="space-y-4  overflow-y-auto scroll-smooth no-scrollbar -mx-5">
-      <div className="pb-20">
+      <div className={`${padBottom ? "pb-20" : ""}`}>
         {Object.keys(restaurant.labelMap).map((menuLabel) => {
           const drinksForLabel = drinks.filter(
             (drink) => drink.label === menuLabel

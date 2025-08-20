@@ -4,6 +4,7 @@ import { PassAddOnCard } from "../cards/pass_add_on_card";
 import { useRestaurant } from "@/context/restaurant_context";
 import AddOnCard from "../cards/add_on_card";
 import { ItemUtils } from "@/utils/item_utils";
+import { PolicyUtils } from "@/utils/policy_utils";
 
 interface AddOnManagerProps {
   state: any;
@@ -40,11 +41,9 @@ const AddOnManager: FC<AddOnManagerProps> = ({
       return;
     }
 
-    let addOns = policyManager.getAddOns(
-      state.cart,
-      state.dealEffect,
-      restaurant
-    );
+    let addOns = policyManager
+      .getAddOns(state.cart, state.dealEffect, restaurant)
+      .filter((policy) => PolicyUtils.isPolicyUsable(policy, restaurant));
 
     const addedItems = (
       state.dealEffect as DealEffectPayload

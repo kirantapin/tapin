@@ -25,6 +25,7 @@ import { isOpenNow } from "@/utils/time.ts";
 import FollowButton from "@/components/buttons/follow_button.tsx";
 import { useUTMParams } from "@/hooks/useUTMParams.tsx";
 import MainMenu from "@/components/display_utils/main_menu.tsx";
+import CookieFooter from "@/components/display_utils/cookie_footer.tsx";
 
 export default function RestaurantPage() {
   const { userSession, transactions } = useAuth();
@@ -251,6 +252,7 @@ export default function RestaurantPage() {
             setSidebarOpen(false);
           }}
         />
+        <CookieFooter />
       </div>
     </div>
   );
