@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Restaurant } from "@/types";
 import { ImageUtils } from "@/utils/image_utils";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 interface ImageFallbackProps {
   src: string | null;
@@ -41,6 +43,24 @@ export const ImageFallback = ({
   }, [src]);
 
   if (!restaurant) return null;
+
+  // Show shimmer while loading
+  if (!isLoaded) {
+    return (
+      <Skeleton
+        width="100%"
+        height="100%"
+        baseColor="#e5e7eb"
+        highlightColor="#d1d5db"
+        style={{
+          margin: 0,
+          padding: 0,
+          display: "block",
+          ...style,
+        }}
+      />
+    );
+  }
 
   return (
     <img
