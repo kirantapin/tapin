@@ -18,7 +18,6 @@ import {
   COCKTAILS_TAG,
   DRINK_MENU_TAG,
   FOOD_MENU_TAG,
-  LIQUOR_MENU_TAG,
   PASS_MENU_TAG,
   SPECIALTY_DRINKS_TAG,
 } from "@/constants";
@@ -58,11 +57,6 @@ const GenericItemIcon: React.FC<GenericItemIconProps> = ({
   if (path.includes(BUNDLE_MENU_TAG)) {
     return (
       <GradientIcon icon={HandCoins} primaryColor={primaryColor} size={size} />
-    );
-  }
-  if (path.includes(LIQUOR_MENU_TAG)) {
-    return (
-      <GradientIcon icon={GlassWater} primaryColor={primaryColor} size={size} />
     );
   }
   if (path.includes(SPECIALTY_DRINKS_TAG)) {

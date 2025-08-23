@@ -9,12 +9,7 @@ import {
   Cart,
   CartItem,
 } from "@/types";
-import {
-  PASS_MENU_TAG,
-  KNOWN_MODIFIERS,
-  BUNDLE_MENU_TAG,
-  LIQUOR_MENU_TAG,
-} from "@/constants";
+import { PASS_MENU_TAG, BUNDLE_MENU_TAG } from "@/constants";
 import { titleCase } from "title-case";
 import { PassUtils } from "./pass_utils";
 import { BundleUtils } from "./bundle_utils";
@@ -76,34 +71,10 @@ export class ItemUtils {
   }
   static getItemName(item: Item, restaurant: Restaurant): string {
     const menu = restaurant.menu;
+    const { variation } = item;
     if (this.isPassItem(item.id, restaurant)) {
       const itemObject = menu[item.id].info as PassItem;
       return titleCase(itemObject.name);
-    } else if (this.isLiquorItem(item.id, restaurant)) {
-      const path = menu[item.id].path;
-      const liquorType = menu[path[path.length - 2]].info.name;
-      let liquorBrand: string | null = menu[path[path.length - 1]].info.name;
-      if (liquorBrand.toLowerCase().includes("house")) {
-        liquorBrand = null;
-      }
-      const tempModifiers = structuredClone(item.modifiers);
-      const mixerIndex = tempModifiers.findIndex((mod) => mod.includes("with"));
-      const mixer =
-        mixerIndex >= 0 ? tempModifiers.splice(mixerIndex, 1)[0] : undefined;
-      let name = "";
-      if (mixer) {
-        name = `${titleCase(liquorType)} ${mixer || ""}${
-          liquorBrand ? `, ${titleCase(liquorBrand)}` : ""
-        }`;
-      } else {
-        name = `Shot of ${titleCase(liquorType)}${
-          liquorBrand ? `, ${titleCase(liquorBrand)}` : ""
-        }`;
-      }
-      if (tempModifiers.length > 0) {
-        name += `, ${tempModifiers.map((mod) => titleCase(mod)).join(", ")}`;
-      }
-      return name;
     } else {
       const itemObject = menu[item.id].info as
         | NormalItem
@@ -111,7 +82,9 @@ export class ItemUtils {
         | Category;
       return (
         titleCase(itemObject.name) +
-        (item.modifiers.length > 0 ? ` (${item.modifiers.join(", ")})` : "")
+        (variation && itemObject.variations && itemObject.variations[variation]
+          ? `, ${titleCase(itemObject.variations[variation].name)}`
+          : "")
       );
     }
   }
@@ -120,9 +93,6 @@ export class ItemUtils {
   }
   static isBundleItem(itemId: string, restaurant: Restaurant): boolean {
     return restaurant.menu[itemId]?.path?.includes(BUNDLE_MENU_TAG) || false;
-  }
-  static isLiquorItem(itemId: string, restaurant: Restaurant): boolean {
-    return restaurant.menu[itemId]?.path?.includes(LIQUOR_MENU_TAG) || false;
   }
   static getMenuItemFromItemId(
     itemId: string,
@@ -135,18 +105,21 @@ export class ItemUtils {
       | undefined;
   }
   static priceItem(item: Item, restaurant: Restaurant): number | null {
-    const { id, modifiers } = item;
-    const multiple = modifiers.reduce(
-      (acc, modifier) => acc * (KNOWN_MODIFIERS[modifier] || 1),
-      1
-    );
-
+    const { id, variation } = item;
     const temp = restaurant.menu[id]?.info;
-    if (!temp || !("price" in temp)) {
-      return null;
+
+    if (variation) {
+      const variationInfo = (temp as NormalItem)?.variations?.[variation];
+      if (variationInfo) {
+        return variationInfo.absolutePrice;
+      }
     }
 
-    return temp.price * multiple;
+    if (!temp || temp.price == null) {
+      throw new Error("Item cannot be priced");
+    }
+
+    return temp.price;
   }
   static doesItemMeetItemSpecification(
     itemSpecs: string[],
@@ -167,12 +140,15 @@ export class ItemUtils {
   static isItemAvailable(
     item: Item,
     restaurant: Restaurant,
-    cart: Cart,
+    cart: Cart = [],
     offset: number = 0
   ): string | null {
     const itemInfo = this.getMenuItemFromItemId(item.id, restaurant);
-    if (!itemInfo) {
+    if (!itemInfo || !("price" in itemInfo)) {
       return "This item is not available";
+    }
+    if ("archived" in itemInfo && itemInfo.archived) {
+      return "This item is no longer available";
     }
     if (this.isBundleItem(item.id, restaurant)) {
       const bundleItem = itemInfo as BundleItem;
@@ -204,5 +180,39 @@ export class ItemUtils {
       return false;
     }
     return !!this.getMenuItemFromItemId(item.id, restaurant);
+  }
+
+  static doesItemRequireConfiguration(
+    item: Item,
+    restaurant: Restaurant
+  ): string | null {
+    const itemInfo = this.getMenuItemFromItemId(item.id, restaurant);
+    if (!itemInfo) {
+      return "Item not found";
+    }
+    const selectedVariation = item.variation;
+    if ("variations" in itemInfo && itemInfo.variations) {
+      if (Object.keys(itemInfo.variations).length === 0) {
+        return null;
+      }
+      if (Object.keys(itemInfo.variations).length === 1) {
+        item.variation = Object.keys(itemInfo.variations)[0];
+        return null;
+      }
+
+      if (selectedVariation) {
+        if (itemInfo.variations[selectedVariation]) {
+          return null;
+        } else {
+          return "Item requires a variation";
+        }
+      } else {
+        return "Item requires a variation";
+      }
+    } else {
+      console.log("Item does not require a variation", item);
+      item.variation = null;
+      return null;
+    }
   }
 }

@@ -247,7 +247,7 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
         </div>
       )}
       {loyaltyPolicies.length > 0 && viewAll && (
-        <div className="space-y-4 mt-6 mb-24">
+        <div className="space-y-4 mt-6 mb-24 -mx-3">
           {loyaltyPolicies.map((policy) => {
             return (
               <LoyaltyRewardPolicyCard

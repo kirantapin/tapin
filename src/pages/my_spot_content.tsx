@@ -69,6 +69,8 @@ const MySpotContent: React.FC = () => {
       const key =
         transaction.item +
         "|" +
+        (transaction.metadata.variation || "") +
+        "|" +
         (transaction.metadata.modifiers || []).join(",");
 
       if (!acc[key]) {
@@ -245,10 +247,9 @@ const MySpotContent: React.FC = () => {
                   return (
                     <PreviousTransactionItem
                       key={key}
-                      item={{
-                        id: transactions[0].item,
-                        modifiers: transactions[0].metadata?.modifiers || [],
-                      }}
+                      item={TransactionUtils.getTransactionItem(
+                        transactions[0]
+                      )}
                       currentQuantity={currentQuantity}
                       maxQuantity={maxQuantity}
                       restaurant={restaurant}

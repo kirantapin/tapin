@@ -1,10 +1,5 @@
 import { useEffect, useMemo, useState, useRef } from "react";
-import { Plus, Trash2, Minus, Check, Sparkles } from "lucide-react";
-import {
-  HOUSE_MIXER_LABEL,
-  LIQUOR_MENU_TAG,
-  SHOTS_SHOOTERS_LABEL,
-} from "@/constants";
+import { Plus, Trash2, Minus, Check } from "lucide-react";
 import { titleCase } from "title-case";
 import {
   Cart,
@@ -19,13 +14,11 @@ import { ItemUtils } from "@/utils/item_utils";
 import { useAuth } from "@/context/auth_context";
 import { convertUtcToLocal } from "@/utils/time";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
-import { getSuggestedMenuItems } from "./display_utils/suggested_menu_items";
-import { isEqual } from "lodash";
+import { isEqual, cloneDeep } from "lodash";
 import { PolicyUtils } from "@/utils/policy_utils";
 import { ImageUtils } from "@/utils/image_utils";
 import { ImageFallback } from "./display_utils/image_fallback";
 import { useRestaurant } from "@/context/restaurant_context";
-import ItemModModal from "./bottom_sheets/item_mod_modal";
 
 export function DrinkItem({
   item,
@@ -53,7 +46,7 @@ export function DrinkItem({
   const cartItem = cart.find((cartItem) => cartItem.item.id === item.id);
   const quantity = cart.reduce(
     (total, cartItem) =>
-      isEqual(cartItem.item, item) ? total + cartItem.quantity : total,
+      cartItem.item.id === item.id ? total + cartItem.quantity : total,
     0
   );
 
@@ -62,6 +55,10 @@ export function DrinkItem({
     (onSelect && isEqual(selected, item));
   if (!restaurant || !menuItem || menuItem.price == null) {
     return null;
+  }
+  let unavailable = false;
+  if ("archived" in menuItem && menuItem.archived) {
+    unavailable = true;
   }
 
   return (
@@ -118,7 +115,7 @@ export function DrinkItem({
             )}
           </div>
 
-          {!onSelect && (
+          {!onSelect && !unavailable && (
             <div className="flex items-center bg-white rounded-full px-1 py-1 relative">
               <div
                 className={`flex items-center transition-all duration-300 ${
@@ -155,7 +152,7 @@ export function DrinkItem({
               <button
                 onClick={async () => {
                   setLoading(true);
-                  await addToCart(item);
+                  await addToCart(cloneDeep(item));
                   setLoading(false);
                 }}
                 className="w-6 h-6 flex items-center justify-center rounded-full transition-all duration-300"
@@ -463,24 +460,22 @@ export const DrinkList = ({
   label,
   slideToFilter,
   restaurant,
-  addToCart,
   itemSpecifications,
   selected = null,
   onSelect = null,
+  padBottom = true,
 }: {
   label: string | null;
   slideToFilter: (filter: string) => void;
   restaurant: Restaurant;
-  addToCart: (item: Item, showToast?: boolean) => Promise<void>;
   itemSpecifications: ItemSpecification[];
   selected?: Item | null;
   onSelect?: ((item: Item) => Promise<void>) | null;
+  padBottom?: boolean;
 }) => {
   const labelRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const isInitialMount = useRef(true);
   const userScroll = useRef(false);
-  const [showItemModModal, setShowItemModModal] = useState(false);
-  const [itemModMenuLabel, setItemModMenuLabel] = useState<string | null>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -525,7 +520,12 @@ export const DrinkList = ({
         labelMap[key],
         restaurant
       );
-      itemIds.forEach((id) => allItemIds.push({ id: id, label: key }));
+      itemIds.forEach((id) => {
+        if (ItemUtils.isItemAvailable({ id: id, modifiers: [] }, restaurant)) {
+          return;
+        }
+        allItemIds.push({ id: id, label: key });
+      });
     }
     if (itemSpecifications.length > 0) {
       allItemIds = allItemIds.filter(({ id }) => {
@@ -547,31 +547,9 @@ export const DrinkList = ({
     }
   }, [label]);
 
-  const houseMixerFilters = [
-    (object: any) => {
-      return object.modifiers?.some((modifier: string) =>
-        modifier.toLowerCase().includes("with")
-      );
-    },
-    (object: any) => {
-      return restaurant.menu[object.id].path.includes(LIQUOR_MENU_TAG);
-    },
-  ];
-
-  const shotsShootersFilters = [
-    (object: any) => {
-      return !object.modifiers?.some((modifier: string) =>
-        modifier.toLowerCase().includes("with")
-      );
-    },
-    (object: any) => {
-      return restaurant.menu[object.id].path.includes(LIQUOR_MENU_TAG);
-    },
-  ];
-
   return (
     <div className="space-y-4  overflow-y-auto scroll-smooth no-scrollbar -mx-5">
-      <div className="pb-20">
+      <div className={`${padBottom ? "pb-20" : ""}`}>
         {Object.keys(restaurant.labelMap).map((menuLabel) => {
           const drinksForLabel = drinks.filter(
             (drink) => drink.label === menuLabel
@@ -592,74 +570,20 @@ export const DrinkList = ({
                   {menuLabel.toUpperCase()}
                 </h3>
                 <div className="space-y-2">
-                  {menuLabel === HOUSE_MIXER_LABEL ||
-                  menuLabel === SHOTS_SHOOTERS_LABEL ? (
-                    <div className="space-y-4">
-                      <div
-                        className="px-6 mt-2 rounded-2xl"
-                        style={{
-                          borderColor: restaurant.metadata.primaryColor,
-                        }}
-                      >
-                        <div
-                          onClick={() => {
-                            setShowItemModModal(true);
-                            setItemModMenuLabel(menuLabel);
-                          }}
-                          className="w-full text-center text-md text-gray-500 rounded-2xl py-3 px-4 mx-auto block flex items-center justify-center font-semibold"
-                          style={{
-                            color: "white",
-                            backgroundColor: restaurant.metadata.primaryColor,
-                          }}
-                        >
-                          <Sparkles className="w-6 h-6 mr-2 text-white" />
-                          Make A{" "}
-                          {menuLabel === HOUSE_MIXER_LABEL
-                            ? "House Mixer"
-                            : "Shot"}
-                        </div>
-                      </div>
-                      {getSuggestedMenuItems({
-                        type: menuLabel,
-                        filters:
-                          menuLabel === HOUSE_MIXER_LABEL
-                            ? houseMixerFilters
-                            : shotsShootersFilters,
-                        restaurant: restaurant,
-                        whiteListCategories: [LIQUOR_MENU_TAG],
-                      }).map((item) => (
-                        <DrinkItem
-                          key={item.id}
-                          item={item}
-                          purchaseDate={null}
-                          onSelect={onSelect}
-                          selected={selected}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    drinksForLabel.map(({ id }) => (
-                      <DrinkItem
-                        key={id}
-                        item={{ id: id, modifiers: [] }}
-                        onSelect={onSelect}
-                        selected={selected}
-                      />
-                    ))
-                  )}
+                  {drinksForLabel.map(({ id }) => (
+                    <DrinkItem
+                      key={id}
+                      item={{ id: id, modifiers: [] }}
+                      onSelect={onSelect}
+                      selected={selected}
+                    />
+                  ))}
                 </div>
               </div>
             );
           }
         })}
       </div>
-      <ItemModModal
-        isOpen={showItemModModal}
-        onClose={() => setShowItemModModal(false)}
-        menuLabel={itemModMenuLabel}
-        onSelect={onSelect ?? null}
-        addToCart={addToCart}
-      />
     </div>
   );
 };

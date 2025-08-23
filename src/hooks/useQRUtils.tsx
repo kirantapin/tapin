@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Item, Transaction } from "@/types";
+import { TransactionUtils } from "@/utils/transaction_utils";
 
 export const useQRUtils = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -26,12 +27,8 @@ export const useQRUtils = () => {
   ): { item: Item; purchaseDate: string }[] => {
     const itemsToBeRedeemed: { item: Item; purchaseDate: string }[] = [];
     transactions.forEach((transaction) => {
-      const modifiers = (transaction.metadata.modifiers as string[]) || [];
       itemsToBeRedeemed.push({
-        item: {
-          id: transaction.item,
-          modifiers: modifiers,
-        },
+        item: TransactionUtils.getTransactionItem(transaction),
         purchaseDate: transaction.created_at,
       });
     });

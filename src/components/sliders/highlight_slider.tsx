@@ -104,12 +104,13 @@ const HighlightSlider = ({ displayOne = false }: { displayOne?: boolean }) => {
       if (!restaurant || !policyManager || highlights === null) return;
       const filteredHighlights = highlights.filter((highlight) => {
         if (highlight.content_type === "item") {
-          const menuItem = ItemUtils.getMenuItemFromItemId(
-            highlight.content_pointer,
+          if (!highlight.content_pointer) return false;
+          return !ItemUtils.isItemAvailable(
+            { id: highlight.content_pointer, modifiers: [] },
             restaurant
           );
-          return menuItem && menuItem?.price;
         } else if (highlight.content_type === "policy") {
+          if (!highlight.content_pointer) return false;
           const policy = policyManager.getPolicyFromId(
             highlight.content_pointer
           );
@@ -118,13 +119,10 @@ const HighlightSlider = ({ displayOne = false }: { displayOne?: boolean }) => {
             PolicyUtils.isPolicyUsable(policy, restaurant)
           );
         } else if (highlight.content_type === "bundle") {
-          const bundle = ItemUtils.getMenuItemFromItemId(
-            highlight.content_pointer,
+          if (!highlight.content_pointer) return false;
+          return !ItemUtils.isItemAvailable(
+            { id: highlight.content_pointer, modifiers: [] },
             restaurant
-          ) as BundleItem;
-          return (
-            bundle?.price != null &&
-            BundleUtils.isBundlePurchaseable(bundle.object)
           );
         } else if (highlight.content_type === "media") {
           const { title_override, description_override } = highlight;

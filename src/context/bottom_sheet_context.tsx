@@ -32,6 +32,7 @@ import LockedPolicyModal from "@/components/bottom_sheets/locked_policy_modal";
 import AllBundlesModal from "@/components/bottom_sheets/all_bundles_modal";
 import CheckoutModal from "@/components/bottom_sheets/checkout_modal";
 import { TransactionUtils } from "@/utils/transaction_utils";
+import ItemModModal from "@/components/bottom_sheets/item_mod_modal";
 
 // Define the shape of your sheet registry: keys → sheet components
 type SheetMap = Record<string, FC<any>>;
@@ -39,9 +40,6 @@ type SheetMap = Record<string, FC<any>>;
 interface BottomSheetContextValue {
   openBundleModal: (bundle: Bundle) => void;
   closeSheet: () => void;
-  bundleModal: Bundle | null;
-  policyModal: { policy: Policy; bundle_id: string | null } | null;
-  isOpen: boolean;
   openQrModal: (transactionsToRedeem: Transaction[]) => void;
   handlePolicyClick: (
     policy: Policy,
@@ -59,10 +57,9 @@ interface BottomSheetContextValue {
   refreshCart: () => Promise<string | null>;
   clearCart: () => void;
   getActivePolicies: () => string[];
-  cartManager: CartManager;
+  cartManager: CartManager | null;
   openSignInModal: () => void;
   openProfileModal: () => void;
-  openLockedPolicyModal: (policy: Policy) => void;
   triggerToast: (
     message: string,
     type: "success" | "error" | "info",
@@ -71,14 +68,15 @@ interface BottomSheetContextValue {
   openAllBundlesModal: () => void;
   openCheckoutModal: () => void;
   closeCheckoutModal: () => void;
+  openItemModModal: (
+    itemId: string,
+    onSelect: (item: Item) => Promise<void>
+  ) => void;
 }
 
 const BottomSheetContext = createContext<BottomSheetContextValue>({
   openBundleModal: () => {},
   closeSheet: () => {},
-  bundleModal: null,
-  policyModal: null,
-  isOpen: false,
   openQrModal: () => {},
   handlePolicyClick: () => {},
   state: {
@@ -98,11 +96,11 @@ const BottomSheetContext = createContext<BottomSheetContextValue>({
   cartManager: null,
   openSignInModal: () => {},
   openProfileModal: () => {},
-  openLockedPolicyModal: () => {},
   triggerToast: () => {},
   openAllBundlesModal: () => {},
   openCheckoutModal: () => {},
   closeCheckoutModal: () => {},
+  openItemModModal: () => {},
 });
 
 interface BottomSheetProviderProps {
@@ -154,19 +152,6 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
 }) => {
   const { restaurant } = useRestaurant();
   const { userSession } = useAuth();
-  const {
-    state,
-    dispatch,
-    addToCart,
-    removeFromCart,
-    addPolicy,
-    removePolicy,
-    refreshCart,
-    clearCart,
-    getActivePolicies,
-    cartManager,
-    triggerToast,
-  } = useGlobalCartManager(restaurant as Restaurant, userSession);
   const [isOpen, setIsOpen] = useState(false);
   const [bundleModal, setBundleModal] = useState<Bundle | null>(null);
   const [policyModal, setPolicyModal] = useState<{
@@ -185,6 +170,63 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
   } | null>(null);
   const [showAllBundlesModal, setShowAllBundlesModal] = useState(false);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  const [showItemModModal, setShowItemModModal] = useState<{
+    open: boolean;
+    itemId: string;
+    onSelect: (item: Item) => Promise<void>;
+  } | null>(null);
+
+  const openItemModModal = (
+    itemId: string,
+    onSelect: (item: Item) => Promise<void>
+  ) => {
+    setShowItemModModal({ open: true, itemId, onSelect });
+  };
+
+  const closeItemModModal = () => {
+    setShowItemModModal((prev) => {
+      if (prev) {
+        return { open: false, itemId: prev.itemId, onSelect: prev.onSelect };
+      }
+      return null;
+    });
+    setTimeout(() => {
+      setShowItemModModal(null);
+    }, 200);
+  };
+
+  const closeSheet = () => {
+    setIsOpen(false);
+    setTimeout(() => {
+      setBundleModal(null);
+      setPolicyModal(null);
+      setQrModal(null);
+      setShowSignInModal(false);
+      setShowProfile(false);
+      setLockedPolicyModal(null);
+      setShowAllBundlesModal(false);
+      setShowItemModModal(null);
+    }, 200);
+  };
+
+  const {
+    state,
+    dispatch,
+    addToCart,
+    removeFromCart,
+    addPolicy,
+    removePolicy,
+    refreshCart,
+    clearCart,
+    getActivePolicies,
+    cartManager,
+    triggerToast,
+  } = useGlobalCartManager(
+    restaurant as Restaurant,
+    userSession,
+    true,
+    openItemModModal
+  );
 
   const handlePolicyClick = (
     policy: Policy,
@@ -320,19 +362,6 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
     }, 200); // Wait for animation to complete
   };
 
-  const closeSheet = () => {
-    setIsOpen(false);
-    setTimeout(() => {
-      setBundleModal(null);
-      setPolicyModal(null);
-      setQrModal(null);
-      setShowSignInModal(false);
-      setShowProfile(false);
-      setLockedPolicyModal(null);
-      setShowAllBundlesModal(false);
-    }, 200);
-  };
-
   return (
     <BottomSheetContext.Provider
       value={{
@@ -355,6 +384,7 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
         openAllBundlesModal,
         openCheckoutModal,
         closeCheckoutModal,
+        openItemModModal,
       }}
     >
       {children}
@@ -382,6 +412,15 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
           onClose={closeSheet}
           policy={lockedPolicyModal.policy}
           bundle_id={lockedPolicyModal.bundle_id}
+        />
+      )}
+
+      {showItemModModal && (
+        <ItemModModal
+          isOpen={showItemModModal.open}
+          onClose={closeItemModModal}
+          itemId={showItemModModal.itemId}
+          onSelect={showItemModModal.onSelect}
         />
       )}
 
