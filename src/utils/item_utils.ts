@@ -82,7 +82,7 @@ export class ItemUtils {
         | Category;
       return (
         titleCase(itemObject.name) +
-        (variation
+        (variation && itemObject.variations && itemObject.variations[variation]
           ? `, ${titleCase(itemObject.variations[variation].name)}`
           : "")
       );
