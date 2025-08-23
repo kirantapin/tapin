@@ -41,12 +41,15 @@ const cartReducer = (state: CartState, action: Partial<CartState>) => {
 export function useGlobalCartManager(
   restaurant: Restaurant | null,
   userSession: UserSession | null,
-  global: boolean = true
+  global: boolean = true,
+  openItemModModal: (
+    itemId: string,
+    onSelect: (item: Item) => Promise<void>
+  ) => void
 ) {
   const cartManagerRef = useRef<CartManager | null>(null);
   const [state, dispatch] = useReducer(cartReducer, initialState);
   const actionLock = useRef<boolean>(false);
-
   const triggerToast = (
     message: string,
     type: "success" | "error" | "info",
@@ -115,6 +118,12 @@ export function useGlobalCartManager(
   // Cart operations
   const addToCart = async (item: Item, showToast?: boolean): Promise<void> => {
     if (!cartManagerRef.current || !restaurant || actionLock.current) return;
+    if (ItemUtils.doesItemRequireConfiguration(item, restaurant)) {
+      openItemModModal(item.id, async (itemWithVariation: Item) => {
+        await addToCart(itemWithVariation, true);
+      });
+      return;
+    }
     actionLock.current = true;
     const result = await cartManagerRef.current.addToCart(item);
     if (result) {
@@ -146,7 +155,16 @@ export function useGlobalCartManager(
     policy_id: string,
     userPreference: Item | null
   ): Promise<void> => {
-    if (!cartManagerRef.current || actionLock.current) return;
+    if (!cartManagerRef.current || !restaurant || actionLock.current) return;
+    if (
+      userPreference &&
+      ItemUtils.doesItemRequireConfiguration(userPreference, restaurant)
+    ) {
+      openItemModModal(userPreference.id, async (itemWithVariation: Item) => {
+        await addPolicy(bundle_id, policy_id, itemWithVariation);
+      });
+      return;
+    }
     actionLock.current = true;
     const result = await cartManagerRef.current.addPolicy(
       bundle_id,

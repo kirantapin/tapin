@@ -71,6 +71,7 @@ export class ItemUtils {
   }
   static getItemName(item: Item, restaurant: Restaurant): string {
     const menu = restaurant.menu;
+    const { variation } = item;
     if (this.isPassItem(item.id, restaurant)) {
       const itemObject = menu[item.id].info as PassItem;
       return titleCase(itemObject.name);
@@ -81,7 +82,9 @@ export class ItemUtils {
         | Category;
       return (
         titleCase(itemObject.name) +
-        (item.modifiers.length > 0 ? ` (${item.modifiers.join(", ")})` : "")
+        (variation
+          ? `, ${titleCase(itemObject.variations[variation].name)}`
+          : "")
       );
     }
   }
@@ -102,11 +105,18 @@ export class ItemUtils {
       | undefined;
   }
   static priceItem(item: Item, restaurant: Restaurant): number | null {
-    const { id } = item;
-
+    const { id, variation } = item;
     const temp = restaurant.menu[id]?.info;
-    if (!temp || !("price" in temp)) {
-      return null;
+
+    if (variation) {
+      const variationInfo = (temp as NormalItem)?.variations?.[variation];
+      if (variationInfo) {
+        return variationInfo.absolutePrice;
+      }
+    }
+
+    if (!temp || temp.price == null) {
+      throw new Error("Item cannot be priced");
     }
 
     return temp.price;
@@ -170,5 +180,39 @@ export class ItemUtils {
       return false;
     }
     return !!this.getMenuItemFromItemId(item.id, restaurant);
+  }
+
+  static doesItemRequireConfiguration(
+    item: Item,
+    restaurant: Restaurant
+  ): string | null {
+    const itemInfo = this.getMenuItemFromItemId(item.id, restaurant);
+    if (!itemInfo) {
+      return "Item not found";
+    }
+    const selectedVariation = item.variation;
+    if ("variations" in itemInfo && itemInfo.variations) {
+      if (Object.keys(itemInfo.variations).length === 0) {
+        return null;
+      }
+      if (Object.keys(itemInfo.variations).length === 1) {
+        item.variation = Object.keys(itemInfo.variations)[0];
+        return null;
+      }
+
+      if (selectedVariation) {
+        if (itemInfo.variations[selectedVariation]) {
+          return null;
+        } else {
+          return "Item requires a variation";
+        }
+      } else {
+        return "Item requires a variation";
+      }
+    } else {
+      console.log("Item does not require a variation", item);
+      item.variation = null;
+      return null;
+    }
   }
 }

@@ -143,6 +143,7 @@ const MainMenu: React.FC<MainMenuProps> = ({
       {/* Filters */}
       {searchResults.length > 0 ? (
         <div
+          className="-mx-5"
           style={{
             height: `calc(100vh - ${
               (orderDrinksRef.current?.offsetHeight || 0) + 10

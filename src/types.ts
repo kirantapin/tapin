@@ -114,6 +114,7 @@ export interface CartItem {
 
 export interface Item {
   id: string;
+  variation?: string | null;
   modifiers: string[];
 }
 
@@ -210,6 +211,14 @@ export interface NormalItem {
   image_url?: string;
   sourceId?: string | null;
   archived?: boolean | null;
+  variations?: Record<
+    string,
+    {
+      sourceId: string | null;
+      name: string;
+      absolutePrice: number;
+    }
+  > | null;
 }
 export interface PassItem {
   name: string;
@@ -268,7 +277,9 @@ export interface Transaction {
   order_id: string;
   metadata: {
     modifiers?: string[];
-    [key: string]: string | string[] | undefined;
+    variation?: string | null;
+    path?: string[];
+    [key: string]: string | string[] | null | undefined;
   };
   tip_amount: number | null;
   price: number | null;

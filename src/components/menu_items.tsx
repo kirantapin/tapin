@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useRef } from "react";
-import { Plus, Trash2, Minus, Check, Sparkles } from "lucide-react";
+import { Plus, Trash2, Minus, Check } from "lucide-react";
 import { titleCase } from "title-case";
 import {
   Cart,
@@ -14,7 +14,7 @@ import { ItemUtils } from "@/utils/item_utils";
 import { useAuth } from "@/context/auth_context";
 import { convertUtcToLocal } from "@/utils/time";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
-import { isEqual } from "lodash";
+import { isEqual, cloneDeep } from "lodash";
 import { PolicyUtils } from "@/utils/policy_utils";
 import { ImageUtils } from "@/utils/image_utils";
 import { ImageFallback } from "./display_utils/image_fallback";
@@ -46,7 +46,7 @@ export function DrinkItem({
   const cartItem = cart.find((cartItem) => cartItem.item.id === item.id);
   const quantity = cart.reduce(
     (total, cartItem) =>
-      isEqual(cartItem.item, item) ? total + cartItem.quantity : total,
+      cartItem.item.id === item.id ? total + cartItem.quantity : total,
     0
   );
 
@@ -152,7 +152,7 @@ export function DrinkItem({
               <button
                 onClick={async () => {
                   setLoading(true);
-                  await addToCart(item);
+                  await addToCart(cloneDeep(item));
                   setLoading(false);
                 }}
                 className="w-6 h-6 flex items-center justify-center rounded-full transition-all duration-300"
@@ -460,7 +460,6 @@ export const DrinkList = ({
   label,
   slideToFilter,
   restaurant,
-  addToCart,
   itemSpecifications,
   selected = null,
   onSelect = null,
@@ -469,7 +468,6 @@ export const DrinkList = ({
   label: string | null;
   slideToFilter: (filter: string) => void;
   restaurant: Restaurant;
-  addToCart: (item: Item, showToast?: boolean) => Promise<void>;
   itemSpecifications: ItemSpecification[];
   selected?: Item | null;
   onSelect?: ((item: Item) => Promise<void>) | null;

@@ -46,7 +46,8 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
   restaurant,
 }) => {
   const { userSession } = useAuth();
-  const { addToCart, addPolicy, state, openCheckoutModal } = useBottomSheet();
+  const { addPolicy, state, openCheckoutModal, openItemModModal } =
+    useBottomSheet();
   const [userPreference, setUserPreference] = useState<Item | null>(null);
   const [loading, setLoading] = useState(false);
   const missingItemsResults = getMissingItemsForPolicy(
@@ -215,7 +216,6 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
 
                       <DrinkList
                         restaurant={restaurant}
-                        addToCart={addToCart}
                         itemSpecifications={ItemUtils.policyItemSpecificationsToItemIds(
                           result.missingItems,
                           restaurant
@@ -249,12 +249,25 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                     {!policyIsActive && userChoices.length > 0 && (
                       <DrinkList
                         restaurant={restaurant}
-                        addToCart={addToCart}
                         itemSpecifications={userChoices}
                         label={null}
                         slideToFilter={() => {}}
                         onSelect={async (item) => {
-                          setUserPreference(item);
+                          if (
+                            ItemUtils.doesItemRequireConfiguration(
+                              item,
+                              restaurant
+                            )
+                          ) {
+                            openItemModModal(
+                              item.id,
+                              async (itemWithVariation: Item) => {
+                                setUserPreference(itemWithVariation);
+                              }
+                            );
+                          } else {
+                            setUserPreference(item);
+                          }
                         }}
                         selected={userPreference}
                       />
@@ -265,62 +278,56 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
           </div>
         </div>
 
-        <div className="mt-4 pt-4 fixed bottom-0 left-0 right-0 px-6 pb-4 bg-white border-t-0">
+        <div className="mt-4 fixed bottom-0 left-0 right-0 px-6 pb-4 bg-white border-t-0">
           <div className="relative">
             <div
               className={`absolute left-0 right-0 transition-transform duration-300 ease-in-out ${
-                userPreference
-                  ? "translate-y-[-70px]"
-                  : "translate-y-full pointer-events-none"
+                userPreference ? "" : "translate-y-full pointer-events-none"
               }`}
               style={{
-                bottom: -16,
+                bottom: "100%",
                 zIndex: 0,
                 left: "-24px",
                 right: "-24px",
               }}
             >
-              <div className="bg-white border border-t-gray-200 rounded-t-3xl px-6 py-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold text-gray-900">Selected Item</h3>
-                  <button
-                    onClick={() => setUserPreference(null)}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="h-14 w-14 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
-                    <ImageFallback
-                      src={ImageUtils.getItemImageUrl(
-                        userPreference?.id,
-                        restaurant
-                      )}
-                      alt="Selected item"
-                      className="h-full w-full object-cover"
-                      restaurant={restaurant}
-                    />
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-gray-900">
-                      {userPreference
-                        ? titleCase(
+              <div className="bg-white border border-t-gray-200 rounded-t-3xl px-6 py-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+                {userPreference && (
+                  <>
+                    {/* Item Image and Basic Info */}
+                    <div className="flex items-start space-x-4 mb-4">
+                      <ImageFallback
+                        src={ImageUtils.getItemImageUrl(
+                          userPreference.id,
+                          restaurant
+                        )}
+                        alt="Selected item"
+                        className="h-14 w-14 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0"
+                        restaurant={restaurant}
+                      />
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900 text-lg">
+                          {titleCase(
                             ItemUtils.getItemName(userPreference, restaurant)
-                          )
-                        : ""}
-                    </h4>
-                    <p className="text-sm text-gray-500 font-semibold">
-                      $
-                      {userPreference
-                        ? ItemUtils.priceItem(
+                          )}
+                        </h4>
+                        <p className="text-sm text-gray-600 mt-1">
+                          $
+                          {ItemUtils.priceItem(
                             userPreference,
                             restaurant
-                          )?.toFixed(2)
-                        : "0.00"}
-                    </p>
-                  </div>
-                </div>
+                          )?.toFixed(2)}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setUserPreference(null)}
+                        className="text-gray-500 hover:text-gray-700"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 

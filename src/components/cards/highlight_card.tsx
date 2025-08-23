@@ -85,7 +85,15 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
           (item as NormalItem).description ||
             "Currently in stock. Purchase while supplies last."
         );
-        setDefaultImageUrl((item as NormalItem).image_url || null);
+        const imageUrl = ImageUtils.getItemImageUrl(
+          content_pointer,
+          restaurant
+        );
+        if (imageUrl) {
+          setDefaultImageUrl(imageUrl);
+        } else {
+          setDefaultImageUrl("fallback");
+        }
       }
     }
     if (content_type === "policy") {
