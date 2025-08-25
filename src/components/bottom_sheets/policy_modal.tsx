@@ -376,10 +376,12 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                 )}
               </button>
             ) : (
-              <SignInButton
-                onClose={onClose}
-                primaryColor={restaurant?.metadata.primaryColor}
-              />
+              <div className="relative z-10">
+                <SignInButton
+                  onClose={onClose}
+                  primaryColor={restaurant?.metadata.primaryColor}
+                />
+              </div>
             )}
           </div>
         </div>
