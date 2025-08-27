@@ -252,7 +252,7 @@ export class PolicyUtils {
       const itemPrice = itemsInCategory.reduce((max, item) => {
         return Math.max(
           max,
-          ItemUtils.priceItem({ id: item, modifiers: [] }, restaurant) || 0
+          ItemUtils.priceItem({ id: item }, restaurant) || 0
         );
       }, 0);
       if (itemPrice > highestCost) {
@@ -365,7 +365,7 @@ export class PolicyUtils {
         );
 
         return itemIds.filter((id) => {
-          const price = ItemUtils.priceItem({ id, modifiers: [] }, restaurant);
+          const price = ItemUtils.priceItem({ id }, restaurant);
           // Only include if price is not null/undefined and less than priceLimit
           return price != null && price < (action.priceLimit ?? Infinity);
         });
@@ -432,7 +432,7 @@ export class PolicyUtils {
         );
 
         const itemAvailabilities = itemIds.map((id) =>
-          ItemUtils.isItemAvailable({ id, modifiers: [] }, restaurant)
+          ItemUtils.isItemAvailable({ id }, restaurant)
         );
 
         if (!itemAvailabilities.includes(null)) {
@@ -451,11 +451,7 @@ export class PolicyUtils {
         const itemIds = ItemUtils.getAllItemsInCategory(item.item, restaurant);
         if (
           itemIds
-            .map(
-              (id) =>
-                ItemUtils.isItemAvailable({ id, modifiers: [] }, restaurant) !==
-                null
-            )
+            .map((id) => ItemUtils.isItemAvailable({ id }, restaurant) !== null)
             .every(Boolean)
         ) {
           return false;
@@ -469,7 +465,7 @@ export class PolicyUtils {
         );
 
         const itemAvailabilities = itemIds.map((id) =>
-          ItemUtils.isItemAvailable({ id, modifiers: [] }, restaurant)
+          ItemUtils.isItemAvailable({ id }, restaurant)
         );
         if (!itemAvailabilities.includes(null)) {
           return false;

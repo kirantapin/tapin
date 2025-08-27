@@ -71,7 +71,11 @@ const MySpotContent: React.FC = () => {
         "|" +
         (transaction.metadata.variation || "") +
         "|" +
-        (transaction.metadata.modifiers || []).join(",");
+        Object.entries(transaction.metadata.modifiers || {})
+          .map(([modifierGroupId, modifierIds]) =>
+            modifierIds.map((modifierId) => `${modifierGroupId}:${modifierId}`)
+          )
+          .join("|");
 
       if (!acc[key]) {
         acc[key] = {
@@ -182,7 +186,7 @@ const MySpotContent: React.FC = () => {
         {/* Title - centered with flex-1 */}
         <h1 className="flex-1 text-xl font-semibold text-center">My Spot</h1>
       </div>
-      <div className="overflow-x-hidden">
+      <div className="overflow-x-hidden -mx-3 px-3">
         <div className="flex gap-3 mb-2 overflow-x-auto pb-2 no-scrollbar mt-6">
           {Object.keys(tagMap).map((filter) => (
             <button

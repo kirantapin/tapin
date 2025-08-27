@@ -3,7 +3,6 @@ import { DrinkItem, DrinkList } from "../menu_items";
 import { titleCase } from "title-case";
 import { Search, X } from "lucide-react";
 import { useRestaurant } from "@/context/restaurant_context";
-import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { Restaurant } from "@/types";
 import { useSearch } from "@/hooks/useSearch";
 import { ItemUtils } from "@/utils/item_utils";
@@ -18,7 +17,6 @@ const MainMenu: React.FC<MainMenuProps> = ({
   scrollToOrderDrinks,
 }) => {
   const { restaurant } = useRestaurant();
-  const { addToCart } = useBottomSheet();
   const { searchResults, searchQuery, setSearchQuery, clearSearch } = useSearch(
     {
       restaurant: restaurant as Restaurant,
@@ -49,9 +47,7 @@ const MainMenu: React.FC<MainMenuProps> = ({
     const labelsSet = new Set<string>();
 
     for (const [itemId, value] of Object.entries(restaurant.menu)) {
-      if (
-        ItemUtils.isItemAvailable({ id: itemId, modifiers: [] }, restaurant)
-      ) {
+      if (ItemUtils.isItemAvailable({ id: itemId }, restaurant)) {
         continue;
       }
 
@@ -152,10 +148,7 @@ const MainMenu: React.FC<MainMenuProps> = ({
         >
           <pre className="whitespace-pre-wrap break-words">
             {searchResults.map((searchResult, index) => (
-              <DrinkItem
-                key={searchResult}
-                item={{ id: searchResult, modifiers: [] }}
-              />
+              <DrinkItem key={searchResult} item={{ id: searchResult }} />
             ))}
           </pre>
         </div>
@@ -164,7 +157,6 @@ const MainMenu: React.FC<MainMenuProps> = ({
           label={activeFilter}
           slideToFilter={slideToFilter}
           restaurant={restaurant}
-          addToCart={addToCart}
           itemSpecifications={[]}
           padBottom={false}
         />

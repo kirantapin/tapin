@@ -12,9 +12,7 @@ export const listItemsToStringDescription = (
     const remainingCount = items.length - 3;
 
     const itemNames = itemsToShow
-      .map((item) =>
-        ItemUtils.getItemName({ id: item, modifiers: [] }, restaurant)
-      )
+      .map((item) => ItemUtils.getItemName({ id: item }, restaurant))
       .join(" or ");
 
     const suffix = remainingCount > 0 ? ` or other select items` : "";
@@ -23,10 +21,7 @@ export const listItemsToStringDescription = (
       quantity > 1 ? "orders" : "order"
     } of either ${itemNames}${suffix}`;
   } else if (items.length === 1) {
-    const itemName = ItemUtils.getItemName(
-      { id: items[0], modifiers: [] },
-      restaurant
-    );
+    const itemName = ItemUtils.getItemName({ id: items[0] }, restaurant);
     return `${quantity} ${injectWord ? injectWord + " " : ""}${itemName}${
       quantity > 1 ? "s" : ""
     }`;

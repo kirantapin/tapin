@@ -114,10 +114,7 @@ export class TransactionUtils {
     transaction: Transaction,
     restaurant: Restaurant
   ): boolean => {
-    const item = {
-      id: transaction.item,
-      modifiers: transaction.metadata.modifiers || [],
-    };
+    const item = this.getTransactionItem(transaction);
     return ItemUtils.isItemRedeemable(item, restaurant);
   };
 
@@ -148,13 +145,13 @@ export class TransactionUtils {
   static getTransactionItem(transaction: Transaction): {
     id: string;
     variation: string | null;
-    modifiers: string[];
+    modifiers: Record<string, string[]>;
     path: string[];
   } {
     const item = {
       id: transaction.item,
       variation: transaction.metadata.variation || null,
-      modifiers: transaction.metadata.modifiers || [],
+      modifiers: transaction.metadata.modifiers || {},
       path: (transaction.metadata.path || []) as string[],
     };
     if (item.path.includes(PASS_MENU_TAG)) {

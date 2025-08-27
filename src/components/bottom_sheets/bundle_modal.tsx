@@ -44,10 +44,10 @@ const BundleModal: React.FC<BundleModalProps> = ({
   const { userSession } = useAuth();
   const navigate = useNavigate();
   const { userOwnershipMap } = useRestaurant();
-  const { refreshCart } = useBottomSheet();
+  const { refreshCart, openItemModModal } = useBottomSheet();
   const location = useLocation();
   const { state, addPolicy, addToCart, removePolicy, removeFromCart } =
-    useGlobalCartManager(restaurant, userSession, false);
+    useGlobalCartManager(restaurant, userSession, false, openItemModModal);
   const { policyManager } = useRestaurant();
   const [loadingLocalCart, setLoadingLocalCart] = useState(false);
 
@@ -73,7 +73,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
       setLoadingLocalCart(true);
       const cartItemIds = [...new Set(state.cart.map((item) => item.item.id))];
       if (!cartItemIds.includes(bundle.bundle_id)) {
-        await addToCart({ id: bundle.bundle_id, modifiers: [] });
+        await addToCart({ id: bundle.bundle_id });
         setTimeout(() => {
           setLoadingLocalCart(false);
         }, 3000);
