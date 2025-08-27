@@ -80,12 +80,7 @@ export class ItemUtils {
         | NormalItem
         | BundleItem
         | Category;
-      return (
-        titleCase(itemObject.name) +
-        (variation && itemObject.variations && itemObject.variations[variation]
-          ? `, ${titleCase(itemObject.variations[variation].name)}`
-          : "")
-      );
+      return titleCase(itemObject.name);
     }
   }
   static isPassItem(itemId: string, restaurant: Restaurant): boolean {
@@ -104,22 +99,42 @@ export class ItemUtils {
       | BundleItem
       | undefined;
   }
-  static priceItem(item: Item, restaurant: Restaurant): number | null {
-    const { id, variation } = item;
+  static priceItem(item: Item, restaurant: Restaurant): number {
+    const { id, variation, modifiers } = item;
     const temp = restaurant.menu[id]?.info;
-
-    if (variation) {
-      const variationInfo = (temp as NormalItem)?.variations?.[variation];
-      if (variationInfo) {
-        return variationInfo.absolutePrice;
-      }
-    }
 
     if (!temp || temp.price == null) {
       throw new Error("Item cannot be priced");
     }
+    let startingPrice = temp.price;
 
-    return temp.price;
+    if (variation) {
+      const variationInfo = (temp as NormalItem)?.variations?.[variation];
+      if (variationInfo) {
+        startingPrice = variationInfo.absolutePrice;
+      }
+    }
+
+    for (const [modifierGroupId, modifierIds] of Object.entries(
+      modifiers || {}
+    )) {
+      const modifierGroup = restaurant.modifier_groups[modifierGroupId];
+      if (!modifierGroup) {
+        continue;
+      }
+      for (const modifierId of modifierIds) {
+        const modifier = modifierGroup.modifiers.find(
+          (mod) => mod.id === modifierId
+        );
+        if (!modifier) {
+          continue;
+        } else {
+          startingPrice += modifier.delta;
+        }
+      }
+    }
+
+    return startingPrice;
   }
   static doesItemMeetItemSpecification(
     itemSpecs: string[],
@@ -190,29 +205,129 @@ export class ItemUtils {
     if (!itemInfo) {
       return "Item not found";
     }
-    const selectedVariation = item.variation;
-    if ("variations" in itemInfo && itemInfo.variations) {
-      if (Object.keys(itemInfo.variations).length === 0) {
-        return null;
-      }
-      if (Object.keys(itemInfo.variations).length === 1) {
-        item.variation = Object.keys(itemInfo.variations)[0];
-        return null;
-      }
 
-      if (selectedVariation) {
-        if (itemInfo.variations[selectedVariation]) {
-          return null;
-        } else {
-          return "Item requires a variation";
+    const { variations, modifierGroups } = itemInfo as NormalItem;
+    const selectedVariation = item.variation;
+
+    if (variations) {
+      if (Object.keys(variations).length === 0) {
+        console.log("Item has no variations", item);
+      } else if (Object.keys(variations).length === 1) {
+        item.variation = Object.keys(variations)[0];
+      } else if (selectedVariation) {
+        if (!variations[selectedVariation]) {
+          return "Item requires a valid variation";
         }
       } else {
-        return "Item requires a variation";
+        return "Item requires a variation selection";
       }
     } else {
-      console.log("Item does not require a variation", item);
       item.variation = null;
-      return null;
     }
+
+    // Check modifiers based on ModifierGroup specifications
+    if (modifierGroups && modifierGroups.length > 0) {
+      if (!item.modifiers) {
+        //Even though in some cases it is fine if modifiers in null, if there are active modifier groups we want to give the user the option to select them
+        return "Item requires modifier selections";
+      }
+
+      for (const modifierGroupId of modifierGroups) {
+        const modifierGroup = restaurant.modifier_groups[modifierGroupId];
+        if (!modifierGroup) {
+          console.warn(
+            `Modifier group ${modifierGroupId} not found in restaurant`
+          );
+          continue;
+        }
+
+        const selectedModifiers = item.modifiers[modifierGroupId] || [];
+
+        if (modifierGroup.select === "single") {
+          if (selectedModifiers.length !== 1) {
+            return "There can only be one option selected from this group";
+          }
+        } else if (modifierGroup.select === "multiple") {
+          if (
+            modifierGroup.minSelected &&
+            selectedModifiers.length < modifierGroup.minSelected
+          ) {
+            return `Item requires at least ${
+              modifierGroup.minSelected
+            } selection${modifierGroup.minSelected > 1 ? "s" : ""} from ${
+              modifierGroup.name
+            }`;
+          }
+
+          // Check maximum selection requirements
+          if (
+            modifierGroup.maxSelected &&
+            selectedModifiers.length > modifierGroup.maxSelected
+          ) {
+            return `Item allows maximum ${modifierGroup.maxSelected} selection${
+              modifierGroup.maxSelected > 1 ? "s" : ""
+            } from ${modifierGroup.name}`;
+          }
+        }
+
+        // Validate that selected modifiers exist in the modifier group
+        if (selectedModifiers && selectedModifiers.length > 0) {
+          const validModifierIds = modifierGroup.modifiers.map((mod) => mod.id);
+          for (const selectedModId of selectedModifiers) {
+            if (!validModifierIds.includes(selectedModId)) {
+              return `Invalid modifier selection in ${modifierGroup.name}`;
+            }
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
+  static getItemModifierNames(item: Item, restaurant: Restaurant): string[] {
+    const itemInfo = this.getMenuItemFromItemId(item.id, restaurant);
+    if (!itemInfo) {
+      return [];
+    }
+
+    const names: string[] = [];
+
+    // Add variation name if it exists
+    if (item.variation && "variations" in itemInfo && itemInfo.variations) {
+      const variation = itemInfo.variations[item.variation];
+      if (variation) {
+        names.push(titleCase(variation.name));
+      }
+    }
+
+    // Add selected modifier names if they exist
+    if (
+      "modifierGroups" in itemInfo &&
+      itemInfo.modifierGroups &&
+      item.modifiers
+    ) {
+      itemInfo.modifierGroups.forEach((modifierGroupId) => {
+        const modifierGroup = restaurant.modifier_groups[modifierGroupId];
+        const selectedModifiers = item.modifiers?.[modifierGroupId] || [];
+
+        if (
+          modifierGroup &&
+          selectedModifiers &&
+          selectedModifiers.length > 0
+        ) {
+          selectedModifiers.forEach((selectedModifierId) => {
+            const modifier = modifierGroup.modifiers.find(
+              (mod) => mod.id === selectedModifierId
+            );
+            if (modifier) {
+              names.push(titleCase(modifier.name));
+            }
+          });
+        }
+      });
+    }
+
+    return names;
   }
 }

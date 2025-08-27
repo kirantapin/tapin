@@ -112,10 +112,27 @@ export interface CartItem {
   point_cost: number | 0;
 }
 
+export interface Modifier {
+  id: string;
+  name: string;
+  delta: number;
+  sourceId?: string | null;
+}
+
+export interface ModifierGroup {
+  name: string;
+  select: "single" | "multiple";
+  minSelected?: number;
+  maxSelected?: number;
+  defaults: string[];
+  sourceId?: string | null;
+  modifiers: Modifier[];
+}
+
 export interface Item {
   id: string;
   variation?: string | null;
-  modifiers: string[];
+  modifiers?: Record<string, string[]>;
 }
 
 export interface Restaurant {
@@ -125,6 +142,7 @@ export interface Restaurant {
   labelMap: Record<string, string>;
   active: boolean;
   metadata: RestaurantMetadata;
+  modifier_groups: Record<string, ModifierGroup>;
   info: RestaurantInfo;
   payment_provider: "square" | "stripe";
   account_id: string;
@@ -219,6 +237,7 @@ export interface NormalItem {
       absolutePrice: number;
     }
   > | null;
+  modifierGroups?: string[];
 }
 export interface PassItem {
   name: string;
@@ -276,10 +295,15 @@ export interface Transaction {
   item: string;
   order_id: string;
   metadata: {
-    modifiers?: string[];
+    modifiers?: Record<string, string[]>;
     variation?: string | null;
     path?: string[];
-    [key: string]: string | string[] | null | undefined;
+    [key: string]:
+      | string
+      | string[]
+      | Record<string, string[]>
+      | null
+      | undefined;
   };
   tip_amount: number | null;
   price: number | null;

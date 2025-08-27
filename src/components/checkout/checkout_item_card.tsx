@@ -65,6 +65,24 @@ export function CheckoutItemCard({
           <p className="text-lg font-semibold text-gray-900">
             {ItemUtils.getItemName(item.item, restaurant)}
           </p>
+
+          {/* Modifier names */}
+          {(() => {
+            const modifierNames = ItemUtils.getItemModifierNames(
+              item.item,
+              restaurant
+            );
+
+            if (modifierNames.length > 0) {
+              return (
+                <p className="text-xs text-gray-500 mt-1">
+                  {modifierNames.join(", ")}
+                </p>
+              );
+            }
+            return null;
+          })()}
+
           <div className="flex items-center gap-2 mt-1">
             <span className="text-md text-gray-600 font-medium">
               ${currentPrice.toFixed(2)}
