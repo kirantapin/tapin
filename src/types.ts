@@ -117,6 +117,7 @@ export interface Modifier {
   name: string;
   delta: number;
   sourceId?: string | null;
+  archived?: boolean;
 }
 
 export interface ModifierGroup {
@@ -127,6 +128,7 @@ export interface ModifierGroup {
   defaults: string[];
   sourceId?: string | null;
   modifiers: Modifier[];
+  archived?: boolean;
 }
 
 export interface Item {
@@ -235,6 +237,7 @@ export interface NormalItem {
       sourceId: string | null;
       name: string;
       absolutePrice: number;
+      archived?: boolean;
     }
   > | null;
   modifierGroups?: string[];

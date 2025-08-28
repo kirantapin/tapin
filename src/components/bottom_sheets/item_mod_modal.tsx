@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { AlertDialog, AlertDialogContent } from "@/components/ui/alert-dialog";
 import { X, Check } from "lucide-react";
 import { useRestaurant } from "@/context/restaurant_context";
-import { Item } from "@/types";
+import { Item, NormalItem } from "@/types";
 import { ItemUtils } from "@/utils/item_utils";
 import { ImageFallback } from "../display_utils/image_fallback";
 import { ImageUtils } from "@/utils/image_utils";
@@ -26,43 +26,46 @@ const ItemModModal: React.FC<ItemModModalProps> = ({
     null
   );
   const [selectedModifiers, setSelectedModifiers] = useState<
-    Record<string, string[]>
-  >({});
+    Record<string, string[]> | undefined
+  >(undefined);
   const [loading, setLoading] = useState(false);
+  const setDefault = useRef(false);
 
   const menuItem = restaurant
-    ? ItemUtils.getMenuItemFromItemId(itemId, restaurant)
+    ? (ItemUtils.getMenuItemFromItemId(itemId, restaurant) as NormalItem)
     : null;
 
+  const { variations, modifierGroups } =
+    menuItem && restaurant
+      ? ItemUtils.extractActiveVariationAndModifierGroups(menuItem, restaurant)
+      : { variations: {}, modifierGroups: {} };
+
   useEffect(() => {
-    if (
-      isOpen &&
-      menuItem &&
-      "modifierGroups" in menuItem &&
-      menuItem.modifierGroups
-    ) {
-      const defaults: Record<string, string[]> = {};
-      menuItem.modifierGroups.forEach((groupId) => {
-        const group = restaurant?.modifier_groups[groupId];
-        if (group && group.defaults.length > 0) {
-          defaults[groupId] = [...group.defaults];
-        }
-      });
-      setSelectedModifiers(defaults);
+    if (isOpen && menuItem && restaurant && !setDefault.current) {
+      const item = {
+        id: itemId,
+        variation: selectedVariation,
+        modifiers: selectedModifiers,
+      };
+      ItemUtils.doesItemRequireConfiguration(item, restaurant);
+      setSelectedVariation(item.variation);
+      setSelectedModifiers(item.modifiers);
+      setDefault.current = true;
     }
   }, [isOpen, menuItem, restaurant]);
 
   if (!menuItem || !restaurant) return null;
 
-  const isItemValid =
-    ItemUtils.doesItemRequireConfiguration(
-      {
-        id: itemId,
-        variation: selectedVariation,
-        modifiers: selectedModifiers,
-      },
-      restaurant
-    ) === null;
+  const errorMessage = ItemUtils.doesItemRequireConfiguration(
+    {
+      id: itemId,
+      variation: selectedVariation,
+      modifiers: selectedModifiers,
+    },
+    restaurant
+  );
+
+  const isItemValid = errorMessage === null;
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
@@ -102,78 +105,69 @@ const ItemModModal: React.FC<ItemModModalProps> = ({
           </div>
 
           {/* Variations List */}
-          {"variations" in menuItem &&
-            menuItem.variations &&
-            Object.keys(menuItem.variations).length > 0 && (
-              <div className="mt-4">
-                <h4 className="text-md font-medium text-right text-gray-600 mb-4">
-                  Required
-                </h4>
-                <div className="flex space-x-3 overflow-x-auto pb-2 no-scrollbar -mx-6 px-6">
-                  {Object.entries(menuItem.variations).map(
-                    ([key, variation]) => (
-                      <div
-                        key={key}
-                        onClick={() => setSelectedVariation(key)}
-                        className={`relative flex-shrink-0 cursor-pointer rounded-xl border border-1 p-5 pl-4 pt-4 min-w-[140px] transition-all hover:shadow-md`}
-                        style={{
-                          borderColor:
-                            selectedVariation === key
-                              ? restaurant.metadata.primaryColor
-                              : undefined,
-                        }}
-                      >
-                        {/* Selection indicator */}
-                        <div
-                          className={`absolute bottom-2 right-2 w-5 h-5 rounded-full flex items-center justify-center `}
-                          style={{
-                            backgroundColor:
-                              selectedVariation === key
-                                ? restaurant.metadata.primaryColor
-                                : "transparent",
-                            border:
-                              selectedVariation === key
-                                ? `none`
-                                : `1px solid #d1d5db`,
-                          }}
-                        >
-                          {selectedVariation === key && (
-                            <Check size={14} className="text-white" />
-                          )}
-                        </div>
+          {variations && Object.keys(variations).length > 0 && (
+            <div className="mt-4">
+              <h4 className="text-md font-medium text-right text-gray-600 mb-4">
+                Required
+              </h4>
+              <div className="flex space-x-3 overflow-x-auto pb-2 no-scrollbar -mx-6 px-6">
+                {Object.entries(variations).map(([key, variation]) => (
+                  <div
+                    key={key}
+                    onClick={() => setSelectedVariation(key)}
+                    className={`relative flex-shrink-0 cursor-pointer rounded-xl border border-1 p-5 pl-4 pt-4 min-w-[140px] transition-all hover:shadow-md`}
+                    style={{
+                      borderColor:
+                        selectedVariation === key
+                          ? restaurant.metadata.primaryColor
+                          : undefined,
+                    }}
+                  >
+                    {/* Selection indicator */}
+                    <div
+                      className={`absolute bottom-2 right-2 w-5 h-5 rounded-full flex items-center justify-center `}
+                      style={{
+                        backgroundColor:
+                          selectedVariation === key
+                            ? restaurant.metadata.primaryColor
+                            : "transparent",
+                        border:
+                          selectedVariation === key
+                            ? `none`
+                            : `1px solid #d1d5db`,
+                      }}
+                    >
+                      {selectedVariation === key && (
+                        <Check size={14} className="text-white" />
+                      )}
+                    </div>
 
-                        <div className="text-center">
-                          <p className="text-md text-left font-medium text-gray-900">
-                            {titleCase(variation.name)}
-                          </p>
-                          <p className="text-sm text-left text-gray-600 mt-1">
-                            ${variation.absolutePrice.toFixed(2)}
-                          </p>
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
+                    <div className="text-center">
+                      <p className="text-md text-left font-medium text-gray-900">
+                        {titleCase(variation.name)}
+                      </p>
+                      <p className="text-sm text-left text-gray-600 mt-1">
+                        ${variation.absolutePrice.toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            )}
+            </div>
+          )}
 
           {/* Modifiers List */}
-          {"modifierGroups" in menuItem &&
-            menuItem.modifierGroups &&
-            menuItem.modifierGroups.length > 0 && (
-              <div className="mt-8 pb-6">
-                <div className="space-y-6">
-                  {menuItem.modifierGroups.map((modifierGroupId) => {
-                    const modifierGroup =
-                      restaurant.modifier_groups[modifierGroupId];
-                    if (!modifierGroup) return null;
-
+          {modifierGroups && Object.keys(modifierGroups).length > 0 && (
+            <div className="mt-8 pb-6">
+              <div className="space-y-6">
+                {Object.entries(modifierGroups).map(
+                  ([modifierGroupId, modifierGroup]) => {
                     const currentSelections =
-                      selectedModifiers[modifierGroupId] || [];
+                      selectedModifiers?.[modifierGroupId] || [];
 
                     const handleModifierToggle = (modifierId: string) => {
                       setSelectedModifiers((prev) => {
-                        const current = prev[modifierGroupId] || [];
+                        const current = prev?.[modifierGroupId] || [];
                         let newSelections: string[];
 
                         if (modifierGroup.select === "single") {
@@ -216,18 +210,29 @@ const ItemModModal: React.FC<ItemModModalProps> = ({
                                 <span>
                                   {modifierGroup.minSelected &&
                                   modifierGroup.maxSelected
-                                    ? `${modifierGroup.minSelected}-${modifierGroup.maxSelected}`
+                                    ? `${modifierGroup.minSelected}-${modifierGroup.maxSelected} Selections`
                                     : modifierGroup.minSelected
-                                    ? `Min: ${modifierGroup.minSelected}`
-                                    : `Max: ${modifierGroup.maxSelected}`}
+                                    ? `Min: ${
+                                        modifierGroup.minSelected
+                                      } Selection${
+                                        modifierGroup.minSelected > 1 ? "s" : ""
+                                      }`
+                                    : `Max: ${
+                                        modifierGroup.maxSelected
+                                      } Selection${
+                                        modifierGroup.maxSelected &&
+                                        modifierGroup.maxSelected > 1
+                                          ? "s"
+                                          : ""
+                                      }`}
                                 </span>
                               )
                             )}
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-3">
-                          {modifierGroup.modifiers.map((modifier) => {
+                        <div className="divide-y divide-gray-200">
+                          {modifierGroup.modifiers.map((modifier, index) => {
                             const isSelected = currentSelections.includes(
                               modifier.id
                             );
@@ -239,11 +244,7 @@ const ItemModModal: React.FC<ItemModModalProps> = ({
                                 onClick={() =>
                                   handleModifierToggle(modifier.id)
                                 }
-                                className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all hover:shadow-sm ${
-                                  isSelected
-                                    ? "border-blue-500 bg-blue-50"
-                                    : "border-gray-200 hover:border-gray-300"
-                                }`}
+                                className={`flex items-center justify-between p-3 cursor-pointer transition-all`}
                               >
                                 <div className="flex items-center space-x-3">
                                   <div
@@ -284,10 +285,11 @@ const ItemModModal: React.FC<ItemModModalProps> = ({
                         </div>
                       </div>
                     );
-                  })}
-                </div>
+                  }
+                )}
               </div>
-            )}
+            </div>
+          )}
         </div>
 
         {/* Add to Cart Button - Fixed at bottom */}
@@ -332,7 +334,7 @@ const ItemModModal: React.FC<ItemModModalProps> = ({
                       },
                       restaurant
                     ).toFixed(2)}`
-                  : "Select Options"}
+                  : errorMessage}
               </span>
             )}
           </button>

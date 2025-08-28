@@ -8,6 +8,7 @@ import {
   Category,
   Cart,
   CartItem,
+  ModifierGroup,
 } from "@/types";
 import { PASS_MENU_TAG, BUNDLE_MENU_TAG } from "@/constants";
 import { titleCase } from "title-case";
@@ -197,6 +198,70 @@ export class ItemUtils {
     return !!this.getMenuItemFromItemId(item.id, restaurant);
   }
 
+  static extractActiveVariationAndModifierGroups(
+    itemInfo: NormalItem,
+    restaurant: Restaurant
+  ): {
+    variations: Record<
+      string,
+      {
+        sourceId: string | null;
+        name: string;
+        absolutePrice: number;
+        archived?: boolean;
+      }
+    > | null;
+    modifierGroups: Record<string, ModifierGroup>;
+  } {
+    const { variations, modifierGroups } = itemInfo as NormalItem;
+    // Filter out archived variations
+    let activeVariations: Record<
+      string,
+      {
+        sourceId: string | null;
+        name: string;
+        absolutePrice: number;
+        archived?: boolean;
+      }
+    > | null = null;
+    if (variations) {
+      activeVariations = Object.fromEntries(
+        Object.entries(variations).filter(
+          ([_, variation]) => !variation.archived
+        )
+      );
+    }
+
+    // Filter out archived modifier groups and their modifiers
+    let activeModifierGroupIds: string[] = [];
+    if (modifierGroups) {
+      activeModifierGroupIds = modifierGroups.filter((groupId) => {
+        const group = restaurant.modifier_groups[groupId];
+        return group && !group.archived;
+      });
+    }
+
+    // Filter out archived modifiers from selected modifiers
+    const activeModifierGroups: Record<string, ModifierGroup> = {};
+    for (const groupId of activeModifierGroupIds) {
+      const group = restaurant.modifier_groups[groupId];
+      const activeModifiersInGroup = group.modifiers.filter(
+        (modifier) => !modifier.archived
+      );
+      if (activeModifiersInGroup.length > 0) {
+        activeModifierGroups[groupId] = {
+          ...group,
+          modifiers: activeModifiersInGroup,
+        };
+      }
+    }
+
+    return {
+      variations: activeVariations,
+      modifierGroups: activeModifierGroups,
+    };
+  }
+
   static doesItemRequireConfiguration(
     item: Item,
     restaurant: Restaurant
@@ -206,12 +271,16 @@ export class ItemUtils {
       return "Item not found";
     }
 
-    const { variations, modifierGroups } = itemInfo as NormalItem;
+    const { variations, modifierGroups } =
+      this.extractActiveVariationAndModifierGroups(
+        itemInfo as NormalItem,
+        restaurant
+      );
     const selectedVariation = item.variation;
 
     if (variations) {
       if (Object.keys(variations).length === 0) {
-        console.log("Item has no variations", item);
+        item.variation = null;
       } else if (Object.keys(variations).length === 1) {
         item.variation = Object.keys(variations)[0];
       } else if (selectedVariation) {
@@ -226,14 +295,29 @@ export class ItemUtils {
     }
 
     // Check modifiers based on ModifierGroup specifications
-    if (modifierGroups && modifierGroups.length > 0) {
+    if (modifierGroups && Object.keys(modifierGroups).length > 0) {
       if (!item.modifiers) {
-        //Even though in some cases it is fine if modifiers in null, if there are active modifier groups we want to give the user the option to select them
+        //Even though in a lot of cases it is fine if modifiers is null, if there are active modifier groups we want to give the user the option to select them
+        const defaults: Record<string, string[]> = {};
+        Object.keys(modifierGroups).forEach((groupId) => {
+          const group = modifierGroups[groupId];
+          if (group && group.defaults.length > 0) {
+            defaults[groupId] = [...group.defaults];
+          }
+        });
+        item.modifiers = defaults;
         return "Item requires modifier selections";
       }
 
-      for (const modifierGroupId of modifierGroups) {
-        const modifierGroup = restaurant.modifier_groups[modifierGroupId];
+      for (const selectedModifierGroupId of Object.keys(item.modifiers)) {
+        if (!modifierGroups[selectedModifierGroupId]) {
+          return `Invalid modifier selection`;
+        }
+      }
+
+      for (const [modifierGroupId, modifierGroup] of Object.entries(
+        modifierGroups
+      )) {
         if (!modifierGroup) {
           console.warn(
             `Modifier group ${modifierGroupId} not found in restaurant`
@@ -243,20 +327,34 @@ export class ItemUtils {
 
         const selectedModifiers = item.modifiers[modifierGroupId] || [];
 
+        // Validate that selected modifiers exist in the modifier group
+        if (selectedModifiers && selectedModifiers.length > 0) {
+          const validModifierIds = modifierGroup.modifiers.map((mod) => mod.id);
+          for (const selectedModId of selectedModifiers) {
+            if (!validModifierIds.includes(selectedModId)) {
+              console.log("Invalid modifier selection", selectedModId);
+              return `Invalid modifier selection in ${modifierGroup.name}`;
+            }
+          }
+        }
+
         if (modifierGroup.select === "single") {
-          if (selectedModifiers.length !== 1) {
-            return "There can only be one option selected from this group";
+          if (selectedModifiers.length === 0) {
+            return `One selection required for ${titleCase(
+              modifierGroup.name
+            )}`;
+          }
+          if (selectedModifiers.length > 1) {
+            return `Only one allowed for ${titleCase(modifierGroup.name)}`;
           }
         } else if (modifierGroup.select === "multiple") {
           if (
             modifierGroup.minSelected &&
             selectedModifiers.length < modifierGroup.minSelected
           ) {
-            return `Item requires at least ${
-              modifierGroup.minSelected
-            } selection${modifierGroup.minSelected > 1 ? "s" : ""} from ${
-              modifierGroup.name
-            }`;
+            return `Minimum of ${modifierGroup.minSelected} selection${
+              modifierGroup.minSelected > 1 ? "s" : ""
+            } from ${modifierGroup.name}`;
           }
 
           // Check maximum selection requirements
@@ -264,19 +362,9 @@ export class ItemUtils {
             modifierGroup.maxSelected &&
             selectedModifiers.length > modifierGroup.maxSelected
           ) {
-            return `Item allows maximum ${modifierGroup.maxSelected} selection${
+            return `Maximum of ${modifierGroup.maxSelected} selection${
               modifierGroup.maxSelected > 1 ? "s" : ""
             } from ${modifierGroup.name}`;
-          }
-        }
-
-        // Validate that selected modifiers exist in the modifier group
-        if (selectedModifiers && selectedModifiers.length > 0) {
-          const validModifierIds = modifierGroup.modifiers.map((mod) => mod.id);
-          for (const selectedModId of selectedModifiers) {
-            if (!validModifierIds.includes(selectedModId)) {
-              return `Invalid modifier selection in ${modifierGroup.name}`;
-            }
           }
         }
       }

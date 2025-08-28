@@ -1,5 +1,5 @@
 import React from "react";
-import { Item, Restaurant, Transaction } from "@/types";
+import { Restaurant, Transaction } from "@/types";
 import { DrinkItem } from "../menu_items";
 import { ItemUtils } from "@/utils/item_utils";
 import { TransactionUtils } from "@/utils/transaction_utils";
