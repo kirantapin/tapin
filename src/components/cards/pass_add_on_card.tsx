@@ -28,14 +28,7 @@ export const PassAddOnCard: React.FC<PassAddOnCardProps> = ({
   if (policy.definition.action.type !== "add_item") {
     return null;
   }
-  if (
-    ItemUtils.isItemAvailable(
-      { id: itemId, modifiers: [] },
-      restaurant,
-      state.cart,
-      1
-    )
-  ) {
+  if (ItemUtils.isItemAvailable({ id: itemId }, restaurant, state.cart, 1)) {
     return null;
   }
   const { quantity, free, percentDiscount, fixedDiscount } =

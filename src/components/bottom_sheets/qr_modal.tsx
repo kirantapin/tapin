@@ -152,7 +152,11 @@ const QRModal: React.FC<QRModalProps> = ({
       // Count occurrences of each item
       const itemCounts = updatedTransactions.reduce((acc, t) => {
         const name = ItemUtils.getItemName(
-          { id: t.item, modifiers: t.metadata.modifiers || [] },
+          {
+            id: t.item,
+            variation: t.metadata.variation || null,
+            modifiers: t.metadata.modifiers || {},
+          },
           restaurant
         );
         acc[name] = (acc[name] || 0) + 1;

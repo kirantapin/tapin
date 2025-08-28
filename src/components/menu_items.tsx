@@ -98,9 +98,27 @@ export function DrinkItem({
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-500 custom-line-clamp-1 show-at-400">
-            {(menuItem as NormalItem | PassItem)?.description}
-          </p>
+
+          {/* Modifier names */}
+          {(() => {
+            const modifierNames = ItemUtils.getItemModifierNames(
+              item,
+              restaurant
+            );
+            if (modifierNames.length > 0) {
+              return (
+                <p className="text-sm text-gray-500 custom-line-clamp-1">
+                  {modifierNames.join(", ")}
+                </p>
+              );
+            } else {
+              return (
+                <p className="text-sm text-gray-500 custom-line-clamp-1 show-at-400">
+                  {(menuItem as NormalItem | PassItem)?.description}
+                </p>
+              );
+            }
+          })()}
         </div>
 
         <div className="flex items-center justify-between">
@@ -211,9 +229,22 @@ export function RedeemedTransaction({
               {titleCase(ItemUtils.getItemName(item, restaurant))}
             </h4>
           </div>
-          <p className="text-sm text-gray-500 custom-line-clamp-1 show-at-400">
-            {(menuItem as NormalItem | PassItem)?.description}
-          </p>
+
+          {/* Modifier names */}
+          {(() => {
+            const modifierNames = ItemUtils.getItemModifierNames(
+              item,
+              restaurant
+            );
+            if (modifierNames.length > 0) {
+              return (
+                <p className="text-sm text-gray-500 custom-line-clamp-1">
+                  {modifierNames.join(", ")}
+                </p>
+              );
+            }
+            return null;
+          })()}
         </div>
 
         <div className="flex items-center justify-between">
@@ -421,9 +452,22 @@ export function PreviousTransactionItem({
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-500 custom-line-clamp-1 show-at-400">
-            {(menuItem as NormalItem | PassItem)?.description}
-          </p>
+
+          {/* Modifier names */}
+          {(() => {
+            const modifierNames = ItemUtils.getItemModifierNames(
+              item,
+              restaurant
+            );
+            if (modifierNames.length > 0) {
+              return (
+                <p className="text-sm text-gray-500 custom-line-clamp-1">
+                  {modifierNames.join(", ")}
+                </p>
+              );
+            }
+            return null;
+          })()}
         </div>
 
         <div className="flex items-center justify-between mt-2">
@@ -521,7 +565,7 @@ export const DrinkList = ({
         restaurant
       );
       itemIds.forEach((id) => {
-        if (ItemUtils.isItemAvailable({ id: id, modifiers: [] }, restaurant)) {
+        if (ItemUtils.isItemAvailable({ id: id }, restaurant)) {
           return;
         }
         allItemIds.push({ id: id, label: key });
@@ -573,7 +617,7 @@ export const DrinkList = ({
                   {drinksForLabel.map(({ id }) => (
                     <DrinkItem
                       key={id}
-                      item={{ id: id, modifiers: [] }}
+                      item={{ id: id }}
                       onSelect={onSelect}
                       selected={selected}
                     />

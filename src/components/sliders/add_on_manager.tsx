@@ -80,8 +80,8 @@ const AddOnManager: FC<AddOnManagerProps> = ({
       );
       for (const itemId of itemIds) {
         if (
-          (ItemUtils.priceItem({ id: itemId, modifiers: [] }, restaurant) ||
-            Infinity) < (policy.definition.action.priceLimit || Infinity)
+          (ItemUtils.priceItem({ id: itemId }, restaurant) || Infinity) <
+          (policy.definition.action.priceLimit || Infinity)
         ) {
           addOnItems.push({ policy, itemId });
         }
@@ -141,7 +141,6 @@ const AddOnManager: FC<AddOnManagerProps> = ({
                 addPolicy={async () => {
                   await addPolicy(null, policy.policy_id, {
                     id: itemId,
-                    modifiers: [],
                   });
                 }}
                 removePolicy={removePolicy}
@@ -158,7 +157,6 @@ const AddOnManager: FC<AddOnManagerProps> = ({
               addPolicy={async () => {
                 await addPolicy(null, policy.policy_id, {
                   id: itemId,
-                  modifiers: [],
                 });
               }}
               removePolicy={removePolicy}

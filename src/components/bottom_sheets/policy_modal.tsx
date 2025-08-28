@@ -295,14 +295,14 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                 {userPreference && (
                   <>
                     {/* Item Image and Basic Info */}
-                    <div className="flex items-start space-x-4 mb-4">
+                    <div className="flex items-start space-x-4 mb-2">
                       <ImageFallback
                         src={ImageUtils.getItemImageUrl(
                           userPreference.id,
                           restaurant
                         )}
                         alt="Selected item"
-                        className="h-14 w-14 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0"
+                        className="h-16 w-16 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0"
                         restaurant={restaurant}
                       />
                       <div className="flex-1">
@@ -311,6 +311,12 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                             ItemUtils.getItemName(userPreference, restaurant)
                           )}
                         </h4>
+                        <p className="text-xs text-gray-500">
+                          {ItemUtils.getItemModifierNames(
+                            userPreference,
+                            restaurant
+                          ).join(", ")}
+                        </p>
                         <p className="text-sm text-gray-600 mt-1">
                           $
                           {ItemUtils.priceItem(

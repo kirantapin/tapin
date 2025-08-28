@@ -86,7 +86,7 @@ export function useWatcher({
             .map(
               ({ passId, amount }) =>
                 `Only ${amount} ${ItemUtils.getItemName(
-                  { id: passId, modifiers: [] },
+                  { id: passId },
                   restaurant
                 )} left!`
             )

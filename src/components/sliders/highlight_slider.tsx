@@ -106,7 +106,7 @@ const HighlightSlider = ({ displayOne = false }: { displayOne?: boolean }) => {
         if (highlight.content_type === "item") {
           if (!highlight.content_pointer) return false;
           return !ItemUtils.isItemAvailable(
-            { id: highlight.content_pointer, modifiers: [] },
+            { id: highlight.content_pointer },
             restaurant
           );
         } else if (highlight.content_type === "policy") {
@@ -121,7 +121,7 @@ const HighlightSlider = ({ displayOne = false }: { displayOne?: boolean }) => {
         } else if (highlight.content_type === "bundle") {
           if (!highlight.content_pointer) return false;
           return !ItemUtils.isItemAvailable(
-            { id: highlight.content_pointer, modifiers: [] },
+            { id: highlight.content_pointer },
             restaurant
           );
         } else if (highlight.content_type === "media") {
@@ -148,7 +148,7 @@ const HighlightSlider = ({ displayOne = false }: { displayOne?: boolean }) => {
     const content_pointer = highlight.content_pointer;
     if (!content_pointer) return;
     if (highlight.content_type === "item") {
-      await addToCart({ id: content_pointer, modifiers: [] }, true);
+      await addToCart({ id: content_pointer }, true);
     } else if (highlight.content_type === "bundle") {
       const bundle = ItemUtils.getMenuItemFromItemId(
         content_pointer,
