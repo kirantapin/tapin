@@ -351,7 +351,7 @@ export interface UserSession {
 
 export interface Policy {
   policy_id: string;
-  name: string;
+  name: string | null;
   header: string | null;
   restaurant_id: string;
   count_as_deal: boolean;
