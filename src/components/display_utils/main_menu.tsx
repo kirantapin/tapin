@@ -47,7 +47,7 @@ const MainMenu: React.FC<MainMenuProps> = ({
     const labelsSet = new Set<string>();
 
     for (const [itemId, value] of Object.entries(restaurant.menu)) {
-      if (ItemUtils.isItemAvailable({ id: itemId }, restaurant)) {
+      if (ItemUtils.isItemUnavailable({ id: itemId }, restaurant)) {
         continue;
       }
 

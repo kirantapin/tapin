@@ -565,7 +565,7 @@ export const DrinkList = ({
         restaurant
       );
       itemIds.forEach((id) => {
-        if (ItemUtils.isItemAvailable({ id: id }, restaurant)) {
+        if (ItemUtils.isItemUnavailable({ id: id }, restaurant)) {
           return;
         }
         allItemIds.push({ id: id, label: key });

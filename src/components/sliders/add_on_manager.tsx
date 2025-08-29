@@ -28,7 +28,6 @@ const AddOnManager: FC<AddOnManagerProps> = ({
   allowNormalItems = true,
 }) => {
   const { restaurant, policyManager } = useRestaurant();
-  const [addOnPolicies, setAddOnPolicies] = useState<Policy[]>([]);
   const [normalItems, setNormalItems] = useState<
     { policy: Policy; itemId: string }[]
   >([]);
@@ -51,8 +50,12 @@ const AddOnManager: FC<AddOnManagerProps> = ({
       addOns.some((policy) => policy.policy_id === item.policy_id)
     );
     const activePolicies = policyManager.getActivePolicies(state.dealEffect);
-    addOns = addOns.filter((policy) => !activePolicies.includes(policy));
-    setAddOnPolicies(addOns);
+    addOns = addOns
+      .filter((policy) => !activePolicies.includes(policy))
+      .sort(
+        (a, b) =>
+          new Date(b.modified_at).getTime() - new Date(a.modified_at).getTime()
+      );
     const addOnItems: { policy: Policy; itemId: string }[] = [];
 
     for (const item of addedItems) {
@@ -69,6 +72,7 @@ const AddOnManager: FC<AddOnManagerProps> = ({
         itemId: cartItem.item.id,
       });
     }
+    const seenItemIds = new Set<string>();
     for (const policy of addOns) {
       if (policy.definition.action.type !== "add_item") {
         continue;
@@ -83,7 +87,10 @@ const AddOnManager: FC<AddOnManagerProps> = ({
           (ItemUtils.priceItem({ id: itemId }, restaurant) || Infinity) <
           (policy.definition.action.priceLimit || Infinity)
         ) {
-          addOnItems.push({ policy, itemId });
+          if (!seenItemIds.has(itemId)) {
+            seenItemIds.add(itemId);
+            addOnItems.push({ policy, itemId });
+          }
         }
       }
     }

@@ -28,6 +28,16 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
   if (policy.definition.action.type !== "add_item") {
     return null;
   }
+  if (
+    ItemUtils.isItemUnavailable(
+      { id: itemId },
+      restaurant,
+      state.cart,
+      policy.definition.action.quantity
+    )
+  ) {
+    return null;
+  }
   const menuItem = ItemUtils.getMenuItemFromItemId(
     itemId,
     restaurant
