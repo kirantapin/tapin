@@ -291,7 +291,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                 right: "-24px",
               }}
             >
-              <div className="bg-white border border-t-gray-200 rounded-t-3xl px-6 py-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+              <div className="bg-white rounded-t-3xl px-6 pt-4 pb-1 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
                 {userPreference && (
                   <>
                     {/* Item Image and Basic Info */}
@@ -336,6 +336,9 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                 )}
               </div>
             </div>
+
+            {/* Spacer to create separation */}
+            <div className="h-4"></div>
 
             {userSession ? (
               <button
