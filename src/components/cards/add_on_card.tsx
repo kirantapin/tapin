@@ -1,5 +1,4 @@
-import { useRestaurant } from "@/context/restaurant_context";
-import { NormalItem, Policy, Restaurant } from "@/types";
+import { DealEffectPayload, NormalItem, Policy, Restaurant } from "@/types";
 import { ImageUtils } from "@/utils/image_utils";
 import { ItemUtils } from "@/utils/item_utils";
 import { Check, Plus, X } from "lucide-react";
@@ -23,7 +22,6 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
   removePolicy,
   restaurant,
 }) => {
-  const { policyManager } = useRestaurant();
   const [loading, setLoading] = useState(false);
   if (policy.definition.action.type !== "add_item") {
     return null;
@@ -64,15 +62,15 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
     return originalPrice;
   })();
 
-  const policies = policyManager
-    ? policyManager.getActivePolicies(state.dealEffect)
-    : [];
-  const active = policies.some((p) => p.policy_id === policy.policy_id);
+  const addedItems = (state.dealEffect as DealEffectPayload).addedItems;
+  const active = addedItems.some(
+    (item) => item.policy_id === policy.policy_id && item.item.id === itemId
+  );
 
   return (
     <div className="w-28 relative">
       {/* Image container with 1:1 aspect ratio */}
-      <div className="aspect-square overflow-hidden rounded-xl bg-gray-100">
+      <div className="aspect-square overflow-hidden rounded-xl bg-gray-100 relative">
         <ImageFallback
           src={ImageUtils.getItemImageUrl(itemId, restaurant)}
           alt={name}
@@ -81,7 +79,7 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
         />
 
         {active ? (
-          <div className="absolute bottom-16 right-2 flex items-center justify-center bg-white h-7 w-7 rounded-full border border-gray-200">
+          <div className="absolute bottom-2 right-2 flex items-center justify-center bg-white h-7 w-7 rounded-full border border-gray-200">
             {loading ? (
               <div className="animate-spin rounded-full h-4 w-4 border-2 border-black border-t-transparent" />
             ) : (
@@ -90,7 +88,7 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
           </div>
         ) : (
           <button
-            className="absolute bottom-16 right-2 w-7 h-7 rounded-full flex items-center justify-center bg-white shadow-md border border-gray-200"
+            className="absolute bottom-2 right-2 w-7 h-7 rounded-full flex items-center justify-center bg-white shadow-md border border-gray-200"
             style={{ color: "black" }}
             onClick={async () => {
               setLoading(true);

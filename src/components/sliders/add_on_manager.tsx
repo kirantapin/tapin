@@ -138,9 +138,9 @@ const AddOnManager: FC<AddOnManagerProps> = ({
       {allowNormalItems && (
         <div className="overflow-x-auto pt-2 mb-2 no-scrollbar -mx-4 px-4">
           <div className="flex gap-4" style={{ minWidth: "max-content" }}>
-            {normalItems.map(({ policy, itemId }) => (
+            {normalItems.map(({ policy, itemId }, index) => (
               <AddOnCard
-                key={policy.policy_id}
+                key={`${policy.policy_id}-${itemId}-${index}`}
                 state={state}
                 policy={policy}
                 itemId={itemId}
