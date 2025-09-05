@@ -105,7 +105,7 @@ const HighlightSlider = ({ displayOne = false }: { displayOne?: boolean }) => {
       const filteredHighlights = highlights.filter((highlight) => {
         if (highlight.content_type === "item") {
           if (!highlight.content_pointer) return false;
-          return !ItemUtils.isItemAvailable(
+          return !ItemUtils.isItemUnavailable(
             { id: highlight.content_pointer },
             restaurant
           );
@@ -120,7 +120,7 @@ const HighlightSlider = ({ displayOne = false }: { displayOne?: boolean }) => {
           );
         } else if (highlight.content_type === "bundle") {
           if (!highlight.content_pointer) return false;
-          return !ItemUtils.isItemAvailable(
+          return !ItemUtils.isItemUnavailable(
             { id: highlight.content_pointer },
             restaurant
           );

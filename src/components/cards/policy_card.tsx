@@ -1,5 +1,5 @@
 import React from "react";
-import { Plus, Tag } from "lucide-react"; // optional: use your own plus icon if needed
+import { Plus } from "lucide-react"; // optional: use your own plus icon if needed
 import { Cart } from "@/types";
 import { Policy } from "@/types";
 import { Restaurant } from "@/types";
@@ -60,14 +60,16 @@ export const PolicyCard: React.FC<PolicyCardProps> = ({
       <div className="flex flex-col gap-1 flex-grow pr-12">
         {/* Title */}
         <div className="flex items-center gap-2">
-          <h2 className="text-xl font-semibold text-gray-900 line-clamp-2 leading-tight min-h-[3rem]">
-            {titleCase(policy.name)}
-          </h2>
+          {policy.name && (
+            <h2 className="text-xl font-semibold text-gray-900 line-clamp-2 leading-tight min-h-[3rem]">
+              {titleCase(policy.name)}
+            </h2>
+          )}
         </div>
 
         {/* Description */}
         <p className="text-md text-gray-500 custom-line-clamp-1 -mr-10">
-          {sentenceCase(policy.header)}
+          {policy.header && sentenceCase(policy.header)}
         </p>
 
         <p

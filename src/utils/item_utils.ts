@@ -153,7 +153,7 @@ export class ItemUtils {
     }
     return false;
   }
-  static isItemAvailable(
+  static isItemUnavailable(
     item: Item,
     restaurant: Restaurant,
     cart: Cart = [],

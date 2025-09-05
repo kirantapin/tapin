@@ -432,7 +432,7 @@ export class PolicyUtils {
         );
 
         const itemAvailabilities = itemIds.map((id) =>
-          ItemUtils.isItemAvailable({ id }, restaurant)
+          ItemUtils.isItemUnavailable({ id }, restaurant)
         );
 
         if (!itemAvailabilities.includes(null)) {
@@ -451,7 +451,9 @@ export class PolicyUtils {
         const itemIds = ItemUtils.getAllItemsInCategory(item.item, restaurant);
         if (
           itemIds
-            .map((id) => ItemUtils.isItemAvailable({ id }, restaurant) !== null)
+            .map(
+              (id) => ItemUtils.isItemUnavailable({ id }, restaurant) !== null
+            )
             .every(Boolean)
         ) {
           return false;
@@ -465,7 +467,7 @@ export class PolicyUtils {
         );
 
         const itemAvailabilities = itemIds.map((id) =>
-          ItemUtils.isItemAvailable({ id }, restaurant)
+          ItemUtils.isItemUnavailable({ id }, restaurant)
         );
         if (!itemAvailabilities.includes(null)) {
           return false;

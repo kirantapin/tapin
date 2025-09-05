@@ -505,6 +505,7 @@ export const DrinkList = ({
   slideToFilter,
   restaurant,
   itemSpecifications,
+  labelOrder,
   selected = null,
   onSelect = null,
   padBottom = true,
@@ -513,6 +514,7 @@ export const DrinkList = ({
   slideToFilter: (filter: string) => void;
   restaurant: Restaurant;
   itemSpecifications: ItemSpecification[];
+  labelOrder?: string[];
   selected?: Item | null;
   onSelect?: ((item: Item) => Promise<void>) | null;
   padBottom?: boolean;
@@ -565,7 +567,7 @@ export const DrinkList = ({
         restaurant
       );
       itemIds.forEach((id) => {
-        if (ItemUtils.isItemAvailable({ id: id }, restaurant)) {
+        if (ItemUtils.isItemUnavailable({ id: id }, restaurant)) {
           return;
         }
         allItemIds.push({ id: id, label: key });
@@ -591,10 +593,12 @@ export const DrinkList = ({
     }
   }, [label]);
 
+  const sortedLabels = labelOrder || Object.keys(restaurant.labelMap);
+
   return (
     <div className="space-y-4  overflow-y-auto scroll-smooth no-scrollbar -mx-5">
       <div className={`${padBottom ? "pb-20" : ""}`}>
-        {Object.keys(restaurant.labelMap).map((menuLabel) => {
+        {sortedLabels.map((menuLabel) => {
           const drinksForLabel = drinks.filter(
             (drink) => drink.label === menuLabel
           );
