@@ -138,14 +138,7 @@ const MainMenu: React.FC<MainMenuProps> = ({
 
       {/* Filters */}
       {searchResults.length > 0 ? (
-        <div
-          className="-mx-5"
-          style={{
-            height: `calc(100vh - ${
-              (orderDrinksRef.current?.offsetHeight || 0) + 10
-            }px)`,
-          }}
-        >
+        <div className="-mx-5">
           <pre className="whitespace-pre-wrap break-words">
             {searchResults.map((searchResult, index) => (
               <DrinkItem key={searchResult} item={{ id: searchResult }} />
@@ -158,6 +151,7 @@ const MainMenu: React.FC<MainMenuProps> = ({
           slideToFilter={slideToFilter}
           restaurant={restaurant}
           itemSpecifications={[]}
+          labelOrder={labelsToDisplay}
           padBottom={false}
         />
       )}
