@@ -112,7 +112,7 @@ export default function CheckoutPage() {
         className="flex-1 overflow-y-auto overflow-x-hidden"
       >
         <div className="px-4 pb-8">
-          <OpeningHoursWarning context="checkout" />
+          <OpeningHoursWarning context="checkout" marginTop={20} />
           <AccessCardSlider
             restaurant={restaurant}
             cart={state.cart}

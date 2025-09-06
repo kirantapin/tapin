@@ -5,10 +5,12 @@ import { AlertCircle } from "lucide-react";
 
 interface OpeningHoursWarningProps {
   context: "checkout" | "redemption";
+  marginTop?: number | undefined;
 }
 
 export const OpeningHoursWarning: React.FC<OpeningHoursWarningProps> = ({
   context,
+  marginTop = undefined,
 }) => {
   const { restaurant } = useRestaurant();
   if (!restaurant) return null;
@@ -32,15 +34,16 @@ export const OpeningHoursWarning: React.FC<OpeningHoursWarningProps> = ({
 
   return (
     <div
-      className={`mt-4 mb-1 px-4 py-2 rounded-xl border border-1`}
+      className={`mb-4 px-4 py-2 rounded-xl border border-1`}
       style={{
         backgroundColor: "white",
         borderColor: "#e5e7eb",
+        marginTop: marginTop,
       }}
     >
       <div className="flex items-center gap-2">
         <AlertCircle
-          className={`w-10 h-10`}
+          className={`w-6 h-6`}
           style={{
             color: "black",
           }}

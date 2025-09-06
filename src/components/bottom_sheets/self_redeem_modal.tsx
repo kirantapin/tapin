@@ -11,6 +11,7 @@ import CustomLogo from "../svg/custom_logo";
 import { DrinkItem } from "../menu_items";
 import { useQRUtils } from "@/hooks/useQRUtils";
 import { NO_FULFILLED_BY } from "@/constants";
+import { OpeningHoursWarning } from "../display_utils/opening_hours_warning";
 
 interface SelfRedeemModalProps {
   isOpen: boolean;
@@ -25,7 +26,6 @@ const SelfRedeemModal: React.FC<SelfRedeemModalProps> = ({
   onClose,
   transactionsToRedeem,
 }) => {
-  const [redeemError, setRedeemError] = useState("");
   const { setTransactions, userSession } = useAuth();
   const { triggerToast } = useBottomSheet();
   const [verifyingState, setVerifyingState] = useState<
@@ -90,13 +90,13 @@ const SelfRedeemModal: React.FC<SelfRedeemModalProps> = ({
     );
     const { updatedTransactions } = response.data;
     if (response.error || response.data.error || !response.data.success) {
-      setRedeemError(response.data.error || "Failed to Redeem Items");
+      triggerToast(response.data.error || "Failed to Redeem Items", "error");
       setVerifyingState("");
       return;
     }
 
     if (updatedTransactions.length !== transactionsToRedeem.length) {
-      setRedeemError("Error occurred while Redeeming Items.");
+      triggerToast("Error occurred while Redeeming Items.", "error");
       setVerifyingState("");
       return;
     }
@@ -216,11 +216,9 @@ const SelfRedeemModal: React.FC<SelfRedeemModalProps> = ({
           </SheetHeader>
 
           <div className="flex-1 overflow-y-auto px-6 pt-4">
+            <OpeningHoursWarning context="redemption" />
             {verifyingState !== "complete" ? (
               <div>
-                {redeemError && (
-                  <div className="text-red-500">{redeemError}</div>
-                )}
                 <p className="text-black mb-0 text-lg font-semibold">
                   You're about to redeem {transactionsToRedeem.length} item
                   {transactionsToRedeem.length > 1 ? "s" : ""}.
