@@ -16,6 +16,7 @@ import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { PolicyUtils } from "@/utils/policy_utils";
 import { useRestaurant } from "@/context/restaurant_context";
 import CustomIcon from "../svg/custom_icon";
+import { ShareButton } from "../buttons/share_button";
 
 interface LockedPolicyModalProps {
   isOpen: boolean;
@@ -88,24 +89,35 @@ const LockedPolicyModal: React.FC<LockedPolicyModalProps> = ({
 
         {/*Content*/}
         <div className="flex-1 overflow-y-auto px-6">
-          <p className="text-gray-500 text-sm mt-1">{policy.header}</p>
-          <p
-            className={`text-sm custom-line-clamp-1 -mr-10 ${
-              !policyIsActive && totalMissingQuantity > 0
-                ? "text-red-500"
-                : "text-[#40C4AA]"
-            }`}
-          >
-            {policyIsActive
-              ? `Deal Applied`
-              : totalMissingQuantity > 0
-              ? missingItemsText
-              : `Apply to cart for ${flair}`}
-          </p>
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <p className="text-gray-500 text-sm mt-1">{policy.header}</p>
+              <p
+                className={`text-sm custom-line-clamp-1 ${
+                  !policyIsActive && totalMissingQuantity > 0
+                    ? "text-red-500"
+                    : "text-[#40C4AA]"
+                }`}
+              >
+                {policyIsActive
+                  ? `Deal Applied`
+                  : totalMissingQuantity > 0
+                  ? missingItemsText
+                  : `Apply to cart for ${flair}`}
+              </p>
+            </div>
+            <div className="flex-shrink-0 ml-4 mt-3">
+              <ShareButton
+                objectType="policy"
+                object={policy}
+                restaurant={restaurant}
+              />
+            </div>
+          </div>
         </div>
         {/*Button*/}
         <div className="mt-2 mb-2 fixed bottom-0 left-0 right-0 px-6 pb-4 bg-white border-t-0">
-          <p className="text-xs text-gray-400 mt-2 mb-4 px-2 leading-relaxed">
+          <p className="text-xs text-gray-400 mt-2 mb-4 leading-relaxed">
             The Deal grants access to exclusive perks, discounts, and offers at
             the associated location.{" "}
             <span className="underline cursor-pointer text-gray-500">

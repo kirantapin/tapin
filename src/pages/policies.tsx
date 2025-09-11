@@ -1,4 +1,4 @@
-import { ChevronLeft, Gift, HandCoins, Star } from "lucide-react";
+import { ChevronLeft, Gift, PartyPopper, Star } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
@@ -8,9 +8,7 @@ import {
 } from "@/constants";
 import { Policy, Restaurant } from "@/types";
 
-import { useAuth } from "@/context/auth_context";
 import Rewards from "@/components/rewards.tsx";
-import { SignInButton } from "@/components/signin/signin_button";
 import { setThemeColor } from "@/utils/color";
 import { OffersSkeleton } from "@/components/skeletons/offers_skeleton";
 import { useRestaurant } from "@/context/restaurant_context";
@@ -20,19 +18,14 @@ import { PolicyCard } from "@/components/cards/policy_card";
 import GoToCartButton from "@/components/buttons/go_to_cart_button";
 import SpendGoalCard from "@/components/cards/spend_goal_card";
 import { PolicyUtils } from "@/utils/policy_utils";
-const tagMap: Record<string, { tag: string; icon: any }> = {
-  Deals: { tag: NORMAL_DEAL_TAG, icon: Star },
-  Rewards: { tag: LOYALTY_REWARD_TAG, icon: Gift },
-};
 
 export default function PoliciesPage() {
   setThemeColor();
-  const { userSession, userData } = useAuth();
   const location = useLocation();
   const [activeTag, setActiveTag] = useState(
     location.state?.tag || NORMAL_DEAL_TAG
   );
-  const { restaurant, setCurrentRestaurantId, policyManager } = useRestaurant();
+  const { restaurant, policyManager } = useRestaurant();
   const policies = React.useMemo(
     () =>
       restaurant && policyManager
@@ -44,13 +37,37 @@ export default function PoliciesPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { state } = useBottomSheet();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const tagMap: Record<
+    string,
+    { label: string; icon: any; filter: (policy: Policy) => boolean }
+  > = {
+    [NORMAL_DEAL_TAG]: {
+      label: "Deals",
+      icon: Star,
+      filter: (policy: Policy) =>
+        policy.definition.tag === NORMAL_DEAL_TAG && !policy.locked,
+    },
+    exclusive: {
+      label: "Exclusive",
+      icon: PartyPopper,
+      filter: (policy: Policy) =>
+        policy.definition.tag === NORMAL_DEAL_TAG && policy.locked,
+    },
+    [LOYALTY_REWARD_TAG]: {
+      label: "Rewards",
+      icon: Gift,
+      filter: (policy: Policy) => policy.definition.tag === LOYALTY_REWARD_TAG,
+    },
+  };
 
   useEffect(() => {
-    if (activeTag === NORMAL_DEAL_TAG && policies) {
-      const filtered = policies.filter(
-        (policy) => policy.definition.tag === activeTag
-      );
+    if (policies) {
+      setIsLoading(true);
+      const filtered = policies.filter(tagMap[activeTag].filter);
       setActivePolicies(filtered);
+      setIsLoading(false);
     }
   }, [activeTag, policies]);
 
@@ -87,16 +104,14 @@ export default function PoliciesPage() {
 
       {/* Tabs */}
       <div className="flex px-4 gap-4 mt-6 mb-8">
-        {Object.keys(tagMap).map((tagLabel) => (
+        {Object.keys(tagMap).map((tagKey) => (
           <button
-            key={tagMap[tagLabel].tag}
+            key={tagKey}
             className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full whitespace-nowrap border transition-all duration-150 font-medium ${
-              activeTag === tagMap[tagLabel].tag
-                ? "text-sm"
-                : "text-sm text-gray-500"
+              activeTag === tagKey ? "text-sm" : "text-sm text-gray-500"
             }`}
             style={
-              activeTag === tagMap[tagLabel].tag
+              activeTag === tagKey
                 ? {
                     color: restaurant?.metadata.primaryColor,
                     borderColor: restaurant?.metadata.primaryColor,
@@ -107,50 +122,52 @@ export default function PoliciesPage() {
                   }
             }
             onClick={() => {
-              setActiveTag(tagMap[tagLabel].tag);
+              setActiveTag(tagKey);
             }}
           >
-            {React.createElement(tagMap[tagLabel].icon, {
+            {React.createElement(tagMap[tagKey].icon, {
               className: "w-4 h-4 inline-block mr-1.5",
             })}
-            {tagLabel}
+            {tagMap[tagKey].label}
           </button>
         ))}
       </div>
 
       {/* Deals */}
 
-      {activeTag === NORMAL_DEAL_TAG && (
-        <div className="px-5 space-y-6 flex flex-col items-center w-full mb-24">
-          <SpendGoalCard
-            onClick={() => {
-              setActiveTag(LOYALTY_REWARD_TAG);
-            }}
-            progressThreshold={0}
-          />
-          {activePolicies.length > 0 ? (
-            activePolicies.map((policy) => (
-              <PolicyCard
-                key={policy.policy_id}
-                cart={state.cart}
-                policy={policy}
-                restaurant={restaurant as Restaurant}
-                dealEffect={state.dealEffect}
-                extraTags={[
-                  ...(PolicyUtils.isPolicyUsable(policy, restaurant)
-                    ? []
-                    : ["Not Currently Active"]),
-                ]}
-              />
-            ))
-          ) : (
-            <p className="text-2xl text-black text-center font-bold flex justify-center items-center min-h-[200px]">
-              No Active Deals.
-            </p>
-          )}
-        </div>
-      )}
-      {activeTag === LOYALTY_REWARD_TAG && restaurant && (
+      {(activeTag === NORMAL_DEAL_TAG || activeTag === "exclusive") &&
+        !isLoading && (
+          <div className="px-5 space-y-6 flex flex-col items-center w-full mb-24">
+            <SpendGoalCard
+              onClick={() => {
+                setActiveTag(LOYALTY_REWARD_TAG);
+              }}
+              progressThreshold={0}
+            />
+            {activePolicies.length > 0 ? (
+              activePolicies.map((policy) => (
+                <PolicyCard
+                  key={policy.policy_id}
+                  cart={state.cart}
+                  policy={policy}
+                  restaurant={restaurant as Restaurant}
+                  dealEffect={state.dealEffect}
+                  extraTags={[
+                    ...(PolicyUtils.isPolicyUsable(policy, restaurant)
+                      ? []
+                      : ["Not Currently Active"]),
+                  ]}
+                />
+              ))
+            ) : (
+              <p className="text-2xl text-black text-center font-bold flex justify-center items-center min-h-[200px]">
+                No Active Deals.
+              </p>
+            )}
+          </div>
+        )}
+
+      {activeTag === LOYALTY_REWARD_TAG && restaurant && !isLoading && (
         <div className="px-4">
           <Rewards viewAll={true} />
         </div>

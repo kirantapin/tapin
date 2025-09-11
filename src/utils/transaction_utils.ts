@@ -1,21 +1,15 @@
-import { PassItem, Transaction } from "@/types";
+import { Item, PassItem, Transaction } from "@/types";
 import { Restaurant } from "@/types";
 import { supabase } from "./supabase_client";
 import { ItemUtils } from "./item_utils";
-import { PASS_MENU_TAG } from "@/constants";
+import { BUNDLE_MENU_TAG, PASS_MENU_TAG } from "@/constants";
 
 export class TransactionUtils {
   static getRecentTransactionItems = (
     transactions: Transaction[],
-    restaurant: Restaurant | null,
-    filters: ((object: {
-      id: string;
-      modifiers: string[];
-      purchaseDate: string;
-    }) => boolean)[]
+    restaurant: Restaurant | null
   ): {
-    id: string;
-    modifiers: string[];
+    item: Item;
     purchaseDate: string;
   }[] => {
     if (!restaurant) {
@@ -37,62 +31,59 @@ export class TransactionUtils {
       }, []);
     const processedTransactionItems = [...recentTransactionItems]
       .map((transactionItem) => {
-        const itemId = transactionItem.item;
-        const metadata = transactionItem.metadata;
-        const modifiers = metadata?.modifiers || [];
+        const item = TransactionUtils.getTransactionItem(transactionItem);
+        const { id, path } = item;
         const purchaseDate = transactionItem.created_at;
-        if (metadata?.path?.includes(PASS_MENU_TAG)) {
+        if (path?.includes(PASS_MENU_TAG)) {
           // Get second to last item from path array
-          const item = ItemUtils.getMenuItemFromItemId(itemId, restaurant);
-          if (item) {
+          const passItem = ItemUtils.getMenuItemFromItemId(id, restaurant);
+          if (passItem) {
             return {
-              id: itemId,
-              modifiers: [],
+              item: item,
               purchaseDate: purchaseDate,
             };
           }
           const sameCurrentPassItems = ItemUtils.getAllItemsInCategory(
-            metadata?.path[metadata?.path.length - 2],
+            path[1],
             restaurant
           );
           if (sameCurrentPassItems.length > 0) {
             return {
-              id: sameCurrentPassItems.reduce((earliest, currentId) => {
-                const currentItem = ItemUtils.getMenuItemFromItemId(
-                  currentId,
-                  restaurant
-                ) as PassItem;
-                const earliestItem = ItemUtils.getMenuItemFromItemId(
-                  earliest,
-                  restaurant
-                ) as PassItem;
-                return new Date(currentItem.for_date) <
-                  new Date(earliestItem.for_date)
-                  ? currentId
-                  : earliest;
-              }, sameCurrentPassItems[0]),
-              modifiers: [],
+              item: {
+                ...item,
+                id: sameCurrentPassItems.reduce((earliest, currentId) => {
+                  const currentItem = ItemUtils.getMenuItemFromItemId(
+                    currentId,
+                    restaurant
+                  ) as PassItem;
+                  const earliestItem = ItemUtils.getMenuItemFromItemId(
+                    earliest,
+                    restaurant
+                  ) as PassItem;
+                  return new Date(currentItem.for_date) <
+                    new Date(earliestItem.for_date)
+                    ? currentId
+                    : earliest;
+                }, sameCurrentPassItems[0]),
+              },
               purchaseDate: purchaseDate,
             };
           } else {
             return null;
           }
         } else {
-          if (!ItemUtils.getMenuItemFromItemId(itemId, restaurant)) {
+          if (!ItemUtils.getMenuItemFromItemId(id, restaurant)) {
             return null;
           }
           return {
-            id: itemId,
-            modifiers: modifiers,
+            item: item,
             purchaseDate: purchaseDate,
           };
         }
       })
       .filter((item) => item !== null);
-    const filteredTransactionItems = processedTransactionItems.filter((item) =>
-      filters.every((filter) => filter(item))
-    );
-    return filteredTransactionItems;
+
+    return processedTransactionItems;
   };
   static fetchTransactionData = async (
     userId: string | null
@@ -123,10 +114,49 @@ export class TransactionUtils {
     transaction: Transaction,
     restaurant: Restaurant
   ): boolean => {
-    const item = {
-      id: transaction.item,
-      modifiers: transaction.metadata.modifiers || [],
-    };
+    const item = this.getTransactionItem(transaction);
     return ItemUtils.isItemRedeemable(item, restaurant);
   };
+
+  static getTransactionHistory = (
+    transactions: Transaction[],
+    restaurant: Restaurant
+  ): {
+    item: Item;
+    fulfilled_at: string;
+  }[] => {
+    const redeemedTransactions = transactions.filter(
+      (transaction) =>
+        transaction.restaurant_id === restaurant.id &&
+        transaction.fulfilled_by != null &&
+        transaction.fulfilled_at != null &&
+        !transaction.metadata.path?.includes(BUNDLE_MENU_TAG)
+    );
+    const transactionHistory = redeemedTransactions.map((transaction) => {
+      const item = this.getTransactionItem(transaction);
+      return {
+        item: item,
+        fulfilled_at: transaction.fulfilled_at as string,
+      };
+    });
+    return transactionHistory;
+  };
+
+  static getTransactionItem(transaction: Transaction): {
+    id: string;
+    variation: string | null;
+    modifiers: Record<string, string[]>;
+    path: string[];
+  } {
+    const item = {
+      id: transaction.item,
+      variation: transaction.metadata.variation || null,
+      modifiers: transaction.metadata.modifiers || {},
+      path: (transaction.metadata.path || []) as string[],
+    };
+    if (item.path.includes(PASS_MENU_TAG)) {
+      item.id = item.path[1];
+    }
+    return item;
+  }
 }

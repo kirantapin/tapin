@@ -14,6 +14,8 @@ import { PolicyUtils } from "@/utils/policy_utils";
 import { ImageUtils } from "@/utils/image_utils";
 import { ImageFallback } from "../display_utils/image_fallback";
 import { formatBundleName } from "@/utils/parse";
+import { HighlightCardSkeleton } from "../skeletons/highlight_card_skeleton";
+import { Alert } from "../display_utils/alert";
 
 interface HighlightCardProps {
   highlight: Highlight;
@@ -83,7 +85,15 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
           (item as NormalItem).description ||
             "Currently in stock. Purchase while supplies last."
         );
-        setDefaultImageUrl((item as NormalItem).image_url || null);
+        const imageUrl = ImageUtils.getItemImageUrl(
+          content_pointer,
+          restaurant
+        );
+        if (imageUrl) {
+          setDefaultImageUrl(imageUrl);
+        } else {
+          setDefaultImageUrl("fallback");
+        }
       }
     }
     if (content_type === "policy") {
@@ -109,6 +119,10 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
     };
   }, [highlight]);
 
+  if (hasHighlightImage && !bgLoaded) {
+    return <HighlightCardSkeleton />;
+  }
+
   if (dontShow) return null;
 
   return (
@@ -123,23 +137,13 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
         color: "white",
         transition: "color 200ms ease-in-out",
       }}
-      onClick={onClick}
     >
       {hasHighlightImage && (
         <div className="absolute inset-0">
-          {!bgLoaded && (
-            <div
-              className="absolute inset-0  animate-pulse"
-              style={{ backgroundColor: primaryColor }}
-            />
-          )}
-
           <div
-            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-200 ${
-              bgLoaded ? "opacity-100" : "opacity-0"
-            }`}
+            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-200 opacity-100`}
             style={{
-              backgroundImage: `linear-gradient(90deg, rgba(0, 0, 0, 0.45) 45%, rgba(0, 0, 0, 0) 75%), url(${ImageUtils.getHighlightImageUrl(
+              backgroundImage: `linear-gradient(90deg, rgba(0, 0, 0, 0.5) 45%, rgba(0, 0, 0, 0) 75%), url(${ImageUtils.getHighlightImageUrl(
                 highlight
               )})`,
             }}
@@ -169,24 +173,47 @@ const HighlightCard: React.FC<HighlightCardProps> = ({
           </p>
         </div>
 
-        {content_pointer && (
-          <button
-            className="bg-white px-5 py-[2px] rounded-full text-sm self-start font-bold min-w-[100px] min-h-[30px] flex justify-center items-center"
-            style={{ color: "black" }}
-          >
-            {loading ? (
-              <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-            ) : content_type === "item" ? (
-              "Add to Cart"
-            ) : content_type === "bundle" ? (
-              "View Bundle"
-            ) : content_type === "media" ? (
-              "View"
-            ) : (
-              "View Deal"
-            )}
-          </button>
-        )}
+        {content_pointer &&
+          (content_type === "media" && highlight.content_pointer ? (
+            <Alert
+              trigger={
+                <button
+                  className="bg-white px-5 py-[2px] rounded-full text-sm self-start font-bold min-w-[100px] min-h-[30px] flex justify-center items-center"
+                  style={{ color: "black" }}
+                >
+                  {loading ? (
+                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    "View"
+                  )}
+                </button>
+              }
+              title="Leave Tap In?"
+              description="You're about to leave Tap In and visit an external website. Are you sure you want to continue?"
+              onConfirm={() => {
+                onClick?.();
+              }}
+              confirmLabel="Continue"
+              cancelLabel="Stay on Tap In"
+              confirmClassName="bg-red-500 hover:bg-red-600"
+            />
+          ) : (
+            <button
+              className="bg-white px-5 py-[2px] rounded-full text-sm self-start font-bold min-w-[100px] min-h-[30px] flex justify-center items-center"
+              style={{ color: "black" }}
+              onClick={onClick}
+            >
+              {loading ? (
+                <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              ) : content_type === "item" ? (
+                "Add to Cart"
+              ) : content_type === "bundle" ? (
+                "View Bundle"
+              ) : (
+                "View Deal"
+              )}
+            </button>
+          ))}
       </div>
 
       {defaultImageUrl && !hasHighlightImage && (

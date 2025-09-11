@@ -4,7 +4,6 @@ import {
   PASS_MENU_TAG,
   HISTORY_KEY,
   BUNDLE_MENU_TAG,
-  LIQUOR_MENU_TAG,
   HOUSE_MIXER_LABEL,
   SHOTS_SHOOTERS_LABEL,
   RESERVED_MENU_KEYWORDS,
@@ -107,17 +106,6 @@ export const fetchRestaurantById = async (
   data.menu = menu;
   data.labelMap = labelMap;
 
-  if (Object.values(data.labelMap).includes(LIQUOR_MENU_TAG)) {
-    const liquorId = Object.keys(data.labelMap).find(
-      (key) => data.labelMap[key] === LIQUOR_MENU_TAG
-    );
-    if (liquorId) {
-      delete data.labelMap[liquorId];
-      data.labelMap[HOUSE_MIXER_LABEL] = LIQUOR_MENU_TAG;
-      data.labelMap[SHOTS_SHOOTERS_LABEL] = LIQUOR_MENU_TAG;
-    }
-  }
-
   return data as Restaurant;
 };
 
@@ -141,7 +129,7 @@ export function indexMenu(menu: Record<string, any>): {
 
     let activeLabel = false;
 
-    if (nodeObj.price) {
+    if (nodeObj.price != null) {
       for (const [key, value] of Object.entries(nodeObj)) {
         info[key] = value;
       }

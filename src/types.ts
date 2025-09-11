@@ -30,7 +30,7 @@ export interface VerifyOrderReturnPayload {
   jwtToken: string;
 }
 
-export interface JWTPayloadType extends Record<string, unknown> {
+export interface JWTPayloadType {
   cart: Cart;
   dealEffectPayload: DealEffectPayload;
   cartResultsPayload: CartResultsPayload;
@@ -112,9 +112,29 @@ export interface CartItem {
   point_cost: number | 0;
 }
 
+export interface Modifier {
+  id: string;
+  name: string;
+  delta: number;
+  sourceId?: string | null;
+  archived?: boolean;
+}
+
+export interface ModifierGroup {
+  name: string;
+  select: "single" | "multiple";
+  minSelected?: number;
+  maxSelected?: number;
+  defaults: string[];
+  sourceId?: string | null;
+  modifiers: Modifier[];
+  archived?: boolean;
+}
+
 export interface Item {
   id: string;
-  modifiers: string[];
+  variation?: string | null;
+  modifiers?: Record<string, string[]>;
 }
 
 export interface Restaurant {
@@ -122,21 +142,24 @@ export interface Restaurant {
   name: string;
   menu: Menu;
   labelMap: Record<string, string>;
-  stripe_account_id: string;
   active: boolean;
   metadata: RestaurantMetadata;
+  modifier_groups: Record<string, ModifierGroup>;
   info: RestaurantInfo;
+  payment_provider: "square" | "stripe";
+  account_id: string;
 }
 
 interface RestaurantMetadata {
   salesTax: number;
   timeZone: string;
-  itemCharge: number;
-  passCharge: number;
   locationTag: string;
-  bundleCharge: number;
   primaryColor: string;
   enableLoyaltyProgram: boolean;
+  tip?: {
+    enabled?: boolean;
+    minimumPercentage?: number;
+  };
 }
 
 interface RestaurantInfo {
@@ -156,6 +179,18 @@ interface RestaurantInfo {
   }[];
 }
 
+export interface PaymentPayLoad {
+  totalWithTip: number;
+  state: CartState;
+  restaurant_id: string;
+  userAccessToken: string;
+  paymentData?: {
+    [key: string]: unknown;
+    additionalOrderData: Record<string, unknown>;
+  };
+  accountId: string;
+}
+
 export interface OpenHours {
   monday: string[];
   tuesday: string[];
@@ -164,11 +199,6 @@ export interface OpenHours {
   friday: string[];
   saturday: string[];
   sunday: string[];
-}
-export interface DrinkForm {
-  restaurant: Restaurant;
-  onUpdate: (values: Record<string, string>) => void;
-  transaction: Transaction;
 }
 
 export interface CreateTransactionsPayload {
@@ -199,6 +229,18 @@ export interface NormalItem {
   price: number;
   description?: string;
   image_url?: string;
+  sourceId?: string | null;
+  archived?: boolean | null;
+  variations?: Record<
+    string,
+    {
+      sourceId: string | null;
+      name: string;
+      absolutePrice: number;
+      archived?: boolean;
+    }
+  > | null;
+  modifierGroups?: string[];
 }
 export interface PassItem {
   name: string;
@@ -243,6 +285,7 @@ export interface Highlight {
   description_override: string | null;
   active: boolean;
   end_time: string | null;
+  modified_at: string;
 }
 
 export interface Transaction {
@@ -255,8 +298,15 @@ export interface Transaction {
   item: string;
   order_id: string;
   metadata: {
-    modifiers?: string[];
-    [key: string]: string | string[] | undefined;
+    modifiers?: Record<string, string[]>;
+    variation?: string | null;
+    path?: string[];
+    [key: string]:
+      | string
+      | string[]
+      | Record<string, string[]>
+      | null
+      | undefined;
   };
   tip_amount: number | null;
   price: number | null;
@@ -301,7 +351,7 @@ export interface UserSession {
 
 export interface Policy {
   policy_id: string;
-  name: string;
+  name: string | null;
   header: string | null;
   restaurant_id: string;
   count_as_deal: boolean;
@@ -311,6 +361,7 @@ export interface Policy {
   locked: boolean;
   active: boolean;
   definition: PolicyDefinition;
+  modified_at: string;
 }
 
 export interface Bundle {
@@ -322,6 +373,7 @@ export interface Bundle {
   name: string;
   price: number;
   deactivated_at: string | null;
+  modified_at: string;
 }
 
 export type ItemSpecification = string;

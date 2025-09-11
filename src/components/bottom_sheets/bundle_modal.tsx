@@ -5,7 +5,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { X, Wallet, CircleX, Check, Share } from "lucide-react";
+import { X, Wallet, CircleX, Check } from "lucide-react";
 import { Bundle, Restaurant, Policy, BundleItem, Transaction } from "@/types";
 import { GradientIcon } from "@/utils/gradient";
 import { useAuth } from "@/context/auth_context";
@@ -26,6 +26,8 @@ import GenericItemIcon from "@/components/display_utils/generic_item_icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import { RESTAURANT_PATH } from "@/constants";
 import { TransactionUtils } from "@/utils/transaction_utils";
+import { CheckoutItemCard } from "../checkout/checkout_item_card";
+import { ShareButton } from "../buttons/share_button";
 interface BundleModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -42,13 +44,10 @@ const BundleModal: React.FC<BundleModalProps> = ({
   const { userSession } = useAuth();
   const navigate = useNavigate();
   const { userOwnershipMap } = useRestaurant();
-  const { refreshCart } = useBottomSheet();
+  const { refreshCart, openItemModModal } = useBottomSheet();
   const location = useLocation();
-  const { state, addPolicy, addToCart, removePolicy } = useGlobalCartManager(
-    restaurant,
-    userSession,
-    false
-  );
+  const { state, addPolicy, addToCart, removePolicy, removeFromCart } =
+    useGlobalCartManager(restaurant, userSession, false, openItemModModal);
   const { policyManager } = useRestaurant();
   const [loadingLocalCart, setLoadingLocalCart] = useState(false);
 
@@ -74,7 +73,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
       setLoadingLocalCart(true);
       const cartItemIds = [...new Set(state.cart.map((item) => item.item.id))];
       if (!cartItemIds.includes(bundle.bundle_id)) {
-        await addToCart({ id: bundle.bundle_id, modifiers: [] });
+        await addToCart({ id: bundle.bundle_id });
         setTimeout(() => {
           setLoadingLocalCart(false);
         }, 3000);
@@ -86,7 +85,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
     initLocalCart();
   }, [isOpen, userOwnershipMap, policyManager, restaurant, state]);
 
-  if (!bundleMenuItem || !bundleMenuItem.price) {
+  if (!bundleMenuItem || bundleMenuItem.price == null) {
     return null;
   }
 
@@ -152,8 +151,8 @@ const BundleModal: React.FC<BundleModalProps> = ({
               </div>
             </div>
             <ShareButton
-              primaryColor={restaurant?.metadata.primaryColor}
-              bundle={bundle}
+              objectType="bundle"
+              object={bundle}
               restaurant={restaurant}
             />
           </div>
@@ -248,7 +247,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
           {deals.length > 0 && (
             <>
               <h1 className="text-xl font-bold text-gray-800">
-                Exclusive Access To:
+                Bundle Exclusive Deals:
               </h1>
               <div className="mt-2">
                 <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar -mx-6 px-6">
@@ -273,6 +272,24 @@ const BundleModal: React.FC<BundleModalProps> = ({
             </>
           )}
 
+          <div className="mt-4">
+            {state.cart
+              .filter((item) =>
+                ItemUtils.isItemRedeemable(item.item, restaurant)
+              )
+              .map((item) => (
+                <CheckoutItemCard
+                  key={item.id}
+                  item={item}
+                  restaurant={restaurant}
+                  dealEffect={state.dealEffect}
+                  addToCart={addToCart}
+                  removeFromCart={removeFromCart}
+                  inlineRecommendation={null}
+                />
+              ))}
+          </div>
+
           {!loadingLocalCart ? (
             !isOwned ? (
               <AddOnManager
@@ -280,7 +297,6 @@ const BundleModal: React.FC<BundleModalProps> = ({
                 isPreEntry={false}
                 addPolicy={addPolicy}
                 removePolicy={removePolicy}
-                allowTimer={false}
                 allowNormalItems={true}
               />
             ) : null
@@ -294,13 +310,13 @@ const BundleModal: React.FC<BundleModalProps> = ({
               ></div>
             </div>
           )}
+
           {!isOwned && (
             <CheckoutSummary
               state={state}
               restaurant={restaurant as Restaurant}
               setTipAmount={() => {}}
               tipAmount={0}
-              fees={false}
               showDiscount={false}
             />
           )}
@@ -354,9 +370,9 @@ const BundleModal: React.FC<BundleModalProps> = ({
                 </div>
               </div>
             ) : (
-              state?.cartResults?.totalPrice &&
-              state.cartResults.totalPrice > 0 && (
+              state?.cartResults?.totalPrice != null && (
                 <PayButton
+                  paymentProvider={restaurant.payment_provider}
                   payload={{
                     userAccessToken: userSession.access_token,
                     restaurant_id: restaurant.id,
@@ -364,7 +380,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
                     totalWithTip: Math.round(
                       state.cartResults.totalPrice * 100
                     ),
-                    connectedAccountId: restaurant?.stripe_account_id,
+                    accountId: restaurant.account_id,
                   }}
                   refresh={refreshCart}
                   postPurchase={async (transactions: Transaction[]) => {
@@ -415,38 +431,3 @@ const BundleModal: React.FC<BundleModalProps> = ({
 };
 
 export default BundleModal;
-
-const ShareButton = ({
-  primaryColor,
-  bundle,
-  restaurant,
-}: {
-  primaryColor: string;
-  bundle: Bundle;
-  restaurant: Restaurant;
-}) => {
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          text: `Here's something interesting at ${restaurant.name}!`,
-          url: `${window.location.origin}/${restaurant.id}/?bundle=${bundle.bundle_id}`,
-        });
-      } catch (error) {
-        console.error("Share failed:", error);
-      }
-    } else {
-      alert("Sharing not supported on this browser.");
-    }
-  };
-
-  return (
-    <button
-      onClick={handleShare}
-      className="p-2 text-white rounded-full shadow"
-      style={{ backgroundColor: primaryColor }}
-    >
-      <Share size={18} />
-    </button>
-  );
-};

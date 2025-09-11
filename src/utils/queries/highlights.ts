@@ -10,8 +10,8 @@ export const fetch_highlights = async (restaurant_id: string | undefined) => {
     .from("highlights")
     .select("*")
     .eq("restaurant_id", restaurant_id)
-    .eq("active", true)
-    .or(`end_time.is.null,end_time.gt.${currentTime}`);
+    .or(`end_time.is.null,end_time.gt.${currentTime}`)
+    .eq("active", true);
 
   if (error) {
     console.error("Error fetching highlights:", error);

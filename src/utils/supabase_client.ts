@@ -3,7 +3,10 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 const environment_override = null;
 
 const supabase_key =
-  (environment_override || process.env.REACT_APP_VERCEL_ENV) === "production"
+  environment_override === "local"
+    ? process.env.REACT_APP_SUPABASE_ANON_KEY_LOCAL
+    : (environment_override || process.env.REACT_APP_VERCEL_ENV) ===
+      "production"
     ? process.env.REACT_APP_SUPABASE_ANON_KEY
     : process.env.REACT_APP_VERCEL_ENV === "preview"
     ? process.env.REACT_APP_SUPABASE_ANON_KEY_STAGING
@@ -15,7 +18,10 @@ export const project_ref =
     : process.env.REACT_APP_VERCEL_ENV === "preview"
     ? process.env.REACT_APP_PROJECT_REF_STAGING
     : process.env.REACT_APP_PROJECT_REF_DEV;
-export const project_url = `https://${project_ref}.supabase.co`;
+export const project_url =
+  environment_override === "local"
+    ? process.env.REACT_APP_PROJECT_URL_LOCAL
+    : `https://${project_ref}.supabase.co`;
 
 let supabase_key_local = process.env.REACT_APP_SUPABASE_ANON_KEY_LOCAL || "";
 let project_url_local = process.env.REACT_APP_PROJECT_URL_LOCAL || "";
@@ -31,6 +37,11 @@ export const supabase_local: SupabaseClient = createClient(
   window.location.hostname === "localhost" ? project_url_local : project_url,
   window.location.hostname === "localhost" ? supabase_key_local : supabase_key
 );
+
+// export const supabase_local: SupabaseClient = createClient(
+//   project_url,
+//   supabase_key
+// );
 
 // export const supabase_local: SupabaseClient = createClient(
 //   project_url_local,

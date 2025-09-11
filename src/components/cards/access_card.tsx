@@ -189,7 +189,7 @@ export default function Card({
             <button
               onClick={async () => {
                 setLoading(true);
-                await addToCart({ id: itemId, modifiers: [] });
+                await addToCart({ id: itemId });
                 setLoading(false);
               }}
               className="w-6 h-6 flex items-center justify-center rounded-full"
@@ -207,7 +207,7 @@ export default function Card({
             }} // adjust as needed
             onClick={async () => {
               setLoading(true);
-              await addToCart({ id: itemId, modifiers: [] });
+              await addToCart({ id: itemId });
               setLoading(false);
             }}
           >

@@ -29,6 +29,7 @@ import {
 import HighlightSlider from "@/components/sliders/highlight_slider";
 import ScrollDownIndicator from "@/components/buttons/scroll_down_indicator";
 import { TransactionUtils } from "@/utils/transaction_utils";
+import { OpeningHoursWarning } from "@/components/display_utils/opening_hours_warning";
 
 export default function CheckoutPage() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -106,12 +107,12 @@ export default function CheckoutPage() {
         </div>
       </div>
 
-      {/* Scrollable Content */}
       <div
         ref={scrollContainerRef}
         className="flex-1 overflow-y-auto overflow-x-hidden"
       >
         <div className="px-4 pb-8">
+          <OpeningHoursWarning context="checkout" marginTop={20} />
           <AccessCardSlider
             restaurant={restaurant}
             cart={state.cart}
@@ -265,6 +266,7 @@ export default function CheckoutPage() {
               <div className="mt-4">
                 {userSession && state.token && state.cartResults ? (
                   <PayButton
+                    paymentProvider={restaurant.payment_provider}
                     payload={{
                       userAccessToken: userSession.access_token,
                       restaurant_id: restaurant.id,
@@ -272,7 +274,7 @@ export default function CheckoutPage() {
                       totalWithTip: Math.round(
                         (state.cartResults.totalPrice + tipAmount) * 100
                       ),
-                      connectedAccountId: restaurant.stripe_account_id,
+                      accountId: restaurant.account_id,
                     }}
                     refresh={refreshCart}
                     postPurchase={async (transactions: Transaction[]) => {

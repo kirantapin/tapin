@@ -1,5 +1,4 @@
-import { useRestaurant } from "@/context/restaurant_context";
-import { NormalItem, Policy, Restaurant } from "@/types";
+import { DealEffectPayload, NormalItem, Policy, Restaurant } from "@/types";
 import { ImageUtils } from "@/utils/image_utils";
 import { ItemUtils } from "@/utils/item_utils";
 import { Check, Plus, X } from "lucide-react";
@@ -23,9 +22,18 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
   removePolicy,
   restaurant,
 }) => {
-  const { policyManager } = useRestaurant();
   const [loading, setLoading] = useState(false);
   if (policy.definition.action.type !== "add_item") {
+    return null;
+  }
+  if (
+    ItemUtils.isItemUnavailable(
+      { id: itemId },
+      restaurant,
+      state.cart,
+      policy.definition.action.quantity
+    )
+  ) {
     return null;
   }
   const menuItem = ItemUtils.getMenuItemFromItemId(
@@ -35,31 +43,34 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
   if (!menuItem) {
     return null;
   }
-  const name = menuItem.name;
+  const { quantity, free, percentDiscount, fixedDiscount } =
+    policy.definition.action;
+  if (quantity === 0) {
+    return null;
+  }
+  const name =
+    quantity > 1 ? `${quantity} ${menuItem.name}s` : `${menuItem.name}`;
   const originalPrice = menuItem.price;
   const newPrice = (() => {
-    const action = policy.definition.action;
-    if (action.free) {
+    if (free) {
       return 0;
-    } else if (action.percentDiscount) {
-      return parseFloat(
-        (originalPrice * (1 - action.percentDiscount)).toFixed(2)
-      );
-    } else if (action.fixedDiscount) {
-      return Math.max(0, originalPrice - action.fixedDiscount);
+    } else if (percentDiscount) {
+      return parseFloat((originalPrice * (1 - percentDiscount)).toFixed(2));
+    } else if (fixedDiscount) {
+      return Math.max(0, originalPrice - fixedDiscount);
     }
     return originalPrice;
   })();
 
-  const policies = policyManager
-    ? policyManager.getActivePolicies(state.dealEffect)
-    : [];
-  const active = policies.some((p) => p.policy_id === policy.policy_id);
+  const addedItems = (state.dealEffect as DealEffectPayload).addedItems;
+  const active = addedItems.some(
+    (item) => item.policy_id === policy.policy_id && item.item.id === itemId
+  );
 
   return (
     <div className="w-28 relative">
       {/* Image container with 1:1 aspect ratio */}
-      <div className="aspect-square overflow-hidden rounded-xl bg-gray-100">
+      <div className="aspect-square overflow-hidden rounded-xl bg-gray-100 relative">
         <ImageFallback
           src={ImageUtils.getItemImageUrl(itemId, restaurant)}
           alt={name}
@@ -68,7 +79,7 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
         />
 
         {active ? (
-          <div className="absolute bottom-16 right-2 flex items-center justify-center bg-white h-7 w-7 rounded-full border border-gray-200">
+          <div className="absolute bottom-2 right-2 flex items-center justify-center bg-white h-7 w-7 rounded-full border border-gray-200">
             {loading ? (
               <div className="animate-spin rounded-full h-4 w-4 border-2 border-black border-t-transparent" />
             ) : (
@@ -77,7 +88,7 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
           </div>
         ) : (
           <button
-            className="absolute bottom-16 right-2 w-7 h-7 rounded-full flex items-center justify-center bg-white shadow-md border border-gray-200"
+            className="absolute bottom-2 right-2 w-7 h-7 rounded-full flex items-center justify-center bg-white shadow-md border border-gray-200"
             style={{ color: "black" }}
             onClick={async () => {
               setLoading(true);

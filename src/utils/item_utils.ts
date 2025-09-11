@@ -8,14 +8,9 @@ import {
   Category,
   Cart,
   CartItem,
+  ModifierGroup,
 } from "@/types";
-import {
-  PASS_MENU_TAG,
-  KNOWN_MODIFIERS,
-  BUNDLE_MENU_TAG,
-  LIQUOR_MENU_TAG,
-  HOUSE_MIXER_LABEL,
-} from "@/constants";
+import { PASS_MENU_TAG, BUNDLE_MENU_TAG } from "@/constants";
 import { titleCase } from "title-case";
 import { PassUtils } from "./pass_utils";
 import { BundleUtils } from "./bundle_utils";
@@ -77,43 +72,16 @@ export class ItemUtils {
   }
   static getItemName(item: Item, restaurant: Restaurant): string {
     const menu = restaurant.menu;
+    const { variation } = item;
     if (this.isPassItem(item.id, restaurant)) {
       const itemObject = menu[item.id].info as PassItem;
       return titleCase(itemObject.name);
-    } else if (this.isLiquorItem(item.id, restaurant)) {
-      const path = menu[item.id].path;
-      const liquorType = menu[path[path.length - 2]].info.name;
-      let liquorBrand: string | null = menu[path[path.length - 1]].info.name;
-      if (liquorBrand.toLowerCase().includes("house")) {
-        liquorBrand = null;
-      }
-      const tempModifiers = structuredClone(item.modifiers);
-      const mixerIndex = tempModifiers.findIndex((mod) => mod.includes("with"));
-      const mixer =
-        mixerIndex >= 0 ? tempModifiers.splice(mixerIndex, 1)[0] : undefined;
-      let name = "";
-      if (mixer) {
-        name = `${titleCase(liquorType)} ${mixer || ""}${
-          liquorBrand ? `, ${titleCase(liquorBrand)}` : ""
-        }`;
-      } else {
-        name = `Shot of ${titleCase(liquorType)}${
-          liquorBrand ? `, ${titleCase(liquorBrand)}` : ""
-        }`;
-      }
-      if (tempModifiers.length > 0) {
-        name += `, ${tempModifiers.map((mod) => titleCase(mod)).join(", ")}`;
-      }
-      return name;
     } else {
       const itemObject = menu[item.id].info as
         | NormalItem
         | BundleItem
         | Category;
-      return (
-        titleCase(itemObject.name) +
-        (item.modifiers.length > 0 ? ` (${item.modifiers.join(", ")})` : "")
-      );
+      return titleCase(itemObject.name);
     }
   }
   static isPassItem(itemId: string, restaurant: Restaurant): boolean {
@@ -121,9 +89,6 @@ export class ItemUtils {
   }
   static isBundleItem(itemId: string, restaurant: Restaurant): boolean {
     return restaurant.menu[itemId]?.path?.includes(BUNDLE_MENU_TAG) || false;
-  }
-  static isLiquorItem(itemId: string, restaurant: Restaurant): boolean {
-    return restaurant.menu[itemId]?.path?.includes(LIQUOR_MENU_TAG) || false;
   }
   static getMenuItemFromItemId(
     itemId: string,
@@ -135,19 +100,42 @@ export class ItemUtils {
       | BundleItem
       | undefined;
   }
-  static priceItem(item: Item, restaurant: Restaurant): number | null {
-    const { id, modifiers } = item;
-    const multiple = modifiers.reduce(
-      (acc, modifier) => acc * (KNOWN_MODIFIERS[modifier] || 1),
-      1
-    );
-
+  static priceItem(item: Item, restaurant: Restaurant): number {
+    const { id, variation, modifiers } = item;
     const temp = restaurant.menu[id]?.info;
-    if (!temp || !("price" in temp)) {
-      return null;
+
+    if (!temp || temp.price == null) {
+      throw new Error("Item cannot be priced");
+    }
+    let startingPrice = temp.price;
+
+    if (variation) {
+      const variationInfo = (temp as NormalItem)?.variations?.[variation];
+      if (variationInfo) {
+        startingPrice = variationInfo.absolutePrice;
+      }
     }
 
-    return temp.price * multiple;
+    for (const [modifierGroupId, modifierIds] of Object.entries(
+      modifiers || {}
+    )) {
+      const modifierGroup = restaurant.modifier_groups[modifierGroupId];
+      if (!modifierGroup) {
+        continue;
+      }
+      for (const modifierId of modifierIds) {
+        const modifier = modifierGroup.modifiers.find(
+          (mod) => mod.id === modifierId
+        );
+        if (!modifier) {
+          continue;
+        } else {
+          startingPrice += modifier.delta;
+        }
+      }
+    }
+
+    return startingPrice;
   }
   static doesItemMeetItemSpecification(
     itemSpecs: string[],
@@ -165,15 +153,18 @@ export class ItemUtils {
     }
     return false;
   }
-  static isItemAvailable(
+  static isItemUnavailable(
     item: Item,
     restaurant: Restaurant,
-    cart: Cart,
+    cart: Cart = [],
     offset: number = 0
   ): string | null {
     const itemInfo = this.getMenuItemFromItemId(item.id, restaurant);
-    if (!itemInfo) {
+    if (!itemInfo || !("price" in itemInfo)) {
       return "This item is not available";
+    }
+    if ("archived" in itemInfo && itemInfo.archived) {
+      return "This item is no longer available";
     }
     if (this.isBundleItem(item.id, restaurant)) {
       const bundleItem = itemInfo as BundleItem;
@@ -205,5 +196,226 @@ export class ItemUtils {
       return false;
     }
     return !!this.getMenuItemFromItemId(item.id, restaurant);
+  }
+
+  static extractActiveVariationAndModifierGroups(
+    itemInfo: NormalItem,
+    restaurant: Restaurant
+  ): {
+    variations: Record<
+      string,
+      {
+        sourceId: string | null;
+        name: string;
+        absolutePrice: number;
+        archived?: boolean;
+      }
+    > | null;
+    modifierGroups: Record<string, ModifierGroup>;
+  } {
+    const { variations, modifierGroups } = itemInfo as NormalItem;
+    // Filter out archived variations
+    let activeVariations: Record<
+      string,
+      {
+        sourceId: string | null;
+        name: string;
+        absolutePrice: number;
+        archived?: boolean;
+      }
+    > | null = null;
+    if (variations) {
+      activeVariations = Object.fromEntries(
+        Object.entries(variations).filter(
+          ([_, variation]) => !variation.archived
+        )
+      );
+    }
+
+    // Filter out archived modifier groups and their modifiers
+    let activeModifierGroupIds: string[] = [];
+    if (modifierGroups) {
+      activeModifierGroupIds = modifierGroups.filter((groupId) => {
+        const group = restaurant.modifier_groups[groupId];
+        return group && !group.archived;
+      });
+    }
+
+    // Filter out archived modifiers from selected modifiers
+    const activeModifierGroups: Record<string, ModifierGroup> = {};
+    for (const groupId of activeModifierGroupIds) {
+      const group = restaurant.modifier_groups[groupId];
+      const activeModifiersInGroup = group.modifiers.filter(
+        (modifier) => !modifier.archived
+      );
+      if (activeModifiersInGroup.length > 0) {
+        activeModifierGroups[groupId] = {
+          ...group,
+          modifiers: activeModifiersInGroup,
+        };
+      }
+    }
+
+    return {
+      variations: activeVariations,
+      modifierGroups: activeModifierGroups,
+    };
+  }
+
+  static doesItemRequireConfiguration(
+    item: Item,
+    restaurant: Restaurant
+  ): string | null {
+    const itemInfo = this.getMenuItemFromItemId(item.id, restaurant);
+    if (!itemInfo) {
+      return "Item not found";
+    }
+
+    const { variations, modifierGroups } =
+      this.extractActiveVariationAndModifierGroups(
+        itemInfo as NormalItem,
+        restaurant
+      );
+    const selectedVariation = item.variation;
+
+    if (variations) {
+      if (Object.keys(variations).length === 0) {
+        item.variation = null;
+      } else if (Object.keys(variations).length === 1) {
+        item.variation = Object.keys(variations)[0];
+      } else if (selectedVariation) {
+        if (!variations[selectedVariation]) {
+          return "Item requires a valid variation";
+        }
+      } else {
+        return "Item requires a variation selection";
+      }
+    } else {
+      item.variation = null;
+    }
+
+    // Check modifiers based on ModifierGroup specifications
+    if (modifierGroups && Object.keys(modifierGroups).length > 0) {
+      if (!item.modifiers) {
+        //Even though in a lot of cases it is fine if modifiers is null, if there are active modifier groups we want to give the user the option to select them
+        const defaults: Record<string, string[]> = {};
+        Object.keys(modifierGroups).forEach((groupId) => {
+          const group = modifierGroups[groupId];
+          if (group && group.defaults.length > 0) {
+            defaults[groupId] = [...group.defaults];
+          }
+        });
+        item.modifiers = defaults;
+        return "Item requires modifier selections";
+      }
+
+      for (const selectedModifierGroupId of Object.keys(item.modifiers)) {
+        if (!modifierGroups[selectedModifierGroupId]) {
+          return `Invalid modifier selection`;
+        }
+      }
+
+      for (const [modifierGroupId, modifierGroup] of Object.entries(
+        modifierGroups
+      )) {
+        if (!modifierGroup) {
+          console.warn(
+            `Modifier group ${modifierGroupId} not found in restaurant`
+          );
+          continue;
+        }
+
+        const selectedModifiers = item.modifiers[modifierGroupId] || [];
+
+        // Validate that selected modifiers exist in the modifier group
+        if (selectedModifiers && selectedModifiers.length > 0) {
+          const validModifierIds = modifierGroup.modifiers.map((mod) => mod.id);
+          for (const selectedModId of selectedModifiers) {
+            if (!validModifierIds.includes(selectedModId)) {
+              console.log("Invalid modifier selection", selectedModId);
+              return `Invalid modifier selection in ${modifierGroup.name}`;
+            }
+          }
+        }
+
+        if (modifierGroup.select === "single") {
+          if (selectedModifiers.length === 0) {
+            return `One selection required for ${titleCase(
+              modifierGroup.name
+            )}`;
+          }
+          if (selectedModifiers.length > 1) {
+            return `Only one allowed for ${titleCase(modifierGroup.name)}`;
+          }
+        } else if (modifierGroup.select === "multiple") {
+          if (
+            modifierGroup.minSelected &&
+            selectedModifiers.length < modifierGroup.minSelected
+          ) {
+            return `Minimum of ${modifierGroup.minSelected} selection${
+              modifierGroup.minSelected > 1 ? "s" : ""
+            } from ${modifierGroup.name}`;
+          }
+
+          // Check maximum selection requirements
+          if (
+            modifierGroup.maxSelected &&
+            selectedModifiers.length > modifierGroup.maxSelected
+          ) {
+            return `Maximum of ${modifierGroup.maxSelected} selection${
+              modifierGroup.maxSelected > 1 ? "s" : ""
+            } from ${modifierGroup.name}`;
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
+  static getItemModifierNames(item: Item, restaurant: Restaurant): string[] {
+    const itemInfo = this.getMenuItemFromItemId(item.id, restaurant);
+    if (!itemInfo) {
+      return [];
+    }
+
+    const names: string[] = [];
+
+    // Add variation name if it exists
+    if (item.variation && "variations" in itemInfo && itemInfo.variations) {
+      const variation = itemInfo.variations[item.variation];
+      if (variation) {
+        names.push(titleCase(variation.name));
+      }
+    }
+
+    // Add selected modifier names if they exist
+    if (
+      "modifierGroups" in itemInfo &&
+      itemInfo.modifierGroups &&
+      item.modifiers
+    ) {
+      itemInfo.modifierGroups.forEach((modifierGroupId) => {
+        const modifierGroup = restaurant.modifier_groups[modifierGroupId];
+        const selectedModifiers = item.modifiers?.[modifierGroupId] || [];
+
+        if (
+          modifierGroup &&
+          selectedModifiers &&
+          selectedModifiers.length > 0
+        ) {
+          selectedModifiers.forEach((selectedModifierId) => {
+            const modifier = modifierGroup.modifiers.find(
+              (mod) => mod.id === selectedModifierId
+            );
+            if (modifier) {
+              names.push(titleCase(modifier.name));
+            }
+          });
+        }
+      });
+    }
+
+    return names;
   }
 }

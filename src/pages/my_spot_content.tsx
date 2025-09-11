@@ -3,7 +3,14 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/auth_context";
 import { Transaction } from "@/types";
 import { RESTAURANT_PATH } from "@/constants";
-import { ChevronLeft, GlassWater, Ticket, HandCoins, Info } from "lucide-react";
+import {
+  ChevronLeft,
+  GlassWater,
+  Ticket,
+  HandCoins,
+  Info,
+  Clock,
+} from "lucide-react";
 import { ItemUtils } from "@/utils/item_utils";
 import { useRestaurant } from "@/context/restaurant_context";
 import { PreviousTransactionItem } from "@/components/menu_items";
@@ -12,11 +19,13 @@ import ManageBundles from "@/components/manage_bundles";
 import { MySpotSkeleton } from "@/components/skeletons/my_spot_skeleton";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { TransactionUtils } from "@/utils/transaction_utils";
+import { RedeemHistory } from "@/components/display_utils/redeem_history";
 
 const tagMap: Record<string, { tag: string; icon: any }> = {
   Passes: { tag: "Passes", icon: Ticket },
   Orders: { tag: "Orders", icon: GlassWater },
   "My Bundles": { tag: "My Bundles", icon: HandCoins },
+  History: { tag: "History", icon: Clock },
 };
 const MySpotContent: React.FC = () => {
   setThemeColor();
@@ -24,9 +33,9 @@ const MySpotContent: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [type, setType] = useState<string>(location.state?.type || "Passes");
-  const [activeFilter, setActiveFilter] = useState<string>(
-    type === "Passes" ? "Passes" : type === "Orders" ? "Orders" : "My Bundles"
-  );
+  const [activeFilter, setActiveFilter] = useState<
+    "Passes" | "Orders" | "My Bundles" | "History"
+  >(type === "Passes" ? "Passes" : type === "Orders" ? "Orders" : "My Bundles");
 
   const { restaurant } = useRestaurant();
   const [groupedTransactions, setGroupedTransactions] = useState<
@@ -60,7 +69,13 @@ const MySpotContent: React.FC = () => {
       const key =
         transaction.item +
         "|" +
-        (transaction.metadata.modifiers || []).join(",");
+        (transaction.metadata.variation || "") +
+        "|" +
+        Object.entries(transaction.metadata.modifiers || {})
+          .map(([modifierGroupId, modifierIds]) =>
+            modifierIds.map((modifierId) => `${modifierGroupId}:${modifierId}`)
+          )
+          .join("|");
 
       if (!acc[key]) {
         acc[key] = {
@@ -85,6 +100,8 @@ const MySpotContent: React.FC = () => {
     } else if (activeFilter === "Orders") {
       filterTransactions();
     } else if (activeFilter === "My Bundles") {
+      setGroupedTransactions({});
+    } else if (activeFilter === "History") {
       setGroupedTransactions({});
     }
   }, [transactions, activeFilter, restaurant]);
@@ -169,7 +186,7 @@ const MySpotContent: React.FC = () => {
         {/* Title - centered with flex-1 */}
         <h1 className="flex-1 text-xl font-semibold text-center">My Spot</h1>
       </div>
-      <div className="overflow-x-hidden">
+      <div className="overflow-x-hidden -mx-3 px-3">
         <div className="flex gap-3 mb-2 overflow-x-auto pb-2 no-scrollbar mt-6">
           {Object.keys(tagMap).map((filter) => (
             <button
@@ -208,6 +225,11 @@ const MySpotContent: React.FC = () => {
         {Object.keys(groupedTransactions).length === 0 ? (
           activeFilter === "My Bundles" ? (
             <ManageBundles restaurant={restaurant} />
+          ) : activeFilter === "History" ? (
+            <RedeemHistory
+              restaurant={restaurant}
+              transactions={transactions}
+            />
           ) : (
             <p className="text-black font-semibold flex items-center justify-center h-[50vh]">
               You have no unredeemed transactions.
@@ -229,10 +251,9 @@ const MySpotContent: React.FC = () => {
                   return (
                     <PreviousTransactionItem
                       key={key}
-                      item={{
-                        id: transactions[0].item,
-                        modifiers: transactions[0].metadata?.modifiers || [],
-                      }}
+                      item={TransactionUtils.getTransactionItem(
+                        transactions[0]
+                      )}
                       currentQuantity={currentQuantity}
                       maxQuantity={maxQuantity}
                       restaurant={restaurant}

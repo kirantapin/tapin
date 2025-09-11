@@ -16,8 +16,8 @@ import {
   BEER_AND_CIDER_TAG,
   BUNDLE_MENU_TAG,
   COCKTAILS_TAG,
+  DRINK_MENU_TAG,
   FOOD_MENU_TAG,
-  LIQUOR_MENU_TAG,
   PASS_MENU_TAG,
   SPECIALTY_DRINKS_TAG,
 } from "@/constants";
@@ -59,11 +59,6 @@ const GenericItemIcon: React.FC<GenericItemIconProps> = ({
       <GradientIcon icon={HandCoins} primaryColor={primaryColor} size={size} />
     );
   }
-  if (path.includes(LIQUOR_MENU_TAG)) {
-    return (
-      <GradientIcon icon={GlassWater} primaryColor={primaryColor} size={size} />
-    );
-  }
   if (path.includes(SPECIALTY_DRINKS_TAG)) {
     return <GradientIcon icon={Wine} primaryColor={primaryColor} size={size} />;
   }
@@ -75,12 +70,18 @@ const GenericItemIcon: React.FC<GenericItemIconProps> = ({
   if (path.includes(BEER_AND_CIDER_TAG)) {
     return <GradientIcon icon={Beer} primaryColor={primaryColor} size={size} />;
   }
+
+  if (path.includes(DRINK_MENU_TAG)) {
+    return (
+      <GradientIcon icon={GlassWater} primaryColor={primaryColor} size={size} />
+    );
+  }
   return (
     <ImageFallback
       src={ImageUtils.getItemImageUrl(itemId, restaurant)}
       alt=""
-      className="w-full h-full object-cover"
-      style={{ width: size, height: size, padding: 0 }}
+      className="object-cover rounded-md"
+      style={{ width: size * 1.2, height: size * 1.2, padding: 0 }}
       restaurant={restaurant}
     />
   );

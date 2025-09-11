@@ -25,15 +25,15 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
 
   useEffect(() => {
     const fetchPolicyStats = async () => {
+      if (!userSession || !userOwnershipMap || !restaurant) return;
       const results: Record<string, Record<string, string[]>> = {};
-
       for (const [bundleId, isOwned] of Object.entries(userOwnershipMap)) {
         if (isOwned) {
           const bundleMenuItem = ItemUtils.getMenuItemFromItemId(
             bundleId,
             restaurant as Restaurant
           ) as BundleItem;
-          if (bundleMenuItem && bundleMenuItem.price) {
+          if (bundleMenuItem && bundleMenuItem.price != null) {
             const bundle = bundleMenuItem.object;
             const stats = await BundleUtils.getUsersBundleUsageStats(
               userSession.user.id,
@@ -46,13 +46,24 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
       setPolicyStatsMap(results);
     };
 
-    if (userSession && userOwnershipMap && restaurant) {
-      fetchPolicyStats();
-    }
+    fetchPolicyStats();
   }, [userSession, userOwnershipMap, restaurant]);
 
-  if (!restaurant || policyStatsMap === undefined) {
+  if (!restaurant) {
     return null;
+  }
+
+  if (policyStatsMap === undefined) {
+    return (
+      <div className="mt-8 mb-8 flex justify-center items-center min-h-[200px]">
+        <div
+          className="animate-spin rounded-full h-8 w-8 border-4 border-gray-200"
+          style={{
+            borderTopColor: restaurant?.metadata.primaryColor,
+          }}
+        ></div>
+      </div>
+    );
   }
 
   const bundlesToDisplay = Object.entries(userOwnershipMap)
@@ -88,7 +99,7 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
           bundleId,
           restaurant
         ) as BundleItem;
-        if (!bundleMenuItem || !bundleMenuItem.price) {
+        if (!bundleMenuItem || bundleMenuItem.price == null) {
           return null;
         }
 

@@ -11,7 +11,7 @@ import { useRestaurant } from "@/context/restaurant_context";
 import { LoyaltyRewardPolicyCard } from "./menu_items";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { useAuth } from "@/context/auth_context";
-import { Gift, ShoppingBag } from "lucide-react";
+import { ChevronRight, Gift, HandCoins, ShoppingBag } from "lucide-react";
 import { PolicyUtils } from "@/utils/policy_utils";
 import { GradientIcon } from "@/utils/gradient";
 interface RewardsProps {
@@ -20,7 +20,8 @@ interface RewardsProps {
 
 const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
   const { restaurant, policyManager } = useRestaurant();
-  const { handlePolicyClick, getActivePolicies } = useBottomSheet();
+  const { handlePolicyClick, getActivePolicies, openAllBundlesModal } =
+    useBottomSheet();
   const { userData } = useAuth();
   const { userOwnershipMap } = useRestaurant();
   const userPoints = userData?.points[restaurant?.id as string] || 0;
@@ -195,32 +196,58 @@ const Rewards: React.FC<RewardsProps> = ({ viewAll }) => {
       {viewAll && (
         <div className="flex flex-col gap-4 mt-4">
           <h3 className="text-lg font-bold">Ways to earn rewards</h3>
-          <div className="bg-gray-50 rounded-3xl p-4 w-48 h-40 relative border border-gray-200">
-            <div className="flex justify-between">
-              <div className="bg-gray-200 rounded-full p-2">
-                <GradientIcon
-                  icon={ShoppingBag}
-                  primaryColor={restaurant.metadata.primaryColor}
-                  size={20}
-                />
+          <div className="flex gap-4">
+            <div className="bg-gray-50 rounded-3xl p-4 w-48 h-40 relative border border-gray-200">
+              <div className="flex justify-between">
+                <div className="bg-gray-200 rounded-full p-2">
+                  <GradientIcon
+                    icon={ShoppingBag}
+                    primaryColor={restaurant.metadata.primaryColor}
+                    size={20}
+                  />
+                </div>
+                <div className="flex items-center">
+                  <span className="text-sm text-gray-600 mr-1">
+                    {POINTS_PER_DOLLAR} points per $1
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center">
-                <span className="text-sm text-gray-600 mr-1">
-                  {POINTS_PER_DOLLAR} points per $1
-                </span>
+              <div className="absolute bottom-4 mr-4">
+                <h3 className="font-semibold text-md">Purchase Items</h3>
+                <p className="font-normal text-sm text-gray-600 mt-2">
+                  For every $1 you spend, get {POINTS_PER_DOLLAR} points.
+                </p>
               </div>
             </div>
-            <div className="absolute bottom-4 mr-4">
-              <h3 className="font-semibold text-md">Purchase Items</h3>
-              <p className="font-normal text-sm text-gray-600 mt-2">
-                For every $1 you spend, get {POINTS_PER_DOLLAR} points.
-              </p>
+            <div
+              className="bg-gray-50 rounded-3xl p-4 w-48 h-40 relative border border-gray-200"
+              onClick={() => openAllBundlesModal()}
+            >
+              <div className="flex justify-between">
+                <div className="bg-gray-200 rounded-full p-2">
+                  <GradientIcon
+                    icon={HandCoins}
+                    primaryColor={restaurant.metadata.primaryColor}
+                    size={20}
+                  />
+                </div>
+                <div className="flex items-center">
+                  <span className="text-sm text-gray-600">View Bundles</span>
+                  <ChevronRight className="w-5 h-5 text-gray-600" />
+                </div>
+              </div>
+              <div className="absolute bottom-4 mr-4">
+                <h3 className="font-semibold text-md">Purchase Bundles</h3>
+                <p className="font-normal text-sm text-gray-600 mt-2">
+                  Bundles contain point multipliers!
+                </p>
+              </div>
             </div>
           </div>
         </div>
       )}
       {loyaltyPolicies.length > 0 && viewAll && (
-        <div className="space-y-4 mt-6 mb-24">
+        <div className="space-y-4 mt-6 mb-24 -mx-3">
           {loyaltyPolicies.map((policy) => {
             return (
               <LoyaltyRewardPolicyCard

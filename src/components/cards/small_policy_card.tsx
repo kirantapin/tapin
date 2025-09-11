@@ -36,16 +36,16 @@ const SmallPolicyCard: React.FC<SmallPolicyCardProps> = ({
             <h3 className="font-bold text-gray-900 line-clamp-1">
               {PolicyUtils.getPolicyName(policy, restaurant)}
             </h3>
-            <span className="flex items-center gap-1 text-sm text-gray-500 truncate text-ellipsis">
-              {policy.locked ? (
-                <>
-                  Requires Bundle
-                  <CustomIcon circleColor={primaryColor} size={12} />
-                </>
-              ) : (
-                <>{policy.header}</>
-              )}
-            </span>
+            {policy.locked ? (
+              <span className="flex items-center gap-1 text-sm text-gray-500 truncate text-ellipsis">
+                Requires Bundle
+                <CustomIcon circleColor={primaryColor} size={12} />
+              </span>
+            ) : (
+              <span className=" text-sm text-gray-500 truncate text-ellipsis">
+                {policy.header}
+              </span>
+            )}
           </div>
         </div>
 

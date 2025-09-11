@@ -2,9 +2,9 @@ import { FC, useEffect, useState } from "react";
 import { Restaurant, Policy, PassItem, DealEffectPayload, Item } from "@/types";
 import { PassAddOnCard } from "../cards/pass_add_on_card";
 import { useRestaurant } from "@/context/restaurant_context";
-import { useTimer } from "@/hooks/useTimer";
 import AddOnCard from "../cards/add_on_card";
 import { ItemUtils } from "@/utils/item_utils";
+import { PolicyUtils } from "@/utils/policy_utils";
 
 interface AddOnManagerProps {
   state: any;
@@ -15,7 +15,6 @@ interface AddOnManagerProps {
     userPreference: Item | null
   ) => Promise<void>;
   removePolicy: (policy_id: string) => Promise<void>;
-  allowTimer?: boolean;
   allowPassItems?: boolean;
   allowNormalItems?: boolean;
 }
@@ -25,19 +24,10 @@ const AddOnManager: FC<AddOnManagerProps> = ({
   isPreEntry,
   addPolicy,
   removePolicy,
-  allowTimer = true,
   allowPassItems = true,
   allowNormalItems = true,
 }) => {
-  const {
-    timeRemaining: addOnTime,
-    isRunning,
-    start,
-    pause,
-    reset,
-  } = useTimer(180);
   const { restaurant, policyManager } = useRestaurant();
-  const [addOnPolicies, setAddOnPolicies] = useState<Policy[]>([]);
   const [normalItems, setNormalItems] = useState<
     { policy: Policy; itemId: string }[]
   >([]);
@@ -50,11 +40,9 @@ const AddOnManager: FC<AddOnManagerProps> = ({
       return;
     }
 
-    let addOns = policyManager.getAddOns(
-      state.cart,
-      state.dealEffect,
-      restaurant
-    );
+    let addOns = policyManager
+      .getAddOns(state.cart, state.dealEffect, restaurant)
+      .filter((policy) => PolicyUtils.isPolicyUsable(policy, restaurant));
 
     const addedItems = (
       state.dealEffect as DealEffectPayload
@@ -62,8 +50,12 @@ const AddOnManager: FC<AddOnManagerProps> = ({
       addOns.some((policy) => policy.policy_id === item.policy_id)
     );
     const activePolicies = policyManager.getActivePolicies(state.dealEffect);
-    addOns = addOns.filter((policy) => !activePolicies.includes(policy));
-    setAddOnPolicies(addOns);
+    addOns = addOns
+      .filter((policy) => !activePolicies.includes(policy))
+      .sort(
+        (a, b) =>
+          new Date(b.modified_at).getTime() - new Date(a.modified_at).getTime()
+      );
     const addOnItems: { policy: Policy; itemId: string }[] = [];
 
     for (const item of addedItems) {
@@ -80,14 +72,26 @@ const AddOnManager: FC<AddOnManagerProps> = ({
         itemId: cartItem.item.id,
       });
     }
+    const seenItemIds = new Set<string>();
     for (const policy of addOns) {
+      if (policy.definition.action.type !== "add_item") {
+        continue;
+      }
       const itemSpecs = policy.definition.action.items || [];
       const itemIds = ItemUtils.policyItemSpecificationsToItemIds(
         itemSpecs,
         restaurant
       );
       for (const itemId of itemIds) {
-        addOnItems.push({ policy, itemId });
+        if (
+          (ItemUtils.priceItem({ id: itemId }, restaurant) || Infinity) <
+          (policy.definition.action.priceLimit || Infinity)
+        ) {
+          if (!seenItemIds.has(itemId)) {
+            seenItemIds.add(itemId);
+            addOnItems.push({ policy, itemId });
+          }
+        }
       }
     }
     setNormalItems(
@@ -134,24 +138,21 @@ const AddOnManager: FC<AddOnManagerProps> = ({
       {allowNormalItems && (
         <div className="overflow-x-auto pt-2 mb-2 no-scrollbar -mx-4 px-4">
           <div className="flex gap-4" style={{ minWidth: "max-content" }}>
-            {addOnTime > 0 &&
-              normalItems.map(({ policy, itemId }) => (
-                <AddOnCard
-                  key={policy.policy_id}
-                  state={state}
-                  policy={policy}
-                  itemId={itemId}
-                  restaurant={restaurant}
-                  addPolicy={async () => {
-                    await addPolicy(null, policy.policy_id, {
-                      id: itemId,
-                      modifiers: [],
-                    });
-                    pause();
-                  }}
-                  removePolicy={removePolicy}
-                />
-              ))}
+            {normalItems.map(({ policy, itemId }, index) => (
+              <AddOnCard
+                key={`${policy.policy_id}-${itemId}-${index}`}
+                state={state}
+                policy={policy}
+                itemId={itemId}
+                restaurant={restaurant}
+                addPolicy={async () => {
+                  await addPolicy(null, policy.policy_id, {
+                    id: itemId,
+                  });
+                }}
+                removePolicy={removePolicy}
+              />
+            ))}
           </div>
         </div>
       )}
@@ -163,9 +164,7 @@ const AddOnManager: FC<AddOnManagerProps> = ({
               addPolicy={async () => {
                 await addPolicy(null, policy.policy_id, {
                   id: itemId,
-                  modifiers: [],
                 });
-                pause();
               }}
               removePolicy={removePolicy}
               restaurant={restaurant as Restaurant}
