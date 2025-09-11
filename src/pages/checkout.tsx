@@ -29,6 +29,7 @@ import {
 import HighlightSlider from "@/components/sliders/highlight_slider";
 import ScrollDownIndicator from "@/components/buttons/scroll_down_indicator";
 import { TransactionUtils } from "@/utils/transaction_utils";
+import { OpeningHoursWarning } from "@/components/display_utils/opening_hours_warning";
 
 export default function CheckoutPage() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -106,21 +107,12 @@ export default function CheckoutPage() {
         </div>
       </div>
 
-      {/* <div
-        className="w-full z-50 h-8 rounded-b-2xl text-center text-xs font-semibold text-white flex items-center justify-center shadow-[0_20px_25px_-5px_rgba(0,0,0,0.15),0_10px_10px_-5px_rgba(0,0,0,0.08)]"
-        style={{
-          backgroundColor: restaurant.metadata.primaryColor,
-        }}
-      >
-        How are items redeemed at {restaurant.name}?
-      </div> */}
-
-      {/* Scrollable Content */}
       <div
         ref={scrollContainerRef}
         className="flex-1 overflow-y-auto overflow-x-hidden"
       >
         <div className="px-4 pb-8">
+          <OpeningHoursWarning context="checkout" marginTop={20} />
           <AccessCardSlider
             restaurant={restaurant}
             cart={state.cart}

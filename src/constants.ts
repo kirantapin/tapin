@@ -53,3 +53,5 @@ export const MAX_BUNDLE_DURATION = 90;
 
 export const RESERVED_MENU_KEYWORDS = ["name", "label"];
 export const MAX_QR_TRANSACTIONS = 4;
+
+export const NO_FULFILLED_BY = "loc";

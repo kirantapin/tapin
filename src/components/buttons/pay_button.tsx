@@ -14,6 +14,7 @@ import { submitPurchase } from "@/utils/purchase.ts";
 import RedeemButton from "@/components/buttons/redeem_button.tsx";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { SquarePayButton } from "./square_button.tsx";
+import { PurchaseTermsCard } from "../cards/purchase_terms_card.tsx";
 
 const stripePublishableKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || "";
 const stripePromise = loadStripe(stripePublishableKey);
@@ -194,14 +195,7 @@ function PayButton({
           postPurchase={postPurchase}
         />
         <div className="text-sm text-gray-600 leading-[1.4] mt-6 mb-6">
-          <p className="m-0">
-            By completing this purchase, you confirm that you are 21 years of
-            age or older and will present a valid government-issued ID upon
-            redemption. All sales are final, and subject to venue rules and
-            availability. By purchasing, you agree to Tapin’s{" "}
-            <span className="underline">Terms & Conditions</span> and{" "}
-            <span className="underline">Privacy Policy</span>.
-          </p>
+          <PurchaseTermsCard />
         </div>
       </div>
     );
@@ -239,14 +233,7 @@ function PayButton({
           postPurchase={postPurchase}
         />
         <div className="text-sm text-gray-600 leading-[1.4] mt-6 mb-6">
-          <p className="m-0">
-            By completing this purchase, you confirm that you are 21 years of
-            age or older and will present a valid government-issued ID upon
-            redemption. All sales are final, and subject to venue rules and
-            availability. By purchasing, you agree to Tapin’s{" "}
-            <span className="underline">Terms & Conditions</span> and{" "}
-            <span className="underline">Privacy Policy</span>.
-          </p>
+          <PurchaseTermsCard />
         </div>
       </Elements>
     );
@@ -262,14 +249,7 @@ function PayButton({
           postPurchase={postPurchase}
         />
         <div className="text-sm text-gray-600 leading-[1.4] mt-6 mb-6">
-          <p className="m-0">
-            By completing this purchase, you confirm that you are 21 years of
-            age or older and will present a valid government-issued ID upon
-            redemption. All sales are final, and subject to venue rules and
-            availability. By purchasing, you agree to Tapin’s{" "}
-            <span className="underline">Terms & Conditions</span> and{" "}
-            <span className="underline">Privacy Policy</span>.
-          </p>
+          <PurchaseTermsCard />
         </div>
       </div>
     );

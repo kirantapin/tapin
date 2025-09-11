@@ -10,18 +10,15 @@ import {
   BundleItem,
   CartState,
   Item,
-  ItemSpecification,
   Policy,
   Restaurant,
   Transaction,
-  UserSession,
 } from "@/types";
 import { Bundle } from "@/types";
 import { useRestaurant } from "./restaurant_context";
 import { useGlobalCartManager } from "@/hooks/useGlobalCartManager";
 import { useAuth } from "./auth_context";
 import BundleModal from "@/components/bottom_sheets/bundle_modal";
-import QRModal from "@/components/bottom_sheets/qr_modal";
 import { BundleUtils } from "@/utils/bundle_utils";
 import { emptyDealEffect, MAX_QR_TRANSACTIONS } from "@/constants";
 import { ItemUtils } from "@/utils/item_utils";
@@ -33,6 +30,7 @@ import AllBundlesModal from "@/components/bottom_sheets/all_bundles_modal";
 import CheckoutModal from "@/components/bottom_sheets/checkout_modal";
 import { TransactionUtils } from "@/utils/transaction_utils";
 import ItemModModal from "@/components/bottom_sheets/item_mod_modal";
+import SelfRedeemModal from "@/components/bottom_sheets/self_redeem_modal";
 
 // Define the shape of your sheet registry: keys → sheet components
 type SheetMap = Record<string, FC<any>>;
@@ -425,7 +423,7 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
       )}
 
       {qrModal && (
-        <QRModal
+        <SelfRedeemModal
           isOpen={isOpen}
           onClose={closeSheet}
           transactionsToRedeem={qrModal?.transactionsToRedeem || []}
