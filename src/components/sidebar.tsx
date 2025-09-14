@@ -105,7 +105,7 @@ export const Sidebar = ({ restaurant, isOpen, onClose }: SidebarProps) => {
           }}
         >
           <ArrowLeft size={20} />
-          <span className="font-semibold">Discover Bars</span>
+          <span className="font-semibold">Discover More </span>
         </button>
       </div>
 
