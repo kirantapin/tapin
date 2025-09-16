@@ -3,14 +3,13 @@ import { supabase } from "./supabase_client";
 import { Cart, CartItem, Pass, PassItem, Restaurant } from "@/types";
 
 const passDisplayThreshold = 14 * 24 * 60 * 60 * 1000; // 14 days
-const passLookback = 14 * 24 * 60 * 60 * 1000; // 14 days
 export class PassUtils {
   static fetchPasses = async (restaurantId: string | null): Promise<Pass[]> => {
     const { data, error } = await supabase
       .from("passes")
       .select("*")
       .eq("restaurant_id", restaurantId)
-      .gte("end_time", new Date(Date.now() - passLookback).toISOString())
+      .gte("end_time", new Date(Date.now()).toISOString())
       .lte(
         "end_time",
         new Date(Date.now() + passDisplayThreshold).toISOString()
