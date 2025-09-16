@@ -70,9 +70,12 @@ const AccessCardSlider = ({
     }
 
     const itemIds = ItemUtils.getAllItemsInCategory(PASS_MENU_TAG, restaurant);
+    const availablePasses = itemIds.filter(
+      (id) => !ItemUtils.isItemUnavailable({ id: id }, restaurant)
+    );
 
     // Sort items by for_date before pushing to flattened
-    const sortedItemIds = [...itemIds].sort((a, b) => {
+    const sortedItemIds = [...availablePasses].sort((a, b) => {
       const aDate =
         (ItemUtils.getMenuItemFromItemId(a, restaurant) as PassItem).for_date ||
         "";

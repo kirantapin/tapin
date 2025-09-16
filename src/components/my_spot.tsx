@@ -28,7 +28,11 @@ export const MySpot: React.FC<MySpotProps> = ({
       t.fulfilled_by === null &&
       t.metadata?.path?.includes(PASS_MENU_TAG) &&
       t.restaurant_id === restaurant?.id &&
-      TransactionUtils.isTransactionRedeemable(t, restaurant)
+      TransactionUtils.isTransactionRedeemable(t, restaurant) &&
+      !ItemUtils.isItemUnavailable(
+        TransactionUtils.getTransactionItem(t),
+        restaurant
+      )
   );
 
   const activeOrdersCount = transactions.filter(

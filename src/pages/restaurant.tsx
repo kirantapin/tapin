@@ -203,7 +203,7 @@ export default function RestaurantPage() {
             unlockedFirst={true}
           />
 
-          {userOwnershipMap && (
+          {Object.keys(userOwnershipMap).length > 0 && (
             <div className="mt-2">
               <h1 className="text-xl font-bold">Great Value</h1>
               <BundleSlider />

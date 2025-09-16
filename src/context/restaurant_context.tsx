@@ -19,7 +19,6 @@ type RestaurantContextType = {
   setRestaurant: (restaurant: Restaurant | null) => void;
   policyManager: PolicyManager | null;
   userOwnershipMap: Record<string, string | null>;
-  fetchUserOwnership: (restaurant: Restaurant) => void;
   highlights: Highlight[] | null;
 };
 
@@ -29,7 +28,6 @@ const RestaurantContext = createContext<RestaurantContextType>({
   setRestaurant: () => {},
   policyManager: null,
   userOwnershipMap: {},
-  fetchUserOwnership: () => {},
   highlights: null,
 });
 
@@ -135,7 +133,6 @@ export const RestaurantProvider = ({
         setCurrentRestaurantId,
         policyManager,
         userOwnershipMap,
-        fetchUserOwnership,
         highlights,
       }}
     >
