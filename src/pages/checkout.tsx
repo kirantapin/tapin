@@ -258,6 +258,7 @@ export default function CheckoutPage() {
             tipAmount={tipAmount}
             setTipAmount={setTipAmount}
             showDiscount={true}
+            showTipSelection={true}
           />
 
           <div className="bg-white pt-0 -mx-4 px-4 shadow-[0_-8px_16px_-6px_rgba(0,0,0,0.1)]">

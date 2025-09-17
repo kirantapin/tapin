@@ -10,6 +10,7 @@ interface CheckoutSummaryProps {
   restaurant: Restaurant;
   tipAmount: number;
   setTipAmount: (tipAmount: number) => void;
+  showTipSelection: boolean;
   showDiscount: boolean;
 }
 
@@ -18,6 +19,7 @@ const CheckoutSummary: FC<CheckoutSummaryProps> = ({
   state,
   tipAmount,
   setTipAmount,
+  showTipSelection,
   showDiscount,
 }) => {
   const tipAmounts =
@@ -152,48 +154,51 @@ const CheckoutSummary: FC<CheckoutSummaryProps> = ({
             ).toFixed(2)}
           </span>
         </div>
-        <>
-          <div className={checkoutStyles.summaryRow}>
-            <span>Tip</span>
-            <span>${tipAmount.toFixed(2)}</span>
-          </div>
-          {restaurant && (
+        {showTipSelection && (
+          <>
             <div className={checkoutStyles.summaryRow}>
-              <div className="relative flex w-full bg-gray-100 rounded-full border border-gray-200 mt-2">
-                {/* Animated highlight */}
-                <motion.div
-                  layout
-                  transition={{
-                    type: "spring",
-                    stiffness: 400,
-                    damping: 30,
-                  }}
-                  className="absolute inset-0 rounded-full z-0"
-                  style={{
-                    left: `${
-                      (tipAmounts.indexOf(tipPercent) / tipAmounts.length) * 100
-                    }%`,
-                    width: `${100 / tipAmounts.length}%`,
-                    backgroundColor: restaurant?.metadata.primaryColor,
-                  }}
-                />
-
-                {tipAmounts.map((tip) => (
-                  <button
-                    key={tip}
-                    onClick={() => {
-                      setTipPercent(tip);
-                    }}
-                    className={`relative z-10 flex-1 py-2 text-sm font-medium transition-colors 
-                    ${tipPercent === tip ? "text-white" : "text-gray-600"}`}
-                  >
-                    {Math.round(tip * 100)}%
-                  </button>
-                ))}
-              </div>
+              <span>Tip</span>
+              <span>${tipAmount.toFixed(2)}</span>
             </div>
-          )}
-        </>
+            {restaurant && (
+              <div className={checkoutStyles.summaryRow}>
+                <div className="relative flex w-full bg-gray-100 rounded-full border border-gray-200 mt-2">
+                  {/* Animated highlight */}
+                  <motion.div
+                    layout
+                    transition={{
+                      type: "spring",
+                      stiffness: 400,
+                      damping: 30,
+                    }}
+                    className="absolute inset-0 rounded-full z-0"
+                    style={{
+                      left: `${
+                        (tipAmounts.indexOf(tipPercent) / tipAmounts.length) *
+                        100
+                      }%`,
+                      width: `${100 / tipAmounts.length}%`,
+                      backgroundColor: restaurant?.metadata.primaryColor,
+                    }}
+                  />
+
+                  {tipAmounts.map((tip) => (
+                    <button
+                      key={tip}
+                      onClick={() => {
+                        setTipPercent(tip);
+                      }}
+                      className={`relative z-10 flex-1 py-2 text-sm font-medium transition-colors 
+                    ${tipPercent === tip ? "text-white" : "text-gray-600"}`}
+                    >
+                      {Math.round(tip * 100)}%
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
         <div className={checkoutStyles.summaryTotal} style={{ marginTop: 20 }}>
           <span className="font-bold">Total</span>
           <span className="font-bold">
