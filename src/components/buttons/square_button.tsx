@@ -76,34 +76,6 @@ export const SquarePayButton = ({
             buttonSizeMode: "fill",
           });
           setGooglePay(googlePay);
-          //   googlePayRef.current.addEventListener("click", async () => {
-          //     const result = await googlePay.tokenize();
-          //     if (result.status === "OK") {
-          //       const error = await refresh();
-          //       if (error) return triggerToast(error, "error");
-
-          //       const token = result.token;
-          //       const paymentData = {
-          //         accountId: payload.accountId,
-          //         token,
-          //         additionalOrderData: {},
-          //       };
-          //       payload["paymentData"] = paymentData;
-
-          //       const response = await submitPurchase(payload);
-          //       if (response) {
-          //         const { transactions, modifiedUserData } = response;
-          //         handleTapInResponse(transactions, modifiedUserData);
-          //       } else {
-          //         triggerToast(
-          //           "Something went wrong. Please try again.",
-          //           "error"
-          //         );
-          //       }
-          //     } else {
-          //       console.error("Google Pay failed", result);
-          //     }
-          //   });
         }
       } catch (e) {
         console.warn("Google Pay setup failed", e);

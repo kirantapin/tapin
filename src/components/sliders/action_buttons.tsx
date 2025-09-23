@@ -83,10 +83,10 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
         </span>
       </button>
 
-      {(restaurant.info?.customLinks || []).map((customLink: any) => {
+      {(restaurant.info?.customLinks || []).map((customLink: any, idx: number) => {
         return (
           <Alert
-            key={customLink.url}
+            key={idx}
             trigger={
               <button className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 py-2 sm:py-2 rounded-full border border-gray-300 bg-white">
                 <GradientIcon

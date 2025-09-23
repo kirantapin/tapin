@@ -66,16 +66,17 @@ const MySpotContent: React.FC = () => {
 
     // Group transactions by item ID + modifiers
     const groupedTransactions = filtered.reduce((acc, transaction) => {
-      const key =
-        transaction.item +
-        "|" +
-        (transaction.metadata.variation || "") +
-        "|" +
-        Object.entries(transaction.metadata.modifiers || {})
-          .map(([modifierGroupId, modifierIds]) =>
-            modifierIds.map((modifierId) => `${modifierGroupId}:${modifierId}`)
-          )
-          .join("|");
+      const transactionModifiers = Object.entries(
+        transaction.metadata.modifiers || {}
+      ).flatMap(([groupId, ids]) => ids.map((id) => `${groupId}:${id}`));
+
+      const key = [
+        transaction.item,
+        transaction.metadata.variation || null,
+        ...transactionModifiers,
+      ]
+        .filter(Boolean)
+        .join("|");
 
       if (!acc[key]) {
         acc[key] = {
@@ -268,7 +269,7 @@ const MySpotContent: React.FC = () => {
             {/* Redeem Button */}
             <div className="fixed bottom-0 left-0 right-0 flex flex-col gap-2 bg-white py-4 px-4 border-t rounded-t-3xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
               <button
-                className={`w-full py-3 rounded-full text-white font-semibold transition-colors duration-400 ${
+                className={`w-full py-3 rounded-full text-white font-semibold transition-colors duration-1000 ${
                   selectedTransactions.length > 0 ? "" : "bg-gray-400"
                 }`}
                 style={

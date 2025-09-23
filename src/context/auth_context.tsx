@@ -20,7 +20,7 @@ interface AuthContextProps {
   userData: User | null;
   setUserData: React.Dispatch<React.SetStateAction<User | null>>;
   transactions: Transaction[];
-  setTransactions: React.Dispatch<React.SetStateAction<Transaction[] | []>>;
+  setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
 }
 
 export const AuthContext = createContext<AuthContextProps | undefined>(

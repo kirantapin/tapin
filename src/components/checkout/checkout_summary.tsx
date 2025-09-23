@@ -10,6 +10,7 @@ interface CheckoutSummaryProps {
   restaurant: Restaurant;
   tipAmount: number;
   setTipAmount: (tipAmount: number) => void;
+  showTipSelection: boolean;
   showDiscount: boolean;
 }
 
@@ -18,6 +19,7 @@ const CheckoutSummary: FC<CheckoutSummaryProps> = ({
   state,
   tipAmount,
   setTipAmount,
+  showTipSelection,
   showDiscount,
 }) => {
   const tipAmounts =
@@ -28,7 +30,7 @@ const CheckoutSummary: FC<CheckoutSummaryProps> = ({
           Math.round(restaurant.metadata.tip.minimumPercentage) / 100 + 0.05,
           Math.round(restaurant.metadata.tip.minimumPercentage) / 100 + 0.1,
         ]
-      : [0.1, 0.15, 0.2];
+      : [0, 0.1, 0.15, 0.2];
   const [tipPercent, setTipPercent] = useState<number>(
     tipAmounts[tipAmounts.length - 1]
   );
@@ -152,7 +154,7 @@ const CheckoutSummary: FC<CheckoutSummaryProps> = ({
             ).toFixed(2)}
           </span>
         </div>
-        {tipAmount > 0 && (
+        {showTipSelection && (
           <>
             <div className={checkoutStyles.summaryRow}>
               <span>Tip</span>
