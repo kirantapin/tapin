@@ -176,7 +176,9 @@ export const RestaurantProvider = ({
                 amount_remaining: pass.amount_remaining,
               },
             };
-            updatedMenu[pass.itemId].children.push(pass.pass_id);
+            if (!updatedMenu[pass.itemId].children.includes(pass.pass_id)) {
+              updatedMenu[pass.itemId].children.push(pass.pass_id);
+            }
           }
         }
 

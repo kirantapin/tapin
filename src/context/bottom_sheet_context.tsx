@@ -31,6 +31,8 @@ import CheckoutModal from "@/components/bottom_sheets/checkout_modal";
 import { TransactionUtils } from "@/utils/transaction_utils";
 import ItemModModal from "@/components/bottom_sheets/item_mod_modal";
 import SelfRedeemModal from "@/components/bottom_sheets/self_redeem_modal";
+import PassWarningModal from "@/components/bottom_sheets/pass_warning_modal";
+import NonRedeemModal from "@/components/bottom_sheets/nonredeem_modal";
 
 // Define the shape of your sheet registry: keys → sheet components
 type SheetMap = Record<string, FC<any>>;
@@ -38,7 +40,10 @@ type SheetMap = Record<string, FC<any>>;
 interface BottomSheetContextValue {
   openBundleModal: (bundle: Bundle) => void;
   closeSheet: () => void;
-  openQrModal: (transactionsToRedeem: Transaction[]) => void;
+  openQrModal: (
+    transactionsToRedeem: Transaction[],
+    forceRedemption?: boolean
+  ) => void;
   handlePolicyClick: (
     policy: Policy,
     userOwnershipMap: Record<string, string | null>
@@ -173,7 +178,12 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
     itemId: string;
     onSelect: (item: Item) => Promise<void>;
   } | null>(null);
-
+  const [passWarningModal, setPassWarningModal] = useState<{
+    transactionsToRedeem: Transaction[];
+  } | null>(null);
+  const [nonRedeemModal, setNonRedeemModal] = useState<{
+    transactionsToRedeem: Transaction[];
+  } | null>(null);
   const openItemModModal = (
     itemId: string,
     onSelect: (item: Item) => Promise<void>
@@ -199,6 +209,8 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
       setBundleModal(null);
       setPolicyModal(null);
       setQrModal(null);
+      setPassWarningModal(null);
+      setNonRedeemModal(null);
       setShowSignInModal(false);
       setShowProfile(false);
       setLockedPolicyModal(null);
@@ -289,7 +301,10 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
     }, 200); // Wait for animation to complete
   };
 
-  const openQrModal = (transactionsToRedeem: Transaction[]) => {
+  const openQrModal = (
+    transactionsToRedeem: Transaction[],
+    forceRedemption: boolean = false
+  ) => {
     const valid = validateTransactions(
       transactionsToRedeem,
       triggerToast,
@@ -298,11 +313,30 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
     if (!valid) {
       return;
     }
+
+    const passItemCount = transactionsToRedeem.filter((transaction) =>
+      ItemUtils.isPassItem(
+        TransactionUtils.getTransactionItem(transaction).id,
+        restaurant as Restaurant
+      )
+    ).length;
+
+    const allPasses = passItemCount === transactionsToRedeem.length;
+
+    // Check if it's a mix of pass items and normal items
+    if (passItemCount > 0 && passItemCount < transactionsToRedeem.length) {
+      openNonRedeemModal(transactionsToRedeem);
+      return;
+    }
+
+    const openFunction =
+      allPasses && !forceRedemption ? setPassWarningModal : setQrModal;
+
     if (isOpen) {
       closeSheet();
     }
     setTimeout(() => {
-      setQrModal({ transactionsToRedeem });
+      openFunction({ transactionsToRedeem });
       setIsOpen(true);
     }, 200); // Wait for animation to complete
   };
@@ -356,6 +390,16 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
     }
     setTimeout(() => {
       setLockedPolicyModal({ policy, bundle_id });
+      setIsOpen(true);
+    }, 200); // Wait for animation to complete
+  };
+
+  const openNonRedeemModal = (transactionsToRedeem: Transaction[]) => {
+    if (isOpen) {
+      closeSheet();
+    }
+    setTimeout(() => {
+      setNonRedeemModal({ transactionsToRedeem });
       setIsOpen(true);
     }, 200); // Wait for animation to complete
   };
@@ -427,6 +471,23 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
           isOpen={isOpen}
           onClose={closeSheet}
           transactionsToRedeem={qrModal?.transactionsToRedeem || []}
+          restaurant={restaurant as Restaurant}
+        />
+      )}
+      {passWarningModal && (
+        <PassWarningModal
+          isOpen={isOpen}
+          onClose={closeSheet}
+          transactionsToRedeem={passWarningModal.transactionsToRedeem}
+          restaurant={restaurant as Restaurant}
+        />
+      )}
+
+      {nonRedeemModal && (
+        <NonRedeemModal
+          isOpen={isOpen}
+          onClose={closeSheet}
+          transactionsToRedeem={nonRedeemModal.transactionsToRedeem}
           restaurant={restaurant as Restaurant}
         />
       )}

@@ -10,7 +10,7 @@ import { useBottomSheet } from "@/context/bottom_sheet_context";
 import CustomLogo from "../svg/custom_logo";
 import { DrinkItem } from "../menu_items";
 import { useQRUtils } from "@/hooks/useQRUtils";
-import { NO_FULFILLED_BY } from "@/constants";
+import { NO_FULFILLED_BY, PASS_MENU_TAG } from "@/constants";
 import { OpeningHoursWarning } from "../display_utils/opening_hours_warning";
 
 interface SelfRedeemModalProps {
@@ -59,8 +59,8 @@ const SelfRedeemModal: React.FC<SelfRedeemModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Check if user display name exists, if not show popup
-    if (!userDisplayName) {
+    // Check if user display name exists, if not show popup (only for user redemptions)
+    if (!staffRedemption && !userDisplayName) {
       setShowNameInput(true);
       return;
     }
@@ -82,7 +82,9 @@ const SelfRedeemModal: React.FC<SelfRedeemModalProps> = ({
           userAccessToken: userSession?.access_token,
           restaurant_id: restaurant.id,
           metadata: {
-            user_display_name: userDisplayName,
+            user_display_name: staffRedemption
+              ? "Staff Redemption"
+              : userDisplayName,
             user_phone_number: userSession?.user?.phone,
           },
         },
@@ -139,6 +141,10 @@ const SelfRedeemModal: React.FC<SelfRedeemModalProps> = ({
 
   const itemsToBeRedeemed: { item: Item; purchaseDate: string }[] =
     getItemsFromTransactions(transactionsToRedeem);
+
+  const staffRedemption = transactionsToRedeem.every((transaction) =>
+    transaction.metadata.path?.includes(PASS_MENU_TAG)
+  );
 
   const modifiedOnClose = async () => {
     setUpdatingTransactions(true);
@@ -220,18 +226,21 @@ const SelfRedeemModal: React.FC<SelfRedeemModalProps> = ({
             {verifyingState !== "complete" ? (
               <div>
                 <p className="text-black mb-0 text-lg font-semibold">
-                  You're about to redeem {transactionsToRedeem.length} item
-                  {transactionsToRedeem.length > 1 ? "s" : ""}.
+                  {staffRedemption
+                    ? `Redeeming ${transactionsToRedeem.length} pass item${
+                        transactionsToRedeem.length > 1 ? "s" : ""
+                      } for customer`
+                    : `You're about to redeem ${
+                        transactionsToRedeem.length
+                      } item${transactionsToRedeem.length > 1 ? "s" : ""}.`}
                 </p>
                 <p className="text-gray-500 mb-0 pt-1 text-sm">
-                  Having trouble? Ask a staff member for assistance. If you
-                  would rather redeem your items later, then just click out of
-                  this page. Items will be saved in{" "}
-                  <span className="font-semibold text-black">"My Spot"</span>{" "}
-                  for up to 90 days.
+                  {staffRedemption
+                    ? "As venue staff, you can redeem these pass items for the customer. Make sure you have confirmed the customer's identity and that they are present."
+                    : "Having trouble? Ask a staff member for assistance. If you would rather redeem your items later, then just click out of this page. Items will be saved in My Spot for up to 90 days."}
                 </p>
 
-                {userDisplayName && (
+                {!staffRedemption && userDisplayName && (
                   <div className="flex items-center justify-between mt-2">
                     <p className="text-md text-gray-600">
                       Order name:{" "}
@@ -265,18 +274,21 @@ const SelfRedeemModal: React.FC<SelfRedeemModalProps> = ({
                 </div>
                 <div className="text-xl text-center">
                   <span className=" font-semibold">
-                    Your redemption has been sent to the {restaurant.name}{" "}
-                    kitchen. Please confirm your order.
+                    {staffRedemption
+                      ? `Pass items have been redeemed for the customer.`
+                      : `Your redemption has been sent to the ${restaurant.name} kitchen. Please confirm your order.`}
                   </span>
                 </div>
-                <div className="text-center">
-                  <p className="text-gray-600 text-md">
-                    Order name:{" "}
-                    <span className="font-semibold text-gray-900">
-                      {userDisplayName}
-                    </span>
-                  </p>
-                </div>
+                {!staffRedemption && (
+                  <div className="text-center">
+                    <p className="text-gray-600 text-md">
+                      Order name:{" "}
+                      <span className="font-semibold text-gray-900">
+                        {userDisplayName}
+                      </span>
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -297,20 +309,10 @@ const SelfRedeemModal: React.FC<SelfRedeemModalProps> = ({
           {/* Fixed Redeem Button */}
           <div className="flex-none px-6 py-4 bg-white border-t border-gray-200">
             <button
-              className={`w-full py-3 rounded-full text-lg font-semibold ${
-                verifyingState === "complete"
-                  ? "text-black border"
-                  : "text-white"
-              }`}
+              className={`w-full py-3 rounded-full text-lg font-semibold text-white`}
               style={{
-                backgroundColor:
-                  verifyingState === "complete"
-                    ? "white"
-                    : restaurant?.metadata.primaryColor,
-                borderColor:
-                  verifyingState === "complete"
-                    ? restaurant?.metadata.primaryColor
-                    : "transparent",
+                backgroundColor: restaurant?.metadata.primaryColor,
+                borderColor: restaurant?.metadata.primaryColor,
               }}
               onClick={
                 verifyingState === "complete"
@@ -326,12 +328,12 @@ const SelfRedeemModal: React.FC<SelfRedeemModalProps> = ({
                   <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
                 ) : verifyingState === "complete" ? (
                   updatingTransactions ? (
-                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-black border-t-transparent" />
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
                   ) : (
                     <>
                       <span className="font-semibold">Close</span>
                       <img
-                        src="/tapin_icon_full_black.png"
+                        src="/tapin_icon_full_white.png"
                         alt="Tap In Icon"
                         className="h-5"
                       />
@@ -416,11 +418,14 @@ const SelfRedeemModal: React.FC<SelfRedeemModalProps> = ({
           <div className="flex flex-col gap-4">
             <div className="text-center">
               <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                Are you ready to redeem these items?
+                {staffRedemption
+                  ? "Are you ready to redeem these pass items for the customer?"
+                  : "Are you ready to redeem these items?"}
               </h2>
               <p className="text-gray-600 text-sm">
-                This will send your redemption order to the {restaurant.name}{" "}
-                kitchen. Make sure you are ready to receive your items.
+                {staffRedemption
+                  ? `This will redeem the pass items for the customer. Make sure the customer is present and you have confirmed their identity.`
+                  : `This will send your redemption order to the ${restaurant.name} kitchen. Make sure you are ready to receive your items.`}
               </p>
             </div>
 

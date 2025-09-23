@@ -195,6 +195,9 @@ export class ItemUtils {
     if (this.isBundleItem(item.id, restaurant)) {
       return false;
     }
+    if (this.isPassItem(item.id, restaurant)) {
+      return this.isItemUnavailable(item, restaurant) === null;
+    }
     return !!this.getMenuItemFromItemId(item.id, restaurant);
   }
 
