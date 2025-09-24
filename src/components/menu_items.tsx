@@ -3,6 +3,7 @@ import { Plus, Trash2, Minus, Check } from "lucide-react";
 import { titleCase } from "title-case";
 import {
   Cart,
+  Category,
   Item,
   ItemSpecification,
   NormalItem,
@@ -606,6 +607,18 @@ export const DrinkList = ({
   }, [label]);
 
   const sortedLabels = labelOrder || Object.keys(restaurant.labelMap);
+
+  sortedLabels.sort((a, b) => {
+    const categoryA = ItemUtils.getMenuItemFromItemId(
+      restaurant.labelMap[a],
+      restaurant
+    ) as Category;
+    const categoryB = ItemUtils.getMenuItemFromItemId(
+      restaurant.labelMap[b],
+      restaurant
+    ) as Category;
+    return (categoryB?.sortWeight || 0) - (categoryA?.sortWeight || 0);
+  });
 
   return (
     <div className="space-y-4  overflow-y-auto scroll-smooth no-scrollbar -mx-5">

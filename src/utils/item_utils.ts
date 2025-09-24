@@ -93,11 +93,12 @@ export class ItemUtils {
   static getMenuItemFromItemId(
     itemId: string,
     restaurant: Restaurant
-  ): NormalItem | PassItem | BundleItem | undefined {
+  ): NormalItem | PassItem | BundleItem | Category | undefined {
     return restaurant.menu[itemId]?.info as
       | NormalItem
       | PassItem
       | BundleItem
+      | Category
       | undefined;
   }
   static priceItem(item: Item, restaurant: Restaurant): number {
