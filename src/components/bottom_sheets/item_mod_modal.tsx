@@ -193,6 +193,14 @@ const ItemModModal: React.FC<ItemModModalProps> = ({
                       });
                     };
 
+                    const { minSelected, maxSelected, modifiers } =
+                      modifierGroup;
+                    const hasMin = minSelected != null; // not null/undefined
+                    const hasMax = maxSelected != null; // not null/undefined
+                    const maxCap = hasMax
+                      ? Math.min(maxSelected!, modifiers.length)
+                      : 0;
+
                     return (
                       <div key={modifierGroupId} className="space-y-3">
                         <div className="flex items-center justify-between">
@@ -201,29 +209,21 @@ const ItemModModal: React.FC<ItemModModalProps> = ({
                           </h5>
                           <div className="text-sm text-gray-500">
                             {modifierGroup.select === "single" ||
-                            (modifierGroup.minSelected === 1 &&
-                              modifierGroup.maxSelected === 1) ? (
+                            (minSelected === 1 && maxSelected === 1) ? (
                               <span>Required</span>
                             ) : (
-                              (modifierGroup.minSelected ||
-                                modifierGroup.maxSelected) && (
+                              (hasMin || hasMax) && (
                                 <span>
-                                  {modifierGroup.minSelected &&
-                                  modifierGroup.maxSelected
-                                    ? `${modifierGroup.minSelected}-${modifierGroup.maxSelected} Selections`
-                                    : modifierGroup.minSelected
-                                    ? `Min: ${
-                                        modifierGroup.minSelected
-                                      } Selection${
-                                        modifierGroup.minSelected > 1 ? "s" : ""
+                                  {hasMin && hasMax
+                                    ? minSelected === maxCap
+                                      ? `${minSelected} Selections`
+                                      : `${minSelected}-${maxCap} Selections`
+                                    : hasMin
+                                    ? `Min: ${minSelected} Selection${
+                                        minSelected! > 1 ? "s" : ""
                                       }`
-                                    : `Max: ${
-                                        modifierGroup.maxSelected
-                                      } Selection${
-                                        modifierGroup.maxSelected &&
-                                        modifierGroup.maxSelected > 1
-                                          ? "s"
-                                          : ""
+                                    : `Max: ${maxCap} Selection${
+                                        maxCap > 1 ? "s" : ""
                                       }`}
                                 </span>
                               )
