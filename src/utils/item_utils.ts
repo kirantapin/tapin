@@ -373,6 +373,10 @@ export class ItemUtils {
         }
       }
     }
+    //sort modifier ids for consistency
+    for (const modifierGroupId of Object.keys(item.modifiers || {})) {
+      item.modifiers?.[modifierGroupId]?.sort();
+    }
 
     return null;
   }
