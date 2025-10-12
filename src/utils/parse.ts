@@ -72,7 +72,7 @@ export const formatPoints = (points: number) => {
     if (points % 1000 === 0) {
       return `${points / 1000}K`;
     } else {
-      return `${(points / 1000).toFixed(1)}K`;
+      return `${truncate(points / 1000, 1)}K`;
     }
   }
   return `${points}`;
@@ -88,3 +88,8 @@ export const formatBundleName = (name: string) => {
   }
   return formattedName;
 };
+
+function truncate(num: number, decimals: number) {
+  const factor = Math.pow(10, decimals);
+  return Math.trunc(num * factor) / factor;
+}
