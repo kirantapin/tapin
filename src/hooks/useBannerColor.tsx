@@ -1,6 +1,6 @@
 import { Restaurant } from "@/types";
 import { setThemeColor } from "@/utils/color";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 export const useBannerColor = (
   titleElement: HTMLHeadingElement | null,

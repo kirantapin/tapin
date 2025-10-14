@@ -467,7 +467,7 @@ export function PreviousTransactionItem({
             );
             if (modifierNames.length > 0) {
               return (
-                <p className="text-sm text-gray-500 custom-line-clamp-1">
+                <p className="text-sm text-gray-500 custom-line-clamp-2">
                   {modifierNames.join(", ")}
                 </p>
               );
