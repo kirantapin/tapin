@@ -398,30 +398,23 @@ export class ItemUtils {
     }
 
     // Add selected modifier names if they exist
-    if (
-      "modifierGroups" in itemInfo &&
-      itemInfo.modifierGroups &&
-      item.modifiers
-    ) {
-      itemInfo.modifierGroups.forEach((modifierGroupId) => {
-        const modifierGroup = restaurant.modifier_groups[modifierGroupId];
-        const selectedModifiers = item.modifiers?.[modifierGroupId] || [];
 
-        if (
-          modifierGroup &&
-          selectedModifiers &&
-          selectedModifiers.length > 0
-        ) {
-          selectedModifiers.forEach((selectedModifierId) => {
-            const modifier = modifierGroup.modifiers.find(
-              (mod) => mod.id === selectedModifierId
-            );
-            if (modifier) {
-              names.push(titleCase(modifier.name));
-            }
-          });
+    if (item.modifiers) {
+      Object.entries(item.modifiers).forEach(
+        ([modifierGroupId, selectedModifiers]) => {
+          const modifierGroup = restaurant.modifier_groups[modifierGroupId];
+          if (modifierGroup && selectedModifiers.length > 0) {
+            selectedModifiers.forEach((selectedModifierId) => {
+              const modifier = modifierGroup.modifiers.find(
+                (mod) => mod.id === selectedModifierId
+              );
+              if (modifier) {
+                names.push(titleCase(modifier.name));
+              }
+            });
+          }
         }
-      });
+      );
     }
 
     return names;
