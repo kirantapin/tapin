@@ -43,15 +43,13 @@ export const SquarePayButton = ({
     }
   };
   useEffect(() => {
-    async function initialize() {
+    const initialize = async () => {
       if (initializedRef.current) return;
+      if (!window.Square) return; // guard
+
       initializedRef.current = true;
 
-      if (!window.Square) {
-        console.error("Square Web Payments SDK not loaded");
-        return;
-      }
-
+      // IMPORTANT: second arg must be a Square **Location ID** for this env
       const payments = window.Square.payments(SQUARE_APP_ID, payload.accountId);
 
       const paymentRequest = payments.paymentRequest({
@@ -66,39 +64,39 @@ export const SquarePayButton = ({
       });
 
       try {
-        const googlePay = await payments.googlePay(paymentRequest);
-        if (googlePay && googlePayRef.current) {
-          await googlePay.attach(googlePayRef.current, {
-            buttonType: "long", // makes the button full-width
-            buttonColor: "black", // optional
+        const google = await payments.googlePay(paymentRequest);
+        if (google && googlePayRef.current) {
+          await google.attach(googlePayRef.current, {
+            buttonType: "long",
+            buttonColor: "black",
             buttonSizeMode: "fill",
           });
-          setGooglePay(googlePay);
+          setGooglePay(google);
         }
       } catch (e) {
         console.warn("Google Pay setup failed", e);
       }
 
       try {
-        const applePay = await payments.applePay(paymentRequest);
-        if (applePay) {
-          setApplePay(applePay);
-        }
+        const apple = await payments.applePay(paymentRequest);
+        if (apple) setApplePay(apple);
       } catch (e) {
         console.warn("Apple Pay setup failed", e);
       }
 
       setPaymentLoaded(true);
-    }
-
-    initialize();
-
-    return () => {
-      if (googlePayRef.current) {
-        googlePayRef.current.removeEventListener("click", () => {});
-      }
     };
-  }, []);
+
+    if (window.Square) {
+      // SDK already loaded (e.g., fast cache)
+      initialize();
+    } else {
+      // Wait for the loader to finish
+      const onReady = () => initialize();
+      window.addEventListener("square-sdk-ready", onReady, { once: true });
+      return () => window.removeEventListener("square-sdk-ready", onReady);
+    }
+  }, [SQUARE_APP_ID, payload.accountId]);
 
   const handlePayClick = async (method: "apple" | "google") => {
     const paymentMethod = method === "apple" ? applePay : googlePay;
