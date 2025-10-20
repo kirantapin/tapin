@@ -375,7 +375,11 @@ export class ItemUtils {
     }
     //sort modifier ids for consistency
     for (const modifierGroupId of Object.keys(item.modifiers || {})) {
-      item.modifiers?.[modifierGroupId]?.sort();
+      const mods = item.modifiers?.[modifierGroupId];
+      if (mods) {
+        // Remove duplicates and sort
+        item.modifiers![modifierGroupId] = Array.from(new Set(mods)).sort();
+      }
     }
 
     return null;

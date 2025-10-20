@@ -77,9 +77,15 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
-    <script
-      type="text/javascript"
-      src="https://sandbox.web.squarecdn.com/v1/square.js"
-    ></script>
+    <script type="module">
+      import { useSquareSandbox } from "/src/constants.js";
+
+      const script = document.createElement("script");
+      script.type = "text/javascript";
+      script.src = useSquareSandbox
+        ? "https://sandbox.web.squarecdn.com/v1/square.js"
+        : "https://web.squarecdn.com/v1/square.js";
+      document.head.appendChild(script);
+    </script>
   </body>
 </html>

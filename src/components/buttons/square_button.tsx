@@ -5,6 +5,7 @@ import { submitPurchase } from "@/utils/purchase.ts";
 import { useAuth } from "@/context/auth_context.tsx";
 import ApplePayButton from "apple-pay-button";
 import { ApplePay, GooglePay } from "@square/web-payments-sdk-types";
+import { SQUARE_APP_ID } from "@/constants.ts";
 
 export const SquarePayButton = ({
   refresh,
@@ -51,10 +52,7 @@ export const SquarePayButton = ({
         return;
       }
 
-      const payments = window.Square.payments(
-        process.env.REACT_APP_SQUARE_APPLICATION_ID!,
-        payload.accountId
-      );
+      const payments = window.Square.payments(SQUARE_APP_ID, payload.accountId);
 
       const paymentRequest = payments.paymentRequest({
         countryCode: "US",
