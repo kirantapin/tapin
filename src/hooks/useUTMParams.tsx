@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { ItemUtils } from "@/utils/item_utils";
-import type { Restaurant, BundleItem } from "@/types";
+import type { Restaurant, BundleItem, UserSession } from "@/types";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { useRestaurant } from "@/context/restaurant_context";
 import { PolicyManager } from "@/utils/policy_manager";
+import { useAuth } from "@/context/auth_context";
 
 const UTM_PARAMS = ["bundle", "welcome", "policy"];
 
@@ -26,12 +27,14 @@ export const useUTMParams = ({
   const location = useLocation();
   const { handlePolicyClick } = useBottomSheet();
   const { policyManager } = useRestaurant();
+  const { userSession } = useAuth();
   const [utmParams, setUtmParams] = useState<{ [key: string]: string }>({});
 
   const handleUTMParams = (
     search: string,
     restaurant: Restaurant,
-    policyManager: PolicyManager
+    policyManager: PolicyManager,
+    userSession: UserSession | null
   ) => {
     const searchParams = new URLSearchParams(search);
     const utms: { [key: string]: string } = {};
@@ -45,11 +48,13 @@ export const useUTMParams = ({
     setUtmParams(utms);
 
     if ("welcome" in utms) {
-      triggerToast(
-        `Welcome to ${restaurant?.name} on Tap In. Earn points, unlock exclusive deals & bundles, and skip the line—all in one spot.`,
-        "info",
-        3000
-      );
+      if (!userSession) {
+        triggerToast(
+          `Welcome to ${restaurant?.name} on Tap In. Earn points, unlock exclusive deals & bundles, and skip the line—all in one spot.`,
+          "info",
+          3000
+        );
+      }
     }
 
     if (utms.bundle) {
@@ -93,7 +98,7 @@ export const useUTMParams = ({
       !hasHandledRef.current
     ) {
       hasHandledRef.current = true;
-      handleUTMParams(location.search, restaurant, policyManager);
+      handleUTMParams(location.search, restaurant, policyManager, userSession);
     }
   }, [location.search, restaurant, policyManager]);
 

@@ -375,7 +375,11 @@ export class ItemUtils {
     }
     //sort modifier ids for consistency
     for (const modifierGroupId of Object.keys(item.modifiers || {})) {
-      item.modifiers?.[modifierGroupId]?.sort();
+      const mods = item.modifiers?.[modifierGroupId];
+      if (mods) {
+        // Remove duplicates and sort
+        item.modifiers![modifierGroupId] = Array.from(new Set(mods)).sort();
+      }
     }
 
     return null;
@@ -398,30 +402,23 @@ export class ItemUtils {
     }
 
     // Add selected modifier names if they exist
-    if (
-      "modifierGroups" in itemInfo &&
-      itemInfo.modifierGroups &&
-      item.modifiers
-    ) {
-      itemInfo.modifierGroups.forEach((modifierGroupId) => {
-        const modifierGroup = restaurant.modifier_groups[modifierGroupId];
-        const selectedModifiers = item.modifiers?.[modifierGroupId] || [];
 
-        if (
-          modifierGroup &&
-          selectedModifiers &&
-          selectedModifiers.length > 0
-        ) {
-          selectedModifiers.forEach((selectedModifierId) => {
-            const modifier = modifierGroup.modifiers.find(
-              (mod) => mod.id === selectedModifierId
-            );
-            if (modifier) {
-              names.push(titleCase(modifier.name));
-            }
-          });
+    if (item.modifiers) {
+      Object.entries(item.modifiers).forEach(
+        ([modifierGroupId, selectedModifiers]) => {
+          const modifierGroup = restaurant.modifier_groups[modifierGroupId];
+          if (modifierGroup && selectedModifiers.length > 0) {
+            selectedModifiers.forEach((selectedModifierId) => {
+              const modifier = modifierGroup.modifiers.find(
+                (mod) => mod.id === selectedModifierId
+              );
+              if (modifier) {
+                names.push(titleCase(modifier.name));
+              }
+            });
+          }
         }
-      });
+      );
     }
 
     return names;

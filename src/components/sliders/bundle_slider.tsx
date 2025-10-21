@@ -8,8 +8,10 @@ import { BundleUtils } from "@/utils/bundle_utils";
 import { AlertCircle } from "lucide-react";
 const BundleSlider = ({
   fallbackDisplay = false,
+  showBundleExplainer = true,
 }: {
   fallbackDisplay?: boolean;
+  showBundleExplainer?: boolean;
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { restaurant, userOwnershipMap } = useRestaurant();
@@ -111,14 +113,16 @@ const BundleSlider = ({
   if (userOwnershipMap && bundlesToDisplay.length > 0) {
     return (
       <div className="-mx-5">
-        <div className="bg-green-100 mt-4 mx-4 mb-1 px-4 py-3 rounded-xl border border-1 border-green-800">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="text-green-800 w-5 h-5" />
-            <p className="text-green-800 text-md font-medium">
-              Bundles unlock various exclusive deals
-            </p>
+        {showBundleExplainer && (
+          <div className="bg-green-100 mt-4 mx-4 mb-1 px-4 py-3 rounded-xl border border-1 border-green-800">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="text-green-800 w-5 h-5" />
+              <p className="text-green-800 text-md font-medium">
+                Bundles unlock various exclusive deals
+              </p>
+            </div>
           </div>
-        </div>
+        )}
         <div
           ref={scrollContainerRef}
           className="overflow-x-auto snap-x snap-mandatory no-scrollbar mt-4 mb-5"

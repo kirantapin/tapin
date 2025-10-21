@@ -36,6 +36,9 @@ const SelfRedeemModal: React.FC<SelfRedeemModalProps> = ({
   const [showNameInput, setShowNameInput] = useState(false);
   const [tempName, setTempName] = useState("");
   const [showRedeemConfirm, setShowRedeemConfirm] = useState(false);
+  const [serviceType, setServiceType] = useState<"dine_in" | "pickup">(
+    "pickup"
+  );
 
   const { getItemsFromTransactions } = useQRUtils();
 
@@ -86,6 +89,7 @@ const SelfRedeemModal: React.FC<SelfRedeemModalProps> = ({
               ? "Staff Redemption"
               : userDisplayName,
             user_phone_number: userSession?.user?.phone,
+            service_type: serviceType,
           },
         },
       }
@@ -241,22 +245,61 @@ const SelfRedeemModal: React.FC<SelfRedeemModalProps> = ({
                 </p>
 
                 {!staffRedemption && userDisplayName && (
-                  <div className="flex items-center justify-between mt-2">
-                    <p className="text-md text-gray-600">
-                      Order name:{" "}
-                      <span className="font-semibold text-md text-black">
-                        {userDisplayName}
-                      </span>
-                    </p>
-                    <button
-                      onClick={() => setShowNameInput(true)}
-                      className="px-3 py-1.5 text-sm font-medium "
-                      style={{
-                        color: restaurant?.metadata.primaryColor,
-                      }}
-                    >
-                      Change
-                    </button>
+                  <div className="space-y-2 mt-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-md text-gray-600">
+                        Order name:{" "}
+                        <span className="font-semibold text-md text-black">
+                          {userDisplayName}
+                        </span>
+                      </p>
+                      <button
+                        onClick={() => setShowNameInput(true)}
+                        className="px-3 text-sm font-medium "
+                        style={{
+                          color: restaurant?.metadata.primaryColor,
+                        }}
+                      >
+                        Change
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <p className="text-md text-gray-600">Order for:</p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setServiceType("pickup")}
+                          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                            serviceType === "pickup"
+                              ? "text-white"
+                              : "text-gray-600 border border-gray-300"
+                          }`}
+                          style={{
+                            backgroundColor:
+                              serviceType === "pickup"
+                                ? restaurant?.metadata.primaryColor
+                                : "transparent",
+                          }}
+                        >
+                          Pickup
+                        </button>
+                        <button
+                          onClick={() => setServiceType("dine_in")}
+                          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                            serviceType === "dine_in"
+                              ? "text-white"
+                              : "text-gray-600 border border-gray-300"
+                          }`}
+                          style={{
+                            backgroundColor:
+                              serviceType === "dine_in"
+                                ? restaurant?.metadata.primaryColor
+                                : "transparent",
+                          }}
+                        >
+                          Dine In
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -280,13 +323,24 @@ const SelfRedeemModal: React.FC<SelfRedeemModalProps> = ({
                   </span>
                 </div>
                 {!staffRedemption && (
-                  <div className="text-center">
-                    <p className="text-gray-600 text-md">
+                  <div className="flex items-center justify-center gap-4 text-center mb-2">
+                    <p className="text-gray-600 text-md m-0">
                       Order name:{" "}
                       <span className="font-semibold text-gray-900">
                         {userDisplayName}
                       </span>
                     </p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-600 text-md">Order for:</span>
+                      <button
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium text-white`}
+                        style={{
+                          backgroundColor: restaurant?.metadata.primaryColor,
+                        }}
+                      >
+                        {serviceType === "pickup" ? "Pickup" : "Dine In"}
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -420,7 +474,9 @@ const SelfRedeemModal: React.FC<SelfRedeemModalProps> = ({
               <h2 className="text-xl font-semibold text-gray-900 mb-2">
                 {staffRedemption
                   ? "Are you ready to redeem these pass items for the customer?"
-                  : "Are you ready to redeem these items?"}
+                  : `Are you ready to redeem these items for ${
+                      serviceType === "pickup" ? "Pickup" : "Dine In"
+                    }?`}
               </h2>
               <p className="text-gray-600 text-sm">
                 {staffRedemption

@@ -52,6 +52,11 @@ export const STRIPE_MIN_AMOUNT = 50; //50 cents
 export const MAX_BUNDLE_DURATION = 90;
 
 export const RESERVED_MENU_KEYWORDS = ["name", "label", "sortWeight"];
-export const MAX_QR_TRANSACTIONS = 4;
+export const MAX_QR_TRANSACTIONS = 10;
 
 export const NO_FULFILLED_BY = "loc";
+
+const useSquareSandbox = false;
+export const SQUARE_APP_ID = useSquareSandbox
+  ? process.env.REACT_APP_SQUARE_APPLICATION_ID_SANDBOX!
+  : process.env.REACT_APP_SQUARE_APPLICATION_ID!;
