@@ -60,3 +60,6 @@ const useSquareSandbox = false;
 export const SQUARE_APP_ID = useSquareSandbox
   ? process.env.REACT_APP_SQUARE_APPLICATION_ID_SANDBOX!
   : process.env.REACT_APP_SQUARE_APPLICATION_ID!;
+
+//PURCHASE SIGNALS
+export const BUNDLE_PURCHASED_SIGNAL = "bundle_purchased";

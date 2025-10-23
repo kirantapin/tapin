@@ -302,6 +302,7 @@ export default function CheckoutPage() {
                           message:
                             "Purchase successful! You can redeem your items anytime in My Spot",
                         },
+                        postPurchaseSignals: [],
                       };
 
                       sessionStorage.setItem(

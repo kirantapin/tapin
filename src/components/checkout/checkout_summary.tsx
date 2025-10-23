@@ -34,11 +34,13 @@ const CheckoutSummary: FC<CheckoutSummaryProps> = ({
   const [tipPercent, setTipPercent] = useState<number>(
     tipAmounts[tipAmounts.length - 1]
   );
+  const [tippableSubtotal, setTippableSubtotal] = useState<number>(0);
 
   useEffect(() => {
     if (state.cart.length > 0 && restaurant) {
       const itemPrice = state.cartResults?.breakdown.itemTotal;
-      setTipAmount(itemPrice * tipPercent);
+      setTipAmount(Math.round(itemPrice * tipPercent * 100) / 100);
+      setTippableSubtotal(itemPrice);
     }
   }, [state, restaurant, tipPercent]);
 
@@ -154,7 +156,7 @@ const CheckoutSummary: FC<CheckoutSummaryProps> = ({
             ).toFixed(2)}
           </span>
         </div>
-        {showTipSelection && (
+        {showTipSelection && tippableSubtotal > 0 && (
           <>
             <div className={checkoutStyles.summaryRow}>
               <span>Tip</span>
@@ -191,7 +193,10 @@ const CheckoutSummary: FC<CheckoutSummaryProps> = ({
                       className={`relative z-10 flex-1 py-2 text-sm font-medium transition-colors 
                     ${tipPercent === tip ? "text-white" : "text-gray-600"}`}
                     >
-                      {Math.round(tip * 100)}%
+                      $
+                      {tip * tippableSubtotal > 0
+                        ? Math.round(tip * tippableSubtotal * 100) / 100
+                        : "0"}
                     </button>
                   ))}
                 </div>

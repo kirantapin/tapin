@@ -253,7 +253,7 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
       );
       if (relevantBundleIds.length === 0) {
         triggerToast(
-          "This deal does not belong to any existing Bundles",
+          "This deal does not have any active bundles right now.",
           "error"
         );
         return;
