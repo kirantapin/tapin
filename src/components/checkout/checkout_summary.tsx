@@ -195,7 +195,9 @@ const CheckoutSummary: FC<CheckoutSummaryProps> = ({
                     >
                       $
                       {tip * tippableSubtotal > 0
-                        ? Math.round(tip * tippableSubtotal * 100) / 100
+                        ? (
+                            Math.round(tip * tippableSubtotal * 100) / 100
+                          ).toFixed(2)
                         : "0"}
                     </button>
                   ))}
