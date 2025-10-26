@@ -3,6 +3,7 @@ import { Plus, Trash2, Minus, Check } from "lucide-react";
 import { titleCase } from "title-case";
 import {
   Cart,
+  Category,
   Item,
   ItemSpecification,
   NormalItem,
@@ -57,7 +58,7 @@ export function DrinkItem({
     return null;
   }
   let unavailable = false;
-  if ("archived" in menuItem && menuItem.archived) {
+  if (ItemUtils.isItemUnavailable(item, restaurant)) {
     unavailable = true;
   }
 
@@ -427,6 +428,11 @@ export function PreviousTransactionItem({
   const menuItem = ItemUtils.getMenuItemFromItemId(item.id, restaurant);
   const isPass = ItemUtils.isPassItem(item.id, restaurant);
 
+  let unavailable = false;
+  if (ItemUtils.isItemUnavailable(item, restaurant)) {
+    unavailable = true;
+  }
+
   return (
     <div className="flex-none flex items-stretch m-3 border p-3 rounded-3xl bg-white">
       {/* Image */}
@@ -461,7 +467,7 @@ export function PreviousTransactionItem({
             );
             if (modifierNames.length > 0) {
               return (
-                <p className="text-sm text-gray-500 custom-line-clamp-1">
+                <p className="text-sm text-gray-500 custom-line-clamp-2">
                   {modifierNames.join(", ")}
                 </p>
               );
@@ -469,32 +475,39 @@ export function PreviousTransactionItem({
             return null;
           })()}
         </div>
-
-        <div className="flex items-center justify-between mt-2">
-          <div className="flex items-center">
-            <button
-              onClick={async () => {
-                decrement();
-              }}
-              className="w-6 h-6 flex items-center justify-center rounded-full mr-2"
-              style={{ backgroundColor: primaryColor }}
-            >
-              <Minus className="w-4 h-4 text-white" />
-            </button>
-            <p>
-              {currentQuantity} / {maxQuantity}
-            </p>
-            <button
-              onClick={async () => {
-                increment();
-              }}
-              className="w-6 h-6 flex items-center justify-center bg-gray-100 rounded-full ml-2"
-              style={{ backgroundColor: primaryColor }}
-            >
-              <Plus className="w-4 h-4 text-white" />
-            </button>
+        {!unavailable ? (
+          <div className="flex items-center justify-between mt-2">
+            <div className="flex items-center">
+              <button
+                onClick={async () => {
+                  decrement();
+                }}
+                className="w-6 h-6 flex items-center justify-center rounded-full mr-2"
+                style={{ backgroundColor: primaryColor }}
+              >
+                <Minus className="w-4 h-4 text-white" />
+              </button>
+              <p>
+                {currentQuantity} / {maxQuantity}
+              </p>
+              <button
+                onClick={async () => {
+                  increment();
+                }}
+                className="w-6 h-6 flex items-center justify-center bg-gray-100 rounded-full ml-2"
+                style={{ backgroundColor: primaryColor }}
+              >
+                <Plus className="w-4 h-4 text-white" />
+              </button>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex items-center justify-between mt-2">
+            <p className="text-sm text-gray-500">
+              This item is not currently available
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -594,6 +607,18 @@ export const DrinkList = ({
   }, [label]);
 
   const sortedLabels = labelOrder || Object.keys(restaurant.labelMap);
+
+  sortedLabels.sort((a, b) => {
+    const categoryA = ItemUtils.getMenuItemFromItemId(
+      restaurant.labelMap[a],
+      restaurant
+    ) as Category;
+    const categoryB = ItemUtils.getMenuItemFromItemId(
+      restaurant.labelMap[b],
+      restaurant
+    ) as Category;
+    return (categoryB?.sortWeight || 0) - (categoryA?.sortWeight || 0);
+  });
 
   return (
     <div className="space-y-4  overflow-y-auto scroll-smooth no-scrollbar -mx-5">

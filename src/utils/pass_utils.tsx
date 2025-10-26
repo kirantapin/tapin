@@ -9,7 +9,7 @@ export class PassUtils {
       .from("passes")
       .select("*")
       .eq("restaurant_id", restaurantId)
-      .gte("end_time", new Date().toISOString())
+      .gte("end_time", new Date(Date.now()).toISOString())
       .lte(
         "end_time",
         new Date(Date.now() + passDisplayThreshold).toISOString()

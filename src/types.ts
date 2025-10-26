@@ -223,6 +223,7 @@ export interface MenuItem {
 
 export interface Category {
   name: string;
+  sortWeight?: number;
 }
 export interface NormalItem {
   name: string;

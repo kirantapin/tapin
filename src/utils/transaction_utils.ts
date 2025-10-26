@@ -1,8 +1,8 @@
-import { Item, PassItem, Transaction } from "@/types";
+import { Item, Transaction } from "@/types";
 import { Restaurant } from "@/types";
 import { supabase } from "./supabase_client";
 import { ItemUtils } from "./item_utils";
-import { BUNDLE_MENU_TAG, PASS_MENU_TAG } from "@/constants";
+import { BUNDLE_MENU_TAG } from "@/constants";
 
 export class TransactionUtils {
   static getRecentTransactionItems = (
@@ -29,59 +29,16 @@ export class TransactionUtils {
         }
         return unique;
       }, []);
-    const processedTransactionItems = [...recentTransactionItems]
-      .map((transactionItem) => {
+    const processedTransactionItems = [...recentTransactionItems].map(
+      (transactionItem) => {
         const item = TransactionUtils.getTransactionItem(transactionItem);
-        const { id, path } = item;
         const purchaseDate = transactionItem.created_at;
-        if (path?.includes(PASS_MENU_TAG)) {
-          // Get second to last item from path array
-          const passItem = ItemUtils.getMenuItemFromItemId(id, restaurant);
-          if (passItem) {
-            return {
-              item: item,
-              purchaseDate: purchaseDate,
-            };
-          }
-          const sameCurrentPassItems = ItemUtils.getAllItemsInCategory(
-            path[1],
-            restaurant
-          );
-          if (sameCurrentPassItems.length > 0) {
-            return {
-              item: {
-                ...item,
-                id: sameCurrentPassItems.reduce((earliest, currentId) => {
-                  const currentItem = ItemUtils.getMenuItemFromItemId(
-                    currentId,
-                    restaurant
-                  ) as PassItem;
-                  const earliestItem = ItemUtils.getMenuItemFromItemId(
-                    earliest,
-                    restaurant
-                  ) as PassItem;
-                  return new Date(currentItem.for_date) <
-                    new Date(earliestItem.for_date)
-                    ? currentId
-                    : earliest;
-                }, sameCurrentPassItems[0]),
-              },
-              purchaseDate: purchaseDate,
-            };
-          } else {
-            return null;
-          }
-        } else {
-          if (!ItemUtils.getMenuItemFromItemId(id, restaurant)) {
-            return null;
-          }
-          return {
-            item: item,
-            purchaseDate: purchaseDate,
-          };
-        }
-      })
-      .filter((item) => item !== null);
+        return {
+          item: item,
+          purchaseDate: purchaseDate,
+        };
+      }
+    );
 
     return processedTransactionItems;
   };
@@ -154,9 +111,7 @@ export class TransactionUtils {
       modifiers: transaction.metadata.modifiers || {},
       path: (transaction.metadata.path || []) as string[],
     };
-    if (item.path.includes(PASS_MENU_TAG)) {
-      item.id = item.path[1];
-    }
+
     return item;
   }
 }

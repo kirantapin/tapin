@@ -3,7 +3,7 @@ import { DrinkItem, DrinkList } from "../menu_items";
 import { titleCase } from "title-case";
 import { Search, X } from "lucide-react";
 import { useRestaurant } from "@/context/restaurant_context";
-import { Restaurant } from "@/types";
+import { Category, Restaurant } from "@/types";
 import { useSearch } from "@/hooks/useSearch";
 import { ItemUtils } from "@/utils/item_utils";
 
@@ -58,7 +58,19 @@ const MainMenu: React.FC<MainMenuProps> = ({
       }
     }
 
-    setLabelsToDisplay(Array.from(labelsSet));
+    const sortedLabels = Array.from(labelsSet).sort((a, b) => {
+      const categoryA = ItemUtils.getMenuItemFromItemId(
+        restaurant.labelMap[a],
+        restaurant
+      ) as Category;
+      const categoryB = ItemUtils.getMenuItemFromItemId(
+        restaurant.labelMap[b],
+        restaurant
+      ) as Category;
+      return (categoryB?.sortWeight || 0) - (categoryA?.sortWeight || 0);
+    });
+
+    setLabelsToDisplay(sortedLabels);
   }, [restaurant]);
 
   if (!restaurant || labelsToDisplay === undefined) return null;

@@ -1,4 +1,4 @@
-import { ItemSpecification, Policy } from "@/types";
+import { ItemSpecification, NormalItem, Policy } from "@/types";
 import { Restaurant } from "@/types";
 import { supabase } from "./supabase_client";
 import { formatPoints, listItemsToStringDescription } from "./parse";
@@ -240,7 +240,87 @@ export class PolicyUtils {
         return "";
     }
   }
-  static returnHighestCostItem = (
+
+  static getBoundItemCost = (
+    itemId: string,
+    restaurant: Restaurant,
+    bound: "lower" | "upper"
+  ): number => {
+    const itemInfo = ItemUtils.getMenuItemFromItemId(itemId, restaurant);
+    const { variations, modifierGroups } =
+      ItemUtils.extractActiveVariationAndModifierGroups(
+        itemInfo as NormalItem,
+        restaurant
+      );
+
+    const variationPrices = variations
+      ? Object.values(variations)
+          .map((variation) => variation.absolutePrice)
+          .sort((a, b) => (bound === "lower" ? a - b : b - a))
+      : [];
+
+    const modifierGroupPrices: Record<string, number[]> = modifierGroups
+      ? Object.entries(modifierGroups).reduce(
+          (acc, [groupId, modifierGroup]) => {
+            const sortedDeltas = modifierGroup.modifiers
+              .map((modifier) => modifier.delta)
+              .sort((a, b) => (bound === "lower" ? a - b : b - a));
+            acc[groupId] = sortedDeltas;
+            return acc;
+          },
+          {} as Record<string, number[]>
+        )
+      : {};
+
+    let startingPrice: number = itemInfo?.price || 0;
+    if (variationPrices.length > 0) {
+      startingPrice = variationPrices[0];
+    }
+
+    for (const [groupId, modifierGroup] of Object.entries(
+      modifierGroups ?? {}
+    )) {
+      const deltas = modifierGroupPrices[groupId];
+      if (!deltas || deltas.length === 0) continue;
+
+      if (modifierGroup.select === "single") {
+        startingPrice += deltas[0];
+      } else if (modifierGroup.select === "multiple") {
+        if (bound === "lower") {
+          const minCount = modifierGroup.minSelected ?? 0; // keep 0 if explicitly set
+          if (minCount > 0) {
+            startingPrice += deltas
+              .slice(0, minCount)
+              .reduce((a, b) => a + b, 0);
+          }
+        } else {
+          const maxAllowed = modifierGroup.modifiers.length;
+          const maxCount = Math.min(
+            modifierGroup.maxSelected ?? maxAllowed,
+            maxAllowed
+          );
+          if (maxCount > 0) {
+            startingPrice += deltas
+              .slice(0, maxCount)
+              .reduce((a, b) => a + b, 0);
+          }
+        }
+      }
+    }
+
+    return startingPrice;
+  };
+
+  static getAverageItemCost = (
+    itemId: string,
+    restaurant: Restaurant
+  ): number => {
+    const lower = this.getBoundItemCost(itemId, restaurant, "lower");
+    const upper = this.getBoundItemCost(itemId, restaurant, "upper");
+    return (lower + upper) / 2;
+  };
+
+  static returnHighestAverageCostItem = (
     items: ItemSpecification[],
     restaurant: Restaurant
   ): number => {
@@ -250,16 +330,13 @@ export class PolicyUtils {
     for (const item of items) {
       const itemsInCategory = ItemUtils.getAllItemsInCategory(item, restaurant);
       const itemPrice = itemsInCategory.reduce((max, item) => {
-        return Math.max(
-          max,
-          ItemUtils.priceItem({ id: item }, restaurant) || 0
-        );
+        return Math.max(max, this.getAverageItemCost(item, restaurant));
       }, 0);
       if (itemPrice > highestCost) {
         highestCost = itemPrice;
       }
     }
-    return highestCost;
+    return parseFloat(highestCost.toFixed(2));
   };
   static getEstimatedPolicyValue = (
     policy: Policy,
@@ -270,7 +347,7 @@ export class PolicyUtils {
 
     switch (action.type) {
       case "add_item":
-        let highestCost = this.returnHighestCostItem(items, restaurant);
+        let highestCost = this.returnHighestAverageCostItem(items, restaurant);
         highestCost = action.priceLimit || highestCost;
         if (action.free) {
           return highestCost * action.quantity;
@@ -284,7 +361,7 @@ export class PolicyUtils {
       case "apply_percent_discount":
         items = action.items;
         return (
-          this.returnHighestCostItem(items, restaurant) *
+          this.returnHighestAverageCostItem(items, restaurant) *
           action.amount *
           action.maxEffectedItems
         );
@@ -293,14 +370,16 @@ export class PolicyUtils {
         return action.amount * action.maxEffectedItems;
       case "apply_point_multiplier":
         items = action.items;
-        return this.returnHighestCostItem(items, restaurant) * action.amount;
+        return (
+          this.returnHighestAverageCostItem(items, restaurant) * action.amount
+        );
       case "apply_order_point_multiplier":
         return 0;
       case "apply_fixed_order_discount":
         return action.amount;
       case "apply_blanket_price":
         const totalOriginalPrice = action.items.reduce((sum, itemSpec) => {
-          const highestPrice = this.returnHighestCostItem(
+          const highestPrice = this.returnHighestAverageCostItem(
             [itemSpec.item],
             restaurant
           );

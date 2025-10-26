@@ -4,8 +4,6 @@ import {
   PASS_MENU_TAG,
   HISTORY_KEY,
   BUNDLE_MENU_TAG,
-  HOUSE_MIXER_LABEL,
-  SHOTS_SHOOTERS_LABEL,
   RESERVED_MENU_KEYWORDS,
 } from "@/constants";
 import { BundleUtils } from "../bundle_utils";

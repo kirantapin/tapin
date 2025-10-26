@@ -93,11 +93,12 @@ export class ItemUtils {
   static getMenuItemFromItemId(
     itemId: string,
     restaurant: Restaurant
-  ): NormalItem | PassItem | BundleItem | undefined {
+  ): NormalItem | PassItem | BundleItem | Category | undefined {
     return restaurant.menu[itemId]?.info as
       | NormalItem
       | PassItem
       | BundleItem
+      | Category
       | undefined;
   }
   static priceItem(item: Item, restaurant: Restaurant): number {
@@ -194,6 +195,9 @@ export class ItemUtils {
   static isItemRedeemable(item: Item, restaurant: Restaurant): boolean {
     if (this.isBundleItem(item.id, restaurant)) {
       return false;
+    }
+    if (this.isPassItem(item.id, restaurant)) {
+      return this.isItemUnavailable(item, restaurant) === null;
     }
     return !!this.getMenuItemFromItemId(item.id, restaurant);
   }
@@ -369,6 +373,14 @@ export class ItemUtils {
         }
       }
     }
+    //sort modifier ids for consistency
+    for (const modifierGroupId of Object.keys(item.modifiers || {})) {
+      const mods = item.modifiers?.[modifierGroupId];
+      if (mods) {
+        // Remove duplicates and sort
+        item.modifiers![modifierGroupId] = Array.from(new Set(mods)).sort();
+      }
+    }
 
     return null;
   }
@@ -390,30 +402,23 @@ export class ItemUtils {
     }
 
     // Add selected modifier names if they exist
-    if (
-      "modifierGroups" in itemInfo &&
-      itemInfo.modifierGroups &&
-      item.modifiers
-    ) {
-      itemInfo.modifierGroups.forEach((modifierGroupId) => {
-        const modifierGroup = restaurant.modifier_groups[modifierGroupId];
-        const selectedModifiers = item.modifiers?.[modifierGroupId] || [];
 
-        if (
-          modifierGroup &&
-          selectedModifiers &&
-          selectedModifiers.length > 0
-        ) {
-          selectedModifiers.forEach((selectedModifierId) => {
-            const modifier = modifierGroup.modifiers.find(
-              (mod) => mod.id === selectedModifierId
-            );
-            if (modifier) {
-              names.push(titleCase(modifier.name));
-            }
-          });
+    if (item.modifiers) {
+      Object.entries(item.modifiers).forEach(
+        ([modifierGroupId, selectedModifiers]) => {
+          const modifierGroup = restaurant.modifier_groups[modifierGroupId];
+          if (modifierGroup && selectedModifiers.length > 0) {
+            selectedModifiers.forEach((selectedModifierId) => {
+              const modifier = modifierGroup.modifiers.find(
+                (mod) => mod.id === selectedModifierId
+              );
+              if (modifier) {
+                names.push(titleCase(modifier.name));
+              }
+            });
+          }
         }
-      });
+      );
     }
 
     return names;

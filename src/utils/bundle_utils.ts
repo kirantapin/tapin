@@ -222,7 +222,7 @@ export class BundleUtils {
         ) as BundleItem;
         const credit = bundle.object.fixed_credit;
         const difference = Math.abs(credit - totalPrice);
-        if (difference < smallestDifference) {
+        if (difference < smallestDifference && credit > 0) {
           smallestDifference = difference;
           bestBundle = bundle.object;
         }
