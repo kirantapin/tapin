@@ -183,6 +183,14 @@ export function formatAvailabilityWindow(
   const formattedStart = format12Hour(begin_time);
   const formattedEnd = format12Hour(end_time);
 
+  // If all 7 days are allowed, simplify message
+  if (
+    allowed_days.length === 7 &&
+    WEEKDAYS_ORDER.every((d) => allowed_days.includes(d))
+  ) {
+    return `from ${formattedStart} to ${formattedEnd}`;
+  }
+
   const sortedDays = [...allowed_days].sort(
     (a, b) => WEEKDAYS_ORDER.indexOf(a) - WEEKDAYS_ORDER.indexOf(b)
   );

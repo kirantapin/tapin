@@ -5,6 +5,9 @@ import { useRestaurant } from "@/context/restaurant_context";
 import AddOnCard from "../cards/add_on_card";
 import { ItemUtils } from "@/utils/item_utils";
 import { PolicyUtils } from "@/utils/policy_utils";
+import { useAuth } from "@/context/auth_context";
+import { useBottomSheet } from "@/context/bottom_sheet_context";
+import { ADD_ON_TAG } from "@/constants";
 
 interface AddOnManagerProps {
   state: any;
@@ -17,6 +20,7 @@ interface AddOnManagerProps {
   removePolicy: (policy_id: string) => Promise<void>;
   allowPassItems?: boolean;
   allowNormalItems?: boolean;
+  allowNoDiscountAddOns?: boolean;
 }
 
 const AddOnManager: FC<AddOnManagerProps> = ({
@@ -26,14 +30,36 @@ const AddOnManager: FC<AddOnManagerProps> = ({
   removePolicy,
   allowPassItems = true,
   allowNormalItems = true,
+  allowNoDiscountAddOns = true,
 }) => {
   const { restaurant, policyManager } = useRestaurant();
+  const { userSession } = useAuth();
+  const { openSignInModal, triggerToast } = useBottomSheet();
   const [normalItems, setNormalItems] = useState<
     { policy: Policy; itemId: string }[]
   >([]);
   const [passItems, setPassItems] = useState<
     { policy: Policy; itemId: string }[]
   >([]);
+  const [noDiscountAddOns, setNoDiscountAddOns] = useState<
+    { policy: Policy; itemId: string }[]
+  >([]);
+
+  // Implies that `policy` is always an ADD_ON_TAG policy.
+  const doesAddOnPolicyHaveDiscount = (
+    policy: Policy & {
+      definition: {
+        tag: typeof ADD_ON_TAG;
+        action: { type: "add_item" };
+      };
+    }
+  ) => {
+    const { action } = policy.definition;
+    if (action.free) return true;
+    if (action.percentDiscount && action.percentDiscount > 0) return true;
+    if (action.fixedDiscount && action.fixedDiscount > 0) return true;
+    return false;
+  };
 
   useEffect(() => {
     if (!restaurant || !policyManager || state.cart.length === 0) {
@@ -96,12 +122,21 @@ const AddOnManager: FC<AddOnManagerProps> = ({
     }
     setNormalItems(
       addOnItems.filter(
-        (item) => !ItemUtils.isPassItem(item.itemId, restaurant)
+        (item) =>
+          !ItemUtils.isPassItem(item.itemId, restaurant) &&
+          doesAddOnPolicyHaveDiscount(item.policy)
       )
+    );
+    setNoDiscountAddOns(
+      addOnItems.filter((item) => !doesAddOnPolicyHaveDiscount(item.policy))
     );
     setPassItems(
       addOnItems
-        .filter((item) => ItemUtils.isPassItem(item.itemId, restaurant))
+        .filter(
+          (item) =>
+            ItemUtils.isPassItem(item.itemId, restaurant) &&
+            doesAddOnPolicyHaveDiscount(item.policy)
+        )
         .sort((a, b) => {
           const menuItemA = ItemUtils.getMenuItemFromItemId(
             a.itemId,
@@ -122,20 +157,18 @@ const AddOnManager: FC<AddOnManagerProps> = ({
     !restaurant ||
     !policyManager ||
     state.cart.length === 0 ||
-    normalItems.length + passItems.length === 0
+    normalItems.length + passItems.length + noDiscountAddOns.length === 0
   ) {
     return null;
   }
 
   return (
     <div className="mt-4">
-      {allowNormalItems && (
-        <h2 className="text-lg font-bold mb-1">
-          {isPreEntry ? "Exclusive Pre-entry Deals" : "Exclusive Deals"}
-        </h2>
+      {allowNormalItems && normalItems.length > 0 && (
+        <h2 className="text-lg font-bold mb-1">Exclusive Deals</h2>
       )}
 
-      {allowNormalItems && (
+      {allowNormalItems && normalItems.length > 0 && (
         <div className="overflow-x-auto pt-2 mb-2 no-scrollbar -mx-4 px-4">
           <div className="flex gap-4" style={{ minWidth: "max-content" }}>
             {normalItems.map(({ policy, itemId }, index) => (
@@ -146,6 +179,11 @@ const AddOnManager: FC<AddOnManagerProps> = ({
                 itemId={itemId}
                 restaurant={restaurant}
                 addPolicy={async () => {
+                  if (!userSession) {
+                    triggerToast("Please sign in to add this item", "info");
+                    openSignInModal();
+                    return;
+                  }
                   await addPolicy(null, policy.policy_id, {
                     id: itemId,
                   });
@@ -156,12 +194,49 @@ const AddOnManager: FC<AddOnManagerProps> = ({
           </div>
         </div>
       )}
-      {allowPassItems && (
+
+      {allowNoDiscountAddOns && noDiscountAddOns.length > 0 && (
+        <h2 className="text-lg font-bold mb-1">{restaurant.name} Favorites</h2>
+      )}
+
+      {allowNoDiscountAddOns && noDiscountAddOns.length > 0 && (
+        <div className="overflow-x-auto pt-2 mb-2 no-scrollbar -mx-4 px-4">
+          <div className="flex gap-4" style={{ minWidth: "max-content" }}>
+            {noDiscountAddOns.map(({ policy, itemId }, index) => (
+              <AddOnCard
+                key={`${policy.policy_id}-${itemId}-${index}`}
+                state={state}
+                policy={policy}
+                itemId={itemId}
+                restaurant={restaurant}
+                addPolicy={async () => {
+                  if (!userSession) {
+                    triggerToast("Please sign in to add this item", "info");
+                    openSignInModal();
+                    return;
+                  }
+                  await addPolicy(null, policy.policy_id, {
+                    id: itemId,
+                  });
+                }}
+                removePolicy={removePolicy}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {allowPassItems && passItems.length > 0 && (
         <div className="mt-2 space-y-4">
           {passItems.slice(0, 2).map(({ policy, itemId }) => (
             <PassAddOnCard
               state={state}
               addPolicy={async () => {
+                if (!userSession) {
+                  triggerToast("Please sign in to add this item", "info");
+                  openSignInModal();
+                  return;
+                }
                 await addPolicy(null, policy.policy_id, {
                   id: itemId,
                 });

@@ -87,20 +87,22 @@ export function CheckoutItemCard({
             <span className="text-md text-gray-600 font-medium">
               ${currentPrice.toFixed(2)}
             </span>
-            {oldPrice != null && (
-              <span className="text-md font-medium text-gray-400 line-through">
-                ${oldPrice?.toFixed(2)}
-              </span>
-            )}
-            {discountDescription && (
-              <span
-                className="bg-[#cda852] text-xs text-white px-2 py-0.5 rounded font-semibold"
-                style={{
-                  background: restaurant?.metadata.primaryColor,
-                }}
-              >
-                {discountDescription}
-              </span>
+            {oldPrice && oldPrice > currentPrice && (
+              <>
+                <span className="text-md font-medium text-gray-400 line-through">
+                  ${oldPrice?.toFixed(2)}
+                </span>
+                {discountDescription && (
+                  <span
+                    className="bg-[#cda852] text-xs text-white px-2 py-0.5 rounded font-semibold"
+                    style={{
+                      background: restaurant?.metadata.primaryColor,
+                    }}
+                  >
+                    {discountDescription}
+                  </span>
+                )}
+              </>
             )}
           </div>
           {inlineRecommendation && inlineRecommendation.cartId === item.id && (
