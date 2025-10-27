@@ -143,22 +143,25 @@ export default function Card({
                 : itemInfo?.price.toFixed(2)}
             </span>
           </p>
-          {modifiedFlair?.oldPrice && (
-            <span className="text-md font-medium text-gray-300 line-through">
-              ${modifiedFlair?.oldPrice?.toFixed(2)}
-            </span>
-          )}
-          {modifiedFlair?.discountDescription && (
-            <span
-              className="bg-[#cda852] text-xs text-white px-2 py-0.5 rounded font-semibold ml-2"
-              style={{
-                backgroundColor: "white",
-                color: primaryColor,
-              }}
-            >
-              {modifiedFlair?.discountDescription}
-            </span>
-          )}
+          {modifiedFlair?.oldPrice &&
+            modifiedFlair.oldPrice > modifiedFlair.currentPrice && (
+              <>
+                <span className="text-md font-medium text-gray-300 line-through">
+                  ${modifiedFlair.oldPrice.toFixed(2)}
+                </span>
+                {modifiedFlair.discountDescription && (
+                  <span
+                    className="bg-[#cda852] text-xs text-white px-2 py-0.5 rounded font-semibold ml-2"
+                    style={{
+                      backgroundColor: "white",
+                      color: primaryColor,
+                    }}
+                  >
+                    {modifiedFlair.discountDescription}
+                  </span>
+                )}
+              </>
+            )}
         </div>
 
         {quantity > 0 ? (

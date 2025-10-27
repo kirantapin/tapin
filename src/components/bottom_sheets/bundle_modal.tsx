@@ -24,7 +24,7 @@ import { PolicyUtils } from "@/utils/policy_utils";
 import { titleCase } from "title-case";
 import GenericItemIcon from "@/components/display_utils/generic_item_icons";
 import { useLocation, useNavigate } from "react-router-dom";
-import { RESTAURANT_PATH } from "@/constants";
+import { BUNDLE_PURCHASED_SIGNAL, RESTAURANT_PATH } from "@/constants";
 import { TransactionUtils } from "@/utils/transaction_utils";
 import { CheckoutItemCard } from "../checkout/checkout_item_card";
 import { ShareButton } from "../buttons/share_button";
@@ -408,6 +408,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
                         message:
                           "Bundle purchased successfully, view in My Spot",
                       },
+                      postPurchaseSignals: [BUNDLE_PURCHASED_SIGNAL],
                     };
 
                     sessionStorage.setItem(

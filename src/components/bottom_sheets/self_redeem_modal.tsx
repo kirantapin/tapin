@@ -268,7 +268,7 @@ const SelfRedeemModal: React.FC<SelfRedeemModalProps> = ({
                       <div className="flex gap-2">
                         <button
                           onClick={() => setServiceType("pickup")}
-                          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                          className={`px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors ${
                             serviceType === "pickup"
                               ? "text-white"
                               : "text-gray-600 border border-gray-300"
@@ -284,7 +284,7 @@ const SelfRedeemModal: React.FC<SelfRedeemModalProps> = ({
                         </button>
                         <button
                           onClick={() => setServiceType("dine_in")}
-                          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                          className={`px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors ${
                             serviceType === "dine_in"
                               ? "text-white"
                               : "text-gray-600 border border-gray-300"

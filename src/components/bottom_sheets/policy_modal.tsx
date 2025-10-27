@@ -135,7 +135,9 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                 >
                   <span className="font-semibold text-xs">
                     {policy.total_usages
-                      ? `${policy.total_usages} Uses`
+                      ? `${policy.total_usages} ${
+                          policy.total_usages === 1 ? "Use" : "Uses"
+                        }`
                       : "Unlimited Uses"}
                   </span>
                 </div>

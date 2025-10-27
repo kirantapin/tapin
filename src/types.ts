@@ -333,6 +333,7 @@ export interface Order {
     discount?: number;
     service_fee?: number;
     back_charge?: number;
+    user_phone_number?: string;
   };
 }
 
