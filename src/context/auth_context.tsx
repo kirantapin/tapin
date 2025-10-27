@@ -7,7 +7,7 @@ import React, {
   ReactNode,
   useRef,
 } from "react";
-import { Transaction, User } from "../types";
+import { Transaction, User, UserRestaurantData } from "../types";
 import { project_ref, supabase } from "../utils/supabase_client";
 import { Session } from "@supabase/supabase-js";
 import { TransactionUtils } from "@/utils/transaction_utils";
@@ -85,14 +85,25 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     }
     try {
       const { data, error } = await supabase
-        .from("users")
+        .from("user_restaurant_data")
         .select("*")
-        .eq("id", userId)
-        .single();
+        .eq("user_id", userId)
+        .returns<UserRestaurantData[]>();
+
+      const user: User = {
+        id: userId,
+        points: {},
+        next_purchase_credit: {},
+      };
+      for (const entry of data || []) {
+        user.points[entry.restaurant_id] = entry.points;
+        user.next_purchase_credit[entry.restaurant_id] =
+          entry.next_purchase_credit;
+      }
 
       if (error) throw error;
 
-      setUserData(data);
+      setUserData(user);
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
