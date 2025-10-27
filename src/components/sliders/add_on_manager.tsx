@@ -34,7 +34,7 @@ const AddOnManager: FC<AddOnManagerProps> = ({
 }) => {
   const { restaurant, policyManager } = useRestaurant();
   const { userSession } = useAuth();
-  const { openSignInModal, triggerToast } = useBottomSheet();
+  const { openSignInModal, triggerToast, addToCart } = useBottomSheet();
   const [normalItems, setNormalItems] = useState<
     { policy: Policy; itemId: string }[]
   >([]);
@@ -210,16 +210,14 @@ const AddOnManager: FC<AddOnManagerProps> = ({
                 itemId={itemId}
                 restaurant={restaurant}
                 addPolicy={async () => {
-                  if (!userSession) {
-                    triggerToast("Please sign in to add this item", "info");
-                    openSignInModal();
-                    return;
-                  }
-                  await addPolicy(null, policy.policy_id, {
-                    id: itemId,
-                  });
+                  await addToCart(
+                    {
+                      id: itemId,
+                    },
+                    true
+                  );
                 }}
-                removePolicy={removePolicy}
+                removePolicy={async (policyId: string) => {}}
               />
             ))}
           </div>
