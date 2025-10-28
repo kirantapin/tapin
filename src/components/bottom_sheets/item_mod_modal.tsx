@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { AlertDialog, AlertDialogContent } from "@/components/ui/alert-dialog";
 import { X, Check } from "lucide-react";
 import { useRestaurant } from "@/context/restaurant_context";
-import { Item, NormalItem } from "@/types";
+import { Item, ModifierGroup, NormalItem } from "@/types";
 import { ItemUtils } from "@/utils/item_utils";
 import { ImageFallback } from "../display_utils/image_fallback";
 import { ImageUtils } from "@/utils/image_utils";
 import { titleCase } from "title-case";
+import { AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface ItemModModalProps {
   isOpen: boolean;
@@ -28,20 +29,27 @@ const ItemModModal: React.FC<ItemModModalProps> = ({
   const [selectedModifiers, setSelectedModifiers] = useState<
     Record<string, string[]> | undefined
   >(undefined);
+  const [variations, setVariations] = useState<Record<
+    string,
+    {
+      sourceId: string | null;
+      name: string;
+      absolutePrice: number;
+      archived?: boolean;
+    }
+  > | null>(null);
+  const [modifierGroups, setModifierGroups] = useState<
+    Record<string, ModifierGroup>
+  >({});
   const [loading, setLoading] = useState(false);
-  const setDefault = useRef(false);
+  const [displayReady, setDisplayReady] = useState(false);
 
   const menuItem = restaurant
     ? (ItemUtils.getMenuItemFromItemId(itemId, restaurant) as NormalItem)
     : null;
 
-  const { variations, modifierGroups } =
-    menuItem && restaurant
-      ? ItemUtils.extractActiveVariationAndModifierGroups(menuItem, restaurant)
-      : { variations: {}, modifierGroups: {} };
-
   useEffect(() => {
-    if (isOpen && menuItem && restaurant && !setDefault.current) {
+    if (isOpen && menuItem && restaurant && !displayReady) {
       const item = {
         id: itemId,
         variation: selectedVariation,
@@ -50,11 +58,20 @@ const ItemModModal: React.FC<ItemModModalProps> = ({
       ItemUtils.doesItemRequireConfiguration(item, restaurant);
       setSelectedVariation(item.variation);
       setSelectedModifiers(item.modifiers);
-      setDefault.current = true;
+      const { variations, modifierGroups } =
+        menuItem && restaurant
+          ? ItemUtils.extractActiveVariationAndModifierGroups(
+              menuItem,
+              restaurant
+            )
+          : { variations: {}, modifierGroups: {} };
+      setVariations(variations);
+      setModifierGroups(modifierGroups);
+      setDisplayReady(true);
     }
-  }, [isOpen, menuItem, restaurant]);
+  }, [isOpen, menuItem, restaurant, displayReady]);
 
-  if (!menuItem || !restaurant) return null;
+  if (!menuItem || !restaurant || !displayReady) return null;
 
   const errorMessage = ItemUtils.doesItemRequireConfiguration(
     {
@@ -70,6 +87,9 @@ const ItemModModal: React.FC<ItemModModalProps> = ({
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent className="w-[90vw] max-w-3xl max-h-[85vh] rounded-3xl overflow-y-auto flex flex-col gap-0 p-0">
+        <AlertDialogTitle className="sr-only">
+          Configure {titleCase(menuItem?.name)}
+        </AlertDialogTitle>
         <div className="flex-1 overflow-y-auto pt-6 no-scrollbar px-6">
           <div className="flex items-start space-x-6">
             {/* Item Image */}
@@ -111,47 +131,49 @@ const ItemModModal: React.FC<ItemModModalProps> = ({
                 Required
               </h4>
               <div className="flex space-x-3 overflow-x-auto pb-2 no-scrollbar -mx-6 px-6">
-                {Object.entries(variations).map(([key, variation]) => (
-                  <div
-                    key={key}
-                    onClick={() => setSelectedVariation(key)}
-                    className={`relative flex-shrink-0 cursor-pointer rounded-xl border border-1 p-5 pl-4 pt-4 min-w-[140px] transition-all hover:shadow-md`}
-                    style={{
-                      borderColor:
-                        selectedVariation === key
-                          ? restaurant.metadata.primaryColor
-                          : undefined,
-                    }}
-                  >
-                    {/* Selection indicator */}
+                {Object.entries(variations)
+                  .sort(([, a], [, b]) => a.absolutePrice - b.absolutePrice)
+                  .map(([key, variation]) => (
                     <div
-                      className={`absolute bottom-2 right-2 w-5 h-5 rounded-full flex items-center justify-center `}
+                      key={key}
+                      onClick={() => setSelectedVariation(key)}
+                      className={`relative flex-shrink-0 cursor-pointer rounded-xl border border-1 p-5 pl-4 pt-4 min-w-[140px] transition-all hover:shadow-md`}
                       style={{
-                        backgroundColor:
+                        borderColor:
                           selectedVariation === key
                             ? restaurant.metadata.primaryColor
-                            : "transparent",
-                        border:
-                          selectedVariation === key
-                            ? `none`
-                            : `1px solid #d1d5db`,
+                            : undefined,
                       }}
                     >
-                      {selectedVariation === key && (
-                        <Check size={14} className="text-white" />
-                      )}
-                    </div>
+                      {/* Selection indicator */}
+                      <div
+                        className={`absolute bottom-2 right-2 w-5 h-5 rounded-full flex items-center justify-center `}
+                        style={{
+                          backgroundColor:
+                            selectedVariation === key
+                              ? restaurant.metadata.primaryColor
+                              : "transparent",
+                          border:
+                            selectedVariation === key
+                              ? `none`
+                              : `1px solid #d1d5db`,
+                        }}
+                      >
+                        {selectedVariation === key && (
+                          <Check size={14} className="text-white" />
+                        )}
+                      </div>
 
-                    <div className="text-center">
-                      <p className="text-md text-left font-medium text-gray-900">
-                        {titleCase(variation.name)}
-                      </p>
-                      <p className="text-sm text-left text-gray-600 mt-1">
-                        ${variation.absolutePrice.toFixed(2)}
-                      </p>
+                      <div className="text-center">
+                        <p className="text-md text-left font-medium text-gray-900">
+                          {titleCase(variation.name)}
+                        </p>
+                        <p className="text-sm text-left text-gray-600 mt-1">
+                          ${variation.absolutePrice.toFixed(2)}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             </div>
           )}
@@ -232,56 +254,61 @@ const ItemModModal: React.FC<ItemModModalProps> = ({
                         </div>
 
                         <div className="divide-y divide-gray-200">
-                          {modifierGroup.modifiers.map((modifier, index) => {
-                            const isSelected = currentSelections.includes(
-                              modifier.id
-                            );
-                            const priceChange = modifier.delta !== 0;
+                          {modifierGroup.modifiers
+                            .sort((a, b) => a.delta - b.delta)
+                            .map((modifier, index) => {
+                              const isSelected = currentSelections.includes(
+                                modifier.id
+                              );
+                              const priceChange = modifier.delta !== 0;
 
-                            return (
-                              <div
-                                key={modifier.id}
-                                onClick={() =>
-                                  handleModifierToggle(modifier.id)
-                                }
-                                className={`flex items-center justify-between p-3 cursor-pointer transition-all`}
-                              >
-                                <div className="flex items-center space-x-3">
-                                  <div
-                                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                                      modifierGroup.select === "single"
-                                        ? "rounded-full"
-                                        : "rounded"
-                                    }`}
-                                    style={{
-                                      borderColor: isSelected
-                                        ? restaurant.metadata.primaryColor
-                                        : "#d1d5db",
-                                      backgroundColor: isSelected
-                                        ? restaurant.metadata.primaryColor
-                                        : "transparent",
-                                    }}
-                                  >
-                                    {isSelected && (
-                                      <Check size={12} className="text-white" />
-                                    )}
+                              return (
+                                <div
+                                  key={modifier.id}
+                                  onClick={() =>
+                                    handleModifierToggle(modifier.id)
+                                  }
+                                  className={`flex items-center justify-between p-3 cursor-pointer transition-all`}
+                                >
+                                  <div className="flex items-center space-x-3">
+                                    <div
+                                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                                        modifierGroup.select === "single"
+                                          ? "rounded-full"
+                                          : "rounded"
+                                      }`}
+                                      style={{
+                                        borderColor: isSelected
+                                          ? restaurant.metadata.primaryColor
+                                          : "#d1d5db",
+                                        backgroundColor: isSelected
+                                          ? restaurant.metadata.primaryColor
+                                          : "transparent",
+                                      }}
+                                    >
+                                      {isSelected && (
+                                        <Check
+                                          size={12}
+                                          className="text-white"
+                                        />
+                                      )}
+                                    </div>
+                                    <span className="font-medium text-gray-900">
+                                      {modifier.name}
+                                    </span>
                                   </div>
-                                  <span className="font-medium text-gray-900">
-                                    {modifier.name}
-                                  </span>
-                                </div>
 
-                                {priceChange && (
-                                  <span
-                                    className={`text-sm font-medium text-gray-600`}
-                                  >
-                                    {modifier.delta > 0 ? "+" : ""}$
-                                    {modifier.delta.toFixed(2)}
-                                  </span>
-                                )}
-                              </div>
-                            );
-                          })}
+                                  {priceChange && (
+                                    <span
+                                      className={`text-sm font-medium text-gray-600`}
+                                    >
+                                      {modifier.delta > 0 ? "+" : ""}$
+                                      {modifier.delta.toFixed(2)}
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            })}
                         </div>
                       </div>
                     );

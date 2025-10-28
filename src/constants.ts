@@ -47,7 +47,7 @@ export const ITEM_IMAGE_BUCKET = "item-images";
 export const HIGHLIGHT_IMAGE_BUCKET = "highlight-images";
 
 export const POINTS_PER_DOLLAR = 10;
-export const STRIPE_MIN_AMOUNT = 50; //50 cents
+export const MIN_PAYMENT_AMOUNT = 1; //50 cents
 
 export const MAX_BUNDLE_DURATION = 90;
 
@@ -60,3 +60,6 @@ const useSquareSandbox = false;
 export const SQUARE_APP_ID = useSquareSandbox
   ? process.env.REACT_APP_SQUARE_APPLICATION_ID_SANDBOX!
   : process.env.REACT_APP_SQUARE_APPLICATION_ID!;
+
+//PURCHASE SIGNALS
+export const BUNDLE_PURCHASED_SIGNAL = "bundle_purchased";

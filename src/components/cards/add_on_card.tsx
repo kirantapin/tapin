@@ -128,9 +128,11 @@ const AddOnCard: React.FC<AddOnCardProps> = ({
           <span className="text-md font-semibold text-gray-900">
             ${newPrice.toFixed(2)}
           </span>
-          <span className="text-md line-through text-gray-500">
-            ${originalPrice.toFixed(2)}
-          </span>
+          {originalPrice > newPrice && (
+            <span className="text-md line-through text-gray-500">
+              ${originalPrice.toFixed(2)}
+            </span>
+          )}
         </div>
       </div>
     </div>

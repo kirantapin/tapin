@@ -37,6 +37,7 @@ export default function RestaurantPage() {
   const orderDrinksRef = useRef<HTMLDivElement>(null);
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
+  const [postPurchaseSignals, setPostPurchaseSignals] = useState<string[]>([]);
   const { state, addToCart, removeFromCart, triggerToast, openBundleModal } =
     useBottomSheet();
   const { openQrModal } = useBottomSheet();
@@ -58,6 +59,13 @@ export default function RestaurantPage() {
       }
     }
 
+    // Early return if no state to process (prevents unnecessary processing on second call)
+    if (!state) {
+      return;
+    }
+
+    const signals = state?.postPurchaseSignals || [];
+    setPostPurchaseSignals(signals);
     const qrFlag = state?.qr as boolean | undefined;
     let message = state?.message as
       | {
@@ -172,7 +180,11 @@ export default function RestaurantPage() {
         <HighlightSlider displayOne={false} />
 
         {/* My Spot Section */}
-        <MySpot userSession={userSession} transactions={transactions} />
+        <MySpot
+          userSession={userSession}
+          transactions={transactions}
+          postPurchaseSignals={postPurchaseSignals}
+        />
 
         {/* Recent Activity Section*/}
         <RecentActivity

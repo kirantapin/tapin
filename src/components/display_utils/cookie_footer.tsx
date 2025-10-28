@@ -86,11 +86,23 @@ const CookieFooter: React.FC = () => {
         <div className="border-t border-gray-200 pt-4 pt-6">
           <p className="text-md text-gray-500">
             This site is powered by{" "}
-            <img
-              src="/tapin_logo_black.png"
-              alt="tapin"
-              className="inline h-5"
-            />
+            <a
+              href="https://go.tapin.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block"
+              style={{ lineHeight: 1 }}
+            >
+              <img
+                src="/tapin_logo_black.png"
+                alt="tapin"
+                className="inline h-5 align-text-bottom"
+                style={{
+                  borderBottom:
+                    "1px solid #9ca3af" /* thin gray-400 underline */,
+                }}
+              />
+            </a>
           </p>
         </div>
       </div>

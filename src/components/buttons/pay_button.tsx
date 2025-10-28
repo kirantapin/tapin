@@ -9,7 +9,7 @@ import { supabase_local } from "../../utils/supabase_client.ts";
 import { useAuth } from "../../context/auth_context.tsx";
 
 import { PaymentPayLoad, Transaction, User } from "../../types.ts";
-import { STRIPE_MIN_AMOUNT } from "../../constants.ts";
+import { MIN_PAYMENT_AMOUNT } from "../../constants.ts";
 import { submitPurchase } from "@/utils/purchase.ts";
 import RedeemButton from "@/components/buttons/redeem_button.tsx";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
@@ -201,15 +201,18 @@ function PayButton({
     );
   }
 
-  if (payload.totalWithTip <= STRIPE_MIN_AMOUNT) {
+  if (payload.totalWithTip <= MIN_PAYMENT_AMOUNT) {
     return (
-      <div>
+      <div className="border border-gray-300 rounded-xl p-4 bg-white w-full max-w-lg mx-auto mt-4">
         <p
-          className=" text-md font-semibold text-center"
-          style={{ color: "red" }}
+          className="text-md font-semibold text-center text-black"
+          style={{ borderColor: "#d1d5db" }}
         >
-          Tap In can't process payments under $0.50. Please add another item to
-          your cart. We apologize for the inconvenience.
+          <span className="text-gray-800 ">
+            Tap In cannot process payments less than $
+            {(MIN_PAYMENT_AMOUNT / 100).toFixed(2)}. Please add another item to
+            your cart. We apologize for the inconvenience.
+          </span>
         </p>
       </div>
     );
