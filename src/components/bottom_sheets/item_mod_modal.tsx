@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { AlertDialog, AlertDialogContent } from "@/components/ui/alert-dialog";
 import { X, Check } from "lucide-react";
 import { useRestaurant } from "@/context/restaurant_context";
-import { Item, NormalItem } from "@/types";
+import { Item, ModifierGroup, NormalItem } from "@/types";
 import { ItemUtils } from "@/utils/item_utils";
 import { ImageFallback } from "../display_utils/image_fallback";
 import { ImageUtils } from "@/utils/image_utils";
 import { titleCase } from "title-case";
+import { AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface ItemModModalProps {
   isOpen: boolean;
@@ -28,20 +29,27 @@ const ItemModModal: React.FC<ItemModModalProps> = ({
   const [selectedModifiers, setSelectedModifiers] = useState<
     Record<string, string[]> | undefined
   >(undefined);
+  const [variations, setVariations] = useState<Record<
+    string,
+    {
+      sourceId: string | null;
+      name: string;
+      absolutePrice: number;
+      archived?: boolean;
+    }
+  > | null>(null);
+  const [modifierGroups, setModifierGroups] = useState<
+    Record<string, ModifierGroup>
+  >({});
   const [loading, setLoading] = useState(false);
-  const setDefault = useRef(false);
+  const [displayReady, setDisplayReady] = useState(false);
 
   const menuItem = restaurant
     ? (ItemUtils.getMenuItemFromItemId(itemId, restaurant) as NormalItem)
     : null;
 
-  const { variations, modifierGroups } =
-    menuItem && restaurant
-      ? ItemUtils.extractActiveVariationAndModifierGroups(menuItem, restaurant)
-      : { variations: {}, modifierGroups: {} };
-
   useEffect(() => {
-    if (isOpen && menuItem && restaurant && !setDefault.current) {
+    if (isOpen && menuItem && restaurant && !displayReady) {
       const item = {
         id: itemId,
         variation: selectedVariation,
@@ -50,11 +58,20 @@ const ItemModModal: React.FC<ItemModModalProps> = ({
       ItemUtils.doesItemRequireConfiguration(item, restaurant);
       setSelectedVariation(item.variation);
       setSelectedModifiers(item.modifiers);
-      setDefault.current = true;
+      const { variations, modifierGroups } =
+        menuItem && restaurant
+          ? ItemUtils.extractActiveVariationAndModifierGroups(
+              menuItem,
+              restaurant
+            )
+          : { variations: {}, modifierGroups: {} };
+      setVariations(variations);
+      setModifierGroups(modifierGroups);
+      setDisplayReady(true);
     }
-  }, [isOpen, menuItem, restaurant]);
+  }, [isOpen, menuItem, restaurant, displayReady]);
 
-  if (!menuItem || !restaurant) return null;
+  if (!menuItem || !restaurant || !displayReady) return null;
 
   const errorMessage = ItemUtils.doesItemRequireConfiguration(
     {
@@ -70,6 +87,9 @@ const ItemModModal: React.FC<ItemModModalProps> = ({
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent className="w-[90vw] max-w-3xl max-h-[85vh] rounded-3xl overflow-y-auto flex flex-col gap-0 p-0">
+        <AlertDialogTitle className="sr-only">
+          Configure {titleCase(menuItem?.name)}
+        </AlertDialogTitle>
         <div className="flex-1 overflow-y-auto pt-6 no-scrollbar px-6">
           <div className="flex items-start space-x-6">
             {/* Item Image */}

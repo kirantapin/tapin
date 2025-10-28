@@ -343,6 +343,14 @@ export interface User {
   next_purchase_credit: Record<string, number>;
 }
 
+export interface UserRestaurantData {
+  user_id: string;
+  restaurant_id: string;
+  points: number;
+  next_purchase_credit: number;
+  metadata: Record<string, string>;
+}
+
 export interface UserSession {
   user: {
     id: string;
