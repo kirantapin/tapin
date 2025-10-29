@@ -7,7 +7,7 @@ import { useRestaurant } from "@/context/restaurant_context";
 import { PolicyManager } from "@/utils/policy_manager";
 import { useAuth } from "@/context/auth_context";
 
-const UTM_PARAMS = ["bundle", "welcome", "policy"];
+const UTM_PARAMS = ["bundle", "welcome", "policy", "signin"];
 
 interface UseUTMParamsOptions {
   restaurant: Restaurant | null;
@@ -25,7 +25,7 @@ export const useUTMParams = ({
   triggerToast,
 }: UseUTMParamsOptions) => {
   const location = useLocation();
-  const { handlePolicyClick } = useBottomSheet();
+  const { handlePolicyClick, openSignInModal } = useBottomSheet();
   const { policyManager } = useRestaurant();
   const { userSession } = useAuth();
   const [utmParams, setUtmParams] = useState<{ [key: string]: string }>({});
@@ -54,6 +54,12 @@ export const useUTMParams = ({
           "info",
           3000
         );
+      }
+    }
+
+    if ("signin" in utms) {
+      if (!userSession) {
+        openSignInModal();
       }
     }
 

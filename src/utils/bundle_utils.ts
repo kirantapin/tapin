@@ -153,16 +153,30 @@ export class BundleUtils {
         restaurant
       );
 
+      let totalUsageConstraintUsages: number | null = null;
+      let daysSinceLastUseConstraintUsages: number | null = null;
+
       if (policy.total_usages) {
-        return totalValue + estimatedPolicyValue * policy.total_usages;
+        totalUsageConstraintUsages = policy.total_usages;
       }
 
-      // If no total_usage, estimate based on duration
-      const daysInBundle = bundle.duration;
-      const daysSinceLastUse = policy.days_since_last_use || daysInBundle;
+      if (policy.days_since_last_use) {
+        // If no total_usage, estimate based on duration
+        const daysInBundle = bundle.duration;
+        const daysSinceLastUse = policy.days_since_last_use || daysInBundle;
+        daysSinceLastUseConstraintUsages = Math.floor(
+          daysInBundle / daysSinceLastUse
+        );
+      }
 
-      const estimatedUses = Math.floor(daysInBundle / daysSinceLastUse);
-      return totalValue + estimatedPolicyValue * estimatedUses;
+      return (
+        totalValue +
+        estimatedPolicyValue *
+          Math.min(
+            daysSinceLastUseConstraintUsages || 1,
+            totalUsageConstraintUsages || 1
+          )
+      );
     }, 0);
     return bundlePolicyValue + bundle.fixed_credit;
   };
