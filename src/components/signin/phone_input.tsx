@@ -89,11 +89,17 @@ export function PhoneInputComponent({
             </div>
           </div>
 
+          <p className="text-xs text-gray-600 mb-4 text-center">
+            By tapping SEND CODE, you consent to receive text messages from Tap
+            In App (e.g., order updates). Text HELP for help or STOP to cancel.
+            Message & data rates may apply.
+          </p>
+
           <button
             type="submit"
             className="w-full bg-[linear-gradient(225deg,#CAA650,#F4E4A8)] text-white py-4 rounded-full text-lg font-semibold hover:bg-[#E4A43B] transition-colors"
           >
-            Continue
+            Send Code
           </button>
         </form>
       </div>
