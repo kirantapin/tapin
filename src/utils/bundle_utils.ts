@@ -169,12 +169,19 @@ export class BundleUtils {
         );
       }
 
+      if (
+        daysSinceLastUseConstraintUsages === null &&
+        totalUsageConstraintUsages === null
+      ) {
+        return totalValue + estimatedPolicyValue;
+      }
+
       return (
         totalValue +
         estimatedPolicyValue *
           Math.min(
-            daysSinceLastUseConstraintUsages || 1,
-            totalUsageConstraintUsages || 1
+            daysSinceLastUseConstraintUsages || Infinity,
+            totalUsageConstraintUsages || Infinity
           )
       );
     }, 0);
