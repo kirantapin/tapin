@@ -329,9 +329,13 @@ export class PolicyUtils {
     let highestCost = 0;
     for (const item of items) {
       const itemsInCategory = ItemUtils.getAllItemsInCategory(item, restaurant);
-      const itemPrice = itemsInCategory.reduce((max, item) => {
-        return Math.max(max, this.getAverageItemCost(item, restaurant));
-      }, 0);
+      const itemPrice = itemsInCategory
+        .filter(
+          (item) => !ItemUtils.isItemUnavailable({ id: item }, restaurant)
+        )
+        .reduce((max, item) => {
+          return Math.max(max, this.getAverageItemCost(item, restaurant));
+        }, 0);
       if (itemPrice > highestCost) {
         highestCost = itemPrice;
       }
