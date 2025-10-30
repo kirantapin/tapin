@@ -89,18 +89,38 @@ export function PhoneInputComponent({
             </div>
           </div>
 
-          <p className="text-xs text-gray-600 mb-4 text-center">
-            By tapping SEND CODE, you consent to receive text messages from Tap
-            In App (e.g., order updates). Text HELP for help or STOP to cancel.
-            Message & data rates may apply.
-          </p>
-
           <button
             type="submit"
             className="w-full bg-[linear-gradient(225deg,#CAA650,#F4E4A8)] text-white py-4 rounded-full text-lg font-semibold hover:bg-[#E4A43B] transition-colors"
           >
             Send Code
           </button>
+
+          <p className="text-xs text-gray-600 mb-4 mt-6 text-left">
+            By tapping SEND CODE, you consent to receive recurring automated
+            text messages from TapIn App (e.g., order updates, exclusive deals,
+            rewards). Message frequency varies. Consent is not a condition of
+            purchase. Text HELP for help or STOP to cancel. Message & data rates
+            may apply. By continuing, you agree to our{" "}
+            <a
+              href="https://go.tapin.app/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+            >
+              Privacy Policy
+            </a>{" "}
+            and{" "}
+            <a
+              href="https://go.tapin.app/terms-and-conditions"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+            >
+              Terms of Service
+            </a>
+            .
+          </p>
         </form>
       </div>
     </div>
