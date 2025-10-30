@@ -30,6 +30,11 @@ export default function RestaurantDiscovery() {
       else setRestaurants(data as Restaurant[]);
       setLoading(false);
     };
+    //TEMPORARY
+    if (process.env.REACT_APP_VERCEL_ENV === "production") {
+      navigate(RESTAURANT_PATH.replace(":id", "mochacafe"));
+      return;
+    }
     window.scrollTo(0, 0);
     fetchRestaurants();
   }, []);

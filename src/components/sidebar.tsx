@@ -100,7 +100,12 @@ export const Sidebar = ({ restaurant, isOpen, onClose }: SidebarProps) => {
             backgroundColor: restaurant?.metadata.primaryColor,
           }}
           onClick={() => {
-            navigate(BASE_PATH);
+            //TEMPORARY
+            if (process.env.REACT_APP_VERCEL_ENV === "production") {
+              triggerToast("Tap In Discovery will be coming soon", "info");
+            } else {
+              navigate(BASE_PATH);
+            }
             onClose();
           }}
         >

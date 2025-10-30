@@ -150,7 +150,7 @@ export default function RestaurantPage() {
         </div>
         <div className="flex items-center gap-1 mt-1 mb-4">
           <LocationMarkerIcon fillColor="#6B7280" />
-          <span className="text-sm text-gray-500 ml-1">
+          <span className="text-sm text-gray-500 ml-1 font-semibold">
             {restaurant?.metadata.locationTag}
           </span>
           {isOpenNow(
