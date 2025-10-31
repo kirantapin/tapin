@@ -8,10 +8,14 @@ const RedeemButton = ({
   payload,
   refresh,
   postPurchase,
+  openProcessingOrderModal,
+  closeProcessingOrderModal,
 }: {
   payload: any;
   refresh: () => Promise<string | null>;
   postPurchase: (transactions: Transaction[]) => Promise<void>;
+  openProcessingOrderModal: () => void;
+  closeProcessingOrderModal: () => void;
 }) => {
   const { setTransactions, setUserData } = useAuth();
   const { restaurant } = useRestaurant();
@@ -31,6 +35,7 @@ const RedeemButton = ({
         ...prevTransactions,
         ...transactions,
       ]);
+      closeProcessingOrderModal();
       await postPurchase(transactions);
     }
   };
@@ -41,7 +46,9 @@ const RedeemButton = ({
       style={{
         background: restaurant?.metadata.primaryColor,
       }}
+      disabled={loading}
       onClick={async () => {
+        if (loading) return;
         setLoading(true);
         try {
           const potentialError = await refresh();
@@ -49,6 +56,7 @@ const RedeemButton = ({
             triggerToast(potentialError, "error");
             return;
           }
+          openProcessingOrderModal();
           const paymentData = {
             accountId: payload.accountId,
             paymentIntentId: null,
@@ -72,22 +80,21 @@ const RedeemButton = ({
           );
           console.error("Unexpected Error:", err);
         } finally {
+          closeProcessingOrderModal();
           setLoading(false);
         }
       }}
     >
       <div className="flex items-center justify-center gap-2 w-full">
-        {loading ? (
-          <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-        ) : (
-          <>
-            <span className="font-semibold">Redeem</span>
-            <img
-              src="/tapin_icon_full_white.png"
-              alt="Tap In Icon"
-              className="h-5"
-            />
-          </>
+        <span className="font-semibold">
+          {loading ? "Processing" : "Redeem"}
+        </span>
+        {!loading && (
+          <img
+            src="/tapin_icon_full_white.png"
+            alt="Tap In Icon"
+            className="h-5"
+          />
         )}
       </div>
     </button>

@@ -11,10 +11,14 @@ export const SquarePayButton = ({
   refresh,
   payload,
   postPurchase,
+  openProcessingOrderModal,
+  closeProcessingOrderModal,
 }: {
   refresh: () => Promise<string | null>;
   payload: PaymentPayLoad;
   postPurchase: (transactions: Transaction[]) => Promise<void>;
+  openProcessingOrderModal: () => void;
+  closeProcessingOrderModal: () => void;
 }) => {
   //apple does not need a ref
   const googlePayRef = useRef<HTMLDivElement>(null);
@@ -39,6 +43,7 @@ export const SquarePayButton = ({
         ...prevTransactions,
         ...transactions,
       ]);
+      closeProcessingOrderModal();
       await postPurchase(transactions);
     }
   };
@@ -107,28 +112,42 @@ export const SquarePayButton = ({
       );
       return;
     }
-    const result = await paymentMethod.tokenize();
-    if (result.status === "OK") {
-      const error = await refresh();
-      if (error) return triggerToast(error, "error");
 
-      const token = result.token;
-      const paymentData = {
-        accountId: payload.accountId,
-        token,
-        additionalOrderData: {},
-      };
-      payload["paymentData"] = paymentData;
+    // Open loading modal when payment process starts
 
-      const response = await submitPurchase(payload);
-      if (response) {
-        const { transactions, modifiedUserData } = response;
-        handleTapInResponse(transactions, modifiedUserData);
+    try {
+      const result = await paymentMethod.tokenize();
+      if (result.status === "OK") {
+        openProcessingOrderModal();
+        const error = await refresh();
+        if (error) {
+          closeProcessingOrderModal();
+          return triggerToast(error, "error");
+        }
+
+        const token = result.token;
+        const paymentData = {
+          accountId: payload.accountId,
+          token,
+          additionalOrderData: {},
+        };
+        payload["paymentData"] = paymentData;
+
+        const response = await submitPurchase(payload);
+        if (response) {
+          const { transactions, modifiedUserData } = response;
+          await handleTapInResponse(transactions, modifiedUserData);
+        } else {
+          triggerToast("Something went wrong. Please try again.", "error");
+        }
       } else {
-        triggerToast("Something went wrong. Please try again.", "error");
+        console.error("Payment tokenization failed", result);
       }
-    } else {
-      console.error("Apple Pay failed", result);
+    } catch (err) {
+      console.error("Payment error:", err);
+      triggerToast("Something went wrong. Please try again.", "error");
+    } finally {
+      closeProcessingOrderModal();
     }
   };
 
