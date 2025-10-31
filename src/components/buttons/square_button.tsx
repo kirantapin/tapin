@@ -43,7 +43,7 @@ export const SquarePayButton = ({
         ...prevTransactions,
         ...transactions,
       ]);
-      closeProcessingOrderModal();
+      closeModalIfOpen();
       await postPurchase(transactions);
     }
   };
@@ -103,51 +103,87 @@ export const SquarePayButton = ({
     }
   }, [SQUARE_APP_ID, payload.accountId]);
 
+  const processingRef = useRef(false);
+  const isModalOpenRef = useRef(false);
+
+  const openModalOnce = () => {
+    if (!isModalOpenRef.current) {
+      openProcessingOrderModal();
+      isModalOpenRef.current = true;
+    }
+  };
+  const closeModalIfOpen = () => {
+    if (isModalOpenRef.current) {
+      closeProcessingOrderModal();
+      isModalOpenRef.current = false;
+    }
+  };
+
   const handlePayClick = async (method: "apple" | "google") => {
+    if (processingRef.current) return;
+    processingRef.current = true;
+
     const paymentMethod = method === "apple" ? applePay : googlePay;
     if (!paymentMethod) {
       triggerToast(
         "Something went wrong. Please refresh the page and try again.",
         "error"
       );
+      processingRef.current = false;
       return;
     }
 
-    // Open loading modal when payment process starts
+    let timer: number | undefined;
 
     try {
-      const result = await paymentMethod.tokenize();
-      if (result.status === "OK") {
-        openProcessingOrderModal();
-        const error = await refresh();
-        if (error) {
-          closeProcessingOrderModal();
-          return triggerToast(error, "error");
-        }
+      // start tokenization (wallet sheet will appear)
+      const tokenizationPromise = paymentMethod.tokenize();
 
-        const token = result.token;
-        const paymentData = {
-          accountId: payload.accountId,
-          token,
-          additionalOrderData: {},
-        };
-        payload["paymentData"] = paymentData;
+      // ✅ delay opening to avoid pre-wallet flash
+      timer = window.setTimeout(() => {
+        openModalOnce(); // open if wallet still up / not finished
+      }, 1200);
 
-        const response = await submitPurchase(payload);
-        if (response) {
-          const { transactions, modifiedUserData } = response;
-          await handleTapInResponse(transactions, modifiedUserData);
-        } else {
-          triggerToast("Something went wrong. Please try again.", "error");
-        }
-      } else {
-        console.error("Payment tokenization failed", result);
+      const result = await tokenizationPromise;
+
+      // ✅ wallet sheet closed now; ensure modal is up
+      if (timer) clearTimeout(timer);
+      openModalOnce();
+
+      if (result.status !== "OK") {
+        throw new Error("Payment was cancelled or failed.");
       }
-    } catch (err) {
-      console.error("Payment error:", err);
-      triggerToast("Something went wrong. Please try again.", "error");
+
+      const err = await refresh();
+      if (err) {
+        throw new Error("Error verifying your cart: " + err);
+      }
+
+      payload.paymentData = {
+        accountId: payload.accountId,
+        token: result.token,
+        additionalOrderData: {},
+      };
+
+      const resp = await submitPurchase(payload);
+      if (!resp) {
+        throw new Error(
+          "Something went wrong submitting purchase. Please try again."
+        );
+      }
+
+      const { transactions, modifiedUserData } = resp;
+      await handleTapInResponse(transactions, modifiedUserData);
+    } catch (e) {
+      console.error(e);
+      triggerToast(
+        (e as Error).message || "Something went wrong. Please try again.",
+        "error"
+      );
     } finally {
-      closeProcessingOrderModal();
+      if (timer) clearTimeout(timer);
+      closeModalIfOpen(); // ✅ always close
+      processingRef.current = false;
     }
   };
 
