@@ -164,9 +164,9 @@ export class BundleUtils {
         // If no total_usage, estimate based on duration
         const daysInBundle = bundle.duration;
         const daysSinceLastUse = policy.days_since_last_use || daysInBundle;
-        daysSinceLastUseConstraintUsages = Math.floor(
-          daysInBundle / daysSinceLastUse
-        );
+        daysSinceLastUseConstraintUsages =
+          Math.floor(daysInBundle / daysSinceLastUse) +
+          (daysInBundle % daysSinceLastUse > 0 ? 1 : 0);
       }
 
       if (
