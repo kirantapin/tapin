@@ -5,6 +5,7 @@ import {
   useElements,
   ExpressCheckoutElement,
 } from "@stripe/react-stripe-js";
+import { useState } from "react";
 import { supabase_local } from "../../utils/supabase_client.ts";
 import { useAuth } from "../../context/auth_context.tsx";
 
@@ -15,6 +16,7 @@ import RedeemButton from "@/components/buttons/redeem_button.tsx";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { SquarePayButton } from "./square_button.tsx";
 import { PurchaseTermsCard } from "../cards/purchase_terms_card.tsx";
+import ProcessingOrderModal from "@/components/bottom_sheets/processing_order_modal.tsx";
 
 const stripePublishableKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || "";
 const stripePromise = loadStripe(stripePublishableKey);
@@ -23,10 +25,14 @@ const StripePayButton = ({
   payload,
   refresh,
   postPurchase,
+  openProcessingOrderModal,
+  closeProcessingOrderModal,
 }: {
   payload: PaymentPayLoad;
   refresh: () => Promise<string | null>;
   postPurchase: (transactions: Transaction[]) => Promise<void>;
+  openProcessingOrderModal: () => void;
+  closeProcessingOrderModal: () => void;
 }) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -44,6 +50,7 @@ const StripePayButton = ({
       ...prevTransactions,
       ...transactions,
     ]);
+    closeProcessingOrderModal();
     await postPurchase(transactions);
   };
 
@@ -111,6 +118,7 @@ const StripePayButton = ({
         );
         console.error("No Payment Intent Generated");
       } else {
+        openProcessingOrderModal();
         const paymentData = {
           accountId: payload.accountId,
           paymentIntentId: paymentIntent.id,
@@ -118,15 +126,19 @@ const StripePayButton = ({
         };
 
         payload["paymentData"] = paymentData;
-        const tapInResponse = await submitPurchase(payload);
-        if (tapInResponse) {
-          const { transactions, modifiedUserData } = tapInResponse;
-          handleTapInResponse(transactions, modifiedUserData);
-        } else {
-          triggerToast(
-            "Something went wrong. Please refresh the page and try again.",
-            "error"
-          );
+        try {
+          const tapInResponse = await submitPurchase(payload);
+          if (tapInResponse) {
+            const { transactions, modifiedUserData } = tapInResponse;
+            await handleTapInResponse(transactions, modifiedUserData);
+          } else {
+            triggerToast(
+              "Something went wrong. Please refresh the page and try again.",
+              "error"
+            );
+          }
+        } finally {
+          closeProcessingOrderModal();
         }
       }
     } catch (err) {
@@ -186,6 +198,16 @@ function PayButton({
   postPurchase: (transactions: Transaction[]) => Promise<void>;
   paymentProvider: "stripe" | "square";
 }) {
+  const [showProcessingOrderModal, setShowProcessingOrderModal] =
+    useState(false);
+
+  const openProcessingOrderModal = () => {
+    setShowProcessingOrderModal(true);
+  };
+
+  const closeProcessingOrderModal = () => {
+    setShowProcessingOrderModal(false);
+  };
   if (payload.totalWithTip <= 0) {
     return (
       <div>
@@ -193,10 +215,16 @@ function PayButton({
           payload={payload}
           refresh={refresh}
           postPurchase={postPurchase}
+          openProcessingOrderModal={openProcessingOrderModal}
+          closeProcessingOrderModal={closeProcessingOrderModal}
         />
         <div className="text-sm text-gray-600 leading-[1.4] mt-6 mb-6">
           <PurchaseTermsCard />
         </div>
+        <ProcessingOrderModal
+          isOpen={showProcessingOrderModal}
+          onClose={closeProcessingOrderModal}
+        />
       </div>
     );
   }
@@ -234,10 +262,16 @@ function PayButton({
           payload={payload}
           refresh={refresh}
           postPurchase={postPurchase}
+          openProcessingOrderModal={openProcessingOrderModal}
+          closeProcessingOrderModal={closeProcessingOrderModal}
         />
         <div className="text-sm text-gray-600 leading-[1.4] mt-6 mb-6">
           <PurchaseTermsCard />
         </div>
+        <ProcessingOrderModal
+          isOpen={showProcessingOrderModal}
+          onClose={closeProcessingOrderModal}
+        />
       </Elements>
     );
   }
@@ -250,10 +284,16 @@ function PayButton({
           payload={payload}
           refresh={refresh}
           postPurchase={postPurchase}
+          openProcessingOrderModal={openProcessingOrderModal}
+          closeProcessingOrderModal={closeProcessingOrderModal}
         />
         <div className="text-sm text-gray-600 leading-[1.4] mt-6 mb-6">
           <PurchaseTermsCard />
         </div>
+        <ProcessingOrderModal
+          isOpen={showProcessingOrderModal}
+          onClose={closeProcessingOrderModal}
+        />
       </div>
     );
   }
