@@ -247,7 +247,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
           {deals.length > 0 && (
             <>
               <h1 className="text-xl font-bold text-gray-800">
-                Bundle Exclusive Deals:
+                Unlocks Access To:
               </h1>
               <div className="mt-2">
                 <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar -mx-6 px-6">
