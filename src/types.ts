@@ -179,6 +179,12 @@ interface RestaurantInfo {
   }[];
 }
 
+export interface FulfillmentInfo {
+  user_display_name?: string;
+  user_phone_number?: string;
+  service_type?: "pickup" | "dine_in";
+}
+
 export interface PaymentPayLoad {
   totalWithTip: number;
   state: CartState;
@@ -189,6 +195,8 @@ export interface PaymentPayLoad {
     additionalOrderData: Record<string, unknown>;
   };
   accountId: string;
+  immediateFulfillment?: boolean;
+  fulfillmentInfo?: FulfillmentInfo;
 }
 
 export interface OpenHours {

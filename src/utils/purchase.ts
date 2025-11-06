@@ -15,6 +15,8 @@ export const submitPurchase = async (payload: PaymentPayLoad) => {
           userCartResults: payload.state.cartResults,
           token: payload.state.token,
           paymentData: payload.paymentData,
+          immediateFulfillment: payload.immediateFulfillment || false,
+          fulfillmentInfo: payload.fulfillmentInfo,
         },
       }
     );

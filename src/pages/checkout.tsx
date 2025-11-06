@@ -285,22 +285,36 @@ export default function CheckoutPage() {
                         ":id",
                         restaurant.id
                       );
-
-                      const redeemableTransactions = transactions.filter(
-                        (transaction) =>
+                      let alreadyRedeemedTransactions = 0;
+                      const redeemableUnfulfilledTransactions = transactions
+                        .filter((transaction) =>
                           TransactionUtils.isTransactionRedeemable(
                             transaction,
                             restaurant
                           )
-                      );
+                        )
+                        .filter((transaction) => {
+                          if (!!transaction.fulfilled_by) {
+                            alreadyRedeemedTransactions++;
+                            return false;
+                          } else {
+                            return true;
+                          }
+                        });
 
                       const postReloadState = {
                         qr: true,
-                        transactions: redeemableTransactions,
+                        transactions: redeemableUnfulfilledTransactions,
                         message: {
                           type: "success",
                           message:
-                            "Purchase successful! You can redeem your items anytime in My Spot",
+                            alreadyRedeemedTransactions > 0
+                              ? `${
+                                  alreadyRedeemedTransactions > 1
+                                    ? `${alreadyRedeemedTransactions} items have`
+                                    : `${alreadyRedeemedTransactions} item has`
+                                } been redeemed, you can access your other items anytime in My Spot`
+                              : "Purchase successful! You can access your items anytime in My Spot",
                         },
                         postPurchaseSignals: [],
                       };
