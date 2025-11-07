@@ -70,7 +70,6 @@ const SelfRedeemModal: React.FC<SelfRedeemModalProps> = ({
             user_display_name: staffRedemption
               ? "Staff Redemption"
               : userDisplayName,
-            user_phone_number: userSession?.user?.phone,
             service_type: serviceType,
           },
         },

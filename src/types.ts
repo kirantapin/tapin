@@ -181,7 +181,6 @@ interface RestaurantInfo {
 
 export interface FulfillmentInfo {
   user_display_name?: string;
-  user_phone_number?: string;
   service_type?: "pickup" | "dine_in";
 }
 
