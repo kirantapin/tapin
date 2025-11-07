@@ -247,7 +247,7 @@ const BundleModal: React.FC<BundleModalProps> = ({
           {deals.length > 0 && (
             <>
               <h1 className="text-xl font-bold text-gray-800">
-                Bundle Exclusive Deals:
+                Unlocks Access To:
               </h1>
               <div className="mt-2">
                 <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar -mx-6 px-6">
@@ -392,21 +392,36 @@ const BundleModal: React.FC<BundleModalProps> = ({
                       restaurant.id
                     );
 
-                    const redeemableTransactions = transactions.filter(
-                      (transaction) =>
+                    let alreadyRedeemedTransactions = 0;
+                    const redeemableUnfulfilledTransactions = transactions
+                      .filter((transaction) =>
                         TransactionUtils.isTransactionRedeemable(
                           transaction,
                           restaurant
                         )
-                    );
+                      )
+                      .filter((transaction) => {
+                        if (!!transaction.fulfilled_by) {
+                          alreadyRedeemedTransactions++;
+                          return false;
+                        } else {
+                          return true;
+                        }
+                      });
 
                     const postReloadState = {
                       qr: true,
-                      transactions: redeemableTransactions,
+                      transactions: redeemableUnfulfilledTransactions,
                       message: {
                         type: "success",
                         message:
-                          "Bundle purchased successfully, view in My Spot",
+                          alreadyRedeemedTransactions > 0
+                            ? `${
+                                alreadyRedeemedTransactions > 1
+                                  ? `${alreadyRedeemedTransactions} items have`
+                                  : `${alreadyRedeemedTransactions} item has`
+                              } been redeemed, you can access your other items anytime in My Spot`
+                            : "Bundle purchased successfully, view in My Spot",
                       },
                       postPurchaseSignals: [BUNDLE_PURCHASED_SIGNAL],
                     };

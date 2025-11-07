@@ -79,7 +79,9 @@ const CheckoutSummary: FC<CheckoutSummaryProps> = ({
         {state.cartResults.totalPointCost > 0 && (
           <div className={checkoutStyles.summaryRow}>
             <span>Point Cost</span>
-            <span>-{formatPoints(state.cartResults.totalPointCost)}</span>
+            <span>
+              -{formatPoints(Math.floor(state.cartResults.totalPointCost))}
+            </span>
           </div>
         )}
         {state.cartResults.totalPoints > 0 && (
@@ -88,7 +90,9 @@ const CheckoutSummary: FC<CheckoutSummaryProps> = ({
             style={{ color: "#40C4AA" }}
           >
             <span>Points Earned</span>
-            <span>+{formatPoints(state.cartResults.totalPoints)}</span>
+            <span>
+              +{formatPoints(Math.floor(state.cartResults.totalPoints))}
+            </span>
           </div>
         )}
         {state.cartResults.credit.creditUsed > 0 && (

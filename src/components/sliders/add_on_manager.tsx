@@ -165,7 +165,7 @@ const AddOnManager: FC<AddOnManagerProps> = ({
   return (
     <div className="mt-4">
       {allowNormalItems && normalItems.length > 0 && (
-        <h2 className="text-lg font-bold mb-1">Exclusive Deals</h2>
+        <h2 className="text-lg font-bold mb-1">One-time Offers</h2>
       )}
 
       {allowNormalItems && normalItems.length > 0 && (

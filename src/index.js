@@ -9,6 +9,7 @@ import { DeviceProvider } from "./context/device_context.tsx";
 import { BrowserRouter as Router } from "react-router-dom";
 import { RestaurantProvider } from "./context/restaurant_context.tsx";
 import { BottomSheetProvider } from "./context/bottom_sheet_context.tsx";
+import { OrderDetailsProvider } from "./context/order_details_context.tsx";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
@@ -16,9 +17,11 @@ root.render(
       <DeviceProvider>
         <AuthProvider>
           <RestaurantProvider>
-            <BottomSheetProvider>
-              <App />
-            </BottomSheetProvider>
+            <OrderDetailsProvider>
+              <BottomSheetProvider>
+                <App />
+              </BottomSheetProvider>
+            </OrderDetailsProvider>
           </RestaurantProvider>
         </AuthProvider>
       </DeviceProvider>
