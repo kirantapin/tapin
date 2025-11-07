@@ -423,4 +423,18 @@ export class ItemUtils {
 
     return names;
   }
+
+  static requiresFulfillment(item: Item, restaurant: Restaurant): boolean {
+    const itemInfo = this.getMenuItemFromItemId(item.id, restaurant);
+    if (!itemInfo) {
+      return false;
+    }
+    if (this.isBundleItem(item.id, restaurant)) {
+      return false;
+    }
+    if (this.isPassItem(item.id, restaurant)) {
+      return false;
+    }
+    return true;
+  }
 }

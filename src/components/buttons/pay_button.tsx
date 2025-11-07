@@ -9,7 +9,12 @@ import { useState } from "react";
 import { supabase_local } from "../../utils/supabase_client.ts";
 import { useAuth } from "../../context/auth_context.tsx";
 
-import { PaymentPayLoad, Transaction, User } from "../../types.ts";
+import {
+  FulfillmentInfo,
+  PaymentPayLoad,
+  Transaction,
+  User,
+} from "../../types.ts";
 import { MIN_PAYMENT_AMOUNT } from "../../constants.ts";
 import { submitPurchase } from "@/utils/purchase.ts";
 import RedeemButton from "@/components/buttons/redeem_button.tsx";
@@ -17,6 +22,8 @@ import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { SquarePayButton } from "./square_button.tsx";
 import { PurchaseTermsCard } from "../cards/purchase_terms_card.tsx";
 import ProcessingOrderModal from "@/components/bottom_sheets/processing_order_modal.tsx";
+import { FulfillmentToggle } from "./fulfillment_toggle.tsx";
+import { useOrderDetails } from "@/context/order_details_context";
 
 const stripePublishableKey = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || "";
 const stripePromise = loadStripe(stripePublishableKey);
@@ -200,6 +207,13 @@ function PayButton({
 }) {
   const [showProcessingOrderModal, setShowProcessingOrderModal] =
     useState(false);
+  const [isImmediateFulfillment, setIsImmediateFulfillment] =
+    useState<boolean>(false);
+  const { userDisplayName, serviceType } = useOrderDetails();
+  const fulfillmentInfo: FulfillmentInfo = {
+    user_display_name: userDisplayName || undefined,
+    service_type: serviceType || undefined,
+  };
 
   const openProcessingOrderModal = () => {
     setShowProcessingOrderModal(true);
@@ -211,8 +225,17 @@ function PayButton({
   if (payload.totalWithTip <= 0) {
     return (
       <div>
+        <FulfillmentToggle
+          cart={payload.state.cart}
+          isImmediateFulfillment={isImmediateFulfillment}
+          onToggle={setIsImmediateFulfillment}
+        />
         <RedeemButton
-          payload={payload}
+          payload={{
+            ...payload,
+            immediateFulfillment: isImmediateFulfillment,
+            fulfillmentInfo: fulfillmentInfo,
+          }}
           refresh={refresh}
           postPurchase={postPurchase}
           openProcessingOrderModal={openProcessingOrderModal}
@@ -258,8 +281,17 @@ function PayButton({
           appearance: {},
         }}
       >
+        <FulfillmentToggle
+          cart={payload.state.cart}
+          isImmediateFulfillment={isImmediateFulfillment}
+          onToggle={setIsImmediateFulfillment}
+        />
         <StripePayButton
-          payload={payload}
+          payload={{
+            ...payload,
+            immediateFulfillment: isImmediateFulfillment,
+            fulfillmentInfo: fulfillmentInfo,
+          }}
           refresh={refresh}
           postPurchase={postPurchase}
           openProcessingOrderModal={openProcessingOrderModal}
@@ -279,9 +311,18 @@ function PayButton({
   if (paymentProvider === "square") {
     return (
       <div>
+        <FulfillmentToggle
+          cart={payload.state.cart}
+          isImmediateFulfillment={isImmediateFulfillment}
+          onToggle={setIsImmediateFulfillment}
+        />
         <SquarePayButton
           key={payload.totalWithTip}
-          payload={payload}
+          payload={{
+            ...payload,
+            immediateFulfillment: isImmediateFulfillment,
+            fulfillmentInfo: fulfillmentInfo,
+          }}
           refresh={refresh}
           postPurchase={postPurchase}
           openProcessingOrderModal={openProcessingOrderModal}
