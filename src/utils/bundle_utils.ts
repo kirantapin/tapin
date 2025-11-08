@@ -13,7 +13,7 @@ export class BundleUtils {
     restaurantId: string | null
   ): Promise<{ bundle: Bundle; bundlePolicies: string[] }[]> => {
     if (!restaurantId) return [];
-    const { data, error } = await supabase
+    const { data, error: fetchBundlesError } = await supabase
       .from("bundles")
       .select("*")
       .eq("restaurant_id", restaurantId)
@@ -24,21 +24,13 @@ export class BundleUtils {
       )
       .returns<Bundle[]>();
 
-    if (error) {
-      console.error("Error fetching bundles:", error);
+    if (fetchBundlesError) {
+      console.error("Error fetching bundles:", fetchBundlesError);
       return [];
     }
 
-    // Filter out bundles that have been deactivated for longer than their duration
-    const relevantBundles = data.filter((bundle) => {
-      if (!bundle.deactivated_at) return true;
-      const deactivatedDate = new Date(bundle.deactivated_at);
-      const durationInMs = bundle.duration * 24 * 60 * 60 * 1000;
-      const cutoffDate = new Date(Date.now() - durationInMs);
-      return deactivatedDate > cutoffDate;
-    });
     // Get all bundle policy junctions for the bundle IDs
-    const bundleIds = relevantBundles.map((bundle) => bundle.bundle_id);
+    const bundleIds = data.map((bundle) => bundle.bundle_id);
 
     const { data: policies = [] } =
       bundleIds.length > 0
@@ -46,7 +38,7 @@ export class BundleUtils {
             .from("bundle_policy_junction")
             .select("bundle_id, policy_id")
             .in("bundle_id", bundleIds)
-        : { data: [], error: null };
+        : { data: [] };
 
     // Group policies by bundle_id
     const policyMap = (policies ?? []).reduce(
@@ -60,7 +52,7 @@ export class BundleUtils {
       {}
     );
 
-    return relevantBundles.map((bundle) => ({
+    return data.map((bundle) => ({
       bundle,
       bundlePolicies: policyMap[bundle.bundle_id] || [],
     }));

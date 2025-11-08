@@ -344,6 +344,18 @@ export interface Order {
   };
 }
 
+export interface RecentOrder {
+  order: Order;
+  transactions: Transaction[];
+  policies: {
+    order_id: string;
+    policy_id: string;
+    bundle_id: string | null;
+    timestamp: string;
+    user_id: string;
+  }[];
+}
+
 export interface User {
   id: string;
   points: Record<string, number>;
