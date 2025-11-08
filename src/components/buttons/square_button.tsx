@@ -22,7 +22,6 @@ export const SquarePayButton = ({
 }) => {
   //apple does not need a ref
   const googlePayRef = useRef<HTMLDivElement>(null);
-  const [paymentLoaded, setPaymentLoaded] = useState(false);
   const initializedRef = useRef(false);
   const { triggerToast } = useBottomSheet();
   const { setTransactions, setUserData } = useAuth();
@@ -88,8 +87,6 @@ export const SquarePayButton = ({
       } catch (e) {
         console.warn("Apple Pay setup failed", e);
       }
-
-      setPaymentLoaded(true);
     };
 
     if (window.Square) {

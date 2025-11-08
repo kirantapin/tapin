@@ -40,7 +40,7 @@ export class BundleUtils {
     // Get all bundle policy junctions for the bundle IDs
     const bundleIds = relevantBundles.map((bundle) => bundle.bundle_id);
 
-    const { data: policies = [], error: policiesError } =
+    const { data: policies = [] } =
       bundleIds.length > 0
         ? await supabase
             .from("bundle_policy_junction")

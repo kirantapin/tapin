@@ -1,17 +1,10 @@
-import {
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
-  IconButton,
-} from "@mui/material";
+import { Drawer, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close"; // or use Lucide if preferred
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/auth_context.tsx";
 import { BASE_PATH, HISTORY_KEY, RESTAURANT_PATH } from "../constants.ts";
 import { ArrowLeft, UserRound } from "lucide-react";
-import { project_url } from "@/utils/supabase_client.ts";
 import { Restaurant } from "@/types.ts";
 import { SignInButton } from "./signin/signin_button.tsx";
 import CustomLogo from "./svg/custom_logo.tsx";

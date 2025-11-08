@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Policy, Restaurant, Bundle } from "@/types";
+import { Policy, Restaurant } from "@/types";
 import { NORMAL_DEAL_TAG, OFFERS_PAGE_PATH } from "@/constants";
 import SmallPolicyCard from "../cards/small_policy_card.tsx";
 import { PolicyUtils } from "@/utils/policy_utils.ts";

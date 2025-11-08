@@ -1,11 +1,4 @@
-import {
-  CartItem,
-  DealEffectPayload,
-  Item,
-  NormalItem,
-  Policy,
-  Restaurant,
-} from "@/types";
+import { CartItem, DealEffectPayload, Item, Policy, Restaurant } from "@/types";
 import { modifiedItemFlair } from "@/utils/pricer";
 import { ChevronRight, Minus, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
@@ -34,10 +27,6 @@ export function CheckoutItemCard({
     policy: Policy;
   } | null;
 }) {
-  const itemInfo = ItemUtils.getMenuItemFromItemId(
-    item.item.id,
-    restaurant
-  ) as NormalItem;
   const { userOwnershipMap } = useRestaurant();
   const { handlePolicyClick } = useBottomSheet();
 

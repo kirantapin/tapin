@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { ShoppingCart } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { Restaurant } from "@/types";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 
@@ -11,7 +10,6 @@ const GoToCartButton = ({
   restaurant: Restaurant;
   cartCount: number;
 }) => {
-  const navigate = useNavigate();
   const { openCheckoutModal } = useBottomSheet();
   const [isVisible, setIsVisible] = useState(false);
 

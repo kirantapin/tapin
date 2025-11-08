@@ -41,7 +41,7 @@ export default function RestaurantPage() {
   const { state, addToCart, removeFromCart, triggerToast, openBundleModal } =
     useBottomSheet();
   const { openQrModal } = useBottomSheet();
-  const utmParams = useUTMParams({
+  useUTMParams({
     restaurant,
     openBundleModal,
     triggerToast,

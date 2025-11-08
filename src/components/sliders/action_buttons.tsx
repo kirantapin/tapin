@@ -8,7 +8,6 @@ import {
   SquareArrowOutUpRight,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { GradientIcon } from "@/utils/gradient";
 import {
   INFO_PAGE_PATH,
   OFFERS_PAGE_PATH,

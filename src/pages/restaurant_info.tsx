@@ -25,7 +25,6 @@ import { format12Hour } from "@/utils/time";
 const RestaurantInfo: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [openingHoursExpanded, setOpeningHoursExpanded] = useState(true);
-  const [socialMediaExpanded, setSocialMediaExpanded] = useState(true);
 
   const { restaurant } = useRestaurant();
 
@@ -33,10 +32,6 @@ const RestaurantInfo: React.FC = () => {
 
   const toggleOpeningHours = () => {
     setOpeningHoursExpanded(!openingHoursExpanded);
-  };
-
-  const toggleSocialMedia = () => {
-    setSocialMediaExpanded(!socialMediaExpanded);
   };
 
   useEffect(() => {
@@ -49,12 +44,6 @@ const RestaurantInfo: React.FC = () => {
 
   const { address, socials, website, openingHours, contactNumber } =
     restaurant.info;
-
-  const hasSocials =
-    socials.tiktokLink ||
-    socials.twitterLink ||
-    socials.facebookLink ||
-    socials.instagramLink;
 
   const hasOpeningHours =
     openingHours.friday ||

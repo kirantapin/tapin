@@ -6,7 +6,6 @@ import { NORMAL_DEAL_TAG } from "@/constants";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { useRestaurant } from "@/context/restaurant_context";
 import { PolicyUtils } from "@/utils/policy_utils";
-import { BundleUtils } from "@/utils/bundle_utils";
 import { HighlightCardSkeleton } from "../skeletons/highlight_card_skeleton";
 const HighlightSlider = ({ displayOne = false }: { displayOne?: boolean }) => {
   const { addToCart } = useBottomSheet();
