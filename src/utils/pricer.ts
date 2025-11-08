@@ -33,7 +33,7 @@ export function modifiedItemFlair(
       temp["discountDescription"] = `-${formatPoints(
         cartItem.point_cost
       )} points`;
-    } else if (cartItem.price == 0) {
+    } else if (cartItem.price === 0) {
       temp["discountDescription"] = "Free Item";
     } else {
       temp["discountDescription"] = `$${(

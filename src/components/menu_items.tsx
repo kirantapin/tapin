@@ -579,12 +579,10 @@ export const DrinkList = ({
         labelMap[key],
         restaurant
       );
-      itemIds.forEach((id) => {
-        if (ItemUtils.isItemUnavailable({ id: id }, restaurant)) {
-          return;
-        }
-        allItemIds.push({ id: id, label: key });
-      });
+      for (const id of itemIds) {
+        if (ItemUtils.isItemUnavailable({ id }, restaurant)) continue;
+        allItemIds.push({ id, label: key });
+      }
     }
     if (itemSpecifications.length > 0) {
       allItemIds = allItemIds.filter(({ id }) => {
@@ -655,6 +653,7 @@ export const DrinkList = ({
               </div>
             );
           }
+          return null;
         })}
       </div>
     </div>

@@ -35,7 +35,7 @@ export const SquarePayButton = ({
     if (modifiedUserData) {
       setUserData(modifiedUserData);
     }
-    if (!transactions || transactions?.length == 0) {
+    if (!transactions || transactions?.length === 0) {
       throw new Error("No transactions received or created");
     } else {
       setTransactions((prevTransactions) => [
