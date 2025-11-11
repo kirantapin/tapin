@@ -1,4 +1,4 @@
-import { Bundle, Highlight, Item, NormalItem, Restaurant } from "@/types";
+import { Bundle, Highlight, Restaurant } from "@/types";
 
 import {
   BUNDLE_IMAGE_BUCKET,
@@ -7,7 +7,7 @@ import {
   RESTAURANT_IMAGE_BUCKET,
 } from "@/constants";
 
-import { project_url, supabase } from "./supabase_client";
+import { project_url } from "./supabase_client";
 import { ItemUtils } from "./item_utils";
 
 export class ImageUtils {

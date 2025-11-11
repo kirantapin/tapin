@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useReducer } from "react";
+import { useEffect, useRef, useReducer } from "react";
 import { toast } from "react-toastify";
 import { CartManager } from "../utils/cartManager";
 import {
@@ -6,7 +6,6 @@ import {
   Item,
   Policy,
   Restaurant,
-  CartItem,
   DealEffectPayload,
   CartResultsPayload,
 } from "../types";

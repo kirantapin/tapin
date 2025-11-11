@@ -221,7 +221,6 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
 
   const {
     state,
-    dispatch,
     addToCart,
     removeFromCart,
     addPolicy,

@@ -72,7 +72,6 @@ export class ItemUtils {
   }
   static getItemName(item: Item, restaurant: Restaurant): string {
     const menu = restaurant.menu;
-    const { variation } = item;
     if (this.isPassItem(item.id, restaurant)) {
       const itemObject = menu[item.id].info as PassItem;
       return titleCase(itemObject.name);

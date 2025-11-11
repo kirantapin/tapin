@@ -6,7 +6,6 @@ import { NORMAL_DEAL_TAG } from "@/constants";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { useRestaurant } from "@/context/restaurant_context";
 import { PolicyUtils } from "@/utils/policy_utils";
-import { BundleUtils } from "@/utils/bundle_utils";
 import { HighlightCardSkeleton } from "../skeletons/highlight_card_skeleton";
 const HighlightSlider = ({ displayOne = false }: { displayOne?: boolean }) => {
   const { addToCart } = useBottomSheet();
@@ -102,34 +101,41 @@ const HighlightSlider = ({ displayOne = false }: { displayOne?: boolean }) => {
   useEffect(() => {
     const filterHighlights = async () => {
       if (!restaurant || !policyManager || highlights === null) return;
-      const filteredHighlights = highlights.filter((highlight) => {
-        if (highlight.content_type === "item") {
-          if (!highlight.content_pointer) return false;
-          return !ItemUtils.isItemUnavailable(
-            { id: highlight.content_pointer },
-            restaurant
-          );
-        } else if (highlight.content_type === "policy") {
-          if (!highlight.content_pointer) return false;
-          const policy = policyManager.getPolicyFromId(
-            highlight.content_pointer
-          );
+      const filteredHighlights = highlights
+        .filter((highlight) => {
+          if (highlight.content_type === "item") {
+            if (!highlight.content_pointer) return false;
+            return !ItemUtils.isItemUnavailable(
+              { id: highlight.content_pointer },
+              restaurant
+            );
+          } else if (highlight.content_type === "policy") {
+            if (!highlight.content_pointer) return false;
+            const policy = policyManager.getPolicyFromId(
+              highlight.content_pointer
+            );
+            return (
+              policy?.definition?.tag === NORMAL_DEAL_TAG &&
+              PolicyUtils.isPolicyUsable(policy, restaurant)
+            );
+          } else if (highlight.content_type === "bundle") {
+            if (!highlight.content_pointer) return false;
+            return !ItemUtils.isItemUnavailable(
+              { id: highlight.content_pointer },
+              restaurant
+            );
+          } else if (highlight.content_type === "media") {
+            const { title_override, description_override } = highlight;
+            return title_override && description_override;
+          }
+          return false;
+        })
+        .sort((a, b) => {
           return (
-            policy?.definition?.tag === NORMAL_DEAL_TAG &&
-            PolicyUtils.isPolicyUsable(policy, restaurant)
+            new Date(b.modified_at).getTime() -
+            new Date(a.modified_at).getTime()
           );
-        } else if (highlight.content_type === "bundle") {
-          if (!highlight.content_pointer) return false;
-          return !ItemUtils.isItemUnavailable(
-            { id: highlight.content_pointer },
-            restaurant
-          );
-        } else if (highlight.content_type === "media") {
-          const { title_override, description_override } = highlight;
-          return title_override && description_override;
-        }
-        return false;
-      });
+        });
       if (displayOne && filteredHighlights.length > 0) {
         const randomIndex = Math.floor(
           Math.random() * filteredHighlights.length

@@ -3,7 +3,6 @@ import { LOYALTY_REWARD_TAG, POINTS_PER_DOLLAR } from "@/constants";
 import { useRestaurant } from "@/context/restaurant_context";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { useAuth } from "@/context/auth_context";
-import { useNavigate } from "react-router-dom";
 import { Policy } from "@/types";
 import { adjustColor } from "@/utils/color";
 import { PolicyUtils } from "@/utils/policy_utils";
@@ -23,7 +22,6 @@ const SpendGoalCard: FC<{
     userPoints +
     (cartResults?.totalPoints || 0) -
     (cartResults?.totalPointCost || 0);
-  const navigate = useNavigate();
   const [nextReward, setNextReward] = useState<Policy | null>(null);
   const [nextSmallest, setNextSmallest] = useState<Policy | null>(null);
   const computeRange = (policies: Policy[]) => {

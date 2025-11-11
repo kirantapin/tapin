@@ -6,12 +6,6 @@ import { supabase } from "@/utils/supabase_client";
 import { Alert } from "@/components/display_utils/alert";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 
-interface Follow {
-  user_id: string;
-  restaurant_id: string;
-  follows: boolean;
-}
-
 const legalityCheck =
   "By submitting this form and signing up for texts, you consent to receive marketing text messages (e.g. promos, cart reminders) from RESTAURANT_NAME at the number provided at sign up, including messages sent by autodialer. Consent is not a condition of purchase. Msg & data rates may apply. Msg frequency varies. Unsubscribe at any time by replying STOP or clicking the unsubscribe link (where available). Privacy Policy & Terms.";
 
@@ -26,7 +20,7 @@ const followRestaurant = async (user_id: string, restaurant_id: string) => {
 
   if (existingData) {
     // Row exists, update follows to true
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("follows")
       .update({ follows: true })
       .eq("user_id", user_id)
@@ -34,7 +28,7 @@ const followRestaurant = async (user_id: string, restaurant_id: string) => {
     if (error) throw error;
   } else {
     // Row doesn't exist, insert new row with follows true
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("follows")
       .insert({ user_id, restaurant_id, follows: true });
     if (error) throw error;
@@ -42,7 +36,7 @@ const followRestaurant = async (user_id: string, restaurant_id: string) => {
 };
 
 const unfollowRestaurant = async (user_id: string, restaurant_id: string) => {
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("follows")
     .update({ follows: false })
     .eq("user_id", user_id)

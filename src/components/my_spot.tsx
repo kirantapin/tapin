@@ -8,7 +8,6 @@ import {
   BUNDLE_PURCHASED_SIGNAL,
 } from "@/constants";
 import { useRestaurant } from "@/context/restaurant_context";
-import { ItemUtils } from "@/utils/item_utils";
 import { useAuth } from "@/context/auth_context";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
 import { TransactionUtils } from "@/utils/transaction_utils";

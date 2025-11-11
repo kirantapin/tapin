@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { AlertDialog, AlertDialogContent } from "@/components/ui/alert-dialog";
 import { X, Check } from "lucide-react";
 import { useRestaurant } from "@/context/restaurant_context";
