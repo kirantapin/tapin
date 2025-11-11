@@ -1,6 +1,4 @@
-import { useAuth } from "@/context/auth_context";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
-import { useRestaurant } from "@/context/restaurant_context";
 
 interface SignInButtonProps {
   onClose: () => void;

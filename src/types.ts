@@ -108,7 +108,7 @@ export interface CartItem {
   item: Item;
   quantity: number;
   price: number;
-  points: number;
+  point_multiplier: number;
   point_cost: number | 0;
 }
 
@@ -342,6 +342,18 @@ export interface Order {
     back_charge?: number;
     user_phone_number?: string;
   };
+}
+
+export interface RecentOrder {
+  order: Order;
+  transactions: Transaction[];
+  policies: {
+    order_id: string;
+    policy_id: string;
+    bundle_id: string | null;
+    timestamp: string;
+    user_id: string;
+  }[];
 }
 
 export interface User {

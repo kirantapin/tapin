@@ -1,8 +1,8 @@
-import { Item, Transaction } from "@/types";
+import { Item, RecentOrder, Transaction } from "@/types";
 import { Restaurant } from "@/types";
 import { supabase } from "./supabase_client";
 import { ItemUtils } from "./item_utils";
-import { BUNDLE_MENU_TAG } from "@/constants";
+import { BUNDLE_MENU_TAG, MAX_TRANSACTION_LOOKBACK } from "@/constants";
 
 export class TransactionUtils {
   static getRecentTransactionItems = (
@@ -50,7 +50,7 @@ export class TransactionUtils {
     }
     try {
       const ninetyDaysAgo = new Date();
-      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - MAX_TRANSACTION_LOOKBACK);
       const formattedDate = ninetyDaysAgo.toISOString();
 
       const { data, error } = await supabase
@@ -114,4 +114,30 @@ export class TransactionUtils {
 
     return item;
   }
+
+  static fetchRecentOrders = async (
+    restaurant: Restaurant,
+    user_id: string,
+    start_time: Date,
+    end_time: Date
+  ): Promise<RecentOrder[]> => {
+    const { data, error } = await supabase
+      .from("orders")
+      .select("*, transactions(*)")
+      .eq("user_id", user_id)
+      .eq("restaurant_id", restaurant.id)
+      .gte("created_at", start_time.toISOString())
+      .lte("created_at", end_time.toISOString());
+
+    if (error) {
+      console.error("Error fetching orders and transactions:", error);
+      return [];
+    }
+
+    return (data || []).map(({ transactions, ...order }) => ({
+      order, // all fields from row except transactions
+      transactions: transactions || [],
+      policies: [],
+    }));
+  };
 }

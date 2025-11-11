@@ -10,7 +10,7 @@ import {
   Wine,
 } from "lucide-react"; // or your actual icon library
 import { GradientIcon } from "@/utils/gradient";
-import { Item, Restaurant } from "@/types";
+import { Restaurant } from "@/types";
 import { ItemUtils } from "@/utils/item_utils";
 import {
   BEER_AND_CIDER_TAG,

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Policy, Restaurant, Bundle } from "@/types";
+import { Policy, Restaurant } from "@/types";
 import { NORMAL_DEAL_TAG, OFFERS_PAGE_PATH } from "@/constants";
 import SmallPolicyCard from "../cards/small_policy_card.tsx";
 import { PolicyUtils } from "@/utils/policy_utils.ts";
@@ -23,15 +23,19 @@ export const PolicySlider: React.FC<PolicySliderProps> = ({
     (policy) => policy.definition.tag === NORMAL_DEAL_TAG
   );
 
-  if (unlockedFirst) {
-    dealPolicies.sort((a, b) => {
+  dealPolicies.sort((a, b) => {
+    if (unlockedFirst) {
+      // Primary sort: unlocked first
       const aLocked = a.locked;
       const bLocked = b.locked;
       if (aLocked && !bLocked) return 1;
       if (!aLocked && bLocked) return -1;
-      return 0;
-    });
-  }
+    }
+    // Secondary sort: most recently modified first
+    return (
+      new Date(b.modified_at).getTime() - new Date(a.modified_at).getTime()
+    );
+  });
 
   if (!restaurant || dealPolicies.length === 0) {
     return null;

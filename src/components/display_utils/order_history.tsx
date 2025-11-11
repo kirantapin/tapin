@@ -1,57 +1,39 @@
-import React, { useEffect, useState } from "react";
-import { Transaction, Order } from "@/types";
+import { useEffect, useState } from "react";
+import { RecentOrder } from "@/types";
 import { useAuth } from "@/context/auth_context";
-import { project_url, supabase } from "@/utils/supabase_client";
+import { project_url } from "@/utils/supabase_client";
 import { convertUtcToLocal } from "@/utils/time";
-import { RESTAURANT_IMAGE_BUCKET } from "@/constants";
+import { MAX_TRANSACTION_LOOKBACK, RESTAURANT_IMAGE_BUCKET } from "@/constants";
 import { useRestaurant } from "@/context/restaurant_context";
-
-interface OrderWithTransactions extends Order {
-  transactions: Transaction[];
-}
+import { TransactionUtils } from "@/utils/transaction_utils";
+import { ItemUtils } from "@/utils/item_utils";
+import { titleCase } from "title-case";
 
 const OrderHistory = () => {
-  const { userSession, transactions } = useAuth();
+  const { userSession } = useAuth();
   const { restaurant } = useRestaurant();
-  const [ordersWithTransactions, setOrdersWithTransactions] = useState<
-    OrderWithTransactions[]
-  >([]);
+  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchOrders = async () => {
-      if (!userSession || !transactions.length || !restaurant) {
+      if (!userSession || !restaurant) {
         return;
       }
 
       setLoading(true);
       try {
-        // Get unique order_ids
-        const uniqueOrderIds = [
-          ...new Set(transactions.map((t) => t.order_id)),
-        ].filter(Boolean);
+        const endTime = new Date();
+        const startTime = new Date();
+        startTime.setDate(startTime.getDate() - MAX_TRANSACTION_LOOKBACK);
 
-        if (uniqueOrderIds.length === 0) return;
-
-        // Query orders table for these IDs
-        const { data: orderData, error } = await supabase
-          .from("orders")
-          .select("*")
-          .in("order_id", uniqueOrderIds);
-
-        if (error) {
-          console.error("Error fetching orders:", error);
-          return;
-        }
-
-        // Combine orders with their transactions
-        const ordersWithTransactions = orderData.map((order) => ({
-          ...order,
-          transactions: transactions.filter(
-            (t) => t.order_id === order.order_id
-          ),
-        }));
-        setOrdersWithTransactions(ordersWithTransactions);
+        const orders = await TransactionUtils.fetchRecentOrders(
+          restaurant,
+          userSession.user.id,
+          startTime,
+          endTime
+        );
+        setRecentOrders(orders);
       } catch (error) {
         console.error("Error in fetchOrders:", error);
       } finally {
@@ -60,7 +42,7 @@ const OrderHistory = () => {
     };
 
     fetchOrders();
-  }, [userSession, transactions, restaurant]);
+  }, [userSession, restaurant]);
 
   if (!restaurant) {
     return null;
@@ -70,62 +52,107 @@ const OrderHistory = () => {
     <div className="relative h-full flex flex-col">
       <div className="flex-1 overflow-y-auto pt-4 pb-40">
         <div className="flex items-center gap-2">
-          <h2 className="text-xl font-bold break-words">Your Order History</h2>
+          <h2 className="text-xl font-bold break-words">
+            Your Orders at {restaurant.name}
+          </h2>
         </div>
         <div className="mt-4">
           {loading ? (
             <div className="text-center py-4">
               <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-800 border-t-transparent mx-auto" />
             </div>
-          ) : ordersWithTransactions.length > 0 ? (
+          ) : recentOrders.length > 0 ? (
             <div className="space-y-4">
-              {ordersWithTransactions
+              {recentOrders
                 .sort(
                   (a, b) =>
-                    new Date(b.created_at).getTime() -
-                    new Date(a.created_at).getTime()
+                    new Date(b.order.created_at).getTime() -
+                    new Date(a.order.created_at).getTime()
                 )
-                .map((order) => (
-                  <div
-                    key={order.order_id}
-                    className="border rounded-lg p-4 shadow-sm"
-                  >
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="flex flex-col h-full justify-between">
-                        <p className="text-sm text-black">
-                          {convertUtcToLocal(
-                            order.created_at,
-                            restaurant.metadata.timeZone
-                          )}
-                        </p>
-                        {order.metadata?.discount &&
-                          order.metadata?.discount > 0 && (
-                            <p
-                              className="text-md text-black mt-auto"
-                              style={{ color: "#40C4AA" }}
-                            >
-                              You saved ${order.metadata?.discount?.toFixed(2)}
+                .map((recentOrder) => {
+                  const { order, transactions } = recentOrder;
+                  return (
+                    <div
+                      key={order.order_id}
+                      className="border rounded-lg p-4 shadow-sm"
+                    >
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex flex-col h-full justify-between">
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-semibold text-black">
+                              {restaurant.name || "Restaurant"}
                             </p>
-                          )}
+                            <p className="text-sm text-gray-600">{" • "}</p>
+                            <p className="text-sm text-gray-600">
+                              {convertUtcToLocal(
+                                order.created_at,
+                                Intl.DateTimeFormat().resolvedOptions().timeZone
+                              )}
+                            </p>
+                          </div>
+                          {order.metadata?.discount &&
+                            order.metadata?.discount > 0 && (
+                              <p
+                                className="text-sm text-black mt-auto"
+                                style={{ color: "#40C4AA" }}
+                              >
+                                You saved $
+                                {order.metadata?.discount?.toFixed(2)}
+                              </p>
+                            )}
+                        </div>
+                        <div className="w-12 h-12 rounded-full overflow-hidden">
+                          <img
+                            src={`${project_url}/storage/v1/object/public/${RESTAURANT_IMAGE_BUCKET}/profile/${order.restaurant_id}`}
+                            alt="Restaurant"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
                       </div>
-                      <div className="w-12 h-12 rounded-full overflow-hidden">
-                        <img
-                          src={`${project_url}/storage/v1/object/public/${RESTAURANT_IMAGE_BUCKET}/profile/${order.restaurant_id}`}
-                          alt="Restaurant"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    </div>
 
-                    {/* Order Total */}
-                    <div className="mt-4 pt-3 border-t flex justify-between items-center">
-                      <span className="font-semibold">Total</span>
-                      <span className="font-semibold">
-                        ${(order.total_price || 0).toFixed(2)}
-                      </span>
+                      {/* Order Items */}
+                      {transactions.length > 0 && (
+                        <div className="mt-4">
+                          <p className="text-sm text-gray-700">
+                            {transactions
+                              .map((transaction) => {
+                                const item =
+                                  TransactionUtils.getTransactionItem(
+                                    transaction
+                                  );
+                                // Try to get menu item from current restaurant context first
+                                // If not available, we'll just use the item ID as fallback
+                                if (restaurant) {
+                                  const menuItem =
+                                    ItemUtils.getMenuItemFromItemId(
+                                      item.id,
+                                      restaurant
+                                    );
+                                  if (menuItem) {
+                                    return titleCase(
+                                      ItemUtils.getItemName(item, restaurant)
+                                    );
+                                  }
+                                }
+                                // Fallback to item ID if restaurant context doesn't have this item
+                                return titleCase("Unknown Item");
+                              })
+                              .filter(Boolean)
+                              .join(" • ")}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Order Total */}
+                      <div className="mt-4 pt-3 border-t flex justify-between items-center">
+                        <span className="font-semibold">Total</span>
+                        <span className="font-semibold">
+                          ${(order.total_price || 0).toFixed(2)}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
             </div>
           ) : (
             <p className="text-center text-gray-500">No orders found</p>

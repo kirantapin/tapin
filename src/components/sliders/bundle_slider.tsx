@@ -103,10 +103,20 @@ const BundleSlider = ({
       if (!BundleUtils.isBundlePurchaseable(bundle) && !isOwned) return false;
       return true;
     })
-    .sort(([, isOwnedA], [, isOwnedB]) => {
+    .sort((a, b) => {
+      const [bundleIdA, isOwnedA] = a;
+      const [bundleIdB, isOwnedB] = b;
+      // First, unowned bundles come first
       if (isOwnedA && !isOwnedB) return 1;
       if (!isOwnedA && isOwnedB) return -1;
-      return 0;
+
+      // Secondary sort by modified_at desc within each group
+      const bundleA = (restaurant?.menu[bundleIdA]?.info as BundleItem).object;
+      const bundleB = (restaurant?.menu[bundleIdB]?.info as BundleItem).object;
+      const modifiedAtA = new Date(bundleA.modified_at).getTime();
+      const modifiedAtB = new Date(bundleB.modified_at).getTime();
+
+      return modifiedAtB - modifiedAtA;
     })
     .map(([bundleId]) => bundleId);
 

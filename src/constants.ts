@@ -50,6 +50,7 @@ export const POINTS_PER_DOLLAR = 10;
 export const MIN_PAYMENT_AMOUNT = 1; //50 cents
 
 export const MAX_BUNDLE_DURATION = 90;
+export const MAX_TRANSACTION_LOOKBACK = MAX_BUNDLE_DURATION;
 
 export const RESERVED_MENU_KEYWORDS = ["name", "label", "sortWeight"];
 export const MAX_QR_TRANSACTIONS = 10;

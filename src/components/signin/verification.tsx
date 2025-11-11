@@ -78,7 +78,7 @@ export function Verification({ phoneNumber, onVerify }: VerificationProps) {
   };
 
   const handleResend = async () => {
-    const { data, error } = await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithOtp({
       phone: phoneNumber,
     });
     if (error) {

@@ -270,7 +270,7 @@ export function RedeemedTransaction({
   );
 }
 
-type LoyaltyRewardPolicyCard = {
+type LoyaltyRewardPolicyCardType = {
   name: string;
   description: string;
   price: number | null;
@@ -294,7 +294,7 @@ export function LoyaltyRewardPolicyCard({
   const { userData } = useAuth();
   const hasEnoughPoints = (userData?.points[restaurant.id] || 0) >= numPoints;
   const primaryColor = restaurant.metadata.primaryColor;
-  let card: LoyaltyRewardPolicyCard = null;
+  let card: LoyaltyRewardPolicyCardType = null;
   if (policy.definition.action.type === "add_to_user_credit") {
     card = {
       name: PolicyUtils.getPolicyName(policy, restaurant),
@@ -579,12 +579,10 @@ export const DrinkList = ({
         labelMap[key],
         restaurant
       );
-      itemIds.forEach((id) => {
-        if (ItemUtils.isItemUnavailable({ id: id }, restaurant)) {
-          return;
-        }
-        allItemIds.push({ id: id, label: key });
-      });
+      for (const id of itemIds) {
+        if (ItemUtils.isItemUnavailable({ id }, restaurant)) continue;
+        allItemIds.push({ id, label: key });
+      }
     }
     if (itemSpecifications.length > 0) {
       allItemIds = allItemIds.filter(({ id }) => {
@@ -655,6 +653,7 @@ export const DrinkList = ({
               </div>
             );
           }
+          return null;
         })}
       </div>
     </div>
