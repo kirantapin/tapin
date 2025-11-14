@@ -164,7 +164,6 @@ const MainMenu: React.FC<MainMenuProps> = ({
           restaurant={restaurant}
           itemSpecifications={[]}
           labelOrder={labelsToDisplay}
-          padBottom={false}
         />
       )}
     </div>
