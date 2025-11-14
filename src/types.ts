@@ -239,6 +239,7 @@ export interface NormalItem {
   image_url?: string;
   sourceId?: string | null;
   archived?: boolean | null;
+  noRequiredFulfillment?: boolean | null;
   variations?: Record<
     string,
     {

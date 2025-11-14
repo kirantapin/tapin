@@ -425,7 +425,7 @@ export class ItemUtils {
 
   static requiresFulfillment(item: Item, restaurant: Restaurant): boolean {
     const itemInfo = this.getMenuItemFromItemId(item.id, restaurant);
-    if (!itemInfo) {
+    if (!itemInfo || ("noRequiredFulfillment" in itemInfo && itemInfo.noRequiredFulfillment)) {
       return false;
     }
     if (this.isBundleItem(item.id, restaurant)) {
