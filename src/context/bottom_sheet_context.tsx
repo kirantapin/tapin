@@ -313,23 +313,28 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
       return;
     }
 
-    const passItemCount = transactionsToRedeem.filter((transaction) =>
-      ItemUtils.isPassItem(
-        TransactionUtils.getTransactionItem(transaction).id,
-        restaurant as Restaurant
-      )
+    const noFulfillmentItemCount = transactionsToRedeem.filter(
+      (transaction) =>
+        !ItemUtils.requiresFulfillment(
+          TransactionUtils.getTransactionItem(transaction),
+          restaurant as Restaurant
+        )
     ).length;
 
-    const allPasses = passItemCount === transactionsToRedeem.length;
+    const allNoFulfillment =
+      noFulfillmentItemCount === transactionsToRedeem.length;
 
-    // Check if it's a mix of pass items and normal items
-    if (passItemCount > 0 && passItemCount < transactionsToRedeem.length) {
+    // Check if it's a mix of nofulfill items and normal items
+    if (
+      noFulfillmentItemCount > 0 &&
+      noFulfillmentItemCount < transactionsToRedeem.length
+    ) {
       openNonRedeemModal(transactionsToRedeem);
       return;
     }
 
     const openFunction =
-      allPasses && !forceRedemption ? setPassWarningModal : setQrModal;
+      allNoFulfillment && !forceRedemption ? setPassWarningModal : setQrModal;
 
     if (isOpen) {
       closeSheet();
