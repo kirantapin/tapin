@@ -1,12 +1,13 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Sheet, SheetContent, SheetHeader } from "@/components/ui/sheet";
 import { X } from "lucide-react";
-import { Transaction, Restaurant } from "@/types";
+import { Transaction, Restaurant, Item } from "@/types";
 import CustomLogo from "../svg/custom_logo";
 import { useNavigate, useLocation } from "react-router-dom";
 import { MY_SPOT_PATH } from "@/constants";
 import { DrinkItem } from "../menu_items";
 import { useQRUtils } from "@/hooks/useQRUtils";
+import { ItemUtils } from "@/utils/item_utils";
 
 interface NonRedeemModalProps {
   isOpen: boolean;
@@ -26,6 +27,34 @@ const NonRedeemModal: React.FC<NonRedeemModalProps> = ({
   const { getItemsFromTransactions } = useQRUtils();
 
   const itemsToBeRedeemed = getItemsFromTransactions(transactionsToRedeem);
+
+  // Get unique item IDs and group by fulfillment requirement
+  const { requiresFulfillmentItems, noFulfillmentItems } = useMemo(() => {
+    // Get unique item IDs
+    const uniqueItemIds = [
+      ...new Set(itemsToBeRedeemed.map((item) => item.item.id)),
+    ];
+
+    const requiresFulfillment: Item[] = [];
+    const noFulfillment: Item[] = [];
+
+    uniqueItemIds.forEach((itemId) => {
+      // Get the first occurrence of this item to check fulfillment
+
+      const itemData = { id: itemId };
+
+      if (ItemUtils.requiresFulfillment(itemData, restaurant)) {
+        requiresFulfillment.push(itemData);
+      } else {
+        noFulfillment.push(itemData);
+      }
+    });
+
+    return {
+      requiresFulfillmentItems: requiresFulfillment,
+      noFulfillmentItems: noFulfillment,
+    };
+  }, [itemsToBeRedeemed, restaurant]);
 
   // Check if user is already on My Spot page
   const isOnMySpotPage = location.pathname.includes(
@@ -94,13 +123,38 @@ const NonRedeemModal: React.FC<NonRedeemModalProps> = ({
               </svg>
             </div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Mixed Item Types
+              Mixed Item Redemptions
             </h2>
-            <p className="text-gray-600 text-sm">
-              You have selected both pass items and regular items. These cannot
+            <p className="text-gray-600 text-sm mb-4">
+              You have selected items with mixed redemption types. These cannot
               be redeemed together. Please redeem them individually in the My
               Spot page.
             </p>
+            {/* Explain which items can be redeemed together */}
+            {requiresFulfillmentItems.length > 0 && (
+              <div className="mb-3">
+                <p className="text-gray-700 text-sm font-medium mb-1">
+                  Can be redeemed together:
+                </p>
+                <p className="text-gray-600 text-xs">
+                  {requiresFulfillmentItems
+                    .map((item) => ItemUtils.getItemName(item, restaurant))
+                    .join(", ")}
+                </p>
+              </div>
+            )}
+            {noFulfillmentItems.length > 0 && (
+              <div>
+                <p className="text-gray-700 text-sm font-medium mb-1">
+                  Must be redeemed by staff:
+                </p>
+                <p className="text-gray-600 text-xs">
+                  {noFulfillmentItems
+                    .map((item) => ItemUtils.getItemName(item, restaurant))
+                    .join(", ")}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Action Button */}

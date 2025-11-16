@@ -10,9 +10,11 @@ import { useBottomSheet } from "@/context/bottom_sheet_context";
 import CustomLogo from "../svg/custom_logo";
 import { DrinkItem } from "../menu_items";
 import { useQRUtils } from "@/hooks/useQRUtils";
-import { NO_FULFILLED_BY, PASS_MENU_TAG } from "@/constants";
+import { NO_FULFILLED_BY } from "@/constants";
 import { OpeningHoursWarning } from "../display_utils/opening_hours_warning";
 import { useOrderDetails } from "@/context/order_details_context";
+import { ItemUtils } from "@/utils/item_utils";
+import { TransactionUtils } from "@/utils/transaction_utils";
 
 interface SelfRedeemModalProps {
   isOpen: boolean;
@@ -108,8 +110,12 @@ const SelfRedeemModal: React.FC<SelfRedeemModalProps> = ({
   const itemsToBeRedeemed: { item: Item; purchaseDate: string }[] =
     getItemsFromTransactions(transactionsToRedeem);
 
-  const staffRedemption = transactionsToRedeem.every((transaction) =>
-    transaction.metadata.path?.includes(PASS_MENU_TAG)
+  const staffRedemption = transactionsToRedeem.every(
+    (transaction) =>
+      !ItemUtils.requiresFulfillment(
+        TransactionUtils.getTransactionItem(transaction),
+        restaurant as Restaurant
+      )
   );
 
   const modifiedOnClose = async () => {
@@ -193,7 +199,7 @@ const SelfRedeemModal: React.FC<SelfRedeemModalProps> = ({
               <div>
                 <p className="text-black mb-0 text-lg font-semibold">
                   {staffRedemption
-                    ? `Redeeming ${transactionsToRedeem.length} pass item${
+                    ? `Redeeming ${transactionsToRedeem.length} item${
                         transactionsToRedeem.length > 1 ? "s" : ""
                       } for customer`
                     : `You're about to redeem ${
@@ -202,7 +208,7 @@ const SelfRedeemModal: React.FC<SelfRedeemModalProps> = ({
                 </p>
                 <p className="text-gray-500 mb-0 pt-1 text-sm">
                   {staffRedemption
-                    ? "As venue staff, you can redeem these pass items for the customer. Make sure you have confirmed the customer's identity and that they are present."
+                    ? "As venue staff, you can redeem these items for the customer. Make sure you have confirmed the customer's identity and that they are present."
                     : "Having trouble? Ask a staff member for assistance. If you would rather redeem your items later, then just click out of this page. Items will be saved in My Spot for up to 90 days."}
                 </p>
 
@@ -280,7 +286,7 @@ const SelfRedeemModal: React.FC<SelfRedeemModalProps> = ({
                 <div className="text-xl text-center">
                   <span className=" font-semibold">
                     {staffRedemption
-                      ? `Pass items have been redeemed for the customer.`
+                      ? `Items have been redeemed for the customer.`
                       : `Your redemption has been sent to the ${restaurant.name} kitchen. Please confirm your order.`}
                   </span>
                 </div>
@@ -378,14 +384,14 @@ const SelfRedeemModal: React.FC<SelfRedeemModalProps> = ({
             <div className="text-center">
               <h2 className="text-xl font-semibold text-gray-900 mb-2">
                 {staffRedemption
-                  ? "Are you ready to redeem these pass items for the customer?"
+                  ? "Are you ready to redeem these items for the customer?"
                   : `Are you ready to redeem these items for ${
                       serviceType === "pickup" ? "Pickup" : "Dine In"
                     }?`}
               </h2>
               <p className="text-gray-600 text-sm">
                 {staffRedemption
-                  ? `This will redeem the pass items for the customer. Make sure the customer is present and you have confirmed their identity.`
+                  ? `This will redeem these items for the customer. Make sure the customer is present and you have confirmed their identity.`
                   : `This will send your redemption order to the ${restaurant.name} kitchen. Make sure you are ready to receive your items.`}
               </p>
             </div>

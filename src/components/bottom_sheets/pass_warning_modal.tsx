@@ -114,7 +114,7 @@ const PassWarningModal: React.FC<PassWarningModalProps> = ({
                 className="w-full py-3 px-4 rounded-full border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
                 onClick={handleHowToRedeemClick}
               >
-                How to redeem passes
+                How to redeem these items
               </button>
             </div>
 
@@ -144,11 +144,11 @@ const PassWarningModal: React.FC<PassWarningModalProps> = ({
           <div className="flex flex-col gap-4">
             <div className="text-center">
               <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                How to Redeem Passes
+                How to Redeem These Items
               </h2>
               <p className="text-gray-600 text-sm">
                 A {restaurant.name} staff member needs to manually redeem your
-                passes on your device.
+                items on your device.
               </p>
             </div>
 
@@ -158,7 +158,7 @@ const PassWarningModal: React.FC<PassWarningModalProps> = ({
                   <span className="text-black text-sm font-semibold">1</span>
                 </div>
                 <p className="text-gray-700 text-sm">
-                  Select which passes you want to redeem
+                  Select which items you want to redeem
                 </p>
               </div>
               <div className="flex items-start gap-3">
