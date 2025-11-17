@@ -421,9 +421,14 @@ const BundleModal: React.FC<BundleModalProps> = ({
                                   ? `${alreadyRedeemedTransactions} items have`
                                   : `${alreadyRedeemedTransactions} item has`
                               } been redeemed, you can access your other items anytime in My Spot`
-                            : "Bundle purchased successfully, view in My Spot",
+                            : "Bundle purchased successfully, view all items in My Spot",
                       },
-                      postPurchaseSignals: [BUNDLE_PURCHASED_SIGNAL],
+                      postPurchaseSignals: [
+                        {
+                          signal: BUNDLE_PURCHASED_SIGNAL,
+                          data: bundle.bundle_id,
+                        },
+                      ],
                     };
 
                     sessionStorage.setItem(
