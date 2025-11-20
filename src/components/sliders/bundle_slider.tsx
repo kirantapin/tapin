@@ -67,39 +67,11 @@ const BundleSlider = ({
     });
   };
 
-  useEffect(() => {
-    if (
-      !autoScrollEnabled ||
-      Object.values(userOwnershipMap).filter((isOwned) => !isOwned).length <= 1
-    )
-      return;
-
-    const startAutoScroll = () => {
-      autoScrollIntervalRef.current = setInterval(() => {
-        setActiveBundle((current) => {
-          const nextIndex =
-            current === Object.keys(userOwnershipMap).length - 1
-              ? 0
-              : current + 1;
-          scrollToCard(nextIndex);
-          return nextIndex;
-        });
-      }, 3500);
-    };
-
-    startAutoScroll();
-
-    return () => {
-      if (autoScrollIntervalRef.current) {
-        clearInterval(autoScrollIntervalRef.current);
-      }
-    };
-  }, [userOwnershipMap, autoScrollEnabled]);
-
   const bundlesToDisplay = Object.entries(userOwnershipMap)
     .filter(([bundleId, isOwned]) => {
       const bundle = (restaurant?.menu[bundleId]?.info as BundleItem).object;
       if (!bundle) return false;
+      //only block it if bundle is deactivated and the user doesn't own it.
       if (!BundleUtils.isBundlePurchaseable(bundle) && !isOwned) return false;
       return true;
     })
@@ -119,6 +91,28 @@ const BundleSlider = ({
       return modifiedAtB - modifiedAtA;
     })
     .map(([bundleId]) => bundleId);
+
+  useEffect(() => {
+    if (!autoScrollEnabled || bundlesToDisplay.length <= 1) return;
+
+    const startAutoScroll = () => {
+      autoScrollIntervalRef.current = setInterval(() => {
+        setActiveBundle((current) => {
+          const nextIndex = (current + 1) % bundlesToDisplay.length;
+          scrollToCard(nextIndex);
+          return nextIndex;
+        });
+      }, 3500);
+    };
+
+    startAutoScroll();
+
+    return () => {
+      if (autoScrollIntervalRef.current) {
+        clearInterval(autoScrollIntervalRef.current);
+      }
+    };
+  }, [bundlesToDisplay, autoScrollEnabled]);
 
   if (userOwnershipMap && bundlesToDisplay.length > 0) {
     return (
