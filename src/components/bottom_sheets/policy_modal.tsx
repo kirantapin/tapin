@@ -256,10 +256,7 @@ const PolicyModal: React.FC<PolicyModalProps> = ({
                         slideToFilter={() => {}}
                         onSelect={async (item) => {
                           if (
-                            ItemUtils.doesItemRequireConfiguration(
-                              item,
-                              restaurant
-                            )
+                            ItemUtils.shouldShowItemModModal(item, restaurant)
                           ) {
                             openItemModModal(
                               item.id,

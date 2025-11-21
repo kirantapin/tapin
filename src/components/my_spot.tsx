@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Ticket, ChevronRight, GlassWater, AlertCircle } from "lucide-react";
+import { Ticket, ChevronRight, GlassWater } from "lucide-react";
 import { Transaction, UserSession } from "@/types";
 import { GradientIcon } from "@/utils/gradient";
 import { PASS_MENU_TAG, MY_SPOT_PATH } from "@/constants";
