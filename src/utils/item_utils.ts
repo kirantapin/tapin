@@ -14,6 +14,7 @@ import { PASS_MENU_TAG, BUNDLE_MENU_TAG } from "@/constants";
 import { titleCase } from "title-case";
 import { PassUtils } from "./pass_utils";
 import { BundleUtils } from "./bundle_utils";
+import { cloneDeep } from "lodash";
 
 export class ItemUtils {
   static getAllItemsInCategory(
@@ -265,10 +266,38 @@ export class ItemUtils {
     };
   }
 
+  static shouldShowItemModModal(item: Item, restaurant: Restaurant): boolean {
+    //UX logic for when the item mod modal should be shown
+    const itemInfo = this.getMenuItemFromItemId(item.id, restaurant);
+    if (!itemInfo) {
+      return false;
+    }
+
+    const { modifierGroups } = this.extractActiveVariationAndModifierGroups(
+      itemInfo as NormalItem,
+      restaurant
+    );
+
+    const hasSelectableModifiers =
+      modifierGroups &&
+      Object.values(modifierGroups).some(
+        (g) => g && g.modifiers && g.modifiers.length > 0
+      );
+
+    if (hasSelectableModifiers && !item.modifiers) {
+      return true;
+    }
+
+    const itemClone = cloneDeep(item);
+
+    return !!this.doesItemRequireConfiguration(itemClone, restaurant);
+  }
+
   static doesItemRequireConfiguration(
     item: Item,
     restaurant: Restaurant
   ): string | null {
+    //The expectation is the correct the item and return an error message
     const itemInfo = this.getMenuItemFromItemId(item.id, restaurant);
     if (!itemInfo) {
       return "Item not found";
@@ -309,7 +338,6 @@ export class ItemUtils {
           }
         });
         item.modifiers = defaults;
-        return "Item requires modifier selections";
       }
 
       for (const selectedModifierGroupId of Object.keys(item.modifiers)) {
@@ -425,7 +453,10 @@ export class ItemUtils {
 
   static requiresFulfillment(item: Item, restaurant: Restaurant): boolean {
     const itemInfo = this.getMenuItemFromItemId(item.id, restaurant);
-    if (!itemInfo || ("noRequiredFulfillment" in itemInfo && itemInfo.noRequiredFulfillment)) {
+    if (
+      !itemInfo ||
+      ("noRequiredFulfillment" in itemInfo && itemInfo.noRequiredFulfillment)
+    ) {
       return false;
     }
     if (this.isBundleItem(item.id, restaurant)) {

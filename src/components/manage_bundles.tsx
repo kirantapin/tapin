@@ -2,68 +2,96 @@ import React, { useEffect, useState } from "react";
 import { Restaurant, BundleItem } from "@/types";
 import { useRestaurant } from "@/context/restaurant_context";
 import { ItemUtils } from "@/utils/item_utils";
-import { useAuth } from "@/context/auth_context";
-import { CircleX, Wallet } from "lucide-react";
+import { Clock } from "lucide-react";
 import { BundleUtils } from "@/utils/bundle_utils";
 import BundleSlider from "./sliders/bundle_slider";
-import { PolicyCard } from "./cards/policy_card";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
-import { GradientIcon } from "@/utils/gradient";
 import GoToCartButton from "./buttons/go_to_cart_button";
-import { PolicyUtils } from "@/utils/policy_utils";
+import { ImageUtils } from "@/utils/image_utils";
+import { ImageFallback } from "./display_utils/image_fallback";
+import { adjustColor } from "@/utils/color";
+
+interface BundleCardBackgroundProps {
+  bundleImageUrl: string | null;
+  restaurant: Restaurant;
+  bundleName: string;
+}
+
+const BundleCardBackground: React.FC<BundleCardBackgroundProps> = ({
+  bundleImageUrl,
+  restaurant,
+  bundleName,
+}) => {
+  const [imageError, setImageError] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const primaryColor = restaurant?.metadata.primaryColor || "#8B0000";
+  const fromColor = adjustColor(primaryColor, -5);
+  const toColor = adjustColor(primaryColor, -45);
+
+  useEffect(() => {
+    if (!bundleImageUrl) {
+      setImageError(true);
+      return;
+    }
+
+    const img = new Image();
+    img.onload = () => {
+      setImageLoaded(true);
+      setImageError(false);
+    };
+    img.onerror = () => {
+      setImageError(true);
+      setImageLoaded(true);
+    };
+    img.src = bundleImageUrl;
+  }, [bundleImageUrl]);
+
+  const isUsingImage = !imageError && bundleImageUrl && imageLoaded;
+
+  return (
+    <>
+      {imageError || !bundleImageUrl ? (
+        <div
+          className="w-full h-full"
+          style={{
+            background: `linear-gradient(135deg, ${fromColor} 0%, ${toColor} 100%)`,
+          }}
+        />
+      ) : !imageLoaded ? (
+        <div className="w-full h-full bg-gray-200 animate-pulse" />
+      ) : (
+        <ImageFallback
+          src={bundleImageUrl}
+          restaurant={restaurant}
+          alt={bundleName}
+          className="w-full h-full object-cover"
+          postFunction={() => setImageError(true)}
+        />
+      )}
+      {/* Gradient Overlay - Only show if using image */}
+      {isUsingImage && (
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 50%, transparent 100%)",
+          }}
+        />
+      )}
+    </>
+  );
+};
+
 interface ManageBundlesProps {
   restaurant: Restaurant;
 }
 
 const ManageBundles: React.FC<ManageBundlesProps> = () => {
-  const { restaurant, userOwnershipMap, policyManager } = useRestaurant();
-  const { userSession } = useAuth();
-  const [policyStatsMap, setPolicyStatsMap] = useState<
-    Record<string, Record<string, string[]>> | undefined
-  >(undefined);
+  const { restaurant, userOwnershipMap } = useRestaurant();
   const { state, openBundleModal } = useBottomSheet();
-
-  useEffect(() => {
-    const fetchPolicyStats = async () => {
-      if (!userSession || !userOwnershipMap || !restaurant) return;
-      const results: Record<string, Record<string, string[]>> = {};
-      for (const [bundleId, isOwned] of Object.entries(userOwnershipMap)) {
-        if (isOwned) {
-          const bundleMenuItem = ItemUtils.getMenuItemFromItemId(
-            bundleId,
-            restaurant as Restaurant
-          ) as BundleItem;
-          if (bundleMenuItem && bundleMenuItem.price != null) {
-            const bundle = bundleMenuItem.object;
-            const stats = await BundleUtils.getUsersBundleUsageStats(
-              userSession.user.id,
-              bundle
-            );
-            results[bundleId] = stats;
-          }
-        }
-      }
-      setPolicyStatsMap(results);
-    };
-
-    fetchPolicyStats();
-  }, [userSession, userOwnershipMap, restaurant]);
 
   if (!restaurant) {
     return null;
-  }
-
-  if (policyStatsMap === undefined) {
-    return (
-      <div className="mt-8 mb-8 flex justify-center items-center min-h-[200px]">
-        <div
-          className="animate-spin rounded-full h-8 w-8 border-4 border-gray-200"
-          style={{
-            borderTopColor: restaurant?.metadata.primaryColor,
-          }}
-        ></div>
-      </div>
-    );
   }
 
   const bundlesToDisplay = Object.entries(userOwnershipMap)
@@ -89,7 +117,7 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
   }
 
   return (
-    <div>
+    <div className="px-2 mt-3">
       {Object.entries(userOwnershipMap).map(([bundleId, isOwned]) => {
         if (!isOwned) {
           return null;
@@ -104,155 +132,101 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
         }
 
         const bundle = bundleMenuItem.object;
-        const childPolicies = bundleMenuItem.bundle_policies;
+        const bundleImageUrl = ImageUtils.getBundleImageUrl(bundle);
+
+        const purchaseDate = new Date(userOwnershipMap[bundleId] as string);
+        const expiryDate = new Date(
+          purchaseDate.getTime() + bundle.duration * 24 * 60 * 60 * 1000
+        );
+        const timeLeft = Math.max(0, expiryDate.getTime() - Date.now());
+        const daysLeft = Math.floor(timeLeft / (24 * 60 * 60 * 1000));
+        const hoursLeft = Math.floor(
+          (timeLeft % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000)
+        );
+        const minutesLeft = Math.floor(
+          (timeLeft % (60 * 60 * 1000)) / (60 * 1000)
+        );
+
+        // Format time remaining
+        let timeRemainingString = "";
+        if (daysLeft > 0) {
+          timeRemainingString = `${daysLeft} ${
+            daysLeft === 1 ? "day" : "days"
+          } remaining`;
+        } else {
+          timeRemainingString = `${hoursLeft}h ${minutesLeft}m remaining`;
+        }
 
         return (
-          <div key={bundleId}>
-            <div className="mb-4 mt-8 px-4">
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <h1 className="text-xl font-bold">{bundle.name}</h1>
-                </div>
+          <div key={bundleId} className="mb-6">
+            <div
+              className="relative rounded-3xl overflow-hidden h-[220px] cursor-pointer"
+              onClick={() => {
+                openBundleModal(bundle);
+              }}
+            >
+              {/* Background Image or Gradient */}
+              <div className="absolute inset-0">
+                <BundleCardBackground
+                  bundleImageUrl={bundleImageUrl}
+                  restaurant={restaurant}
+                  bundleName={bundle.name}
+                />
               </div>
-              <div className="flex justify-between items-center">
-                <div className="text-md text-gray-500">
-                  {(() => {
-                    const purchaseDate = new Date(
-                      userOwnershipMap[bundleId] as string
-                    );
-                    const expiryDate = new Date(
-                      purchaseDate.getTime() +
-                        bundle.duration * 24 * 60 * 60 * 1000
-                    );
-                    const timeLeft = expiryDate.getTime() - Date.now();
-                    const daysLeft = Math.floor(
-                      timeLeft / (24 * 60 * 60 * 1000)
-                    );
-                    const hoursLeft = Math.floor(
-                      (timeLeft % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000)
-                    );
-                    const minsLeft = Math.floor(
-                      (timeLeft % (60 * 60 * 1000)) / (60 * 1000)
-                    );
 
-                    if (daysLeft > 0) {
-                      return `${daysLeft}d ${hoursLeft}h remaining`;
-                    } else {
-                      return `${hoursLeft}h ${minsLeft}m remaining`;
-                    }
-                  })()}
+              {/* Content */}
+              <div className="relative h-full flex flex-col p-5">
+                {/* Top Row: Owned Tag and Points */}
+                <div className="flex justify-between items-start mb-3">
+                  <div
+                    className="px-3 py-1 rounded-full text-xs font-semibold text-white border border-white/60"
+                    style={{
+                      backgroundColor: "rgba(255, 255, 255, 0.2)",
+                      backdropFilter: "blur(4px)",
+                    }}
+                  >
+                    Owned
+                  </div>
+                  <div
+                    className="px-3 py-1 rounded-full text-xs font-semibold text-white border border-white/60"
+                    style={{
+                      backgroundColor: "rgba(255, 255, 255, 0.2)",
+                      backdropFilter: "blur(4px)",
+                    }}
+                  >
+                    {bundle.point_multiplier > 1
+                      ? `${bundle.point_multiplier}x`
+                      : "1x"}{" "}
+                    pts
+                  </div>
                 </div>
-                <button
-                  className="text-md font-semibold"
-                  style={{ color: restaurant?.metadata.primaryColor }}
-                  onClick={() => {
-                    openBundleModal(bundle);
-                  }}
-                >
-                  View Details
-                </button>
-              </div>
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                {/* Points Box */}
-                <div className="flex flex-col justify-between p-4 rounded-xl bg-white h-24 border border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500 font-medium">
-                      Points
+
+                {/* Bottom Section: Title, Time, and Button */}
+                <div className="flex-1 flex flex-col justify-end mb-2">
+                  {/* Bundle Title */}
+                  <h2 className="text-2xl font-bold text-white custom-line-clamp">
+                    {bundle.name}
+                  </h2>
+
+                  {/* Days Remaining */}
+                  <div className="flex items-center gap-2 mt-2">
+                    <Clock size={18} className="text-white" />
+                    <span className="text-white text-sm font-medium">
+                      {timeRemainingString}
                     </span>
-                    <GradientIcon
-                      icon={CircleX}
-                      primaryColor={restaurant?.metadata.primaryColor}
-                      size={24}
-                    />
                   </div>
-                  <div className="text-xl font-bold text-gray-900">
-                    {bundle.point_multiplier}x
-                  </div>
+
+                  {/* Start Redeeming Button */}
+                  <button
+                    className="w-full bg-white rounded-full py-2 px-4 mt-4 flex items-center justify-center font-semibold text-gray-900"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openBundleModal(bundle);
+                    }}
+                  >
+                    <span className="font-semibold">View</span>
+                  </button>
                 </div>
-
-                {/* Credits Box */}
-                <div className="flex flex-col justify-between p-4 rounded-xl bg-white h-24 border border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500 font-medium">
-                      Credit Earned
-                    </span>
-                    <GradientIcon
-                      icon={Wallet}
-                      primaryColor={restaurant?.metadata.primaryColor}
-                      size={24}
-                    />
-                  </div>
-                  <div className="text-xl font-bold text-gray-900">
-                    ${bundle.fixed_credit.toFixed(2)}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="mt-6">
-              <div className="px-4">
-                <h1 className="text-xl font-bold mb-4">Benefits</h1>
-              </div>
-              <div className="space-y-8 px-4">
-                {childPolicies.map((policyId: string, index: number) => {
-                  const policy = policyManager?.getPolicyFromId(policyId);
-                  if (!policy) return null;
-                  const numUsages =
-                    policyStatsMap?.[bundleId]?.[policyId]?.length || 0;
-                  const lastUsed =
-                    policyStatsMap?.[bundleId]?.[policyId]?.[0] || null;
-                  const timeSinceLastUsed = lastUsed
-                    ? Math.floor(Date.now() - new Date(lastUsed).getTime())
-                    : Infinity;
-                  const timeRequired = policy.days_since_last_use
-                    ? policy.days_since_last_use * 24 * 60 * 60 * 1000
-                    : 0;
-                  const diff = timeSinceLastUsed - timeRequired;
-
-                  const tags = [];
-                  if (diff < 0) {
-                    const absDiff = Math.abs(diff);
-                    const days = Math.floor(absDiff / (24 * 60 * 60 * 1000));
-                    const hours = Math.floor(
-                      (absDiff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000)
-                    );
-                    const minutes = Math.floor(
-                      (absDiff % (60 * 60 * 1000)) / (60 * 1000)
-                    );
-
-                    tags.push(
-                      days > 0
-                        ? `Ready in ${days}d ${hours}h`
-                        : `Ready in ${hours}h ${minutes}m`
-                    );
-                  }
-                  if (policy.total_usages) {
-                    tags.push(
-                      `${policy.total_usages - numUsages} ${
-                        policy.total_usages - numUsages === 1 ? "Use" : "Uses"
-                      } Left`
-                    );
-                  }
-                  if (tags.length === 0) {
-                    tags.push("Ready to use");
-                  }
-                  return (
-                    <div key={index}>
-                      <PolicyCard
-                        key={index}
-                        policy={policy}
-                        restaurant={restaurant}
-                        dealEffect={state.dealEffect}
-                        cart={state.cart}
-                        extraTags={[
-                          ...tags,
-                          ...(PolicyUtils.isPolicyUsable(policy, restaurant)
-                            ? []
-                            : ["Not Currently Active"]),
-                        ]}
-                      />
-                    </div>
-                  );
-                })}
               </div>
             </div>
           </div>
@@ -262,7 +236,7 @@ const ManageBundles: React.FC<ManageBundlesProps> = () => {
         {Object.values(userOwnershipMap).some((value) => value === null) && (
           <div className="mt-6 px-1 mb-8">
             <h1 className="text-xl font-bold">Bundles You Might Like</h1>
-            <BundleSlider />
+            <BundleSlider showBundleExplainer={false} />
           </div>
         )}
       </div>

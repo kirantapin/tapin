@@ -1,9 +1,7 @@
 import { Bundle, BundleItem, Policy, Restaurant } from "@/types";
 
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import { CheckIcon, CircleX, Wallet } from "lucide-react";
-import { MY_SPOT_PATH } from "@/constants";
 import { ItemUtils } from "@/utils/item_utils";
 import { useRestaurant } from "@/context/restaurant_context";
 import { BundleUtils } from "@/utils/bundle_utils";
@@ -24,9 +22,7 @@ const BundleCard = ({
   isOwned: string | null;
   onCardClick: (bundle: Bundle) => void;
 }) => {
-  const location = useLocation();
   const { policyManager } = useRestaurant();
-  const navigate = useNavigate();
   const [isFallback, setIsFallback] = useState(false);
   const bundleMenuItem = ItemUtils.getMenuItemFromItemId(
     bundleId,
@@ -61,16 +57,7 @@ const BundleCard = ({
   return (
     <div
       onClick={() => {
-        const onMySpot = location.pathname.includes(
-          MY_SPOT_PATH.split("/").slice(-1)[0]
-        );
-        if (isOwned && !onMySpot) {
-          navigate(MY_SPOT_PATH.replace(":id", restaurant?.id), {
-            state: { type: "My Bundles" },
-          });
-        } else {
-          onCardClick(bundle);
-        }
+        onCardClick(bundle);
       }}
     >
       <div className="flex items-start p-1">
@@ -212,14 +199,7 @@ const BundleCard = ({
                 }}
               >
                 {isOwned ? (
-                  <div
-                    className="flex items-center justify-center"
-                    onClick={() => {
-                      navigate(MY_SPOT_PATH.replace(":id", restaurant?.id), {
-                        state: { type: "My Bundles" },
-                      });
-                    }}
-                  >
+                  <div className="flex items-center justify-center">
                     <CheckIcon size={20} className="mr-2" />
                     <span className="font-semibold">View your Bundle</span>
                   </div>

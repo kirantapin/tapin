@@ -122,7 +122,7 @@ const MainMenu: React.FC<MainMenuProps> = ({
                   buttonRefs.current.set(filter, el);
                 }
               }}
-              className={`px-3 sm:px-4 py-2 sm:py-2 rounded-full whitespace-nowrap border transition-all duration-150 font-medium ${
+              className={`px-4 py-2 rounded-full whitespace-nowrap border transition-all duration-150 font-semibold ${
                 activeFilter === filter ? "text-sm" : "text-sm text-gray-500"
               }`}
               style={

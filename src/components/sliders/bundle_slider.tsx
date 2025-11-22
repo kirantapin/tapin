@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { BundleItem, Restaurant } from "@/types";
 
 import BundleCard from "../cards/bundle_card";
@@ -67,20 +67,42 @@ const BundleSlider = ({
     });
   };
 
+  const bundlesToDisplay = useMemo(() => {
+    return Object.entries(userOwnershipMap)
+      .filter(([bundleId, isOwned]) => {
+        const bundle = (restaurant?.menu[bundleId]?.info as BundleItem).object;
+        if (!bundle) return false;
+        //only block it if bundle is deactivated and the user doesn't own it.
+        if (!BundleUtils.isBundlePurchaseable(bundle) && !isOwned) return false;
+        return true;
+      })
+      .sort((a, b) => {
+        const [bundleIdA, isOwnedA] = a;
+        const [bundleIdB, isOwnedB] = b;
+        // First, unowned bundles come first
+        if (isOwnedA && !isOwnedB) return 1;
+        if (!isOwnedA && isOwnedB) return -1;
+
+        // Secondary sort by modified_at desc within each group
+        const bundleA = (restaurant?.menu[bundleIdA]?.info as BundleItem)
+          .object;
+        const bundleB = (restaurant?.menu[bundleIdB]?.info as BundleItem)
+          .object;
+        const modifiedAtA = new Date(bundleA.modified_at).getTime();
+        const modifiedAtB = new Date(bundleB.modified_at).getTime();
+
+        return modifiedAtB - modifiedAtA;
+      })
+      .map(([bundleId]) => bundleId);
+  }, [userOwnershipMap, restaurant]);
+
   useEffect(() => {
-    if (
-      !autoScrollEnabled ||
-      Object.values(userOwnershipMap).filter((isOwned) => !isOwned).length <= 1
-    )
-      return;
+    if (!autoScrollEnabled || bundlesToDisplay.length <= 1) return;
 
     const startAutoScroll = () => {
       autoScrollIntervalRef.current = setInterval(() => {
         setActiveBundle((current) => {
-          const nextIndex =
-            current === Object.keys(userOwnershipMap).length - 1
-              ? 0
-              : current + 1;
+          const nextIndex = (current + 1) % bundlesToDisplay.length;
           scrollToCard(nextIndex);
           return nextIndex;
         });
@@ -94,31 +116,7 @@ const BundleSlider = ({
         clearInterval(autoScrollIntervalRef.current);
       }
     };
-  }, [userOwnershipMap, autoScrollEnabled]);
-
-  const bundlesToDisplay = Object.entries(userOwnershipMap)
-    .filter(([bundleId, isOwned]) => {
-      const bundle = (restaurant?.menu[bundleId]?.info as BundleItem).object;
-      if (!bundle) return false;
-      if (!BundleUtils.isBundlePurchaseable(bundle) && !isOwned) return false;
-      return true;
-    })
-    .sort((a, b) => {
-      const [bundleIdA, isOwnedA] = a;
-      const [bundleIdB, isOwnedB] = b;
-      // First, unowned bundles come first
-      if (isOwnedA && !isOwnedB) return 1;
-      if (!isOwnedA && isOwnedB) return -1;
-
-      // Secondary sort by modified_at desc within each group
-      const bundleA = (restaurant?.menu[bundleIdA]?.info as BundleItem).object;
-      const bundleB = (restaurant?.menu[bundleIdB]?.info as BundleItem).object;
-      const modifiedAtA = new Date(bundleA.modified_at).getTime();
-      const modifiedAtB = new Date(bundleB.modified_at).getTime();
-
-      return modifiedAtB - modifiedAtA;
-    })
-    .map(([bundleId]) => bundleId);
+  }, [bundlesToDisplay, autoScrollEnabled]);
 
   if (userOwnershipMap && bundlesToDisplay.length > 0) {
     return (
