@@ -187,12 +187,18 @@ const MySpotContent: React.FC = () => {
         {/* Title - centered with flex-1 */}
         <h1 className="flex-1 text-xl font-semibold text-center">My Spot</h1>
       </div>
+      <div className="flex items-center gap-2 bg-white rounded-lg p-3 mb-1 mt-4 border border-gray-200">
+        <Info className="w-5 h-5 text-gray-700" />
+        <p className="text-gray-700 text-sm font-semibold">
+          Unredeemed Items expire after 90 days.
+        </p>
+      </div>
       <div className="overflow-x-hidden -mx-3 px-3">
-        <div className="flex gap-3 mb-2 overflow-x-auto pb-2 no-scrollbar mt-6">
+        <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar mt-3">
           {Object.keys(tagMap).map((filter) => (
             <button
               key={tagMap[filter].tag}
-              className={`px-4 py-1.5 rounded-full text-sm whitespace-nowrap font-medium border ${
+              className={`px-4 py-1.5 rounded-full text-sm whitespace-nowrap font-semibold border transition-colors duration-300 ${
                 activeFilter === tagMap[filter].tag ? "" : "text-gray-500"
               }`}
               style={
@@ -214,13 +220,6 @@ const MySpotContent: React.FC = () => {
               {tagMap[filter].tag}
             </button>
           ))}
-        </div>
-
-        <div className="flex items-center gap-2 bg-amber-50 rounded-lg p-3 mb-1 mx-3 border border-gray-200">
-          <Info className="w-5 h-5 text-amber-600" />
-          <p className="text-black text-sm font-semibold">
-            Unredeemed Items expire after 90 days.
-          </p>
         </div>
 
         {Object.keys(groupedTransactions).length === 0 ? (

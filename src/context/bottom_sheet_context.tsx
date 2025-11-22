@@ -33,6 +33,7 @@ import ItemModModal from "@/components/bottom_sheets/item_mod_modal";
 import SelfRedeemModal from "@/components/bottom_sheets/self_redeem_modal";
 import PassWarningModal from "@/components/bottom_sheets/pass_warning_modal";
 import NonRedeemModal from "@/components/bottom_sheets/nonredeem_modal";
+import BundleOwnedModal from "@/components/bottom_sheets/bundle_owned_modal";
 
 // Define the shape of your sheet registry: keys → sheet components
 type SheetMap = Record<string, FC<any>>;
@@ -153,10 +154,11 @@ const validateTransactions = (
 export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
   children,
 }) => {
-  const { restaurant } = useRestaurant();
+  const { restaurant, userOwnershipMap } = useRestaurant();
   const { userSession } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [bundleModal, setBundleModal] = useState<Bundle | null>(null);
+  const [bundleOwnedModal, setBundleOwnedModal] = useState<Bundle | null>(null);
   const [policyModal, setPolicyModal] = useState<{
     policy: Policy;
     bundle_id: string | null;
@@ -207,6 +209,7 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
     setIsOpen(false);
     setTimeout(() => {
       setBundleModal(null);
+      setBundleOwnedModal(null);
       setPolicyModal(null);
       setQrModal(null);
       setPassWarningModal(null);
@@ -294,10 +297,18 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
     if (isOpen) {
       closeSheet();
     }
-    setTimeout(() => {
-      setBundleModal(bundle);
-      setIsOpen(true);
-    }, 200); // Wait for animation to complete
+    const isOwned = userOwnershipMap?.[bundle.bundle_id] ? true : false;
+    if (isOwned) {
+      setTimeout(() => {
+        setBundleOwnedModal(bundle);
+        setIsOpen(true);
+      }, 200); // Wait for animation to complete
+    } else {
+      setTimeout(() => {
+        setBundleModal(bundle);
+        setIsOpen(true);
+      }, 200); // Wait for animation to complete
+    }
   };
 
   const openQrModal = (
@@ -449,6 +460,15 @@ export const BottomSheetProvider: FC<BottomSheetProviderProps> = ({
           onClose={closeSheet}
           bundle={bundleModal}
           restaurant={restaurant as Restaurant}
+        />
+      )}
+      {bundleOwnedModal && (
+        <BundleOwnedModal
+          isOpen={isOpen}
+          onClose={closeSheet}
+          bundle={bundleOwnedModal}
+          restaurant={restaurant as Restaurant}
+          purchasedAt={userOwnershipMap[bundleOwnedModal.bundle_id] as string}
         />
       )}
 

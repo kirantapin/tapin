@@ -117,7 +117,7 @@ export function useGlobalCartManager(
   // Cart operations
   const addToCart = async (item: Item, showToast?: boolean): Promise<void> => {
     if (!cartManagerRef.current || !restaurant || actionLock.current) return;
-    if (ItemUtils.doesItemRequireConfiguration(item, restaurant)) {
+    if (ItemUtils.shouldShowItemModModal(item, restaurant)) {
       openItemModModal(item.id, async (itemWithVariation: Item) => {
         await addToCart(itemWithVariation, true);
       });
@@ -157,7 +157,7 @@ export function useGlobalCartManager(
     if (!cartManagerRef.current || !restaurant || actionLock.current) return;
     if (
       userPreference &&
-      ItemUtils.doesItemRequireConfiguration(userPreference, restaurant)
+      ItemUtils.shouldShowItemModModal(userPreference, restaurant)
     ) {
       openItemModModal(userPreference.id, async (itemWithVariation: Item) => {
         await addPolicy(bundle_id, policy_id, itemWithVariation);

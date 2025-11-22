@@ -3,8 +3,8 @@ import { ArrowUp } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/auth_context.tsx";
-import { Restaurant, Transaction } from "../types.ts";
-import { MAX_QR_TRANSACTIONS } from "../constants.ts";
+import { BundleItem, Restaurant, Transaction } from "../types.ts";
+import { BUNDLE_PURCHASED_SIGNAL, MAX_QR_TRANSACTIONS } from "../constants.ts";
 
 import GoToCartButton from "@/components/buttons/go_to_cart_button.tsx";
 import AccessCardSlider from "@/components/sliders/access_card_slider.tsx";
@@ -26,6 +26,7 @@ import FollowButton from "@/components/buttons/follow_button.tsx";
 import { useUTMParams } from "@/hooks/useUTMParams.tsx";
 import MainMenu from "@/components/display_utils/main_menu.tsx";
 import CookieFooter from "@/components/display_utils/cookie_footer.tsx";
+import { ItemUtils } from "@/utils/item_utils.ts";
 
 export default function RestaurantPage() {
   const { userSession, transactions } = useAuth();
@@ -37,7 +38,6 @@ export default function RestaurantPage() {
   const orderDrinksRef = useRef<HTMLDivElement>(null);
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
-  const [postPurchaseSignals, setPostPurchaseSignals] = useState<string[]>([]);
   const { state, addToCart, removeFromCart, triggerToast, openBundleModal } =
     useBottomSheet();
   const { openQrModal } = useBottomSheet();
@@ -63,9 +63,18 @@ export default function RestaurantPage() {
     if (!state) {
       return;
     }
-
+    let blockOtherModals = false;
     const signals = state?.postPurchaseSignals || [];
-    setPostPurchaseSignals(signals);
+    for (const signal of signals) {
+      if (signal.signal === BUNDLE_PURCHASED_SIGNAL) {
+        const bundle = ItemUtils.getMenuItemFromItemId(
+          signal.data,
+          restaurant as Restaurant
+        ) as BundleItem;
+        openBundleModal(bundle.object);
+        blockOtherModals = true;
+      }
+    }
     const qrFlag = state?.qr as boolean | undefined;
     let message = state?.message as
       | {
@@ -82,7 +91,9 @@ export default function RestaurantPage() {
           message: `This QR code only represents ${MAX_QR_TRANSACTIONS} purchased items, your other items can be found in My Spot`,
         };
       }
-      openQrModal(qrTransactions.slice(0, MAX_QR_TRANSACTIONS));
+      if (!blockOtherModals) {
+        openQrModal(qrTransactions.slice(0, MAX_QR_TRANSACTIONS));
+      }
     }
 
     if (message) {
@@ -180,11 +191,7 @@ export default function RestaurantPage() {
         <HighlightSlider displayOne={false} />
 
         {/* My Spot Section */}
-        <MySpot
-          userSession={userSession}
-          transactions={transactions}
-          postPurchaseSignals={postPurchaseSignals}
-        />
+        <MySpot userSession={userSession} transactions={transactions} />
 
         {/* Recent Activity Section*/}
         <RecentActivity

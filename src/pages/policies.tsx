@@ -107,7 +107,7 @@ export default function PoliciesPage() {
         {Object.keys(tagMap).map((tagKey) => (
           <button
             key={tagKey}
-            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full whitespace-nowrap border transition-all duration-150 font-medium ${
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full whitespace-nowrap border transition-colors duration-300 font-semibold ${
               activeTag === tagKey ? "text-sm" : "text-sm text-gray-500"
             }`}
             style={

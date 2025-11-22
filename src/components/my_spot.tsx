@@ -1,12 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import { Ticket, ChevronRight, GlassWater, AlertCircle } from "lucide-react";
+import { Ticket, ChevronRight, GlassWater } from "lucide-react";
 import { Transaction, UserSession } from "@/types";
 import { GradientIcon } from "@/utils/gradient";
-import {
-  PASS_MENU_TAG,
-  MY_SPOT_PATH,
-  BUNDLE_PURCHASED_SIGNAL,
-} from "@/constants";
+import { PASS_MENU_TAG, MY_SPOT_PATH } from "@/constants";
 import { useRestaurant } from "@/context/restaurant_context";
 import { useAuth } from "@/context/auth_context";
 import { useBottomSheet } from "@/context/bottom_sheet_context";
@@ -15,13 +11,11 @@ import { TransactionUtils } from "@/utils/transaction_utils";
 interface MySpotProps {
   transactions: Transaction[];
   userSession: UserSession | null;
-  postPurchaseSignals: string[];
 }
 
 export const MySpot: React.FC<MySpotProps> = ({
   userSession,
   transactions,
-  postPurchaseSignals,
 }) => {
   const { userData } = useAuth();
   const { userOwnershipMap, restaurant } = useRestaurant();
@@ -54,18 +48,6 @@ export const MySpot: React.FC<MySpotProps> = ({
   return (
     <div className="mt-6">
       <h1 className="text-xl font-bold flex items-center gap-2">My Spot</h1>
-
-      {/* My Bundles - full width */}
-      {postPurchaseSignals.includes(BUNDLE_PURCHASED_SIGNAL) && (
-        <div className="bg-green-100 mt-4 mb-1 px-4 py-3 rounded-xl border border-1 border-green-800 animate-bounce-slower">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="text-green-800 w-5 h-5" />
-            <p className="text-green-800 text-md font-medium">
-              View your newly purchased bundle
-            </p>
-          </div>
-        </div>
-      )}
 
       <div className="flex gap-4 mt-4">
         <div
